@@ -15,9 +15,54 @@ export interface SitePaths {
   subscribe: string;
   brief: (date: string) => string;
   crossEdition?: { href: string; label: string };
+  editionNav: EditionNav;
+}
+
+export interface EditionNav {
+  ossHref: string;
+  skillsHref: string;
+  active?: "oss" | "skills";
+}
+
+function editionNavFor(siteSegment: string, depth: 0 | 1): EditionNav {
+  const active: EditionNav["active"] = siteSegment === "skills" ? "skills" : "oss";
+
+  if (depth === 0) {
+    if (siteSegment === "skills") {
+      return { ossHref: "../", skillsHref: "./", active };
+    }
+    return { ossHref: "./", skillsHref: "skills/", active };
+  }
+
+  if (siteSegment === "skills") {
+    return { ossHref: "../../", skillsHref: "../", active };
+  }
+  return { ossHref: "../", skillsHref: "../skills/", active };
+}
+
+export function editionNavHtml(
+  nav: EditionNav,
+  escapeHtml: (t: string) => string,
+): string {
+  const pill = (href: string, label: string, isActive: boolean) => {
+    const base =
+      "inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
+    const active =
+      "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
+    const idle =
+      "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+    return `<a href="${href}" class="${base} ${isActive ? active : idle}"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+  };
+
+  return `<nav aria-label="Tastemakers editions" class="mt-4 flex flex-wrap gap-2">
+      ${pill(nav.ossHref, "AI Tastemakers", nav.active === "oss")}
+      ${pill(nav.skillsHref, "Skill Tastemakers", nav.active === "skills")}
+    </nav>`;
 }
 
 export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
+  const editionNav = editionNavFor(siteSegment, depth);
+
   if (depth === 0) {
     const assetPrefix = siteSegment ? "../" : "";
     return {
@@ -28,6 +73,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
       crossEdition: siteSegment
         ? { href: "../", label: "AI Tastemakers" }
         : { href: "skills/", label: "Skill Tastemakers" },
+      editionNav,
     };
   }
 
@@ -40,6 +86,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
     crossEdition: siteSegment
       ? { href: "../../", label: "AI Tastemakers" }
       : { href: "../skills/", label: "Skill Tastemakers" },
+    editionNav,
   };
 }
 
@@ -58,6 +105,7 @@ export function pageShell(
   const cross = paths.crossEdition
     ? `<span aria-hidden="true"> · </span><a href="${paths.crossEdition.href}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(paths.crossEdition.label)}</a>`
     : "";
+  const nav = editionNavHtml(paths.editionNav, escapeHtml);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -75,6 +123,7 @@ export function pageShell(
         <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">${escapeHtml(brand.name)}</a>
       </h1>
       <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brand.tagline)}</p>
+      ${nav}
     </header>
     ${body}
     <footer class="mt-16 border-t border-stone-200 pt-6 text-center font-sans text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400">
@@ -145,6 +194,27 @@ function ossIndexBody(paths: SitePaths, dates: string[], latest?: string): strin
     <section id="archive" class="mb-4 scroll-mt-8">
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet.</li>"}</ul>
+    </section>
+    ${siblingEditionPromo(paths, "skills")}`;
+}
+
+function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): string {
+  if (sibling === "skills") {
+    return `
+    <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
+      <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
+      <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a></h2>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}">Browse skills digest &rarr;</a>
+    </section>`;
+  }
+
+  return `
+    <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
+      <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
+      <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}">AI Tastemakers</a></h2>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}">Browse OSS digest &rarr;</a>
     </section>`;
 }
 
@@ -161,9 +231,12 @@ function skillsIndexBody(
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
         <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 dark:bg-blue-600" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.editionNav.ossHref}">AI Tastemakers &rarr;</a>
         <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400" href="#archive">Archive &rarr;</a>
       </div>`
-    : "";
+    : `<div class="flex flex-wrap items-center gap-3 md:gap-4">
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.editionNav.ossHref}">AI Tastemakers &rarr;</a>
+      </div>`;
 
   const items = dates
     .map(
@@ -189,7 +262,8 @@ function skillsIndexBody(
     <section id="archive" class="mb-4 scroll-mt-8">
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.</li>"}</ul>
-    </section>`;
+    </section>
+    ${siblingEditionPromo(paths, "oss")}`;
 }
 
 export async function buildEditionSite(
@@ -218,8 +292,15 @@ export async function buildEditionSite(
     }
     const paths = editionSitePaths(edition.siteSegment, 1);
     const html = marked.parse(markdown) as string;
+    const siblingHref =
+      edition.id === "skills" ? paths.editionNav.ossHref : paths.editionNav.skillsHref;
+    const siblingLabel = edition.id === "skills" ? "AI Tastemakers" : "Skill Tastemakers";
     const body = `
-      <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400" href="${paths.home}">&larr; All briefings</a>
+      <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; All briefings</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${siblingHref}">${siblingLabel} &rarr;</a>
+      </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
     await fs.writeFile(
       path.join(briefOutDir, `${date}.html`),

@@ -110,14 +110,18 @@ form.addEventListener("submit", async function (event) {
 
 async function buildSubscribePage(): Promise<void> {
   const paths = editionSitePaths("", 0);
-  const brand = { name: "AI Tastemakers", tagline: "Daily intelligence on AI-derivative open source" };
+  paths.editionNav.active = undefined;
+  const brand = {
+    name: "Tastemakers",
+    tagline: "Daily GitHub digests for AI open source and agent skills",
+  };
   const firebase = loadFirebaseWebConfig();
   const configNote = firebase
     ? ""
     : `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">Firebase signup is not configured for this build. Set FIREBASE_* env vars when running build:pages.</p>`;
 
   const body = `
-    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; Home</a>
+    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
 
     <section class="mb-8">
       <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily email</p>
@@ -125,6 +129,14 @@ async function buildSubscribePage(): Promise<void> {
       <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
         One email each morning with the top ten AI-derivative repos gaining momentum on GitHub&mdash;ranked by 7-day star growth, with a short Claude-written brief for each pick.
       </p>
+    </section>
+
+    <section class="mb-8 rounded-xl border border-stone-200 bg-stone-50 p-5 dark:border-stone-700 dark:bg-stone-950/40">
+      <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Web only</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+        <a class="font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a> covers agent skills, Claude Code plugins, and installable capabilities&mdash;updated daily on the site, no email yet.
+      </p>
+      <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}">Browse Skill Tastemakers &rarr;</a>
     </section>
 
     ${configNote}
@@ -160,7 +172,7 @@ async function buildSubscribePage(): Promise<void> {
   await fs.writeFile(
     path.join(SITE_DIR, "subscribe.html"),
     pageShell(
-      "Subscribe · AI Tastemakers",
+      "Subscribe · Tastemakers",
       body,
       paths,
       brand,
