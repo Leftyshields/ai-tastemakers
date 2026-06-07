@@ -18,6 +18,18 @@ export function filterCandidates(
   });
 }
 
+/** Cap total stars during bootstrap ranking only (see design_decisions.md). */
+export function applyBootstrapMaxStars(
+  candidates: CandidateRepo[],
+  rankingMode: string,
+  maxStars: number,
+): CandidateRepo[] {
+  if (!rankingMode.startsWith("bootstrap")) {
+    return candidates;
+  }
+  return candidates.filter((c) => c.stars <= maxStars);
+}
+
 export function excludeNegativeDelta(
   scored: { full_name: string; score: number; stars_gained_7d: number }[],
   mode: string,

@@ -45,7 +45,8 @@ export async function narrateRepo(
 
     return block.text.trim().replace(/^```[\s\S]*?```$/gm, "").trim();
   } catch (err) {
-    console.warn(`Claude narration failed for ${repo.full_name}:`, err);
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`Claude narration failed for ${repo.full_name}: ${msg}`);
     return null;
   }
 }

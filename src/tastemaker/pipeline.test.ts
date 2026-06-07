@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { mergeCandidates } from "./github/search.js";
 import { computeDelta, resolveRankingMode, scoreForRanking } from "./snapshot/delta.js";
-import { filterCandidates, excludeNegativeDelta } from "./rank/filter.js";
+import { filterCandidates, excludeNegativeDelta, applyBootstrapMaxStars } from "./rank/filter.js";
 import { applySoftDedupPenalty } from "./rank/score.js";
 import { renderMarkdown } from "./writers/markdown.js";
 import type { CandidateRepo, Digest } from "./types.js";
@@ -92,6 +92,36 @@ describe("filterCandidates", () => {
   it("excludes blocklisted repos", () => {
     const blocklist = new Set(["o/r"]);
     expect(filterCandidates([base], { minStars: 50, blocklist, excludeArchived: true })).toHaveLength(0);
+  });
+
+  it("excludes repos above maxStars when set", () => {
+    const big = { ...base, stars: 100_000 };
+    expect(
+      filterCandidates([big], { minStars: 50, blocklist: new Set(), excludeArchived: true, maxStars: 80_000 }),
+    ).toHaveLength(0);
+  });
+});
+
+describe("applyBootstrapMaxStars", () => {
+  const base: CandidateRepo = {
+    full_name: "o/r",
+    html_url: "https://github.com/o/r",
+    stars: 100_000,
+    topics: [],
+    description: null,
+    pushed_at: "2026-06-01T00:00:00Z",
+    language: null,
+    is_fork: false,
+    is_archived: false,
+  };
+
+  it("caps stars in bootstrap modes", () => {
+    expect(applyBootstrapMaxStars([base], "bootstrap_total_stars", 80_000)).toHaveLength(0);
+    expect(applyBootstrapMaxStars([base], "bootstrap_since_first_seen", 80_000)).toHaveLength(0);
+  });
+
+  it("does not cap in delta_7d mode", () => {
+    expect(applyBootstrapMaxStars([base], "delta_7d", 80_000)).toHaveLength(1);
   });
 });
 

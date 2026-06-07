@@ -52,7 +52,7 @@
 | Ranking tuning | `DIGEST_MAX_STARS_BOOTSTRAP`, blocklist expansion |
 | Email / Slack / Substack distribution | Discussed; not implemented |
 | Brief page repo cards | UX medium polish |
-| `/code_review` + `/qa_checklist` | Skipped; run before next feature |
+| `/code_review` + `/qa_checklist` | Code review done — see `docs/CODE_REVIEW_EPH-20260606-DIG1.md`; QA checklist still open |
 | GitHub issue close | Create/close issue on tracker if used |
 | Node 24 on Actions | Deprecation warning on checkout/setup-node |
 

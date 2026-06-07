@@ -10,6 +10,14 @@ const REPO_URL = "https://github.com/Leftyshields/ai-tastemakers";
 
 marked.setOptions({ gfm: true, breaks: false });
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 /** Path prefix for assets/links ("" at site root, "../" under briefings/). */
 function sitePaths(depth: 0 | 1) {
   const p = depth === 0 ? "" : "../";
@@ -27,15 +35,16 @@ function pageShell(
   description?: string,
 ): string {
   const paths = sitePaths(depth);
+  const safeTitle = escapeHtml(title);
   const meta = description
-    ? `<meta name="description" content="${description.replace(/"/g, "&quot;")}">`
+    ? `<meta name="description" content="${escapeHtml(description)}">`
     : "";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>${title}</title>
+  <title>${safeTitle}</title>
   ${meta}
   <link rel="stylesheet" href="${paths.css}">
 </head>

@@ -30,6 +30,15 @@ export function findRepoRoot(): string {
   return path.resolve(here, "../..");
 }
 
+function parseEnvInt(name: string, fallback: string): number {
+  const raw = process.env[name]?.trim() || fallback;
+  const n = parseInt(raw, 10);
+  if (!Number.isFinite(n) || n < 0) {
+    throw new Error(`${name} must be a non-negative integer (got "${raw}")`);
+  }
+  return n;
+}
+
 export function loadConfig(rootDir = findRepoRoot()): AppConfig {
   loadDotenv({ path: path.join(rootDir, ".env") });
 
@@ -48,13 +57,13 @@ export function loadConfig(rootDir = findRepoRoot()): AppConfig {
     anthropicApiKey,
     anthropicModel: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
     timezone: process.env.TZ?.trim() || "America/Los_Angeles",
-    topN: parseInt(process.env.DIGEST_TOP_N || "10", 10),
-    minStars: parseInt(process.env.DIGEST_MIN_STARS || "50", 10),
-    pushedWithinDays: parseInt(process.env.DIGEST_PUSHED_WITHIN_DAYS || "30", 10),
+    topN: parseEnvInt("DIGEST_TOP_N", "10"),
+    minStars: parseEnvInt("DIGEST_MIN_STARS", "50"),
+    pushedWithinDays: parseEnvInt("DIGEST_PUSHED_WITHIN_DAYS", "30"),
     topics: DEFAULT_TOPICS,
     searchPagesPerTopic: 2,
     blocklist: new Set(DEFAULT_BLOCKLIST),
-    maxStarsBootstrap: parseInt(process.env.DIGEST_MAX_STARS_BOOTSTRAP || "80000", 10),
+    maxStarsBootstrap: parseEnvInt("DIGEST_MAX_STARS_BOOTSTRAP", "80000"),
     softDedupBriefingCount: 3,
     softDedupPenalty: 0.8,
     readmeMaxChars: 4000,

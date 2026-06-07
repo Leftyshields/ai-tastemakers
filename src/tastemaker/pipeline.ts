@@ -11,7 +11,7 @@ import {
   resolveRankingMode,
   scoreForRanking,
 } from "./snapshot/delta.js";
-import { filterCandidates, excludeNegativeDelta } from "./rank/filter.js";
+import { filterCandidates, excludeNegativeDelta, applyBootstrapMaxStars } from "./rank/filter.js";
 import { applySoftDedupPenalty, loadRecentBriefingRepos } from "./rank/score.js";
 import { narrateRepos } from "./narrate/claude.js";
 import { writeDigestJson } from "./writers/json.js";
@@ -66,7 +66,6 @@ export async function runPipeline(
     minStars: config.minStars,
     blocklist: config.blocklist,
     excludeArchived: true,
-    maxStars: config.maxStarsBootstrap,
   });
 
   console.error(`Snapshotting ${candidates.length} candidates…`);
@@ -87,6 +86,8 @@ export async function runPipeline(
   );
 
   console.error(`Ranking mode: ${rankingMode}`);
+
+  candidates = applyBootstrapMaxStars(candidates, rankingMode, config.maxStarsBootstrap);
 
   const recentlyFeatured = await loadRecentBriefingRepos(
     config.briefingsDir,
