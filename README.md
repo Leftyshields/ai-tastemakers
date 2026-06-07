@@ -4,6 +4,8 @@
 
 **Skill Tastemakers** is a companion edition focused on agent skills, Claude Code extensions, and reusable instruction artifacts.
 
+**Tastemakers Weekly** — every Sunday, Claude synthesizes the past week's OSS + Skills digests into a combined editorial wrap-up with momentum stats and builder takeaways.
+
 Instantiated from [Project Genesis](https://github.com/Leftyshields/project-genesis) for structured AI-assisted development.
 
 **Live site:** https://leftyshields.github.io/ai-tastemakers/ · **Skills:** https://leftyshields.github.io/ai-tastemakers/skills/
@@ -20,12 +22,15 @@ Each daily run (both editions):
 4. Writes `briefings/<edition>/YYYY-MM-DD/daily_brief.md` + `digest.json`
 5. Optionally emails subscribers (Resend) and deploys to GitHub Pages
 
+**Sundays:** After both daily digests, `npm run weekly` aggregates seven days of `digest.json` (OSS + Skills), calls Claude once for a combined editorial, and writes `briefings/weekly/YYYY-Www/weekly_review.{md,json}`. Skips cleanly until all seven Mon–Sun days exist for both editions.
+
 ### Editions
 
 | Edition | CLI | Output | Site |
 |---------|-----|--------|------|
 | AI Tastemakers (OSS) | `npm run digest` | `briefings/YYYY-MM-DD/` | `/` |
 | Skill Tastemakers | `npm run digest:skills` | `briefings/skills/YYYY-MM-DD/` | `/skills/` |
+| Tastemakers Weekly | `npm run weekly` | `briefings/weekly/YYYY-Www/` | `/weekly/YYYY-Www.html` |
 
 ---
 
@@ -36,10 +41,11 @@ npm install
 cp .env.example .env   # GITHUB_TOKEN, ANTHROPIC_API_KEY
 npm run digest           # OSS edition
 npm run digest:skills    # Skills edition (optional)
+npm run weekly           # Sunday wrap-up (needs 7 days × both editions)
 npm run build:pages      # static site from briefings/
 ```
 
-Open today's briefing under `briefings/`, or the public site after Pages deploy.
+Open today's briefing under `briefings/`, or the public site after Pages deploy. Weekly reviews appear on the homepage once `briefings/weekly/` has content.
 
 **Production verification:** Prefer `gh workflow run "Daily Digest"` over re-running locally on a day that already has a briefing — same-day re-runs can affect rankings. See [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md).
 
@@ -51,7 +57,8 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 |---------|-------------|
 | `npm run digest` | Run OSS digest pipeline |
 | `npm run digest:skills` | Run Skill Tastemakers pipeline |
-| `npm run test:digest` | Unit + integration tests (44) |
+| `npm run weekly` | Weekly wrap-up from daily digests (`--week 2026-W23` optional) |
+| `npm run test:digest` | Unit + integration tests (75) |
 | `npm run build:digest` | Compile TypeScript |
 | `npm run build:pages` | Build static site from `briefings/` → `site/` (Tailwind CSS) |
 | `npm test` | Genesis framework tests |
@@ -60,7 +67,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 
 ## Scheduling & deploy
 
-**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`).
+**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays**, the same workflow runs `npm run weekly` after the daily digests (skips if the week is incomplete; `continue-on-error` so a synthesis failure does not block the daily commit).
 
 Required repo secret: `ANTHROPIC_API_KEY`. `GITHUB_TOKEN` uses the default Actions token for public search.
 
@@ -85,6 +92,7 @@ gh workflow run "Deploy GitHub Pages" --repo Leftyshields/ai-tastemakers
 |-----------|-------|-------|
 | v1 pipeline + GHA + Pages | [EPH-20260606-DIG1](docs/CLOSURE_EPH-20260606-DIG1.md) | Shipped 2026-06-07 |
 | Copy + brief format | [EPH-20260607-COPY](docs/CLOSURE_EPH-20260607-COPY.md) | Three-subhead briefs, homepage copy, email bold rendering |
+| Weekly wrap-up | EPH-20260607-WEEK | Sunday synthesis, `briefings/weekly/`, site archive |
 
 **Repo:** https://github.com/Leftyshields/ai-tastemakers
 
