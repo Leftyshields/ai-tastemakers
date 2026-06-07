@@ -15,3 +15,8 @@
 # Node
 node_modules/
 dist/
+
+# Generated GitHub Pages output (built in CI from briefings/)
+site/index.html
+site/briefings/
+site/.nojekyll

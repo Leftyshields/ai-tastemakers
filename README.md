@@ -23,7 +23,9 @@ cp .env.example .env   # add GITHUB_TOKEN and ANTHROPIC_API_KEY
 npm run digest
 ```
 
-Open `briefings/<today>/daily_brief.md`.
+Open `briefings/<today>/daily_brief.md`, or the public site (after Pages deploy):
+
+**https://leftyshields.github.io/ai-tastemakers/**
 
 ### Commands
 
@@ -32,6 +34,7 @@ Open `briefings/<today>/daily_brief.md`.
 | `npm run digest` | Run the daily pipeline |
 | `npm run test:digest` | Unit + integration tests |
 | `npm run build:digest` | Compile TypeScript |
+| `npm run build:pages` | Build static site from `briefings/` → `site/` |
 | `npm test` | Genesis framework tests |
 
 ### Scheduling
