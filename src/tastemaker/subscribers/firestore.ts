@@ -63,18 +63,23 @@ export function getAdminFirestore(config: AppConfig): Firestore | null {
 export async function readFirestoreSubscribers(
   config: AppConfig,
 ): Promise<string[]> {
-  const db = getAdminFirestore(config);
-  if (!db) return [];
+  try {
+    const db = getAdminFirestore(config);
+    if (!db) return [];
 
-  const snapshot = await db.collection(TASTEMAKERS_SUBSCRIBERS_COLLECTION).get();
-  const emails: string[] = [];
-  for (const doc of snapshot.docs) {
-    const email = doc.data().email;
-    if (typeof email === "string") {
-      emails.push(normalizeEmail(email));
+    const snapshot = await db.collection(TASTEMAKERS_SUBSCRIBERS_COLLECTION).get();
+    const emails: string[] = [];
+    for (const doc of snapshot.docs) {
+      const email = doc.data().email;
+      if (typeof email === "string") {
+        emails.push(normalizeEmail(email));
+      }
     }
+    return emails.filter(Boolean);
+  } catch (err) {
+    console.warn("Firestore subscriber read failed; using file/env recipients only:", err);
+    return [];
   }
-  return emails.filter(Boolean);
 }
 
 export async function writeFirestoreSubscriber(
