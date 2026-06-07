@@ -33,9 +33,12 @@ Optional email (Resend — skipped if `RESEND_API_KEY` unset):
 - `DIGEST_EMAIL_TO` — comma-separated extra recipients (merged with `data/subscribers.json`)
 - `DIGEST_SITE_URL` — link in email footer (default: GitHub Pages URL)
 
-Optional subscribe page:
+Optional Firebase (epiphoric-prod — subscribe + digest recipients):
 
-- `SUBSCRIBE_API_URL` — Vercel endpoint, e.g. `https://your-project.vercel.app/api/subscribe` (baked into `site/subscribe.html` at build time)
+- `FIREBASE_PROJECT_ID`, `FIREBASE_AUTH_DOMAIN`, `FIREBASE_API_KEY`, `FIREBASE_APP_ID` — public web config (subscribe page build)
+- `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` — Admin SDK (digest reads Firestore; optional `FIREBASE_SERVICE_ACCOUNT` JSON instead)
+
+See `firebase/README.md` for setup.
 
 ## Hard requirements
 
@@ -57,7 +60,8 @@ Optional subscribe page:
 | Empty briefing | Filters too strict or search returned nothing | Lower `DIGEST_MIN_STARS` temporarily for debug |
 | GHA commit step skipped | No file changes | Expected if digest identical; check workflow logs |
 | GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |
-| `git push` rejected (non-fast-forward) | GHA bot pushed digest commit | `git pull --rebase origin main` then push |
+| Subscribe form permission-denied | Firestore rules not deployed to epiphoric-prod | Deploy rules from Epiphoric repo: `firebase deploy --only firestore:rules` |
+| Digest sends to env only, not Firestore list | Firebase Admin not in GHA secrets | Set `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` on repo |
 
 ## GitHub Actions
 
@@ -67,7 +71,9 @@ Secrets:
 
 - `ANTHROPIC_API_KEY` (required)
 - `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`, `DIGEST_EMAIL_TO` (optional — email after each digest)
-- `SUBSCRIBE_API_URL` (optional — enables subscribe form on GitHub Pages)
+- `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` (optional — read Firestore subscribers)
+
+Pages workflow secrets: `FIREBASE_API_KEY`, `FIREBASE_APP_ID` (public web config for subscribe form)
 
 Manual run: Actions → Daily Digest → Run workflow.
 
@@ -81,26 +87,20 @@ Manual run: Actions → Daily Digest → Run workflow.
    gh secret set DIGEST_EMAIL_TO --repo Leftyshields/ai-tastemakers    # optional extra recipients
    ```
 3. Add same vars to local `.env` for `npm run digest` testing
-4. Email sends automatically at end of pipeline when Resend is configured and at least one recipient exists in `data/subscribers.json` and/or `DIGEST_EMAIL_TO`
+4. Email sends when Resend is configured and at least one recipient exists in Firestore, `data/subscribers.json`, and/or `DIGEST_EMAIL_TO`
 
-### Subscribe page
+### Subscribe (Firebase / epiphoric-prod)
 
-Public signup lives at `/subscribe.html` on GitHub Pages. Recipients are stored in `data/subscribers.json` and merged with `DIGEST_EMAIL_TO` when sending.
+Public signup: `/subscribe.html` writes to Firestore collection `tastemakers_subscribers`.
 
-**Add a subscriber manually:**
+**Setup:** See `firebase/README.md` — deploy rules from Epiphoric repo, seed subscribers, set GitHub secrets.
+
+**Manual add:**
 
 ```bash
 npm run subscribers:add -- you@example.com
-git add data/subscribers.json && git commit -m "chore: add subscriber"
+npm run subscribers:seed-firestore   # one-time: JSON → Firestore
 ```
-
-**Enable the web form** (GitHub Pages is static — signup needs a small API):
-
-1. Import this repo on [Vercel](https://vercel.com) (deploys `api/subscribe.ts`)
-2. Set Vercel env: `GITHUB_TOKEN` (fine-grained PAT with **Contents: Read and write** on this repo)
-3. Optional: `ALLOWED_ORIGINS=https://leftyshields.github.io`
-4. Add GitHub secret: `gh secret set SUBSCRIBE_API_URL --repo Leftyshields/ai-tastemakers` → your Vercel URL + `/api/subscribe`
-5. Re-run the Pages deploy workflow (or push a change under `briefings/`)
 
 ## GitHub Pages
 

@@ -44,6 +44,15 @@ function parseEmailList(raw?: string): string[] {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
+function parseServiceAccount(raw?: string): Record<string, unknown> | undefined {
+  if (!raw?.trim()) return undefined;
+  try {
+    return JSON.parse(raw) as Record<string, unknown>;
+  } catch {
+    throw new Error("FIREBASE_SERVICE_ACCOUNT must be valid JSON");
+  }
+}
+
 export function loadConfig(rootDir = findRepoRoot()): AppConfig {
   loadDotenv({ path: path.join(rootDir, ".env") });
 
@@ -81,6 +90,10 @@ export function loadConfig(rootDir = findRepoRoot()): AppConfig {
     digestSiteUrl:
       process.env.DIGEST_SITE_URL?.trim() ||
       "https://leftyshields.github.io/ai-tastemakers",
+    firebaseProjectId: process.env.FIREBASE_PROJECT_ID?.trim() || undefined,
+    firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL?.trim() || undefined,
+    firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY?.trim() || undefined,
+    firebaseServiceAccount: parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT),
   };
 }
 

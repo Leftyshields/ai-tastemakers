@@ -1,13 +1,30 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { config as loadDotenv } from "dotenv";
 import { marked } from "marked";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
+loadDotenv({ path: path.join(ROOT, ".env") });
 const BRIEFINGS_DIR = path.join(ROOT, "briefings");
 const SITE_DIR = path.join(ROOT, "site");
 const REPO_URL = "https://github.com/Leftyshields/ai-tastemakers";
-const SUBSCRIBE_API_URL = process.env.SUBSCRIBE_API_URL?.trim() || "";
+
+interface FirebaseWebConfig {
+  apiKey: string;
+  authDomain: string;
+  projectId: string;
+  appId: string;
+}
+
+function loadFirebaseWebConfig(): FirebaseWebConfig | null {
+  const apiKey = process.env.FIREBASE_API_KEY?.trim();
+  const authDomain = process.env.FIREBASE_AUTH_DOMAIN?.trim();
+  const projectId = process.env.FIREBASE_PROJECT_ID?.trim();
+  const appId = process.env.FIREBASE_APP_ID?.trim();
+  if (!apiKey || !authDomain || !projectId || !appId) return null;
+  return { apiKey, authDomain, projectId, appId };
+}
 
 marked.setOptions({ gfm: true, breaks: false });
 
@@ -187,70 +204,88 @@ async function buildIndex(dates: string[]): Promise<void> {
   );
 }
 
-function subscribeFormScript(apiUrl: string): string {
-  const safeApiUrl = JSON.stringify(apiUrl);
-  return `<script>
+function subscribeFormScript(firebase: FirebaseWebConfig | null): string {
+  if (!firebase) {
+    return `<script>
 (function () {
   var form = document.getElementById("subscribe-form");
-  var emailInput = document.getElementById("subscribe-email");
-  var submitBtn = document.getElementById("subscribe-submit");
   var status = document.getElementById("subscribe-status");
-  var apiUrl = ${safeApiUrl};
-
-  function setStatus(message, kind) {
-    status.textContent = message;
-    status.className = "mt-4 font-sans text-sm " + (kind === "error"
-      ? "text-red-700 dark:text-red-400"
-      : kind === "success"
-        ? "text-green-800 dark:text-green-400"
-        : "text-stone-500 dark:text-stone-400");
-  }
-
   form.addEventListener("submit", function (event) {
     event.preventDefault();
-    var email = (emailInput.value || "").trim();
-    if (!email || email.indexOf("@") === -1) {
-      setStatus("Enter a valid email address.", "error");
-      return;
-    }
-    if (!apiUrl) {
-      setStatus("Online signup is not configured yet. Check back soon.", "error");
-      return;
-    }
-
-    submitBtn.disabled = true;
-    setStatus("Subscribing…", "info");
-
-    fetch(apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: email })
-    })
-      .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
-      .then(function (result) {
-        if (!result.ok) {
-          throw new Error(result.body && result.body.error ? result.body.error : "Subscription failed");
-        }
-        emailInput.value = "";
-        setStatus("You are subscribed. The next digest will land in your inbox.", "success");
-      })
-      .catch(function (err) {
-        setStatus(err.message || "Something went wrong. Please try again.", "error");
-      })
-      .finally(function () {
-        submitBtn.disabled = false;
-      });
+    status.textContent = "Online signup is not configured yet. Check back soon.";
+    status.className = "mt-4 font-sans text-sm text-red-700 dark:text-red-400";
   });
 })();
+</script>`;
+  }
+
+  const configJson = JSON.stringify(firebase);
+  return `<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getFirestore, doc, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+const firebaseConfig = ${configJson};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const form = document.getElementById("subscribe-form");
+const emailInput = document.getElementById("subscribe-email");
+const submitBtn = document.getElementById("subscribe-submit");
+const status = document.getElementById("subscribe-status");
+
+function setStatus(message, kind) {
+  status.textContent = message;
+  status.className = "mt-4 font-sans text-sm " + (kind === "error"
+    ? "text-red-700 dark:text-red-400"
+    : kind === "success"
+      ? "text-green-800 dark:text-green-400"
+      : "text-stone-500 dark:text-stone-400");
+}
+
+function subscriberDocId(email) {
+  return email.trim().toLowerCase();
+}
+
+form.addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const email = (emailInput.value || "").trim();
+  if (!email || !email.includes("@")) {
+    setStatus("Enter a valid email address.", "error");
+    return;
+  }
+
+  submitBtn.disabled = true;
+  setStatus("Subscribing…", "info");
+
+  try {
+    const normalized = subscriberDocId(email);
+    await setDoc(doc(db, "tastemakers_subscribers", normalized), {
+      email: normalized,
+      subscribedAt: serverTimestamp(),
+      source: "ai-tastemakers",
+    }, { merge: false });
+    emailInput.value = "";
+    setStatus("You are subscribed. The next digest will land in your inbox.", "success");
+  } catch (err) {
+    const code = err && err.code ? String(err.code) : "";
+    if (code === "permission-denied") {
+      setStatus("You are already subscribed.", "success");
+    } else {
+      setStatus("Something went wrong. Please try again.", "error");
+    }
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
 </script>`;
 }
 
 async function buildSubscribePage(): Promise<void> {
   const paths = sitePaths(0);
-  const apiConfigured = SUBSCRIBE_API_URL.length > 0;
-  const apiNote = apiConfigured
+  const firebase = loadFirebaseWebConfig();
+  const configNote = firebase
     ? ""
-    : `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">Signup API is being wired up. You can still browse daily briefs on the site.</p>`;
+    : `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">Firebase signup is not configured for this build. Set FIREBASE_* env vars when running build:pages.</p>`;
 
   const body = `
     <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; Home</a>
@@ -263,7 +298,7 @@ async function buildSubscribePage(): Promise<void> {
       </p>
     </section>
 
-    ${apiNote}
+    ${configNote}
 
     <form id="subscribe-form" class="rounded-xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-700 dark:bg-stone-950/50" novalidate>
       <label for="subscribe-email" class="mb-2 block font-sans text-sm font-medium text-stone-800 dark:text-stone-200">Email address</label>
@@ -291,7 +326,7 @@ async function buildSubscribePage(): Promise<void> {
       </p>
     </form>
 
-    ${subscribeFormScript(SUBSCRIBE_API_URL)}`;
+    ${subscribeFormScript(firebase)}`;
 
   await fs.writeFile(
     path.join(SITE_DIR, "subscribe.html"),

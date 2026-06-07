@@ -70,4 +70,8 @@ export interface AppConfig {
   digestEmailFrom?: string;
   digestEmailTo: string[];
   digestSiteUrl: string;
+  firebaseProjectId?: string;
+  firebaseClientEmail?: string;
+  firebasePrivateKey?: string;
+  firebaseServiceAccount?: Record<string, unknown>;
 }

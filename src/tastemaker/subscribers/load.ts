@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { AppConfig } from "../types.js";
+import { readFirestoreSubscribers } from "./firestore.js";
 
 const SUBSCRIBERS_FILE = "data/subscribers.json";
 
@@ -44,8 +45,9 @@ export async function readSubscribersFile(rootDir: string): Promise<string[]> {
 }
 
 export async function resolveDigestRecipients(config: AppConfig): Promise<string[]> {
+  const fromFirestore = await readFirestoreSubscribers(config);
   const fromFile = await readSubscribersFile(config.rootDir);
-  return mergeRecipientEmails(fromFile, config.digestEmailTo);
+  return mergeRecipientEmails(fromFirestore, fromFile, config.digestEmailTo);
 }
 
 export function subscribersFilePath(rootDir: string): string {

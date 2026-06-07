@@ -7,7 +7,7 @@ on:
       - "briefings/**"
       - "data/subscribers.json"
       - "scripts/build-pages.ts"
-      - "api/subscribe.ts"
+      - "firebase/**"
       - "site/assets/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -40,7 +40,10 @@ jobs:
       - name: Build site
         run: npm run build:pages
         env:
-          SUBSCRIBE_API_URL: ${{ secrets.SUBSCRIBE_API_URL }}
+          FIREBASE_PROJECT_ID: epiphoric-prod
+          FIREBASE_AUTH_DOMAIN: epiphoric-prod.firebaseapp.com
+          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
+          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
 
       - name: Verify CSS artifact
         run: test -s site/assets/style.css && test "$(wc -c < site/assets/style.css)" -gt 1000

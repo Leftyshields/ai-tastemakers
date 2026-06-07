@@ -1,6 +1,7 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { loadConfig } from "../src/tastemaker/config.js";
 import {
   isValidEmail,
   mergeRecipientEmails,
@@ -8,6 +9,10 @@ import {
   readSubscribersFile,
   subscribersFilePath,
 } from "../src/tastemaker/subscribers/load.js";
+import {
+  isFirebaseAdminConfigured,
+  writeFirestoreSubscriber,
+} from "../src/tastemaker/subscribers/firestore.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -24,17 +29,29 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
+  const config = loadConfig();
+  const addedVia: string[] = [];
+
+  if (isFirebaseAdminConfigured(config)) {
+    const result = await writeFirestoreSubscriber(config, normalized);
+    addedVia.push(result === "added" ? "Firestore" : "Firestore (already exists)");
+  }
+
   const existing = await readSubscribersFile(ROOT);
   const merged = mergeRecipientEmails(existing, [normalized]);
-  if (merged.length === existing.length) {
+  if (merged.length > existing.length) {
+    const filePath = subscribersFilePath(ROOT);
+    await fs.mkdir(path.dirname(filePath), { recursive: true });
+    await fs.writeFile(filePath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
+    addedVia.push("subscribers.json");
+  }
+
+  if (addedVia.length === 0) {
     console.log(`${normalized} is already subscribed`);
     return;
   }
 
-  const filePath = subscribersFilePath(ROOT);
-  await fs.mkdir(path.dirname(filePath), { recursive: true });
-  await fs.writeFile(filePath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
-  console.log(`Added ${normalized} (${merged.length} subscriber(s) total)`);
+  console.log(`${normalized} added via ${addedVia.join(" + ")}`);
 }
 
 main().catch((err) => {

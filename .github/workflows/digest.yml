@@ -31,6 +31,9 @@ jobs:
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
           DIGEST_EMAIL_TO: ${{ secrets.DIGEST_EMAIL_TO }}
           DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+          FIREBASE_PROJECT_ID: epiphoric-prod
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
         run: npm run digest
 
       - name: Commit briefing

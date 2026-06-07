@@ -8,15 +8,16 @@
     "digest": "tsx src/tastemaker/cli.ts",
     "build:digest": "tsc -p tsconfig.json",
     "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
-    "subscribers:add": "tsx scripts/add-subscriber.ts"
+    "subscribers:add": "tsx scripts/add-subscriber.ts",
+    "subscribers:seed-firestore": "tsx scripts/seed-subscribers-firestore.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "dotenv": "^16.4.7",
+    "firebase-admin": "^13.4.0",
     "resend": "^6.12.4"
   },
   "devDependencies": {
-    "@vercel/node": "^5.3.0",
     "@tailwindcss/cli": "^4.3.0",
     "@tailwindcss/typography": "^0.5.19",
     "marked": "^18.0.5",
