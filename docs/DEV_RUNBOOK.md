@@ -29,7 +29,7 @@ Optional: `TZ`, `DIGEST_TOP_N`, `DIGEST_MIN_STARS`, `ANTHROPIC_MODEL`
 Optional email (Resend — skipped if `RESEND_API_KEY` unset):
 
 - `RESEND_API_KEY`
-- `DIGEST_EMAIL_FROM` — verified sender, e.g. `AI Tastemakers <digest@yourdomain.com>`
+- `DIGEST_EMAIL_FROM` — verified sender, e.g. `AI Tastemakers <digest@epiphoric.com>`
 - `DIGEST_EMAIL_TO` — comma-separated recipients
 - `DIGEST_SITE_URL` — link in email footer (default: GitHub Pages URL)
 
@@ -72,7 +72,7 @@ Manual run: Actions → Daily Digest → Run workflow.
 2. Add secrets:
    ```bash
    gh secret set RESEND_API_KEY --repo Leftyshields/ai-tastemakers
-   gh secret set DIGEST_EMAIL_FROM --repo Leftyshields/ai-tastemakers  # e.g. AI Tastemakers <digest@yourdomain.com>
+   gh secret set DIGEST_EMAIL_FROM --repo Leftyshields/ai-tastemakers  # AI Tastemakers <digest@epiphoric.com>
    gh secret set DIGEST_EMAIL_TO --repo Leftyshields/ai-tastemakers    # you@example.com or a,b@example.com
    ```
 3. Add same vars to local `.env` for `npm run digest` testing
