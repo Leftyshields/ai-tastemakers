@@ -1,7 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ScoredRepo } from "../types.js";
 
-function buildPrompt(repo: ScoredRepo): string {
+export function buildPrompt(repo: ScoredRepo): string {
   const parts = [
     `Repository: ${repo.full_name}`,
     `URL: ${repo.html_url}`,
@@ -19,8 +19,13 @@ function buildPrompt(repo: ScoredRepo): string {
 
   parts.push(
     "",
-    "Write exactly 2–3 sentences in English explaining: (1) what this project does, (2) why it is interesting right now, (3) what a builder could do with it.",
-    "Be specific and punchy. No markdown headings. No hype or filler.",
+    "Write a brief in English using exactly three labeled sections in this order, each with one to two sentences:",
+    "",
+    "**What it does:** [what this project is]",
+    "**Why now:** [why it is relevant this week]",
+    "**Build with it:** [what a builder could do with it]",
+    "",
+    "Use those exact bold labels. Be specific, punchy, and builder-focused. No hype or filler.",
   );
 
   return parts.join("\n");
@@ -34,7 +39,7 @@ export async function narrateRepo(
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 300,
+      max_tokens: 450,
       messages: [{ role: "user", content: buildPrompt(repo) }],
     });
 

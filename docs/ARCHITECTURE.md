@@ -15,7 +15,7 @@ ai-tastemakers/
 │   ├── github/               # Search, enrich, client
 │   ├── snapshot/             # jsonl store, delta math
 │   ├── rank/                 # filter, score, top-N
-│   ├── narrate/              # Claude client
+│   ├── narrate/              # Claude client (briefs: **What it does:** / **Why now:** / **Build with it:**)
 │   └── writers/              # markdown + json
 ├── data/snapshots/           # repos.jsonl (star history)
 ├── briefings/                # Daily output artifacts

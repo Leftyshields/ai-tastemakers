@@ -66,6 +66,9 @@ describe("runPipeline integration", () => {
     await fs.rm(tmpDir, { recursive: true, force: true });
   });
 
+  const structuredBrief =
+    "**What it does:** First project.\n\n**Why now:** Timely pick.\n\n**Build with it:** Fork and ship.";
+
   it("writes markdown and json with mocked external services", async () => {
     const fixedNow = new Date("2026-06-06T14:00:00.000Z");
 
@@ -79,18 +82,20 @@ describe("runPipeline integration", () => {
       enrich: vi.fn(async (_c, candidates) => candidates),
       narrate: vi.fn().mockResolvedValue(
         new Map([
-          ["acme/one", "Brief one."],
-          ["acme/two", "Brief two."],
+          ["acme/one", structuredBrief],
+          ["acme/two", structuredBrief],
         ]),
       ),
     });
 
     expect(result.digest.repos).toHaveLength(2);
-    expect(result.digest.repos[0].brief).toBe("Brief one.");
+    expect(result.digest.repos[0].brief).toBe(structuredBrief);
 
     const md = await fs.readFile(result.markdownPath, "utf-8");
     expect(md).toContain("acme/one");
-    expect(md).toContain("Brief one.");
+    expect(md).toContain("**What it does:**");
+    expect(md).toContain("**Why now:**");
+    expect(md).toContain("**Build with it:**");
 
     const json = JSON.parse(await fs.readFile(result.jsonPath, "utf-8"));
     expect(json.schema_version).toBe(1);

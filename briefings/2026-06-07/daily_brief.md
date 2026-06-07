@@ -1,6 +1,6 @@
 # AI Tastemakers — Daily Brief — 2026-06-07
 
-_Ranking: bootstrap_since_first_seen · 10 repos · generated 2026-06-07T14:11:07.477Z_
+_Ranking: bootstrap_since_first_seen · 10 repos · generated 2026-06-07T16:23:49.040Z_
 
 
 > ⚠️ **Bootstrap ranking** (`bootstrap_since_first_seen`): 7-day star history is still maturing. Rankings will improve after a week of daily snapshots.
@@ -8,60 +8,100 @@ _Ranking: bootstrap_since_first_seen · 10 repos · generated 2026-06-07T14:11:0
 
 ## 1. mvanhorn/last30days-skill
 
-https://github.com/mvanhorn/last30days-skill · ★ 29753 (+988 this week) · ai-prompts, ai-skill, bluesky, claude, claude-code, clawhub, deep-research, hackernews, instagram, openclaw, polymarket, recency, reddit, research, social-media, tiktok, trends, twitter, web-search, youtube
+https://github.com/mvanhorn/last30days-skill · ★ 30084 (+1319 this week) · ai-prompts, ai-skill, bluesky, claude, claude-code, clawhub, deep-research, hackernews, instagram, openclaw, polymarket, recency, reddit, research, social-media, tiktok, trends, twitter, web-search, youtube
 
-/last30days is an AI agent skill that searches Reddit, X, YouTube, TikTok, Hacker News, Polymarket, and the open web in parallel, then scores results by upvotes, likes, and real-money prediction market odds to synthesize a grounded summary of any topic from the past month. It's compelling right now because no single AI platform has native access to all these walled gardens simultaneously, and this skill bridges them using bring-your-own credentials — giving Claude Code and other agents a recency layer that Google, ChatGPT, and Gemini each lack individually. A builder could wire it into a sales intelligence pipeline to auto-brief reps before calls, embed it in a research agent to surface emerging community pain points before they hit mainstream coverage, or use it as a signal layer in a trend-detection system that flags topics gaining real engagement velocity across platforms.
+**What it does:** `/last30days` is a Python-based AI agent skill that queries Reddit, X, YouTube, HN, Polymarket, and the web in parallel, scores results by real engagement signals (upvotes, likes, prediction market odds), and synthesizes them into a grounded summary of any topic from the past 30 days.
+
+**Why now:** It hit #1 on GitHub Trending this week with 1,319 new stars, landing as AI agents and multi-platform search orchestration become a primary battleground — and as every major AI lab still lacks unified access across these walled gardens.
+
+**Build with it:** Drop it into a Claude Code or Cursor workflow as a pre-call research step, or wire it into a pipeline that auto-briefs your team on competitors, candidates, or market trends before every meeting.
 
 ## 2. Leonxlnx/taste-skill
 
-https://github.com/Leonxlnx/taste-skill · ★ 35953 (+735 this week) · agent, ai, claude, claude-code, codex, coding, design, frontend, lowcode, nocode, skill, skills, vibecoding
+https://github.com/Leonxlnx/taste-skill · ★ 36178 (+962 this week) · agent, ai, claude, claude-code, codex, coding, design, frontend, lowcode, nocode, skill, skills, vibecoding
 
-Taste-Skill is a collection of installable "agent skills" — structured markdown instruction files — that constrain AI coding agents like Codex, Cursor, and Claude Code to produce frontend interfaces with intentional typography, spacing, motion, and layout instead of generic boilerplate. It's timely because the explosion of AI-generated UIs has created a recognizable aesthetic problem: functional but visually mediocre output that looks identical across projects, and this directly addresses that gap at the prompt/instruction layer rather than requiring post-hoc design fixes. A builder could drop these skills into any AI-assisted project to get production-quality visual output from day one, or combine the image-generation skills with tools like ChatGPT Images to produce reference boards that feed directly into implementation agents.
+**What it does:** Taste-Skill is a collection of portable agent skills (markdown files) that inject design constraints—layout, typography, motion, spacing—into AI coding agents like Codex, Cursor, and Claude Code to prevent them from generating generic, boilerplate-looking UIs.
+
+**Why now:** The repo gained nearly 1,000 stars this week, reflecting growing frustration that vibe-coded frontends all look identical; as AI-generated code becomes the default starting point, the quality floor of that output matters more.
+
+**Build with it:** Drop the skill files into your Codex or Cursor project to immediately raise the visual baseline of any AI-generated frontend, or pair the image-generation skills with ChatGPT Images to produce reference mood boards that feed directly into your coding agent's context.
 
 ## 3. chopratejas/headroom
 
-https://github.com/chopratejas/headroom · ★ 16534 (+728 this week) · agent, ai, anthropic, claude-code, compression, context-engineering, context-window, cursor, fastapi, langchain, llm, mcp, openai, prompt-engineering, proxy, python, rag, token-optimization, tokens, typescript
+https://github.com/chopratejas/headroom · ★ 16641 (+835 this week) · agent, ai, anthropic, claude-code, compression, context-engineering, context-window, cursor, fastapi, langchain, llm, mcp, openai, prompt-engineering, proxy, python, rag, token-optimization, tokens, typescript
 
-Headroom is a token compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% before they hit the context window, using six algorithms including a locally-run neural model, with no code changes required via its proxy mode. It's timely because context costs and limits are the dominant bottleneck for production agentic systems right now, especially as agents accumulate long tool-call histories and multi-step reasoning chains that burn through expensive tokens. A builder could drop it in front of Claude Code or a LangChain pipeline today to cut API bills, extend effective context length for long-running agents, or use the MCP server to add compression and semantic retrieval as tools any MCP-compatible client can call.
+**What it does:** Headroom is a context compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% using six algorithms, available as a Python/TypeScript library, a drop-in proxy, or an MCP server.
+
+**Why now:** With 16,641 stars and 835 added this week, it is gaining rapid traction as agents grow more complex and context window costs become a real bottleneck in production deployments.
+
+**Build with it:** Drop it in front of any LangChain, Claude Code, or Cursor workflow to slash token costs on log-heavy or RAG-heavy pipelines, or run it as an MCP server to give any agent a shared, deduplicated memory store across sessions.
 
 ## 4. Panniantong/Agent-Reach
 
-https://github.com/Panniantong/Agent-Reach · ★ 22978 (+689 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+https://github.com/Panniantong/Agent-Reach · ★ 23052 (+764 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
 
-Agent Reach is a Python CLI that gives AI agents (Claude Code, Cursor, etc.) the ability to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and a dozen other platforms without paying for APIs, by wrapping open-source scrapers and free endpoints into a single installable tool. It's timely because the gap between what LLM agents can reason about and what they can actually fetch from the live web is a major bottleneck right now, and this project attacks that problem across both Western and Chinese platforms simultaneously. A builder could use it to wire up an autonomous research agent that monitors competitor mentions across Twitter and Xiaohongshu, summarizes relevant YouTube and Bilibili tutorials, and surfaces Reddit bug reports—all without touching a paid API.
+**What it does:** Agent Reach is a Python CLI that gives AI agents (Claude Code, Cursor, etc.) authenticated, structured access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and more — no paid APIs required, just cookie-based auth and open-source scrapers wired together.
 
-## 5. santifer/career-ops
+**Why now:** It gained 764 stars this week, signaling rapid adoption among developers who want agents that can actually pull live internet data rather than hallucinating or hitting paywalls.
 
-https://github.com/santifer/career-ops · ★ 49733 (+427 this week) · ai-agent, anthropic, automation, career, careerops, claude, claude-code, cli, golang, interview-prep, job-search, open-source, resume
+**Build with it:** Drop it into any agent workflow to enable real-time competitive research, social sentiment scraping, or automated content monitoring — for example, have Claude Code pull Reddit threads and YouTube transcripts on a topic, then synthesize a daily briefing with zero manual browsing.
 
-Career-Ops is an open-source CLI pipeline that uses Claude Code and other AI coding agents to automatically scrape job listings, score them across 10 weighted dimensions, and generate ATS-optimized PDFs tailored to each job description. It's interesting right now because the AI agent CLI ecosystem (Claude Code, Gemini CLI, Codex) just matured enough to handle multi-step autonomous workflows, and the 49k stars suggest job seekers are actively weaponizing these tools against AI-powered applicant filters. A builder could fork this to add new data sources (LinkedIn, niche job boards), swap in their own scoring rubric, or repurpose the batch evaluation and PDF generation pipeline for adjacent use cases like grant applications or RFP responses.
+## 5. MemPalace/mempalace
 
-## 6. Imbad0202/academic-research-skills
+https://github.com/MemPalace/mempalace · ★ 54564 (+305 this week) · ai, chromadb, llm, mcp, memory, python
 
-https://github.com/Imbad0202/academic-research-skills · ★ 28412 (+339 this week) · academic-pipeline, academic-writing, ai-research, claude, claude-code, literature-review, peer-review, prompt-engineering
+**What it does:** MemPalace is a local-first AI memory system that stores conversation history as verbatim text and retrieves it via semantic search against a structured index of people, projects, and topics — no summarization, no API calls, no data leaving your machine.
 
-Academic Research Skills for Claude Code is a Python toolkit that wires Claude into a structured academic pipeline — literature search, citation verification, style calibration, peer-review simulation, and claim-level audit — with human checkpoints blocking fully-automated output at each integrity gate. It lands at a precise moment when corpus-scale studies are documenting ~147,000 hallucinated citations per year in AI-assisted research, making the claim-audit pass (which fetches sources and flags unsupported assertions) immediately practical rather than theoretical. A builder could extend the audit infrastructure to run continuous citation integrity checks on a lab's living paper drafts, or repurpose the reviewer calibration loop — where the tool measures its own false-negative rate against a gold set — as a quality-control layer for any high-stakes document generation system.
+**Why now:** It hit 54k+ stars with 305 added this week, ships MCP server support out of the box, and benchmarks at 96.6% R@5 on LongMemEval, making it a credible drop-in for persistent memory in Claude Code and similar agentic workflows right now.
 
-## 7. rohitg00/ai-engineering-from-scratch
+**Build with it:** Wire the Docker MCP server into Claude Code or any MCP-compatible client to give your AI assistant durable, searchable memory across sessions, or use the pluggable backend interface to swap ChromaDB for your own vector store inside a larger RAG pipeline.
 
-https://github.com/rohitg00/ai-engineering-from-scratch · ★ 29696 (+317 this week) · agents, ai, ai-agents, ai-engineering, computer-vision, course, deep-learning, from-scratch, generative-ai, llm, machine-learning, mcp, nlp, python, reinforcement-learning, rust, swarm-intelligence, transformers, tutorial, typescript
+## 6. helloianneo/ian-xiaohei-illustrations
 
-This is a free, MIT-licensed curriculum of 503 lessons across 20 phases that teaches AI engineering bottom-up — from raw linear algebra and backpropagation through transformers, LLMs, agents, and production deployment — in Python, TypeScript, Rust, and Julia, with every lesson producing a reusable artifact. It's particularly relevant right now because the gap between "AI user" and "AI engineer" is widening fast, and most existing resources teach APIs without the underlying mechanics that matter when things break or need to scale. A builder could work through it to go from zero to shipping production agents with genuine understanding of what's happening inside the model, or mine specific phases (e.g., the LLM-from-scratch or MCP server sections) to fill targeted knowledge gaps in an existing project.
+https://github.com/helloianneo/ian-xiaohei-illustrations · ★ 3324 (+300 this week) · ai-agent, chinese, codex-skill, handdrawn, illustration, image-generation, xiaohei
 
-## 8. CopilotKit/CopilotKit
+**What it does:** Ian Xiaohei Illustrations is a Codex Skill that analyzes Chinese articles and generates 16:9 hand-drawn inline illustrations featuring "Xiaohei," a minimalist black character, translating abstract arguments, workflows, and metaphors into single-concept sketch-style images with sparse red/orange/blue Chinese annotations.
 
-https://github.com/CopilotKit/CopilotKit · ★ 33562 (+375 this week) · agent, agent-native, agentic-ai, agents, ai, ai-agent, ai-assistant, assistant, assistant-chat-bots, copilot, copilot-chat, generative-ui, js, llm, nextjs, open-source, react, reactjs, ts, typescript
+**Why now:** The repo gained 300 stars this week, signaling a surge of interest among Chinese-language content creators looking for a repeatable visual language that sits between bare text and overproduced infographics—likely amplified by growing Codex agent adoption.
 
-CopilotKit is a full-stack SDK for embedding AI agents directly into web, mobile, and Slack applications, providing ready-made components for chat UI, generative UI, shared agent-app state, and human-in-the-loop workflows across React, Angular, and Vue. It's particularly relevant right now because it's the team behind the AG-UI Protocol, which is rapidly becoming an industry standard adopted by Google, LangChain, AWS, and Microsoft for how frontends communicate with agents. A builder could use it to ship a production-grade AI assistant into an existing Next.js app in under an hour, complete with streaming responses, backend tool calls that render live UI components, and pause-and-confirm checkpoints where users can intervene before the agent proceeds.
+**Build with it:** Drop the skill into your Codex setup and wire it into a content pipeline that takes a Markdown article, auto-generates a shot list of 4–8 illustration concepts, and exports labeled PNGs into an `assets/` folder ready for Notion, WeChat articles, or blog CMS uploads.
 
-## 9. esengine/DeepSeek-Reasonix
+## 7. nexu-io/html-video
 
-https://github.com/esengine/DeepSeek-Reasonix · ★ 19107 (+272 this week) · agent, agent-framework, ai-agent, ai-coding, cli, coding-agent, deepseek, developer-tools, ink, llm, prompt-caching, r1, terminal, tool-use, tui, typescript
+https://github.com/nexu-io/html-video · ★ 1990 (+284 this week) · ai-agent, apache-2, coding-agent, css, ffmpeg, html, html-to-video, hyperframes, mp4, open-design, open-source, programmatic-video, video, video-as-code, video-generation
 
-DeepSeek-Reasonix is a terminal-based AI coding agent written in Go that wraps DeepSeek's R1 model in a config-driven, plugin-extensible harness, letting you run multi-step coding tasks from the CLI while its architecture actively minimizes token costs by stabilizing DeepSeek's prefix cache across long sessions. It's timely because DeepSeek's pricing makes long agentic loops economically viable in a way they weren't with OpenAI, and the rewrite from TypeScript to a single static Go binary signals a maturity push toward production use. A builder could drop it into a CI pipeline or dev container to automate refactoring, test generation, or code review workflows entirely from the terminal, with costs that stay predictable even across hour-long sessions.
+**What it does:** html-video converts HTML, CSS, and data into real MP4 files locally using pluggable render engines (including FFmpeg), with 21 prebuilt animated templates and optional AI-generated soundtrack and narration.
 
-## 10. D4Vinci/Scrapling
+**Why now:** AI coding agents have become the default way many developers build and prototype, and this week's spike in stars signals the community is actively looking for a local, fee-free way to generate video assets directly inside those agent loops.
 
-https://github.com/D4Vinci/Scrapling · ★ 61841 (+253 this week) · ai, ai-scraping, automation, crawler, crawling, crawling-python, data, data-extraction, mcp, mcp-server, playwright, python, scraping, selectors, stealth, web-scraper, web-scraping, web-scraping-python, webscraping, xpath
+**Build with it:** Point your agent (Claude Code, Cursor, Codex, or similar) at an article URL or GitHub repo, let it populate one of the 21 templates with real content, and ship a finished MP4 walkthrough, changelog video, or data-viz clip without touching a cloud render service.
 
-Scrapling is a Python web scraping framework that combines stealth browser automation (via Playwright), adaptive CSS/XPath selectors that self-heal when page layouts change, and built-in proxy rotation to extract data from sites that actively resist scraping. It's gaining traction now because anti-bot measures have made traditional scrapers nearly useless against modern sites, and Scrapling's MCP server integration means AI agents can trigger live web data extraction directly from LLM tool calls. A builder could use it to power a competitive intelligence product, a real-time price monitor, or an AI research agent that pulls fresh web data on demand without constantly breaking when target sites redesign their pages.
+## 8. heygen-com/hyperframes
+
+https://github.com/heygen-com/hyperframes · ★ 25285 (+278 this week) · ai, animation, ffmpeg, framework, gsap, html, mcp, puppeteer, rendering, typescript, video
+
+**What it does:** HyperFrames is an open-source TypeScript framework that renders HTML, CSS, and GSAP animations into deterministic MP4 videos via Puppeteer and FFmpeg, with native MCP support so AI coding agents can plan, write, and render video end-to-end without leaving the chat.
+
+**Why now:** The project just crossed 25,000 stars with 278 added this week, signaling rapid adoption at the intersection of agentic coding workflows and programmatic video generation—two areas seeing heavy builder activity right now.
+
+**Build with it:** Wire it into a Claude Code or Cursor agent to auto-generate product demo videos, animated data visualizations, or social content from a brief, then pipe the MP4 output into a publishing or content pipeline without touching a video editor.
+
+## 9. aaif-goose/goose
+
+https://github.com/aaif-goose/goose · ★ 47267 (+269 this week) · acp, ai, ai-agents, mcp
+
+**What it does:** Goose is an open-source, general-purpose AI agent built in Rust that runs locally as a desktop app, CLI, or API, supporting 15+ LLM providers and 70+ extensions via MCP to autonomously install, execute, edit, and test across code and non-code workflows.
+
+**Why now:** Goose just migrated from `block/goose` to the Linux Foundation's Agentic AI Foundation (AAIF), signaling serious institutional backing, and is gaining 269 stars this week as the community consolidates around the new home.
+
+**Build with it:** Fork the repo to create a custom goose distribution with preconfigured providers, branding, and extensions — or embed the API into your own product to ship a self-hosted AI agent without depending on closed platforms.
+
+## 10. rtk-ai/rtk
+
+https://github.com/rtk-ai/rtk · ★ 59692 (+237 this week) · agentic-coding, ai-coding, anthropic, claude-code, cli, command-line-tool, cost-reduction, developer-tools, llm, open-source, productivity, rust, token-optimization
+
+**What it does:** RTK is a Rust CLI proxy that intercepts commands like `git diff`, `cargo test`, and `grep` before their output hits your LLM context, compressing results to cut token consumption by 60–90% with under 10ms overhead.
+
+**Why now:** The project gained 237 stars this week, signaling growing developer pain around runaway API costs in agentic coding workflows where Claude Code and similar tools repeatedly invoke shell commands in tight loops.
+
+**Build with it:** Drop RTK into any Claude Code or LLM-powered dev agent as a shell hook and immediately reduce per-session API spend—useful as a foundation for cost-aware agent infrastructure or as a benchmark for building smarter output-filtering middleware.

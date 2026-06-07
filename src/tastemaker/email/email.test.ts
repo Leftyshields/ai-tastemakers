@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { renderDigestEmailHtml, digestEmailSubject } from "./html.js";
+import { renderDigestEmailHtml, renderBriefForEmail, digestEmailSubject } from "./html.js";
 import { shouldSendDigestEmail, parseEmailList } from "./resend.js";
 import type { AppConfig, Digest } from "../types.js";
 
@@ -24,11 +24,60 @@ const sampleDigest: Digest = {
   ],
 };
 
+describe("renderBriefForEmail", () => {
+  it("converts markdown bold to strong tags", () => {
+    const html = renderBriefForEmail(
+      "**What it does:** A neat tool.\n**Why now:** Timely.\n**Build with it:** Fork it.",
+    );
+    expect(html).toContain("<strong>What it does:</strong>");
+    expect(html).toContain("<strong>Why now:</strong>");
+    expect(html).toContain("<strong>Build with it:</strong>");
+  });
+
+  it("escapes HTML outside bold segments", () => {
+    const html = renderBriefForEmail("Uses a <tool> for builders.");
+    expect(html).toContain("Uses a &lt;tool&gt; for builders.");
+    expect(html).not.toContain("<tool>");
+  });
+
+  it("escapes HTML inside bold segments", () => {
+    const html = renderBriefForEmail("**What it does:** Uses a <tool> for builders.");
+    expect(html).toContain("<strong>What it does:</strong>");
+    expect(html).toContain("Uses a &lt;tool&gt; for builders.");
+    expect(html).not.toContain("<tool>");
+  });
+
+  it("converts paragraph breaks to br tags", () => {
+    const html = renderBriefForEmail(
+      "**What it does:** First.\n\n**Why now:** Second.",
+    );
+    expect(html).toContain("<strong>What it does:</strong> First.<br><br>");
+    expect(html).toContain("<strong>Why now:</strong> Second.");
+  });
+});
+
 describe("renderDigestEmailHtml", () => {
   it("escapes HTML in brief text", () => {
     const html = renderDigestEmailHtml(sampleDigest, "2026-06-06", "https://example.com/app");
     expect(html).toContain("A neat &lt;tool&gt; for builders.");
     expect(html).not.toContain("<tool>");
+  });
+
+  it("renders bold labels in structured briefs", () => {
+    const digest: Digest = {
+      ...sampleDigest,
+      repos: [
+        {
+          ...sampleDigest.repos[0],
+          brief:
+            "**What it does:** Demo.\n\n**Why now:** Hot.\n\n**Build with it:** Ship it.",
+        },
+      ],
+    };
+    const html = renderDigestEmailHtml(digest, "2026-06-07", "https://example.com/app");
+    expect(html).toContain("<strong>What it does:</strong>");
+    expect(html).toContain("<br><br>");
+    expect(html).not.toContain("**What it does:**");
   });
 
   it("includes read online link", () => {

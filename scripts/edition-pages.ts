@@ -187,7 +187,8 @@ function ossIndexBody(paths: SitePaths, dates: string[], latest?: string): strin
   return `
     <section class="mb-12 border-b border-stone-200 pb-10 dark:border-stone-800">
       <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily digest &middot; GitHub momentum</p>
-      <p class="mb-6 text-xl leading-snug md:text-[1.65rem] md:leading-snug">Every morning, AI Tastemakers surfaces the ten AI-derivative repos gaining the most momentum&mdash;not a static star leaderboard.</p>
+      <p class="mb-3 text-xl leading-snug md:text-[1.65rem] md:leading-snug">Every morning, AI Tastemakers surfaces the ten AI-derivative repos gaining the most momentum&mdash;not a static star leaderboard.</p>
+      <p class="mb-6 text-base leading-relaxed text-stone-600 dark:text-stone-400">Tools, agents, and frameworks built on top of foundation models &ndash; not foundation model news.</p>
       ${heroActions}
     </section>
 
@@ -274,7 +275,7 @@ function skillsIndexBody(
   return `
     <section class="mb-12 border-b border-stone-200 pb-10 dark:border-stone-800">
       <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Agent skills · GitHub momentum</p>
-      <p class="mb-4 text-xl leading-snug md:text-[1.65rem]">Daily top ten <strong>AI agent skills</strong> — research plugins, Claude Code skills, and installable capabilities ranked by star growth.</p>
+      <p class="mb-4 text-xl leading-snug md:text-[1.65rem]">Reusable agent instruction artifacts &mdash; prompt skills, Claude Code extensions, and capabilities you drop into your AI agents to unlock new powers. Overlaps with AI Tastemakers are intentional; the lens is different.</p>
       ${inspiration}
       <div class="mt-6">${heroActions}</div>
     </section>

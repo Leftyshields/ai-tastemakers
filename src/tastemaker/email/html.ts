@@ -8,6 +8,24 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+/** Converts markdown bold (`**text**`) to `<strong>`, then escapes remaining HTML. */
+export function renderBriefForEmail(brief: string): string {
+  const parts: string[] = [];
+  const re = /\*\*([^*]+)\*\*/g;
+  let lastIndex = 0;
+  let match: RegExpExecArray | null;
+  while ((match = re.exec(brief)) !== null) {
+    parts.push(escapeHtml(brief.slice(lastIndex, match.index)));
+    parts.push(`<strong>${escapeHtml(match[1])}</strong>`);
+    lastIndex = match.index + match[0].length;
+  }
+  parts.push(escapeHtml(brief.slice(lastIndex)));
+  return parts
+    .join("")
+    .replace(/\n\n/g, "<br><br>")
+    .replace(/\n/g, "<br>");
+}
+
 function formatStars(repo: Digest["repos"][0], mode: Digest["ranking_mode"]): string {
   if (mode === "bootstrap_total_stars") {
     return `★ ${repo.stars.toLocaleString()} total`;
@@ -30,7 +48,7 @@ export function renderDigestEmailHtml(
   const repoBlocks = digest.repos
     .map((repo) => {
       const brief = repo.brief
-        ? escapeHtml(repo.brief)
+        ? renderBriefForEmail(repo.brief)
         : "<em>_[brief unavailable]_</em>";
       const topics =
         repo.topics.length > 0

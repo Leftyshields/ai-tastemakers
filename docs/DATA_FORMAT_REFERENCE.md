@@ -58,8 +58,14 @@ _Ranking: delta_7d · 10 repos · generated 2026-06-06T14:00:00Z_
 
 https://github.com/owner/repo · ★ 1234 (+89 this week) · llm, mcp
 
-Claude brief paragraph here.
+**What it does:** One or two sentences on what the repo is.
+
+**Why now:** One or two sentences on why it's relevant this week.
+
+**Build with it:** One or two sentences on what a builder could do with it.
 ```
+
+Older briefings may use a single dense paragraph (legacy format).
 
 ## GitHub Search → candidate (internal)
 

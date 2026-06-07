@@ -1,67 +1,107 @@
 # Skill Tastemakers — Daily Brief — 2026-06-07
 
-_Ranking: bootstrap_total_stars · 10 repos · generated 2026-06-07T14:23:55.944Z_
+_Ranking: bootstrap_total_stars · 10 repos · generated 2026-06-07T16:25:53.136Z_
 
 
 > ⚠️ **Bootstrap ranking** (`bootstrap_total_stars`): 7-day star history is still maturing. Rankings will improve after a week of daily snapshots.
 
 
-## 1. jarrodwatts/claude-hud
+## 1. manaflow-ai/cmux
 
-https://github.com/jarrodwatts/claude-hud · ★ 24633 (★ 24633 total) · anthropic, claude, claude-code, cli, plugin, statusline, typescript
+https://github.com/manaflow-ai/cmux · ★ 21355 (★ 21355 total) · amp, claude-code, codex, gemini, ghostty, opencode, terminal, tmux
 
-Claude HUD is a Claude Code plugin that renders a persistent status bar showing real-time context window usage, active tool calls, running subagents, and todo progress directly in your terminal via Claude Code's native statusline API. It's particularly relevant right now as Claude Code sessions grow more complex with multi-agent workflows and 1M-token context windows, making it genuinely hard to know when you're about to hit limits or what's actually running. A builder could fork it to add custom metrics — like cost tracking per session, per-agent token attribution, or alerts that trigger shell commands when context crosses a threshold.
+**What it does:** cmux is a macOS terminal built on Ghostty that adds vertical tabs, split panes, a built-in browser, and notification rings specifically designed to manage multiple AI coding agents (Claude Code, Codex, Gemini) running simultaneously without losing track of which one needs your input.
 
-## 2. VoltAgent/awesome-agent-skills
+**Why now:** With Claude Code's teammate/multi-agent mode gaining traction, the bottleneck has shifted from writing code to supervising parallel agents — cmux directly targets that workflow with a single `cmux claude-teams` command that spawns teammates as native splits with no tmux configuration required.
 
-https://github.com/VoltAgent/awesome-agent-skills · ★ 24504 (★ 24504 total) · agent-skills, ai-agents, antigravity-skills, awesome, awesome-list, awesome-lists, claude-code, claude-code-skills, claude-skills, codex-skills, cursor-skills, gemini-skills, opencode-skills, skills
+**Build with it:** Use cmux as the shell layer for a multi-agent orchestration setup — pipe agent stdout through its notification API to surface blocking prompts, use the scriptable in-app browser to let agents interact with localhost previews over SSH tunnels, or fork the Swift codebase to add custom sidebar metadata (cost tracking, token counts, task state) per agent pane.
 
-This repository aggregates 1,400+ hand-curated "agent skills" — reusable instruction files (like CLAUDE.md or similar configs) that prime AI coding agents such as Claude Code, Gemini CLI, and Cursor with domain-specific knowledge from real engineering teams at Anthropic, Stripe, Vercel, Cloudflare, and dozens more. It's particularly relevant right now because agent-native development is exploding and teams are converging on skill/context files as the primary way to encode institutional knowledge into AI workflows, making a high-quality, cross-compatible collection genuinely scarce and valuable. A builder could mine these skills to instantly bootstrap production-grade AI agent behaviors for their stack — for example, dropping in Stripe's official payment skill, Sentry's error-monitoring skill, and Supabase's database skill to give an agent deep, accurate context across their entire backend without writing custom prompts from scratch.
+## 2. VoltAgent/awesome-claude-code-subagents
 
-## 3. gastownhall/beads
+https://github.com/VoltAgent/awesome-claude-code-subagents · ★ 21320 (★ 21320 total) · ai-agent-framework, ai-agent-tools, ai-agents, awesome, awesome-list, claude, claude-ai, claude-code-subagents, claude-subagents, subagents
 
-https://github.com/gastownhall/beads · ★ 24394 (★ 24394 total) · agents, claude-code, coding
+**What it does:** A curated collection of 154+ specialized Claude Code subagents organized into 10 categories (core development, infrastructure, language specialists, meta-orchestration, etc.) that can be installed globally or per-project to give Claude Code focused personas for specific tasks.
 
-Beads is a distributed, graph-based issue tracker built for AI coding agents, using Dolt (a version-controlled SQL database) to give agents persistent, structured task memory across long-horizon sessions instead of throwaway markdown files. It's timely because autonomous coding agents like Claude Code and Codex are hitting real walls with context loss and coordination in multi-agent workflows, and Beads directly addresses that with atomic task claiming, dependency graphs, and conflict-free hash IDs. A builder could wire it into a multi-agent pipeline where several Claude or Codex instances work a shared backlog in parallel—each claiming tasks without collisions, tracking blockers, and accumulating project memory that survives context resets.
+**Why now:** Claude Code's subagent architecture is seeing rapid adoption this week, and having a plug-and-play library of pre-configured specialists removes the friction of writing custom system prompts from scratch.
 
-## 4. cheahjs/free-llm-api-resources
+**Build with it:** Install the meta-orchestration agents alongside domain-specific ones (e.g., `voltagent-infra` + `voltagent-lang`) to wire up a multi-agent pipeline where a planner agent delegates backend, API design, and deployment tasks to specialist subagents automatically.
 
-https://github.com/cheahjs/free-llm-api-resources · ★ 23058 (★ 23058 total) · ai, claude, gemini, llama, llm, openai
+## 3. Donchitos/Claude-Code-Game-Studios
 
-This project maintains a curated, auto-updated list of LLM APIs that are genuinely free or offer trial credits, covering providers like Google AI Studio, Groq, OpenRouter, Cerebras, and over a dozen others with their current rate limits and available models. It's particularly relevant right now because the landscape of free inference endpoints is shifting rapidly — new models like DeepSeek, Qwen3, and Gemini keep appearing while limits change weekly, making a single tracked source genuinely useful. A builder could use this as a routing reference to stack multiple free tiers together, cycling across providers to stay under rate limits and effectively run a zero-cost LLM-powered prototype before committing to paid API spend.
+https://github.com/Donchitos/Claude-Code-Game-Studios · ★ 21090 (★ 21090 total) · ai-agents, ai-assisted-development, anthropic, claude, claude-code, game-design, game-development, gamedev, godot, indie-game-dev, unity, unreal-engine
 
-## 5. Panniantong/Agent-Reach
+**What it does:** Claude Code Game Studios installs 49 specialized AI agents into a Claude Code session, organized into a three-tier studio hierarchy (directors, department leads, specialists) with 73 slash-command workflow skills and automated validation hooks that enforce code standards and design review gates.
 
-https://github.com/Panniantong/Agent-Reach · ★ 22986 (★ 22986 total) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+**Why now:** With 21,000+ stars and active development, this is gaining serious traction as Claude Code's subagent capabilities mature, making structured multi-agent workflows in a single session genuinely practical for the first time.
 
-Agent Reach is a Python CLI that gives AI agents free, authenticated access to Twitter, Reddit, YouTube, Bilibili, XiaoHongShu, GitHub, and a dozen other platforms — scraping past API paywalls and login walls using cookies and open-source tools like yt-dlp and Jina Reader. It's timely because the race to build autonomous agents has hit a hard wall: LLMs can reason but can't see the live web without expensive API keys or brittle scraping setups, and this project collapses that friction into a single install command. A builder could use it to wire a Claude Code or Cursor agent into real-time social sentiment pipelines, competitive research workflows, or content monitoring bots across Chinese and Western platforms simultaneously — with zero recurring API costs.
+**Build with it:** Clone the repo, run the setup script, and use `/start` to kick off a new game project — then try using `/design-system` and `/create-epics` to see how the director-tier agents challenge your design decisions before a line of code gets written.
 
-## 6. OthmanAdi/planning-with-files
+## 4. zarazhangrui/frontend-slides
 
-https://github.com/OthmanAdi/planning-with-files · ★ 22829 (★ 22829 total) · adal, agent-skills, antigravity, claude, claude-code, claude-skills, copilot, copilot-skills, hermes, hermes-agent, hermes-skill, kilocode, manus, mastra, openclaw, openclaw-skills, pi, pi-agent, planning
+https://github.com/zarazhangrui/frontend-slides · ★ 20630 (★ 20630 total) · ai-slides, anthropic, claude, claude-code, claude-skill, generative-ui, html, presentation, slides, vibe-coding
 
-Planning-with-files is a Claude Code skill that implements persistent markdown-based task planning, where an AI agent writes and continuously updates a structured plan file instead of losing context between steps — directly mimicking the workflow pattern Manus used before its reported $2B acquisition. It's particularly relevant right now because developers are actively reverse-engineering what made Manus effective, and this distills that into a drop-in skill with documented evals and a growing ecosystem of forks. A builder could use it as a foundation for any long-horizon agentic workflow — coding assistants, research pipelines, or multi-step automation — where maintaining coherent state across many tool calls is the core unsolved problem.
+**What it does:** Frontend Slides is a Claude Code plugin (and portable `SKILL.md` skill) that turns a text prompt or an existing PowerPoint file into a single self-contained HTML presentation, using a coding agent's frontend skills so non-designers get production-quality slides without writing CSS or JavaScript.
 
-## 7. coleam00/Archon
+**Why now:** The repo crossed 20,000 stars this week, signaling strong builder momentum around Claude Code plugins and vibe-coded UI generation as practical daily workflows rather than demos.
 
-https://github.com/coleam00/Archon · ★ 22228 (★ 22228 total) · ai, automation, bun, claude, cli, coding-assistant, developer-tools, typescript, workflow-engine, yaml
+**Build with it:** Drop it into any Claude Code setup and build a custom slide generator for your team's recurring decks—pitch templates, sprint reviews, client reports—or wire the `SKILL.md` into another agent (Gemini CLI, Kimi Code) to add slide export to an existing documentation or research pipeline.
 
-Archon is an open-source workflow engine that lets you define AI coding processes as YAML files — planning, implementation, testing, review, PR creation — so they run the same way every time instead of depending on an AI's unpredictable choices. It's timely because teams are moving from one-shot AI prompts to structured agentic pipelines, and the tooling for making those pipelines reliable and repeatable is still wide open. A builder could use it to ship a SaaS product where non-technical users define and share reusable AI coding workflows, or build integrations that trigger Archon runs from Slack, GitHub webhooks, or CI/CD systems.
+## 5. AI4Finance-Foundation/FinGPT
 
-## 8. promptfoo/promptfoo
+https://github.com/AI4Finance-Foundation/FinGPT · ★ 20428 (★ 20428 total) · chatgpt, finance, fingpt, fintech, large-language-models, machine-learning, nlp, prompt-engineering, pytorch, reinforcement-learning, robo-advisor, sentiment-analysis, technical-analysis
 
-https://github.com/promptfoo/promptfoo · ★ 21972 (★ 21972 total) · ci, ci-cd, cicd, evaluation, evaluation-framework, llm, llm-eval, llm-evaluation, llm-evaluation-framework, llmops, pentesting, prompt-engineering, prompt-testing, prompts, rag, red-teaming, testing, vulnerability-scanners
+**What it does:** FinGPT is an open-source suite of financial large language models built on top of bases like LLaMA2, fine-tuned for tasks including sentiment analysis, market forecasting, and robo-advisory using instruction tuning and LoRA adapters.
 
-Promptfoo is an open-source CLI and library that lets developers systematically test LLM prompts, compare model outputs across providers like GPT and Claude, and run automated red-teaming scans to find security vulnerabilities in AI applications. It's particularly relevant right now because shipping AI features without structured evaluation is a major source of production failures and security risks, and promptfoo just joined OpenAI while remaining MIT-licensed, signaling serious institutional backing. A builder could wire it into their CI/CD pipeline to automatically catch prompt regressions, benchmark a model swap from GPT-4 to DeepSeek on real test cases, or generate a vulnerability report on a RAG chatbot before it ships.
+**Why now:** With 20,428 stars and active model releases on HuggingFace, FinGPT gives builders a ready alternative to closed, proprietary financial AI APIs that Wall Street firms won't open-source.
 
-## 9. slopus/happy
+**Build with it:** Use the pre-trained FinGPT-Forecaster or sentiment models via HuggingFace to add financial signal generation—stock sentiment scoring, earnings forecasting, or portfolio commentary—into a trading dashboard or investment app without training from scratch.
 
-https://github.com/slopus/happy · ★ 21673 (★ 21673 total) · claude-code, claude-desktop, claude-mobile, codex, codex-cli, hacktoberfest
+## 6. Kilo-Org/kilocode
 
-Happy is an open-source mobile and web client that wraps Claude Code and OpenAI Codex CLI sessions, letting you monitor, control, and receive push notifications from your AI coding agents entirely from your phone via end-to-end encrypted relay. It's timely because agentic coding workflows are increasingly running long, unsupervised tasks where the bottleneck is human availability rather than model capability—this directly solves the "step away from your desk" problem. A builder could fork the server component to self-host the relay, extend the agent CLI to pipe in custom tool outputs, or use the Expo app as a template for building mobile dashboards over other long-running CLI-based AI agents.
+https://github.com/Kilo-Org/kilocode · ★ 19901 (★ 19901 total) · ai, ai-age, ai-coding, ai-developer-tools, chatgpt, claude, cli, gemini, jetbrains, sonnet, vscode, vscode-extension
 
-## 10. rohitg00/agentmemory
+**What it does:** Kilo is an open-source agentic coding platform that runs inside VS Code, JetBrains, CLI, and Slack, giving developers access to 500+ AI models to generate code, automate tasks, refactor, and control the browser from a single agent.
 
-https://github.com/rohitg00/agentmemory · ★ 21669 (★ 21669 total) · agentmemory, agents, ai, claude, claudecode, codex, copilot, cursor, genai, harness, hermes, memory, openclaw
+**Why now:** With 19,901 stars and active development, Kilo recently expanded support across JetBrains and a dedicated CLI (`npm install -g @kilocode/cli`), making it a timely option for teams evaluating multi-IDE AI tooling as the agentic coding space consolidates.
 
-AgentMemory is an MCP (Model Context Protocol) server that gives AI coding agents like Claude Code, Cursor, and Copilot persistent, searchable memory across sessions using hybrid vector and knowledge-graph search. It's interesting now because context amnesia is one of the sharpest practical pain points in agentic workflows, and the project benchmarks 95%+ retrieval recall while cutting token usage by 92%. A builder could wire it into any MCP-compatible agent to retain project conventions, past decisions, and debugging history—eliminating the constant re-explanation tax on every new session.
+**Build with it:** Use Kilo's custom modes and MCP server marketplace to wire up a multi-step agent that plans architecture, writes and tests code, then deploys—all without leaving your editor or switching between AI providers.
+
+## 7. comet-ml/opik
+
+https://github.com/comet-ml/opik · ★ 19445 (★ 19445 total) · evaluation, hacktoberfest, hacktoberfest2025, langchain, llama-index, llm, llm-evaluation, llm-observability, llmops, open-source, openai, playground, prompt-engineering
+
+**What it does:** Opik is an open-source platform for tracing, evaluating, and optimizing LLM applications—covering RAG pipelines, agentic workflows, and prompt engineering—with integrations for OpenAI, LangChain, and LlamaIndex.
+
+**Why now:** With nearly 20,000 GitHub stars and active Hacktoberfest 2025 participation, Opik is attracting contributors and shipping new features rapidly, making this a good moment to adopt it before the ecosystem solidifies.
+
+**Build with it:** Wire Opik into your existing LLM app to get end-to-end trace visibility, then run automated LLM-as-a-judge evaluations against your prompts to catch regressions before they hit production.
+
+## 8. tirth8205/code-review-graph
+
+https://github.com/tirth8205/code-review-graph · ★ 18180 (★ 18180 total) · ai-coding, claude, claude-code, code-review, graphrag, incremental, knowledge-graph, llm, mcp, python, static-analysis, tree-sitter
+
+**What it does:** `code-review-graph` builds a persistent structural map of your codebase using Tree-sitter, then exposes it via MCP so AI coding tools receive only the relevant context for each review task instead of re-reading entire repos.
+
+**Why now:** With AI coding tools now standard in daily dev workflows, token waste on large-repo reviews is a real cost and latency problem—this project benchmarks 38x–528x token reductions across real codebases, making it immediately practical.
+
+**Build with it:** Wire it into a custom CI pipeline that automatically surfaces dependency-aware review context for every pull request, or extend its MCP tools to power a graph-backed chat interface that answers precise questions about code relationships without full-file retrieval.
+
+## 9. alirezarezvani/claude-skills
+
+https://github.com/alirezarezvani/claude-skills · ★ 17395 (★ 17395 total) · agent-plugins, agent-skills, agentic-ai, ai-coding-agent, anthropic-claude, claude-ai, claude-code, claude-code-plugins, claude-code-skills, claude-skills, codex-skills, coding-agent-plugins, cursor-skills, developer-tools, gemini-cli-skills, openai-codex, openclaw, openclaw-plugins, openclaw-skills, prompt-engineering
+
+**What it does:** A library of 338 modular "skill" packages — each a SKILL.md file plus Python scripts and reference docs — that inject domain expertise (security, compliance, marketing, CFO/CMO personas, research ops) into Claude Code, Codex, Gemini CLI, Cursor, and 10 other AI coding agents.
+
+**Why now:** Gemini CLI launched recently and is listed as a supported target this week, making this one of the first cross-agent skill libraries to explicitly support it alongside Claude Code and Codex in a single install.
+
+**Build with it:** Clone the repo, run the one-line install script for your agent, and wire in a pre-built CFO or CISO persona to give your coding agent real advisory judgment — or strip out a single SKILL.md and use it as the backbone for your own domain-specific agent plugin.
+
+## 10. decolua/9router
+
+https://github.com/decolua/9router · ★ 16729 (★ 16729 total) · ai-agents, ai-gateway, anthropic, chatgpt, claude, claude-code, cline, codex, copilot, cursor, deepseek, free-ai, gemini, gemini-cli, llm, llm-gateway, openai, openai-proxy, qwen, token-saver
+
+**What it does:** 9Router is a local proxy server that sits between AI coding tools (Claude Code, Cursor, Cline, Codex) and 40+ model providers, handling automatic fallback across subscription, paid, and free tiers while compressing tool output tokens by 20-40% via its RTK system.
+
+**Why now:** Free tiers from Kiro AI and OpenCode just became viable coding backends, and 9Router's 16K+ stars this month signal developers are actively routing around expensive API costs rather than paying per provider.
+
+**Build with it:** Wire 9Router as a unified OpenAI-compatible endpoint for an internal dev platform that lets your team burn through free quotas first, falls back to cheap models automatically, and gives you a dashboard to track exactly where tokens are being spent across every coding agent you run.
