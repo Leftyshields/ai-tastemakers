@@ -66,6 +66,75 @@ header.site-header {
   margin: 0;
 }
 
+.intro {
+  margin-bottom: 2.5rem;
+}
+
+.intro-lede {
+  font-size: 1.2rem;
+  line-height: 1.55;
+  margin-top: 0;
+}
+
+.intro p {
+  margin: 0 0 1rem;
+}
+
+.cta-button {
+  display: inline-block;
+  margin-top: 0.5rem;
+  padding: 0.65rem 1.25rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #fff;
+  background: var(--accent);
+  border-radius: 6px;
+  text-decoration: none;
+}
+
+.cta-button:hover {
+  filter: brightness(1.08);
+}
+
+.section-heading {
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin: 0 0 1rem;
+  letter-spacing: -0.01em;
+}
+
+.how-it-works {
+  margin-bottom: 2.5rem;
+  padding: 1.25rem 0;
+  border-top: 1px solid var(--border);
+  border-bottom: 1px solid var(--border);
+}
+
+.steps-list {
+  margin: 0;
+  padding-left: 1.25rem;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 0.95rem;
+  line-height: 1.6;
+}
+
+.steps-list li {
+  margin-bottom: 0.65rem;
+}
+
+.steps-list code {
+  font-size: 0.85em;
+  padding: 0.1em 0.35em;
+  background: var(--quote-bg);
+  border-radius: 3px;
+}
+
+.archive-section {
+  margin-bottom: 1rem;
+}
+
 .meta {
   font-family: system-ui, -apple-system, sans-serif;
   font-size: 0.875rem;

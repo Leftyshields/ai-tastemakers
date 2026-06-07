@@ -10,13 +10,17 @@ const REPO_URL = "https://github.com/Leftyshields/ai-tastemakers";
 
 marked.setOptions({ gfm: true, breaks: false });
 
-function pageShell(title: string, body: string): string {
+function pageShell(title: string, body: string, description?: string): string {
+  const meta = description
+    ? `<meta name="description" content="${description.replace(/"/g, "&quot;")}">`
+    : "";
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${title}</title>
+  ${meta}
   <link rel="stylesheet" href="/assets/style.css">
 </head>
 <body>
@@ -27,7 +31,7 @@ function pageShell(title: string, body: string): string {
     </header>
     ${body}
     <footer class="site-footer">
-      <a href="${REPO_URL}">Source on GitHub</a> · Updated daily
+      <a href="${REPO_URL}">Source on GitHub</a> · Updated daily · Automated pipeline
     </footer>
   </div>
 </body>
@@ -80,11 +84,9 @@ async function buildBriefPage(date: string): Promise<void> {
 
 async function buildIndex(dates: string[]): Promise<void> {
   const latest = dates[0];
-  let featured = "";
-  if (latest) {
-    featured = `
-    <p class="meta">Latest: <a href="/briefings/${latest}.html">${formatDisplayDate(latest)}</a></p>`;
-  }
+  const latestLink = latest
+    ? `<a class="cta-button" href="/briefings/${latest}.html">Read today&rsquo;s brief</a>`
+    : "";
 
   const items = dates
     .map(
@@ -94,13 +96,49 @@ async function buildIndex(dates: string[]): Promise<void> {
     .join("\n");
 
   const body = `
-    ${featured}
-    <h2 style="font-family:system-ui,sans-serif;font-size:1.1rem;margin-bottom:1rem;">Archive</h2>
-    <ul class="archive-list">${items || "<li>No briefings yet.</li>"}</ul>`;
+    <section class="intro">
+      <p class="intro-lede">
+        Every morning, AI Tastemakers scans GitHub for open-source projects riding the
+        AI wave&mdash;agents, MCP servers, LLM tooling, and everything builders are
+        shipping on top of foundation models&mdash;then surfaces the ten gaining the
+        most momentum.
+      </p>
+      <p>
+        This isn&rsquo;t a star-count leaderboard of LangChain and Transformers.
+        The pipeline filters for recently active repos, excludes well-known giants,
+        and ranks by <strong>stars gained in the last seven days</strong> so you see
+        what&rsquo;s moving now, not what was popular three years ago.
+      </p>
+      <p>
+        Each pick gets a short narrative brief: what the project does, why it matters
+        this week, and what a builder could do with it. Written by Claude from README
+        context and live GitHub metadata.
+      </p>
+      ${latestLink}
+    </section>
+
+    <section class="how-it-works">
+      <h2 class="section-heading">How it works</h2>
+      <ol class="steps-list">
+        <li><strong>Discover</strong> &mdash; Search GitHub across AI topics (<code>llm</code>, <code>ai-agent</code>, <code>mcp</code>, <code>claude</code>, and more).</li>
+        <li><strong>Rank</strong> &mdash; Score by 7-day star delta; bootstrap mode uses recent activity until a week of snapshots accumulates.</li>
+        <li><strong>Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
+        <li><strong>Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site automatically.</li>
+      </ol>
+    </section>
+
+    <section class="archive-section">
+      <h2 class="section-heading">Archive</h2>
+      <ul class="archive-list">${items || "<li>No briefings yet.</li>"}</ul>
+    </section>`;
 
   await fs.writeFile(
     path.join(SITE_DIR, "index.html"),
-    pageShell("AI Tastemakers", body),
+    pageShell(
+      "AI Tastemakers",
+      body,
+      "Daily curated briefings on trending AI-derivative open source on GitHub — ranked by 7-day star momentum with Claude narratives.",
+    ),
   );
 }
 
