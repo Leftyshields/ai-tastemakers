@@ -58,7 +58,7 @@ MVP “done” was defined as local CLI success, not **production verification**
 
 ### Changes incorporated into Genesis (PR `improve/tastemakers-postmortem-dig1`)
 
-See [project-genesis PR](https://github.com/Leftyshields/project-genesis/pulls) — merged templates listed in Genesis `docs/INSTANTIATED_APP_FEEDBACK.md`.
+See [project-genesis PR #15](https://github.com/Leftyshields/project-genesis/pull/15).
 
 ### App-repo fixes already applied
 
