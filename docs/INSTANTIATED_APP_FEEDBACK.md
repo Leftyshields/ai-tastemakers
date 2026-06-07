@@ -32,9 +32,48 @@ Changelog of workflow improvements derived from real app development (postmortem
 - `DEV_RUNBOOK_TEMPLATE` — Script integrity rule + terminology table
 - Expression profiles — Happy-path handoff gates
 
+## 2026-06-07 — AI Tastemakers (Daily Digest, EPH-20260606-DIG1)
+
+**Source:** Greenfield instantiate from Project Genesis → full workflow through deploy (capture → explore → design → plan → execute → GitHub + Pages). QA gate skipped.
+
+### Friction observed
+
+| Area | Issue |
+|------|--------|
+| Instantiate | Wrong seed repo first; delete and re-run `instantiate.sh` from correct URL |
+| External APIs | Deprecated Anthropic model ID in `.env.example` / design doc → 404 on all narrations |
+| Config edit | Partial refactor dropped `blocklist` from config return object |
+| Pipeline perf | First design enriched all candidates; needed reorder to enrich top-N only |
+| Ranking UX | Bootstrap mode surfaced mega-repos; user expected “non-obvious” picks day one |
+| Git | Placeholder remote `YOU/repo`; push failed until `gh repo create` |
+| GHA vs local git | Bot commit caused non-fast-forward push; needed `git pull --rebase` |
+| Timezone | Commit message UTC vs briefing folder Pacific date |
+| GitHub Pages | Root-absolute `/assets/style.css` → unstyled site on project URL |
+| Workflow doc | Stale “product not yet built” after MVP shipped |
+| QA gate | `/code_review` and `/qa_checklist` not run before production deploy |
+
 ### Root cause (process)
 
-Local dev parity was documented aspirationally but not treated as part of “done.” Demoability should be a deliverable, not a QA surprise.
+MVP “done” was defined as local CLI success, not **production verification** (GHA dispatch, Pages CSS load, secrets). Genesis templates under-specify deployment boundaries for scheduled/automated products and static hosting path rules.
+
+### Recommended Genesis changes
+
+| Change | Target |
+|--------|--------|
+| “Deployment verification” gate in `/execute_plan` (secrets, manual GHA run, public URL smoke test) | `execute_plan.md` |
+| “External API IDs — verify at implement time” in `/design_decisions` | `design_decisions.md` |
+| “Scheduled job MVP” section in dev runbook template | `DEV_RUNBOOK_TEMPLATE.md` |
+| Post-instantiate git block: real remote, never `YOU/repo` placeholder | `instantiate.sh` README / instantiate docs |
+| GitHub Pages checklist: relative paths for `username.github.io/repo/` | New template or `GITHUB_SETTINGS.md` |
+| Common mistake: GitHub Pages asset paths | `workflow.md` |
+| `/postmortem` prompt: list skipped phases (code review, QA) | `postmortem.md` |
+| Bootstrap / cold-start caveat in explore or design for ranking products | `design_decisions.md` |
+
+### App-repo fixes already applied
+
+- Model default `claude-sonnet-4-6`; pipeline enrich-top-10; `maxStarsBootstrap`
+- Tailwind Pages site with relative asset paths
+- Closure: `docs/CLOSURE_EPH-20260606-DIG1.md`
 
 ---
 

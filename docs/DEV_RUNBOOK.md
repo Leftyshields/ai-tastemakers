@@ -41,9 +41,12 @@ Optional: `TZ`, `DIGEST_TOP_N`, `DIGEST_MIN_STARS`, `ANTHROPIC_MODEL`
 | `GITHUB_TOKEN is required` | Missing `.env` | `cp .env.example .env` and fill in |
 | Discovery failed: only N topics succeeded | Search rate limit or query error | Wait 1 min; check token; see API logs |
 | All repos bootstrap ranking | First week of snapshots | Normal; deltas improve after 7 days |
-| `[brief unavailable]` in output | Claude API error for that repo | Check key/quota; re-run |
+| `[brief unavailable]` in output | Claude API error for that repo | Check key/quota; verify `ANTHROPIC_MODEL` is current |
+| Claude 404 `model: …` | Deprecated Anthropic model ID | Set `ANTHROPIC_MODEL=claude-sonnet-4-6` (or latest Sonnet) |
 | Empty briefing | Filters too strict or search returned nothing | Lower `DIGEST_MIN_STARS` temporarily for debug |
 | GHA commit step skipped | No file changes | Expected if digest identical; check workflow logs |
+| GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |
+| `git push` rejected (non-fast-forward) | GHA bot pushed digest commit | `git pull --rebase origin main` then push |
 
 ## GitHub Actions
 
@@ -52,6 +55,23 @@ Workflow: `.github/workflows/digest.yml`
 Secrets: `ANTHROPIC_API_KEY` (and ensure `GITHUB_TOKEN` has repo write for commit step).
 
 Manual run: Actions → Daily Digest → Run workflow.
+
+## GitHub Pages
+
+Workflow: `.github/workflows/pages.yml` (runs on push to `briefings/` or `scripts/build-pages.ts`).
+
+- **Live:** https://leftyshields.github.io/ai-tastemakers/
+- **Build locally:** `npm run build:pages` then `npx serve site`
+- **CSS:** Tailwind compiles `site/assets/input.css` → `site/assets/style.css` (generated, not committed)
+- **Paths:** Use relative asset URLs for project sites (`assets/style.css`, not `/assets/style.css`)
+
+### Deployment verification (MVP checklist)
+
+1. `gh secret set ANTHROPIC_API_KEY` on the repo
+2. `gh workflow run "Daily Digest"` — confirm briefing commit on `main`
+3. Confirm Pages workflow succeeded after briefing push
+4. Hard-refresh live site; verify styled layout (not raw HTML)
+5. Open latest brief from homepage CTA
 
 ## Local cron (alternative)
 

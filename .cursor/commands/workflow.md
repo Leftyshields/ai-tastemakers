@@ -184,15 +184,19 @@ For smaller changes or bug fixes:
 
 ## AI Tastemakers (this repo)
 
-**Status:** Instantiated from [Project Genesis](https://github.com/Leftyshields/project-genesis) — product application **not yet built**.
+**Status:** v1 shipped — daily digest pipeline + GitHub Actions + GitHub Pages.
 
-**Backend parity:** Document all HTTP entry points in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) when the stack is chosen (stub today).
+**Live site:** https://leftyshields.github.io/ai-tastemakers/
+
+**Repo:** https://github.com/Leftyshields/ai-tastemakers
+
+**Closure:** [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md)
 
 **Ops runbook:** [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md)
 
-**Product mission:** Capture/plan in `.ai/context/` and future `docs/CLOSURE_*.md` — **not** `.genome/mission.md` (framework metadata only). See [docs/PRODUCT_VS_GENOME_MISSION.md](docs/PRODUCT_VS_GENOME_MISSION.md).
+**Product mission:** `.ai/context/` capture/plan/postmortem — **not** `.genome/mission.md`. See [docs/PRODUCT_VS_GENOME_MISSION.md](docs/PRODUCT_VS_GENOME_MISSION.md).
 
-**Next step:** Run `/capture_issue` with the AI Tastemakers product goal.
+**Next step:** Run `/capture_issue` for v2 (ranking tuning, distribution, or brief UX).
 
 ---
 
@@ -210,6 +214,11 @@ For smaller changes or bug fixes:
 10. **Stale `last_plan.md`** - Plan issue ID must match current capture before `/execute_plan`
 11. **Monorepo shared package drift** - Rebuild shared workspace packages after editing `src/` if consumers import `dist/`
 12. **QA-driven silent scope** - New requests during QA need a mini capture or plan note, not ad-hoc patches
+13. **GitHub Pages root-absolute paths** - On `username.github.io/repo/`, use relative paths (`assets/style.css`, `../assets/`) not `/assets/`; verify CSS loads on production URL before calling UI shipped
+14. **Placeholder git remote** - Replace `YOU/repo` after instantiate; use `gh repo create` + `git remote set-url` before first push
+15. **Stale external API IDs** - Model names and API versions in `.env.example` / design docs must be verified at implement time; treat provider docs as source of truth
+16. **Local-only “done” for scheduled products** - MVP includes secrets, manual GHA dispatch, and verifying the public artifact (briefing commit, Pages deploy)
+17. **GHA bot vs local git** - After Actions pushes commits, run `git pull --rebase` before pushing local changes
 
 ---
 
@@ -223,4 +232,4 @@ For smaller changes or bug fixes:
 
 ---
 
-**Last Updated:** 2026-05-31
+**Last Updated:** 2026-06-07
