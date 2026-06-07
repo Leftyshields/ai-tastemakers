@@ -190,7 +190,7 @@ For smaller changes or bug fixes:
 
 **Repo:** https://github.com/Leftyshields/ai-tastemakers
 
-**Closure:** [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md)
+**Closure:** [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) (latest) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
 
 **Ops runbook:** [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md)
 
@@ -219,6 +219,9 @@ For smaller changes or bug fixes:
 15. **Stale external API IDs** - Model names and API versions in `.env.example` / design docs must be verified at implement time; treat provider docs as source of truth
 16. **Local-only “done” for scheduled products** - MVP includes secrets, manual GHA dispatch, and verifying the public artifact (briefing commit, Pages deploy)
 17. **GHA bot vs local git** - After Actions pushes commits, run `git pull --rebase` before pushing local changes
+18. **Same-day pipeline re-run** - Re-running `npm run digest` when `briefings/YYYY-MM-DD/` already exists can reshuffle rankings (soft-dedup) and drift star counts (enrich vs snapshot). Prefer `npm run test:digest` + GHA dispatch for prompt/format verification
+19. **Stale `execution_plan.md` on follow-on issues** - Run `/create_plan` for the new issue ID; do not reuse a closed issue’s plan file
+20. **GHA digest without Pages** - Bot commits to `briefings/` may not trigger Pages; verify deploy or `gh workflow run "Deploy GitHub Pages"` after digest
 
 ---
 
@@ -228,6 +231,7 @@ For smaller changes or bug fixes:
 - [Dev runbook template](docs/DEV_RUNBOOK_TEMPLATE.md)
 - [Product vs genome mission](docs/PRODUCT_VS_GENOME_MISSION.md)
 - [Instantiated app feedback log](docs/INSTANTIATED_APP_FEEDBACK.md)
+- [Genesis workflow course](https://github.com/Leftyshields/project-genesis/blob/main/docs/WORKFLOW_COURSE.md) — case studies (DIG1, COPY)
 - [Blueprint](docs/BLUEPRINT.md) — Genesis framework architecture
 
 ---

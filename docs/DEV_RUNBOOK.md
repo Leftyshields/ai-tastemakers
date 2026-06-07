@@ -59,6 +59,9 @@ See `firebase/README.md` for setup.
 | Claude 404 `model: …` | Deprecated Anthropic model ID | Set `ANTHROPIC_MODEL=claude-sonnet-4-6` (or latest Sonnet) |
 | Empty briefing | Filters too strict or search returned nothing | Lower `DIGEST_MIN_STARS` temporarily for debug |
 | GHA commit step skipped | No file changes | Expected if digest identical; check workflow logs |
+| Same-day re-run reshuffled top 10 | Soft-dedup penalized today's existing `briefings/YYYY-MM-DD/` | Fixed: pipeline excludes current date from dedup; still prefer GHA over local re-run for verification |
+| Digest stars ≠ snapshot stars | Enrich re-fetched live GitHub counts | Fixed: pipeline keeps `stars` from discovery/snapshot; enrich supplies metadata only |
+| Pages stale after GHA digest | Bot commit may not trigger Pages workflow | `gh workflow run "Deploy GitHub Pages"` then verify public URL |
 | GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |
 | Subscribe form permission-denied | Firestore rules not deployed to epiphoric-prod | Deploy rules from Epiphoric repo: `firebase deploy --only firestore:rules` |
 | Digest sends to env only, not Firestore list | Firebase Admin not in GHA secrets | Set `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` on repo |

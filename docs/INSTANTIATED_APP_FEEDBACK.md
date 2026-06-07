@@ -66,6 +66,37 @@ See [project-genesis PR #15](https://github.com/Leftyshields/project-genesis/pul
 - Tailwind Pages site with relative asset paths
 - Closure: `docs/CLOSURE_EPH-20260606-DIG1.md`
 
+## 2026-06-07 — AI Tastemakers (Copy + Brief Format, EPH-20260607-COPY)
+
+**Source:** Follow-on feature after v1; capture → explore → design_decisions → create_plan (late) → execute → code_review → deploy. `/qa_checklist` skipped.
+
+### Friction observed
+
+| Area | Issue |
+|------|--------|
+| Planning order | `/design_decisions` before `/create_plan`; checklist blocked on stale DIG1 `execution_plan.md` |
+| Verification | Local same-day `npm run digest` treated as harmless smoke test |
+| Scope blur | “Copy only” → pipeline fixes for soft-dedup + enrich star drift |
+| Deploy | Push vs GHA digest vs Pages unclear; manual Pages dispatch after bot digest |
+| Mid-plan ops | Delete `2026-06-06` archive, forward-only — no mini-capture |
+| Source doc | `TASTEMAKER_COPY_EDITS.md` referenced but not in repo |
+
+### Root cause (process)
+
+**Same-day scheduled pipeline re-runs are not idempotent** — soft-dedup and live API refresh mutate rankings and star fields. Verification strategy for output-format changes was undocumented.
+
+### Changes incorporated into Genesis (PR `improve/copy-postmortem-eph20260607`)
+
+- `docs/WORKFLOW_COURSE.md` — case study: follow-on / copy-only scope
+- `/workflow`, `/execute_plan`, `DEV_RUNBOOK_TEMPLATE` — same-day re-run + post-digest Pages checks
+- `/postmortem` — required closure artifact paths
+
+### App-repo fixes already applied
+
+- Three-subhead brief prompt; homepage copy; email bold rendering
+- `excludeDate` for same-day ranking stability; snapshot star preservation on enrich merge
+- Closure: `docs/CLOSURE_EPH-20260607-COPY.md`
+
 ---
 
 **How to add entries:** After `/postmortem` in an instantiated app, open a PR to [project-genesis](https://github.com/Leftyshields/project-genesis) or append a row here via PR from your app repo.
