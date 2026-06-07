@@ -35,6 +35,10 @@ async function main(): Promise<void> {
   if (isFirebaseAdminConfigured(config)) {
     const result = await writeFirestoreSubscriber(config, normalized);
     addedVia.push(result === "added" ? "Firestore" : "Firestore (already exists)");
+  } else {
+    console.warn(
+      "Firestore skipped — set FIREBASE_SERVICE_ACCOUNT in .env (or keep ../epiphoric/.env.production nearby).",
+    );
   }
 
   const existing = await readSubscribersFile(ROOT);

@@ -1,21 +1,11 @@
-import { config as loadDotenv } from "dotenv";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
-
-const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-loadDotenv({ path: path.join(ROOT, ".env") });
-loadDotenv({
-  path: path.resolve(ROOT, "../epiphoric/.env.production"),
-  override: false,
-});
+import { loadConfig } from "../src/tastemaker/config.js";
+import { readSubscribersFile } from "../src/tastemaker/subscribers/load.js";
+import {
+  isFirebaseAdminConfigured,
+  writeFirestoreSubscriber,
+} from "../src/tastemaker/subscribers/firestore.js";
 
 async function main(): Promise<void> {
-  const { loadConfig } = await import("../src/tastemaker/config.js");
-  const { readSubscribersFile } = await import("../src/tastemaker/subscribers/load.js");
-  const { isFirebaseAdminConfigured, writeFirestoreSubscriber } = await import(
-    "../src/tastemaker/subscribers/firestore.js"
-  );
-
   const config = loadConfig();
   if (!isFirebaseAdminConfigured(config)) {
     console.error("Firebase Admin is not configured. Set FIREBASE_PROJECT_ID and credentials.");

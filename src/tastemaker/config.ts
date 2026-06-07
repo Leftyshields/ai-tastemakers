@@ -53,8 +53,16 @@ function parseServiceAccount(raw?: string): Record<string, unknown> | undefined 
   }
 }
 
-export function loadConfig(rootDir = findRepoRoot()): AppConfig {
+function loadEnvFiles(rootDir: string): void {
   loadDotenv({ path: path.join(rootDir, ".env") });
+  loadDotenv({
+    path: path.resolve(rootDir, "../epiphoric/.env.production"),
+    override: false,
+  });
+}
+
+export function loadConfig(rootDir = findRepoRoot()): AppConfig {
+  loadEnvFiles(rootDir);
 
   const githubToken = process.env.GITHUB_TOKEN?.trim();
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim();
