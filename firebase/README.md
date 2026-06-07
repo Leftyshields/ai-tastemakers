@@ -46,9 +46,13 @@ Copy public keys from `epiphoric/.env.production` (`REACT_APP_FIREBASE_*` → `F
 
 ## How it works
 
-- **Subscribe page** (`/subscribe.html`) — Firebase web SDK writes to `tastemakers_subscribers/{email}` (create-only rules)
+- **Subscribe page** (`/subscribe.html`) — Firebase web SDK creates `tastemakers_subscribers/{email}`
+- **Unsubscribe page** (`/unsubscribe.html`) — Firebase web SDK deletes the same document (rules allow public delete by doc ID)
 - **Daily digest** — Admin SDK reads all docs in the collection, merged with `data/subscribers.json` + `DIGEST_EMAIL_TO`
 - **Manual add** — `npm run subscribers:add -- email@example.com` (Firestore + JSON file when Admin configured)
+- **Manual remove** — `npm run subscribers:remove -- email@example.com` (Firestore + JSON; does not touch `DIGEST_EMAIL_TO`)
+
+Digest emails include an **Unsubscribe** link and `List-Unsubscribe` header pointing at `/unsubscribe.html`.
 
 ## Collection schema
 

@@ -53,3 +53,17 @@ export async function resolveDigestRecipients(config: AppConfig): Promise<string
 export function subscribersFilePath(rootDir: string): string {
   return path.join(rootDir, SUBSCRIBERS_FILE);
 }
+
+export async function removeEmailFromSubscribersFile(
+  rootDir: string,
+  email: string,
+): Promise<boolean> {
+  const normalized = normalizeEmail(email);
+  const existing = await readSubscribersFile(rootDir);
+  const filtered = existing.filter((entry) => entry !== normalized);
+  if (filtered.length === existing.length) return false;
+
+  const filePath = subscribersFilePath(rootDir);
+  await fs.writeFile(filePath, `${JSON.stringify(filtered, null, 2)}\n`, "utf8");
+  return true;
+}

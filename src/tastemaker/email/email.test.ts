@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { renderDigestEmailHtml, renderBriefForEmail, digestEmailSubject } from "./html.js";
+import {
+  renderDigestEmailHtml,
+  renderDigestEmailText,
+  renderBriefForEmail,
+  renderBriefForPlainText,
+  digestEmailSubject,
+  digestEmailPreheader,
+  rankingModeLabel,
+} from "./html.js";
 import { shouldSendDigestEmail, parseEmailList } from "./resend.js";
 import type { AppConfig, Digest } from "../types.js";
 
@@ -83,6 +91,68 @@ describe("renderDigestEmailHtml", () => {
   it("includes read online link", () => {
     const html = renderDigestEmailHtml(sampleDigest, "2026-06-06", "https://example.com/app");
     expect(html).toContain("https://example.com/app/briefings/2026-06-06.html");
+  });
+
+  it("uses human-readable ranking meta line", () => {
+    const digest: Digest = {
+      ...sampleDigest,
+      ranking_mode: "bootstrap_since_first_seen",
+    };
+    const html = renderDigestEmailHtml(digest, "2026-06-07", "https://example.com/app");
+    expect(html).toContain("ranked by recent momentum (bootstrap week)");
+    expect(html).not.toContain("bootstrap_since_first_seen");
+  });
+
+  it("includes preheader and unsubscribe footer", () => {
+    const html = renderDigestEmailHtml(sampleDigest, "2026-06-06", "https://example.com/app");
+    expect(html).toContain("builder-focused briefs");
+    expect(html).toContain("https://example.com/app/unsubscribe.html");
+    expect(html).toContain("Unsubscribe");
+    expect(html).not.toContain("Reply to any email");
+  });
+
+  it("limits topics shown per repo", () => {
+    const digest: Digest = {
+      ...sampleDigest,
+      repos: [
+        {
+          ...sampleDigest.repos[0],
+          topics: ["a", "b", "c", "d", "e", "f", "g", "h"],
+        },
+      ],
+    };
+    const html = renderDigestEmailHtml(digest, "2026-06-06", "https://example.com/app");
+    expect(html).toContain("a, b, c, d, e…");
+    expect(html).not.toContain(", f");
+  });
+});
+
+describe("renderDigestEmailText", () => {
+  it("renders plain-text multipart body", () => {
+    const text = renderDigestEmailText(sampleDigest, "2026-06-06", "https://example.com/app");
+    expect(text).toContain("ranked by 7-day star growth");
+    expect(text).toContain("Read online:");
+    expect(text).toContain("Unsubscribe: https://example.com/app/unsubscribe.html");
+    expect(text).not.toContain("<strong>");
+  });
+});
+
+describe("rankingModeLabel", () => {
+  it("maps bootstrap modes to friendly copy", () => {
+    expect(rankingModeLabel("bootstrap_since_first_seen")).toContain("recent momentum");
+    expect(rankingModeLabel("delta_7d")).toContain("7-day star growth");
+  });
+});
+
+describe("digestEmailPreheader", () => {
+  it("mentions top repo when present", () => {
+    expect(digestEmailPreheader(sampleDigest)).toContain("Led by acme/demo");
+  });
+});
+
+describe("renderBriefForPlainText", () => {
+  it("strips markdown bold markers", () => {
+    expect(renderBriefForPlainText("**What it does:** Demo.")).toBe("What it does: Demo.");
   });
 });
 

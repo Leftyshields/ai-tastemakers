@@ -1,7 +1,12 @@
 import { Resend } from "resend";
 import type { AppConfig, Digest } from "../types.js";
 import { resolveDigestRecipients } from "../subscribers/load.js";
-import { digestEmailSubject, renderDigestEmailHtml } from "./html.js";
+import {
+  digestEmailSubject,
+  renderDigestEmailHtml,
+  renderDigestEmailText,
+} from "./html.js";
+import { digestUnsubscribeUrl } from "./unsubscribe.js";
 
 export async function shouldSendDigestEmail(config: AppConfig): Promise<boolean> {
   if (!config.resendApiKey || !config.digestEmailFrom) return false;
@@ -29,13 +34,19 @@ export async function sendDigestEmail(
 
   const resend = new Resend(config.resendApiKey);
   const html = renderDigestEmailHtml(digest, dateLabel, config.digestSiteUrl);
+  const text = renderDigestEmailText(digest, dateLabel, config.digestSiteUrl);
   const subject = digestEmailSubject(dateLabel);
 
+  const unsubscribeUrl = digestUnsubscribeUrl(config.digestSiteUrl);
   const { data, error } = await resend.emails.send({
     from: config.digestEmailFrom,
     to,
     subject,
     html,
+    text,
+    headers: {
+      "List-Unsubscribe": `<${unsubscribeUrl}>`,
+    },
   });
 
   if (error) {

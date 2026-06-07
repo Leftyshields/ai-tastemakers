@@ -82,6 +82,24 @@ export async function readFirestoreSubscribers(
   }
 }
 
+export async function deleteFirestoreSubscriber(
+  config: AppConfig,
+  email: string,
+): Promise<"removed" | "missing"> {
+  const db = getAdminFirestore(config);
+  if (!db) {
+    throw new Error("Firebase Admin is not configured");
+  }
+
+  const normalized = normalizeEmail(email);
+  const ref = db.collection(TASTEMAKERS_SUBSCRIBERS_COLLECTION).doc(subscriberDocId(normalized));
+  const existing = await ref.get();
+  if (!existing.exists) return "missing";
+
+  await ref.delete();
+  return "removed";
+}
+
 export async function writeFirestoreSubscriber(
   config: AppConfig,
   email: string,

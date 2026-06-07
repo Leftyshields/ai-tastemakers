@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Unsubscribe · Tastemakers</title>
+  <meta name="description" content="Unsubscribe from the AI Tastemakers daily digest email.">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
+  <div class="mx-auto min-h-screen max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12">
+    <header class="mb-10 border-b border-stone-200 pb-6 dark:border-stone-800">
+      <h1 class="font-sans text-2xl font-bold tracking-tight">
+        <a href="./" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">Tastemakers</a>
+      </h1>
+      <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">Daily GitHub digests for AI open source and agent skills</p>
+      <nav aria-label="Tastemakers editions" class="mt-4 flex flex-wrap gap-2">
+      <a href="./" class="inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100">AI Tastemakers</a>
+      <a href="skills/" class="inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100">Skill Tastemakers</a>
+    </nav>
+    </header>
+    
+    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="./">&larr; AI Tastemakers</a>
+
+    <section class="mb-8">
+      <h2 class="mb-4 font-sans text-2xl font-bold tracking-tight">Unsubscribe from AI Tastemakers</h2>
+      <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
+        Enter the email address that receives the daily digest. We&rsquo;ll remove it from the mailing list immediately.
+      </p>
+    </section>
+
+    
+
+    <form id="unsubscribe-form" class="rounded-xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-700 dark:bg-stone-950/50" novalidate>
+      <label for="unsubscribe-email" class="mb-2 block font-sans text-sm font-medium text-stone-800 dark:text-stone-200">Email address</label>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <input
+          id="unsubscribe-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="you@example.com"
+          class="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-4 py-3 font-sans text-sm text-stone-900 outline-none ring-blue-800/30 focus:border-blue-800 focus:ring-2 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-blue-500"
+        />
+        <button
+          id="unsubscribe-submit"
+          type="submit"
+          class="rounded-lg border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 transition hover:bg-stone-50 disabled:cursor-not-allowed disabled:opacity-60 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:bg-stone-800"
+        >
+          Unsubscribe
+        </button>
+      </div>
+      <p id="unsubscribe-status" class="mt-4 font-sans text-sm text-stone-500 dark:text-stone-400" aria-live="polite"></p>
+      <p class="mt-4 mb-0 font-sans text-xs leading-relaxed text-stone-500 dark:text-stone-400">
+        Changed your mind? <a class="text-blue-800 no-underline hover:underline dark:text-blue-400" href="subscribe.html">Subscribe again</a>.
+      </p>
+    </form>
+
+    <script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
+import { getFirestore, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
+
+const firebaseConfig = {"apiKey":"AIzaSyBWU5eZCR150Vn92dm4ARo0kwG95f2qeIw","authDomain":"epiphoric-prod.firebaseapp.com","projectId":"epiphoric-prod","appId":"1:174389116874:web:d7cf9bda6e20bf0d2e5933"};
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+const form = document.getElementById("unsubscribe-form");
+const emailInput = document.getElementById("unsubscribe-email");
+const submitBtn = document.getElementById("unsubscribe-submit");
+const status = document.getElementById("unsubscribe-status");
+
+function setStatus(message, kind) {
+  status.textContent = message;
+  status.className = "mt-4 font-sans text-sm " + (kind === "error"
+    ? "text-red-700 dark:text-red-400"
+    : kind === "success"
+      ? "text-green-800 dark:text-green-400"
+      : "text-stone-500 dark:text-stone-400");
+}
+
+function subscriberDocId(email) {
+  return email.trim().toLowerCase();
+}
+
+var params = new URLSearchParams(window.location.search);
+var prefill = params.get("email");
+if (prefill) {
+  emailInput.value = prefill;
+}
+
+form.addEventListener("submit", async function (event) {
+  event.preventDefault();
+  const email = (emailInput.value || "").trim();
+  if (!email || !email.includes("@")) {
+    setStatus("Enter a valid email address.", "error");
+    return;
+  }
+
+  submitBtn.disabled = true;
+  setStatus("Unsubscribing…", "info");
+
+  try {
+    const normalized = subscriberDocId(email);
+    await deleteDoc(doc(db, "tastemakers_subscribers", normalized));
+    emailInput.value = "";
+    setStatus("You are unsubscribed. You will not receive further digests at this address.", "success");
+  } catch (err) {
+    const code = err && err.code ? String(err.code) : "";
+    if (code === "not-found" || code === "permission-denied") {
+      setStatus("That address is not on the list (or was already removed).", "success");
+    } else {
+      setStatus("Something went wrong. Please try again.", "error");
+    }
+  } finally {
+    submitBtn.disabled = false;
+  }
+});
+</script>
+    <footer class="mt-16 border-t border-stone-200 pt-6 text-center font-sans text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400">
+      <a href="subscribe.html" class="text-blue-800 hover:underline dark:text-blue-400">Subscribe</a><span aria-hidden="true"> · </span><a href="skills/" class="text-blue-800 hover:underline dark:text-blue-400">Skill Tastemakers</a>
+      <span aria-hidden="true"> · </span>
+      <a href="https://github.com/Leftyshields/ai-tastemakers" class="text-blue-800 hover:underline dark:text-blue-400">Source on GitHub</a>
+      <span aria-hidden="true"> · </span>Updated daily
+      <span aria-hidden="true"> · </span>Automated pipeline
+    </footer>
+  </div>
+</body>
+</html>
