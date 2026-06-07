@@ -56,18 +56,9 @@ Changelog of workflow improvements derived from real app development (postmortem
 
 MVP “done” was defined as local CLI success, not **production verification** (GHA dispatch, Pages CSS load, secrets). Genesis templates under-specify deployment boundaries for scheduled/automated products and static hosting path rules.
 
-### Recommended Genesis changes
+### Changes incorporated into Genesis (PR `improve/tastemakers-postmortem-dig1`)
 
-| Change | Target |
-|--------|--------|
-| “Deployment verification” gate in `/execute_plan` (secrets, manual GHA run, public URL smoke test) | `execute_plan.md` |
-| “External API IDs — verify at implement time” in `/design_decisions` | `design_decisions.md` |
-| “Scheduled job MVP” section in dev runbook template | `DEV_RUNBOOK_TEMPLATE.md` |
-| Post-instantiate git block: real remote, never `YOU/repo` placeholder | `instantiate.sh` README / instantiate docs |
-| GitHub Pages checklist: relative paths for `username.github.io/repo/` | New template or `GITHUB_SETTINGS.md` |
-| Common mistake: GitHub Pages asset paths | `workflow.md` |
-| `/postmortem` prompt: list skipped phases (code review, QA) | `postmortem.md` |
-| Bootstrap / cold-start caveat in explore or design for ranking products | `design_decisions.md` |
+See [project-genesis PR](https://github.com/Leftyshields/project-genesis/pulls) — merged templates listed in Genesis `docs/INSTANTIATED_APP_FEEDBACK.md`.
 
 ### App-repo fixes already applied
 
