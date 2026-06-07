@@ -1,0 +1,20 @@
+{
+  "name": "ai-tastemakers",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "test": "node --test lib/loadGenome.test.js lib/decompose.test.js lib/signaling.test.js lib/guardrails.test.js lib/run.test.js lib/repair.test.js scripts/derive-expression-profiles.test.js scripts/molecules-read_file.test.js scripts/instantiate.test.js",
+    "test:digest": "vitest run",
+    "digest": "tsx src/tastemaker/cli.ts",
+    "build:digest": "tsc -p tsconfig.json"
+  },
+  "dependencies": {
+    "@anthropic-ai/sdk": "^0.39.0",
+    "dotenv": "^16.4.7"
+  },
+  "devDependencies": {
+    "tsx": "^4.19.3",
+    "typescript": "^5.8.2",
+    "vitest": "^3.0.9"
+  }
+}
