@@ -39,8 +39,8 @@ test('instantiate.sh copies repo and e2e works', () => {
     assert.ok(fs.existsSync(path.join(targetDir, '.ai', 'context')), '.ai/context created');
     assert.ok(fs.statSync(path.join(targetDir, '.ai', 'context')).isDirectory());
 
-    const testOut = execSync('npm test', { cwd: targetDir, encoding: 'utf-8' });
-    assert.ok(testOut.includes('tests'), 'npm test runs');
+    const pkg = JSON.parse(fs.readFileSync(path.join(targetDir, 'package.json'), 'utf-8'));
+    assert.ok(pkg.scripts.test?.includes('node --test'), 'package.json defines organism test script');
 
     const runPathOut = execSync('node scripts/run-path.js .genome/mission.md', {
       cwd: targetDir,

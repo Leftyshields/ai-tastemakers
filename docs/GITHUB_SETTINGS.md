@@ -17,7 +17,7 @@ Recommended settings for [Leftyshields/ai-tastemakers](https://github.com/Leftys
 | Allow force pushes | **No** |
 | Allow deletions | **No** |
 
-**Repository ruleset:** Main — require PR + CI (owner bypass) — see repo **Settings → Rules → Rulesets**.
+**Repository ruleset:** [Main: require PR + CI (owner bypass)](https://github.com/Leftyshields/ai-tastemakers/rules/17372404)
 
 | Setting | Value |
 |--------|--------|
