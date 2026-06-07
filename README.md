@@ -41,8 +41,9 @@ Open `briefings/<today>/daily_brief.md`, or the public site (after Pages deploy)
 
 GitHub Actions runs daily at 06:00 Pacific (`.github/workflows/digest.yml`). Requires repo secrets:
 
-- `GITHUB_TOKEN` (default Actions token works for public search)
 - `ANTHROPIC_API_KEY`
+- `GITHUB_TOKEN` (default Actions token works for public search)
+- Optional email: `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`, `DIGEST_EMAIL_TO`
 
 ---
 

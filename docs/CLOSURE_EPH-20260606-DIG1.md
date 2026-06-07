@@ -50,7 +50,7 @@
 |------|--------|
 | 7-day delta ranking quality | Needs ~7 days of daily snapshots; bootstrap still active |
 | Ranking tuning | `DIGEST_MAX_STARS_BOOTSTRAP`, blocklist expansion |
-| Email / Slack / Substack distribution | Discussed; not implemented |
+| Email / Slack / Substack distribution | **Resend email shipped** (v2); Slack/Substack still open |
 | Brief page repo cards | UX medium polish |
 | `/code_review` + `/qa_checklist` | Code review done — see `docs/CODE_REVIEW_EPH-20260606-DIG1.md`; QA checklist still open |
 | GitHub issue close | Create/close issue on tracker if used |

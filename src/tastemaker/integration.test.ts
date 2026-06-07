@@ -55,6 +55,8 @@ describe("runPipeline integration", () => {
       rootDir: tmpDir,
       snapshotPath: path.join(tmpDir, "data/snapshots/repos.jsonl"),
       briefingsDir: path.join(tmpDir, "briefings"),
+      digestEmailTo: [],
+      digestSiteUrl: "https://example.com",
     };
   });
 

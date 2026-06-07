@@ -66,4 +66,8 @@ export interface AppConfig {
   rootDir: string;
   snapshotPath: string;
   briefingsDir: string;
+  resendApiKey?: string;
+  digestEmailFrom?: string;
+  digestEmailTo: string[];
+  digestSiteUrl: string;
 }

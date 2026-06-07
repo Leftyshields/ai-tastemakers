@@ -39,6 +39,11 @@ function parseEnvInt(name: string, fallback: string): number {
   return n;
 }
 
+function parseEmailList(raw?: string): string[] {
+  if (!raw?.trim()) return [];
+  return raw.split(",").map((s) => s.trim()).filter(Boolean);
+}
+
 export function loadConfig(rootDir = findRepoRoot()): AppConfig {
   loadDotenv({ path: path.join(rootDir, ".env") });
 
@@ -70,6 +75,12 @@ export function loadConfig(rootDir = findRepoRoot()): AppConfig {
     rootDir,
     snapshotPath: path.join(rootDir, "data/snapshots/repos.jsonl"),
     briefingsDir: path.join(rootDir, "briefings"),
+    resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
+    digestEmailFrom: process.env.DIGEST_EMAIL_FROM?.trim() || undefined,
+    digestEmailTo: parseEmailList(process.env.DIGEST_EMAIL_TO),
+    digestSiteUrl:
+      process.env.DIGEST_SITE_URL?.trim() ||
+      "https://leftyshields.github.io/ai-tastemakers",
   };
 }
 

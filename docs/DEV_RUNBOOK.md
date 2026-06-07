@@ -26,6 +26,13 @@ See `.env.example`. Required:
 
 Optional: `TZ`, `DIGEST_TOP_N`, `DIGEST_MIN_STARS`, `ANTHROPIC_MODEL`
 
+Optional email (Resend — skipped if `RESEND_API_KEY` unset):
+
+- `RESEND_API_KEY`
+- `DIGEST_EMAIL_FROM` — verified sender, e.g. `AI Tastemakers <digest@yourdomain.com>`
+- `DIGEST_EMAIL_TO` — comma-separated recipients
+- `DIGEST_SITE_URL` — link in email footer (default: GitHub Pages URL)
+
 ## Hard requirements
 
 | Rule | Why |
@@ -52,9 +59,24 @@ Optional: `TZ`, `DIGEST_TOP_N`, `DIGEST_MIN_STARS`, `ANTHROPIC_MODEL`
 
 Workflow: `.github/workflows/digest.yml`
 
-Secrets: `ANTHROPIC_API_KEY` (and ensure `GITHUB_TOKEN` has repo write for commit step).
+Secrets:
+
+- `ANTHROPIC_API_KEY` (required)
+- `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`, `DIGEST_EMAIL_TO` (optional — email after each digest)
 
 Manual run: Actions → Daily Digest → Run workflow.
+
+### Resend setup
+
+1. Verify domain at [resend.com](https://resend.com)
+2. Add secrets:
+   ```bash
+   gh secret set RESEND_API_KEY --repo Leftyshields/ai-tastemakers
+   gh secret set DIGEST_EMAIL_FROM --repo Leftyshields/ai-tastemakers  # e.g. AI Tastemakers <digest@yourdomain.com>
+   gh secret set DIGEST_EMAIL_TO --repo Leftyshields/ai-tastemakers    # you@example.com or a,b@example.com
+   ```
+3. Add same vars to local `.env` for `npm run digest` testing
+4. Email sends automatically at end of pipeline when all three are set
 
 ## GitHub Pages
 

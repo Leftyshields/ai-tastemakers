@@ -16,6 +16,7 @@ import { applySoftDedupPenalty, loadRecentBriefingRepos } from "./rank/score.js"
 import { narrateRepos } from "./narrate/claude.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
+import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
 
 export interface PipelineResult {
   briefingDir: string;
@@ -28,6 +29,7 @@ export interface PipelineDeps {
   narrate?: typeof narrateRepos;
   search?: typeof searchByTopics;
   enrich?: typeof enrichCandidates;
+  sendEmail?: typeof sendDigestEmail;
   now?: Date;
 }
 
@@ -157,6 +159,13 @@ export async function runPipeline(
   console.error(`Writing briefing to ${briefingDir}…`);
   const jsonPath = await writeDigestJson(briefingDir, digest);
   const markdownPath = await writeDailyBrief(briefingDir, digest, dateLabel);
+
+  if (shouldSendDigestEmail(config)) {
+    const sendEmail = deps.sendEmail ?? sendDigestEmail;
+    console.error(`Sending digest email to ${config.digestEmailTo.length} recipient(s)…`);
+    const sent = await sendEmail(config, digest, dateLabel);
+    console.error(`Email sent (id: ${sent.id})`);
+  }
 
   return { briefingDir, markdownPath, jsonPath, digest };
 }
