@@ -131,6 +131,7 @@ export function pageShell(
       <span aria-hidden="true"> · </span>
       <a href="https://github.com/Leftyshields/ai-tastemakers" class="text-blue-800 hover:underline dark:text-blue-400">Source on GitHub</a>
       <span aria-hidden="true"> · </span>Updated daily
+      <span aria-hidden="true"> · </span>Automated pipeline
     </footer>
   </div>
 </body>
@@ -162,12 +163,14 @@ function formatDisplayDate(isoDate: string): string {
 function ossIndexBody(paths: SitePaths, dates: string[], latest?: string): string {
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
-        <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
-        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.crossEdition!.href}">Skill Tastemakers &rarr;</a>
-        <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400" href="#archive">Browse archive &rarr;</a>
+        <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${paths.subscribe}">Get daily email</a>
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${paths.editionNav.skillsHref}">Skill Tastemakers &rarr;</a>
+        <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200" href="#archive">Browse archive &rarr;</a>
       </div>`
     : `<div class="flex flex-wrap items-center gap-3 md:gap-4">
-        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.crossEdition!.href}">Skill Tastemakers &rarr;</a>
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.subscribe}">Get daily email</a>
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.editionNav.skillsHref}">Skill Tastemakers &rarr;</a>
       </div>`;
 
   const items = dates
@@ -183,17 +186,36 @@ function ossIndexBody(paths: SitePaths, dates: string[], latest?: string): strin
 
   return `
     <section class="mb-12 border-b border-stone-200 pb-10 dark:border-stone-800">
-      <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily digest · GitHub momentum</p>
-      <p class="mb-6 text-xl leading-snug md:text-[1.65rem]">Every morning, AI Tastemakers surfaces the ten AI-derivative repos gaining the most momentum&mdash;not a static star leaderboard.</p>
+      <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily digest &middot; GitHub momentum</p>
+      <p class="mb-6 text-xl leading-snug md:text-[1.65rem] md:leading-snug">Every morning, AI Tastemakers surfaces the ten AI-derivative repos gaining the most momentum&mdash;not a static star leaderboard.</p>
       ${heroActions}
     </section>
+
     <section class="mb-12 text-base leading-relaxed text-stone-600 dark:text-stone-400">
-      <p class="mb-3">We scan GitHub for agents, MCP servers, LLM tooling, and everything builders ship on top of foundation models. Ranked by <strong class="text-stone-800 dark:text-stone-200">stars gained in the last seven days</strong>.</p>
-      <p class="mb-0">Each pick gets a short Claude narrative brief.</p>
+      <p class="mb-3">
+        We scan GitHub for agents, MCP servers, LLM tooling, and everything builders ship on top of foundation models.
+        The pipeline filters for recently active repos, excludes well-known giants, and ranks by
+        <strong class="font-semibold text-stone-800 dark:text-stone-200">stars gained in the last seven days</strong>.
+      </p>
+      <p class="mb-0">
+        Each pick gets a short narrative brief&mdash;what it does, why it matters this week, and what a builder could do with it.
+        Written by Claude from README context and live GitHub metadata.
+      </p>
     </section>
+
+    <section class="mb-12 border-t border-stone-200 pt-10 dark:border-stone-800">
+      <h2 class="mb-5 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">How it works</h2>
+      <ol class="space-y-3 pl-5 font-sans text-sm leading-relaxed text-stone-700 dark:text-stone-300">
+        <li><strong class="text-stone-900 dark:text-stone-100">Discover</strong> &mdash; Search GitHub across AI topics (<code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">llm</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-agent</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">mcp</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude</code>, and more).</li>
+        <li><strong class="text-stone-900 dark:text-stone-100">Rank</strong> &mdash; Score by 7-day star delta; bootstrap mode until a week of snapshots accumulates.</li>
+        <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
+        <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
+      </ol>
+    </section>
+
     <section id="archive" class="mb-4 scroll-mt-8">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Archive</h2>
-      <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet.</li>"}</ul>
+      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Archive</h2>
+      <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>
     ${siblingEditionPromo(paths, "skills")}`;
 }
