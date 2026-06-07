@@ -2,7 +2,13 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { config as loadDotenv } from "dotenv";
-import { allEditions, buildEditionSite, editionSitePaths, pageShell } from "./edition-pages.js";
+import {
+  allEditions,
+  buildEditionSite,
+  buildWeeklySite,
+  editionSitePaths,
+  pageShell,
+} from "./edition-pages.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
@@ -333,10 +339,14 @@ async function main(): Promise<void> {
   for (const edition of allEditions()) {
     total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml);
   }
+  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml);
+  total += weeklyCount;
 
   await buildSubscribePage();
   await buildUnsubscribePage();
-  console.log(`Built ${total} briefing page(s) across editions + subscribe + unsubscribe → site/`);
+  console.log(
+    `Built ${total} page(s) (briefings + weekly) across editions + subscribe + unsubscribe → site/`,
+  );
 }
 
 main().catch((err) => {

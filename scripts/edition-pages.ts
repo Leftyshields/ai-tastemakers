@@ -138,6 +138,19 @@ export function pageShell(
 </html>`;
 }
 
+export async function listWeeklyReviewWeeks(repoRoot: string): Promise<string[]> {
+  const weeklyDir = path.join(repoRoot, "briefings", "weekly");
+  let entries: string[];
+  try {
+    entries = await fs.readdir(weeklyDir);
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((e) => /^\d{4}-W\d{2}$/.test(e))
+    .sort((a, b) => b.localeCompare(a));
+}
+
 export async function listBriefingDates(briefingsDir: string): Promise<string[]> {
   let entries: string[];
   try {
@@ -160,10 +173,48 @@ function formatDisplayDate(isoDate: string): string {
   });
 }
 
-function ossIndexBody(paths: SitePaths, dates: string[], latest?: string): string {
+function formatWeekLabel(weekId: string): string {
+  return weekId.replace("-W", " · Week ");
+}
+
+function weeklyArchiveSection(
+  weeks: string[],
+  weekHref: (weekId: string) => string,
+): string {
+  if (weeks.length === 0) return "";
+  const items = weeks
+    .map(
+      (w) =>
+        `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
+          <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}">
+            ${formatWeekLabel(w)}
+          </a>
+        </li>`,
+    )
+    .join("\n");
+  return `
+    <section id="weekly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
+      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Weekly reviews</h2>
+      <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Sunday synthesis across AI Tastemakers and Skill Tastemakers &mdash; themes, stats, and builder takeaways.</p>
+      <ul class="m-0 list-none p-0">${items}</ul>
+    </section>`;
+}
+
+function ossIndexBody(
+  paths: SitePaths,
+  dates: string[],
+  latest?: string,
+  weekly?: { weeks: string[]; latest?: string; weekHref: (weekId: string) => string },
+): string {
+  const weeklyCta =
+    weekly?.latest
+      ? `<a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${weekly.weekHref(weekly.latest)}">This week&rsquo;s wrap-up</a>`
+      : "";
+
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
         <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
+        ${weeklyCta}
         <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${paths.subscribe}">Get daily email</a>
         <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${paths.editionNav.skillsHref}">Skill Tastemakers &rarr;</a>
         <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200" href="#archive">Browse archive &rarr;</a>
@@ -215,9 +266,10 @@ function ossIndexBody(paths: SitePaths, dates: string[], latest?: string): strin
     </section>
 
     <section id="archive" class="mb-4 scroll-mt-8">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Archive</h2>
+      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>
+    ${weekly ? weeklyArchiveSection(weekly.weeks, weekly.weekHref) : ""}
     ${siblingEditionPromo(paths, "skills")}`;
 }
 
@@ -246,14 +298,21 @@ function skillsIndexBody(
   dates: string[],
   edition: EditionDefinition,
   latest?: string,
+  weekly?: { weeks: string[]; latest?: string; weekHref: (weekId: string) => string },
 ): string {
   const inspiration = edition.inspiration
     ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a> — installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
     : "";
 
+  const weeklyCta =
+    weekly?.latest
+      ? `<a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${weekly.weekHref(weekly.latest)}">Weekly wrap-up</a>`
+      : "";
+
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
         <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 dark:bg-blue-600" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
+        ${weeklyCta}
         <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${paths.editionNav.ossHref}">AI Tastemakers &rarr;</a>
         <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400" href="#archive">Archive &rarr;</a>
       </div>`
@@ -283,10 +342,70 @@ function skillsIndexBody(
       <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics — then rank by 7-day star momentum with Claude briefs.</p>
     </section>
     <section id="archive" class="mb-4 scroll-mt-8">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Archive</h2>
+      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.</li>"}</ul>
     </section>
+    ${weekly ? weeklyArchiveSection(weekly.weeks, weekly.weekHref) : ""}
     ${siblingEditionPromo(paths, "oss")}`;
+}
+
+function weeklyPagePaths(): SitePaths {
+  return {
+    css: "../assets/style.css",
+    home: "../",
+    subscribe: "../subscribe.html",
+    brief: () => "../",
+    editionNav: { ossHref: "../", skillsHref: "../skills/", active: undefined },
+  };
+}
+
+export async function buildWeeklySite(
+  repoRoot: string,
+  siteDir: string,
+  escapeHtml: (t: string) => string,
+): Promise<number> {
+  const weeks = await listWeeklyReviewWeeks(repoRoot);
+  const outDir = path.join(siteDir, "weekly");
+  await fs.mkdir(outDir, { recursive: true });
+
+  const brand = {
+    name: "Tastemakers Weekly",
+    tagline: "Weekly synthesis of AI Tastemakers and Skill Tastemakers",
+  };
+  const paths = weeklyPagePaths();
+
+  for (const weekId of weeks) {
+    const mdPath = path.join(repoRoot, "briefings", "weekly", weekId, "weekly_review.md");
+    let markdown: string;
+    try {
+      markdown = await fs.readFile(mdPath, "utf8");
+    } catch {
+      continue;
+    }
+    const html = marked.parse(markdown) as string;
+    const body = `
+      <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}#weekly-archive">All weekly reviews</a>
+      </nav>
+      <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+    await fs.writeFile(
+      path.join(outDir, `${weekId}.html`),
+      pageShell(
+        `Weekly Review — ${weekId}`,
+        body,
+        paths,
+        brand,
+        "Weekly editorial synthesis across AI and Skills tastemaker digests.",
+        escapeHtml,
+      ),
+    );
+  }
+
+  return weeks.length;
 }
 
 export async function buildEditionSite(
@@ -331,11 +450,25 @@ export async function buildEditionSite(
     );
   }
 
+  const weeklyWeeks = await listWeeklyReviewWeeks(repoRoot);
+  const weeklyLatest = weeklyWeeks[0];
+  const weeklyForEdition =
+    weeklyWeeks.length > 0
+      ? {
+          weeks: weeklyWeeks,
+          latest: weeklyLatest,
+          weekHref: (weekId: string) =>
+            edition.siteSegment
+              ? `../weekly/${weekId}.html`
+              : `weekly/${weekId}.html`,
+        }
+      : undefined;
+
   const indexPaths = editionSitePaths(edition.siteSegment, 0);
   const indexBody =
     edition.id === "skills"
-      ? skillsIndexBody(indexPaths, dates, edition, dates[0])
-      : ossIndexBody(indexPaths, dates, dates[0]);
+      ? skillsIndexBody(indexPaths, dates, edition, dates[0], weeklyForEdition)
+      : ossIndexBody(indexPaths, dates, dates[0], weeklyForEdition);
 
   const indexDescription =
     edition.id === "skills"

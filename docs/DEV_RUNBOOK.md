@@ -5,6 +5,7 @@
 | Term | Meaning |
 |------|---------|
 | **Digest pipeline** | `npm run digest` — GitHub discovery → rank → Claude → briefing files |
+| **Weekly wrap-up** | `npm run weekly` — aggregate 7 days of digests → Claude editorial → `briefings/weekly/` |
 | **Genesis runtime** | `lib/`, `npm test` — framework organism tests |
 | **Bootstrap ranking** | First ~7 days before 7-day star deltas are reliable |
 
@@ -13,6 +14,8 @@
 | Service | Command | Notes |
 |---------|---------|-------|
 | Daily digest | `npm run digest` | Requires `.env` with tokens |
+| Weekly wrap-up | `npm run weekly` | Requires 7 full days × both editions; `--week 2026-W23` to target ISO week |
+| Skills digest | `npm run digest:skills` | Same tokens as daily |
 | Digest tests | `npm run test:digest` | Mocked GitHub/Claude |
 | Typecheck/build | `npm run build:digest` | Emits `dist/tastemaker/` |
 | Genesis tests | `npm test` | Organism unit tests |
@@ -59,6 +62,8 @@ See `firebase/README.md` for setup.
 | Claude 404 `model: …` | Deprecated Anthropic model ID | Set `ANTHROPIC_MODEL=claude-sonnet-4-6` (or latest Sonnet) |
 | Empty briefing | Filters too strict or search returned nothing | Lower `DIGEST_MIN_STARS` temporarily for debug |
 | GHA commit step skipped | No file changes | Expected if digest identical; check workflow logs |
+| `Skipping weekly … Incomplete week` | Fewer than 7 days × both editions | Normal until ~7 daily runs complete; first weekly ~Sunday after full week |
+| `Weekly skipped` locally | Same completeness gate | Seed 14 `digest.json` files or wait for production data |
 | Same-day re-run reshuffled top 10 | Soft-dedup penalized today's existing `briefings/YYYY-MM-DD/` | Fixed: pipeline excludes current date from dedup; still prefer GHA over local re-run for verification |
 | Digest stars ≠ snapshot stars | Enrich re-fetched live GitHub counts | Fixed: pipeline keeps `stars` from discovery/snapshot; enrich supplies metadata only |
 | Pages stale after GHA digest | Bot commit may not trigger Pages workflow | `gh workflow run "Deploy GitHub Pages"` then verify public URL |
@@ -79,6 +84,8 @@ Secrets:
 Pages workflow secrets: `FIREBASE_API_KEY`, `FIREBASE_APP_ID` (public web config for subscribe form)
 
 Manual run: Actions → Daily Digest → Run workflow.
+
+**Weekly:** Runs automatically on **Sundays** (America/Los_Angeles) after OSS + Skills daily digests in the same workflow. Skips with exit 0 if the Mon–Sun window is incomplete. Weekly step uses `continue-on-error` so a synthesis failure does not block the daily briefing commit.
 
 ### Resend setup
 

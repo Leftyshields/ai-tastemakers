@@ -67,6 +67,57 @@ https://github.com/owner/repo · ★ 1234 (+89 this week) · llm, mcp
 
 Older briefings may use a single dense paragraph (legacy format).
 
+## Weekly review envelope (`briefings/weekly/YYYY-Www/weekly_review.json`)
+
+```json
+{
+  "schema_version": 1,
+  "week_id": "2026-W23",
+  "week_start": "2026-06-01",
+  "week_end": "2026-06-07",
+  "days_covered": { "oss": 7, "skills": 7 },
+  "stats": {
+    "unique_repos": { "oss": 42, "skills": 38 },
+    "total_stars_gained": { "oss": 1200, "skills": 800 },
+    "top_topics": { "oss": ["llm", "mcp"], "skills": ["ai-skill"] },
+    "repeat_repos": { "oss": [{ "full_name": "owner/repo", "days_appeared": 2 }], "skills": [] },
+    "cross_edition_overlap": ["owner/repo"],
+    "ranking_modes": ["delta_7d"],
+    "standouts": { "oss": [], "skills": [] }
+  },
+  "narrative": {
+    "opening": "…",
+    "oss": "…",
+    "skills": "…",
+    "cross_lane": "…",
+    "takeaway": "…"
+  },
+  "generated_at": "2026-06-07T14:00:00.000Z"
+}
+```
+
+Stats are computed from daily `digest.json` files. `total_stars_gained` sums each unique repo's **max** `stars_gained_7d` seen that week (avoids double-counting repeat appearances). Narrative is Claude-generated from aggregated stats + standouts (not full daily brief text). If synthesis fails, a stats-only fallback opening is written.
+
+## Weekly markdown (`briefings/weekly/YYYY-Www/weekly_review.md`)
+
+```markdown
+# Tastemakers Weekly — 2026-W23
+
+_2026-06-01 – 2026-06-07 · generated …_
+
+## Week at a glance
+- **AI Tastemakers:** …
+- **Skill Tastemakers:** …
+
+## Opening
+…
+
+## AI Tastemakers
+…
+```
+
+Published as `site/weekly/YYYY-Www.html` via `npm run build:pages`.
+
 ## GitHub Search → candidate (internal)
 
 Maps GitHub API `items[]` fields: `full_name`, `html_url`, `stargazers_count` → `stars`, `topics`, `description`, `pushed_at`, `language`, `fork`, `archived`.
@@ -83,3 +134,5 @@ Structured text block: name, description, topics, stars, delta, readme excerpt (
 | README base64 (API) | utf-8 excerpt | decode, truncate 4000 |
 | Negative star delta | ranking | exclude from top 10 |
 | Missing 7d snapshot | ranking_mode | bootstrap per design_decisions |
+| 7× daily digest.json (×2 editions) | weekly_review.json stats | aggregate in `weekly/aggregate.ts` |
+| daily repo.brief | weekly standouts excerpt | parse `**What it does:**` first sentence |

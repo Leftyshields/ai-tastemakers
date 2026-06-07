@@ -50,6 +50,77 @@ export interface Digest {
   repos: DigestRepo[];
 }
 
+export interface WeeklyRepeatRepo {
+  full_name: string;
+  days_appeared: number;
+}
+
+export interface WeeklyStandout {
+  full_name: string;
+  total_stars_gained: number;
+  days_appeared: number;
+  excerpt: string;
+}
+
+export interface WeeklyEditionStats {
+  unique_repos: number;
+  total_stars_gained: number;
+  top_topics: string[];
+  repeat_repos: WeeklyRepeatRepo[];
+  standouts: WeeklyStandout[];
+}
+
+export interface WeeklyStats {
+  unique_repos: { oss: number; skills: number };
+  total_stars_gained: { oss: number; skills: number };
+  top_topics: { oss: string[]; skills: string[] };
+  repeat_repos: { oss: WeeklyRepeatRepo[]; skills: WeeklyRepeatRepo[] };
+  cross_edition_overlap: string[];
+  ranking_modes: RankingMode[];
+  standouts: { oss: WeeklyStandout[]; skills: WeeklyStandout[] };
+}
+
+export interface WeeklyNarrative {
+  opening: string;
+  oss: string;
+  skills: string;
+  cross_lane: string;
+  takeaway: string;
+}
+
+export interface WeeklyReview {
+  schema_version: 1;
+  week_id: string;
+  week_start: string;
+  week_end: string;
+  days_covered: { oss: number; skills: number };
+  stats: WeeklyStats;
+  narrative: WeeklyNarrative;
+  generated_at: string;
+}
+
+export interface LoadedDigestEntry {
+  date: string;
+  edition: "oss" | "skills";
+  digest: Digest;
+}
+
+export interface WeeklyAggregate {
+  week_id: string;
+  week_start: string;
+  week_end: string;
+  dates: string[];
+  entries: LoadedDigestEntry[];
+  stats: WeeklyStats;
+}
+
+export interface WeeklyConfig {
+  rootDir: string;
+  timezone: string;
+  anthropicApiKey: string;
+  anthropicModel: string;
+}
+
 export interface AppConfig {
   githubToken: string;
   anthropicApiKey: string;

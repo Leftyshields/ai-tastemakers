@@ -39,6 +39,18 @@ jobs:
           npm run digest -- --edition oss
           npm run digest -- --edition skills
 
+      - name: Run weekly wrap-up (Sundays)
+        continue-on-error: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          if [ "$(TZ=America/Los_Angeles date +%u)" -eq 7 ]; then
+            npm run weekly
+          else
+            echo "Not Sunday in America/Los_Angeles — skipping weekly wrap-up"
+          fi
+
       - name: Commit briefing
         env:
           TZ: America/Los_Angeles
