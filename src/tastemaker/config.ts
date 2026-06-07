@@ -39,6 +39,15 @@ function parseEnvInt(name: string, fallback: string): number {
   return n;
 }
 
+function parseEnvFloat(name: string, fallback: string, min: number, max: number): number {
+  const raw = process.env[name]?.trim() || fallback;
+  const n = parseFloat(raw);
+  if (!Number.isFinite(n) || n < min || n > max) {
+    throw new Error(`${name} must be between ${min} and ${max} (got "${raw}")`);
+  }
+  return n;
+}
+
 function parseEmailList(raw?: string): string[] {
   if (!raw?.trim()) return [];
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
@@ -86,8 +95,8 @@ export function loadConfig(rootDir = findRepoRoot()): AppConfig {
     searchPagesPerTopic: 2,
     blocklist: new Set(DEFAULT_BLOCKLIST),
     maxStarsBootstrap: parseEnvInt("DIGEST_MAX_STARS_BOOTSTRAP", "80000"),
-    softDedupBriefingCount: 3,
-    softDedupPenalty: 0.8,
+    softDedupBriefingCount: parseEnvInt("DIGEST_SOFT_DEDUP_BRIEFINGS", "5"),
+    softDedupPenalty: parseEnvFloat("DIGEST_SOFT_DEDUP_PENALTY", "0.5", 0.01, 1),
     readmeMaxChars: 4000,
     rootDir,
     snapshotPath: path.join(rootDir, "data/snapshots/repos.jsonl"),
