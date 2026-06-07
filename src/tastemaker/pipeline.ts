@@ -92,9 +92,12 @@ export async function runPipeline(
 
   candidates = applyBootstrapMaxStars(candidates, rankingMode, config.maxStarsBootstrap);
 
+  const dateLabel = formatDateInTimezone(now, config.timezone);
+
   const recentlyFeatured = await loadRecentBriefingRepos(
     config.briefingsDir,
     config.softDedupBriefingCount,
+    dateLabel,
   );
 
   const rawScores = new Map<string, number>();
@@ -126,7 +129,16 @@ export async function runPipeline(
   const enrichedTop = await enrich(client, top, config.readmeMaxChars);
   for (let i = 0; i < top.length; i++) {
     const enriched = enrichedTop.find((r) => r.full_name === top[i].full_name);
-    if (enriched) top[i] = { ...top[i], ...enriched, score: top[i].score, stars_gained_7d: top[i].stars_gained_7d };
+    if (enriched) {
+      // Keep stars from discovery/snapshot; enrich re-fetches live counts and can drift by ±1.
+      top[i] = {
+        ...top[i],
+        ...enriched,
+        stars: top[i].stars,
+        stars_gained_7d: top[i].stars_gained_7d,
+        score: top[i].score,
+      };
+    }
   }
 
   console.error(`Narrating top ${top.length} repos…`);
@@ -154,7 +166,6 @@ export async function runPipeline(
     repos: digestRepos,
   };
 
-  const dateLabel = formatDateInTimezone(now, config.timezone);
   const briefingDir = path.join(config.briefingsDir, dateLabel);
 
   console.error(`Writing briefing to ${briefingDir}…`);

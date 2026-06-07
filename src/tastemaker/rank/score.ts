@@ -5,6 +5,8 @@ import type { Digest } from "../types.js";
 export async function loadRecentBriefingRepos(
   briefingsDir: string,
   count: number,
+  /** Skip this briefing date so same-day re-runs do not penalize today's picks. */
+  excludeDate?: string,
 ): Promise<Set<string>> {
   const featured = new Set<string>();
 
@@ -18,7 +20,11 @@ export async function loadRecentBriefingRepos(
     throw err;
   }
 
-  const dates = entries.filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e)).sort().reverse();
+  const dates = entries
+    .filter((e) => /^\d{4}-\d{2}-\d{2}$/.test(e))
+    .filter((e) => e !== excludeDate)
+    .sort()
+    .reverse();
 
   for (const date of dates.slice(0, count)) {
     const jsonPath = path.join(briefingsDir, date, "digest.json");

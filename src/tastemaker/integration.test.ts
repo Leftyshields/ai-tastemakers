@@ -2,7 +2,7 @@ import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import type { AppConfig, CandidateRepo } from "./types.js";
+import type { AppConfig, CandidateRepo, Digest } from "./types.js";
 import { runPipeline } from "./pipeline.js";
 
 const mockCandidates: CandidateRepo[] = [
@@ -102,5 +102,86 @@ describe("runPipeline integration", () => {
 
     const snapshots = await fs.readFile(config.snapshotPath, "utf-8");
     expect(snapshots).toContain("acme/one");
+  });
+
+  it("keeps discovery star counts in digest when enrich returns different values", async () => {
+    const fixedNow = new Date("2026-06-06T14:00:00.000Z");
+
+    const result = await runPipeline(config, {
+      now: fixedNow,
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) =>
+        candidates.map((c) => ({ ...c, stars: c.stars + 1, readme_excerpt: "Fresh README" })),
+      ),
+      narrate: vi.fn().mockResolvedValue(
+        new Map([
+          ["acme/one", structuredBrief],
+          ["acme/two", structuredBrief],
+        ]),
+      ),
+    });
+
+    expect(result.digest.repos[0].stars).toBe(100);
+    expect(result.digest.repos[1].stars).toBe(80);
+
+    const snapshots = (await fs.readFile(config.snapshotPath, "utf-8"))
+      .trim()
+      .split("\n")
+      .map((line) => JSON.parse(line) as { full_name: string; stars: number });
+    const oneSnap = snapshots.find((s) => s.full_name === "acme/one");
+    expect(oneSnap?.stars).toBe(100);
+    expect(result.digest.repos[0].stars).toBe(oneSnap?.stars);
+  });
+
+  it("does not soft-dedup repos from the briefing date being regenerated", async () => {
+    const fixedNow = new Date("2026-06-06T14:00:00.000Z");
+    const dateDir = path.join(config.briefingsDir, "2026-06-06");
+    await fs.mkdir(dateDir, { recursive: true });
+    const prior: Digest = {
+      schema_version: 1,
+      run_id: "prior",
+      generated_at: "2026-06-06T10:00:00.000Z",
+      ranking_mode: "bootstrap_total_stars",
+      topic_queries: ["llm"],
+      repos: [
+        {
+          rank: 1,
+          full_name: "acme/one",
+          html_url: "https://github.com/acme/one",
+          stars: 100,
+          stars_gained_7d: 0,
+          topics: ["llm"],
+          language: "TS",
+          brief: "Old brief",
+          pushed_at: "2026-06-01T00:00:00Z",
+        },
+      ],
+    };
+    await fs.writeFile(path.join(dateDir, "digest.json"), JSON.stringify(prior), "utf-8");
+
+    config.softDedupPenalty = 0.5;
+
+    const result = await runPipeline(config, {
+      now: fixedNow,
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) => candidates),
+      narrate: vi.fn().mockResolvedValue(
+        new Map([
+          ["acme/one", structuredBrief],
+          ["acme/two", structuredBrief],
+        ]),
+      ),
+    });
+
+    expect(result.digest.repos[0].full_name).toBe("acme/one");
+    expect(result.digest.repos[1].full_name).toBe("acme/two");
   });
 });

@@ -8,7 +8,7 @@ _Ranking: bootstrap_since_first_seen · 10 repos · generated 2026-06-07T16:23:4
 
 ## 1. mvanhorn/last30days-skill
 
-https://github.com/mvanhorn/last30days-skill · ★ 30084 (+1319 this week) · ai-prompts, ai-skill, bluesky, claude, claude-code, clawhub, deep-research, hackernews, instagram, openclaw, polymarket, recency, reddit, research, social-media, tiktok, trends, twitter, web-search, youtube
+https://github.com/mvanhorn/last30days-skill · ★ 30083 (+1319 this week) · ai-prompts, ai-skill, bluesky, claude, claude-code, clawhub, deep-research, hackernews, instagram, openclaw, polymarket, recency, reddit, research, social-media, tiktok, trends, twitter, web-search, youtube
 
 **What it does:** `/last30days` is a Python-based AI agent skill that queries Reddit, X, YouTube, HN, Polymarket, and the web in parallel, scores results by real engagement signals (upvotes, likes, prediction market odds), and synthesizes them into a grounded summary of any topic from the past 30 days.
 
@@ -58,7 +58,7 @@ https://github.com/MemPalace/mempalace · ★ 54564 (+305 this week) · ai, chro
 
 ## 6. helloianneo/ian-xiaohei-illustrations
 
-https://github.com/helloianneo/ian-xiaohei-illustrations · ★ 3324 (+300 this week) · ai-agent, chinese, codex-skill, handdrawn, illustration, image-generation, xiaohei
+https://github.com/helloianneo/ian-xiaohei-illustrations · ★ 3323 (+300 this week) · ai-agent, chinese, codex-skill, handdrawn, illustration, image-generation, xiaohei
 
 **What it does:** Ian Xiaohei Illustrations is a Codex Skill that analyzes Chinese articles and generates 16:9 hand-drawn inline illustrations featuring "Xiaohei," a minimalist black character, translating abstract arguments, workflows, and metaphors into single-concept sketch-style images with sparse red/orange/blue Chinese annotations.
 
