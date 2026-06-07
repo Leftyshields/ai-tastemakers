@@ -23,15 +23,19 @@ function pageShell(title: string, body: string, description?: string): string {
   ${meta}
   <link rel="stylesheet" href="/assets/style.css">
 </head>
-<body>
-  <div class="wrap">
-    <header class="site-header">
-      <h1 class="site-title"><a href="/">AI Tastemakers</a></h1>
-      <p class="site-tagline">Daily intelligence on AI-derivative open source</p>
+<body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
+  <div class="mx-auto min-h-screen max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12">
+    <header class="mb-10 border-b border-stone-200 pb-6 dark:border-stone-800">
+      <h1 class="font-sans text-2xl font-bold tracking-tight">
+        <a href="/" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">AI Tastemakers</a>
+      </h1>
+      <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">Daily intelligence on AI-derivative open source</p>
     </header>
     ${body}
-    <footer class="site-footer">
-      <a href="${REPO_URL}">Source on GitHub</a> · Updated daily · Automated pipeline
+    <footer class="mt-16 border-t border-stone-200 pt-6 text-center font-sans text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400">
+      <a href="${REPO_URL}" class="text-blue-800 hover:underline dark:text-blue-400">Source on GitHub</a>
+      <span aria-hidden="true"> · </span>Updated daily
+      <span aria-hidden="true"> · </span>Automated pipeline
     </footer>
   </div>
 </body>
@@ -71,8 +75,8 @@ async function buildBriefPage(date: string): Promise<void> {
 
   const html = marked.parse(markdown) as string;
   const body = `
-    <a class="back-link" href="/">← All briefings</a>
-    <article class="brief-content">${html}</article>`;
+    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="/">&larr; All briefings</a>
+    <article class="brief-content prose prose-stone max-w-none prose-headings:font-sans prose-a:text-blue-800 dark:prose-invert dark:prose-a:text-blue-400">${html}</article>`;
 
   const outDir = path.join(SITE_DIR, "briefings");
   await fs.mkdir(outDir, { recursive: true });
@@ -84,52 +88,58 @@ async function buildBriefPage(date: string): Promise<void> {
 
 async function buildIndex(dates: string[]): Promise<void> {
   const latest = dates[0];
-  const latestLink = latest
-    ? `<a class="cta-button" href="/briefings/${latest}.html">Read today&rsquo;s brief</a>`
+  const heroActions = latest
+    ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
+        <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:outline-blue-400" href="/briefings/${latest}.html">Read today&rsquo;s brief</a>
+        <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200" href="#archive">Browse archive &rarr;</a>
+      </div>`
     : "";
 
   const items = dates
     .map(
       (d) =>
-        `<li><a href="/briefings/${d}.html">${formatDisplayDate(d)}</a> <span class="date">${d}</span></li>`,
+        `<li class="flex items-baseline justify-between gap-4 border-b border-stone-200 py-3.5 dark:border-stone-800">
+          <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="/briefings/${d}.html">
+            <time datetime="${d}">${formatDisplayDate(d)}</time>
+          </a>
+        </li>`,
     )
     .join("\n");
 
   const body = `
-    <section class="intro">
-      <p class="intro-lede">
-        Every morning, AI Tastemakers scans GitHub for open-source projects riding the
-        AI wave&mdash;agents, MCP servers, LLM tooling, and everything builders are
-        shipping on top of foundation models&mdash;then surfaces the ten gaining the
-        most momentum.
+    <section class="mb-12 border-b border-stone-200 pb-10 dark:border-stone-800">
+      <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily digest &middot; GitHub momentum</p>
+      <p class="mb-6 text-xl leading-snug md:text-[1.65rem] md:leading-snug">
+        Every morning, AI Tastemakers surfaces the ten AI-derivative repos gaining the most momentum&mdash;not a static star leaderboard.
       </p>
-      <p>
-        This isn&rsquo;t a star-count leaderboard of LangChain and Transformers.
-        The pipeline filters for recently active repos, excludes well-known giants,
-        and ranks by <strong>stars gained in the last seven days</strong> so you see
-        what&rsquo;s moving now, not what was popular three years ago.
-      </p>
-      <p>
-        Each pick gets a short narrative brief: what the project does, why it matters
-        this week, and what a builder could do with it. Written by Claude from README
-        context and live GitHub metadata.
-      </p>
-      ${latestLink}
+      ${heroActions}
     </section>
 
-    <section class="how-it-works">
-      <h2 class="section-heading">How it works</h2>
-      <ol class="steps-list">
-        <li><strong>Discover</strong> &mdash; Search GitHub across AI topics (<code>llm</code>, <code>ai-agent</code>, <code>mcp</code>, <code>claude</code>, and more).</li>
-        <li><strong>Rank</strong> &mdash; Score by 7-day star delta; bootstrap mode uses recent activity until a week of snapshots accumulates.</li>
-        <li><strong>Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
-        <li><strong>Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site automatically.</li>
+    <section class="mb-12 text-base leading-relaxed text-stone-600 dark:text-stone-400">
+      <p class="mb-3">
+        We scan GitHub for agents, MCP servers, LLM tooling, and everything builders ship on top of foundation models.
+        The pipeline filters for recently active repos, excludes well-known giants, and ranks by
+        <strong class="font-semibold text-stone-800 dark:text-stone-200">stars gained in the last seven days</strong>.
+      </p>
+      <p class="mb-0">
+        Each pick gets a short narrative brief&mdash;what it does, why it matters this week, and what a builder could do with it.
+        Written by Claude from README context and live GitHub metadata.
+      </p>
+    </section>
+
+    <section class="mb-12 border-t border-stone-200 pt-10 dark:border-stone-800">
+      <h2 class="mb-5 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">How it works</h2>
+      <ol class="space-y-3 pl-5 font-sans text-sm leading-relaxed text-stone-700 dark:text-stone-300">
+        <li><strong class="text-stone-900 dark:text-stone-100">Discover</strong> &mdash; Search GitHub across AI topics (<code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">llm</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-agent</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">mcp</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude</code>, and more).</li>
+        <li><strong class="text-stone-900 dark:text-stone-100">Rank</strong> &mdash; Score by 7-day star delta; bootstrap mode until a week of snapshots accumulates.</li>
+        <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
+        <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
       </ol>
     </section>
 
-    <section class="archive-section">
-      <h2 class="section-heading">Archive</h2>
-      <ul class="archive-list">${items || "<li>No briefings yet.</li>"}</ul>
+    <section id="archive" class="mb-4 scroll-mt-8">
+      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Archive</h2>
+      <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>`;
 
   await fs.writeFile(

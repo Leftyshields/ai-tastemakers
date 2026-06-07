@@ -34,7 +34,7 @@ Open `briefings/<today>/daily_brief.md`, or the public site (after Pages deploy)
 | `npm run digest` | Run the daily pipeline |
 | `npm run test:digest` | Unit + integration tests |
 | `npm run build:digest` | Compile TypeScript |
-| `npm run build:pages` | Build static site from `briefings/` → `site/` |
+| `npm run build:pages` | Build static site from `briefings/` → `site/` (Tailwind CSS) |
 | `npm test` | Genesis framework tests |
 
 ### Scheduling

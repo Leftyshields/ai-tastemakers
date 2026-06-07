@@ -7,14 +7,17 @@
     "test:digest": "vitest run",
     "digest": "tsx src/tastemaker/cli.ts",
     "build:digest": "tsc -p tsconfig.json",
-    "build:pages": "tsx scripts/build-pages.ts"
+    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
     "dotenv": "^16.4.7"
   },
   "devDependencies": {
+    "@tailwindcss/cli": "^4.3.0",
+    "@tailwindcss/typography": "^0.5.19",
     "marked": "^18.0.5",
+    "tailwindcss": "^4.3.0",
     "tsx": "^4.19.3",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"

@@ -20,3 +20,4 @@ dist/
 site/index.html
 site/briefings/
 site/.nojekyll
+site/assets/style.css

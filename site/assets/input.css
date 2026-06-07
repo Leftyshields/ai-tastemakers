@@ -1,0 +1,29 @@
+@import "tailwindcss";
+@plugin "@tailwindcss/typography";
+
+@source "../**/*.html";
+
+@theme {
+  --font-serif: Georgia, "Times New Roman", serif;
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+}
+
+@layer base {
+  body {
+    @apply font-serif antialiased;
+  }
+}
+
+@layer components {
+  .brief-content > p:first-of-type em {
+    @apply block font-sans text-sm not-italic text-stone-500 dark:text-stone-400;
+  }
+
+  .brief-content blockquote {
+    @apply rounded-lg border-l-4 border-blue-700 font-sans text-sm dark:border-blue-400;
+  }
+
+  .brief-content h2 {
+    @apply scroll-mt-20 font-sans text-lg font-semibold tracking-tight;
+  }
+}
