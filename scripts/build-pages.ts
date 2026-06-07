@@ -10,7 +10,23 @@ const REPO_URL = "https://github.com/Leftyshields/ai-tastemakers";
 
 marked.setOptions({ gfm: true, breaks: false });
 
-function pageShell(title: string, body: string, description?: string): string {
+/** Path prefix for assets/links ("" at site root, "../" under briefings/). */
+function sitePaths(depth: 0 | 1) {
+  const p = depth === 0 ? "" : "../";
+  return {
+    css: `${p}assets/style.css`,
+    home: depth === 0 ? "./" : "../",
+    brief: (date: string) => (depth === 0 ? `briefings/${date}.html` : `${date}.html`),
+  };
+}
+
+function pageShell(
+  title: string,
+  body: string,
+  depth: 0 | 1,
+  description?: string,
+): string {
+  const paths = sitePaths(depth);
   const meta = description
     ? `<meta name="description" content="${description.replace(/"/g, "&quot;")}">`
     : "";
@@ -21,13 +37,13 @@ function pageShell(title: string, body: string, description?: string): string {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${title}</title>
   ${meta}
-  <link rel="stylesheet" href="/assets/style.css">
+  <link rel="stylesheet" href="${paths.css}">
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="mx-auto min-h-screen max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12">
     <header class="mb-10 border-b border-stone-200 pb-6 dark:border-stone-800">
       <h1 class="font-sans text-2xl font-bold tracking-tight">
-        <a href="/" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">AI Tastemakers</a>
+        <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">AI Tastemakers</a>
       </h1>
       <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">Daily intelligence on AI-derivative open source</p>
     </header>
@@ -73,24 +89,26 @@ async function buildBriefPage(date: string): Promise<void> {
     return;
   }
 
+  const paths = sitePaths(1);
   const html = marked.parse(markdown) as string;
   const body = `
-    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="/">&larr; All briefings</a>
+    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; All briefings</a>
     <article class="brief-content prose prose-stone max-w-none prose-headings:font-sans prose-a:text-blue-800 dark:prose-invert dark:prose-a:text-blue-400">${html}</article>`;
 
   const outDir = path.join(SITE_DIR, "briefings");
   await fs.mkdir(outDir, { recursive: true });
   await fs.writeFile(
     path.join(outDir, `${date}.html`),
-    pageShell(`Daily Brief — ${date} · AI Tastemakers`, body),
+    pageShell(`Daily Brief — ${date} · AI Tastemakers`, body, 1),
   );
 }
 
 async function buildIndex(dates: string[]): Promise<void> {
+  const paths = sitePaths(0);
   const latest = dates[0];
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
-        <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:outline-blue-400" href="/briefings/${latest}.html">Read today&rsquo;s brief</a>
+        <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:outline-blue-400" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
         <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200" href="#archive">Browse archive &rarr;</a>
       </div>`
     : "";
@@ -99,7 +117,7 @@ async function buildIndex(dates: string[]): Promise<void> {
     .map(
       (d) =>
         `<li class="flex items-baseline justify-between gap-4 border-b border-stone-200 py-3.5 dark:border-stone-800">
-          <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="/briefings/${d}.html">
+          <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${paths.brief(d)}">
             <time datetime="${d}">${formatDisplayDate(d)}</time>
           </a>
         </li>`,
@@ -147,6 +165,7 @@ async function buildIndex(dates: string[]): Promise<void> {
     pageShell(
       "AI Tastemakers",
       body,
+      0,
       "Daily curated briefings on trending AI-derivative open source on GitHub — ranked by 7-day star momentum with Claude narratives.",
     ),
   );
