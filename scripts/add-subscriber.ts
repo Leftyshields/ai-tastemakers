@@ -36,18 +36,17 @@ async function main(): Promise<void> {
     const result = await writeFirestoreSubscriber(config, normalized);
     addedVia.push(result === "added" ? "Firestore" : "Firestore (already exists)");
   } else {
+    const existing = await readSubscribersFile(ROOT);
+    const merged = mergeRecipientEmails(existing, [normalized]);
+    if (merged.length > existing.length) {
+      const filePath = subscribersFilePath(ROOT);
+      await fs.mkdir(path.dirname(filePath), { recursive: true });
+      await fs.writeFile(filePath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
+      addedVia.push("subscribers.json");
+    }
     console.warn(
-      "Firestore skipped — set FIREBASE_SERVICE_ACCOUNT in .env (or keep ../epiphoric/.env.production nearby).",
+      "Firestore skipped — set Firebase Admin in .env for production subscribe/unsubscribe automation.",
     );
-  }
-
-  const existing = await readSubscribersFile(ROOT);
-  const merged = mergeRecipientEmails(existing, [normalized]);
-  if (merged.length > existing.length) {
-    const filePath = subscribersFilePath(ROOT);
-    await fs.mkdir(path.dirname(filePath), { recursive: true });
-    await fs.writeFile(filePath, `${JSON.stringify(merged, null, 2)}\n`, "utf8");
-    addedVia.push("subscribers.json");
   }
 
   if (addedVia.length === 0) {
