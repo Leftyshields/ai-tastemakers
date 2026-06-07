@@ -27,9 +27,14 @@ Follow-on work for the digest app (`src/tastemaker/`). Ordered loosely by priori
 
 ### SUB-1 ops checklist (after deploy)
 
-- [ ] Deploy Firestore rules from Epiphoric repo (`firebase deploy --only firestore:rules`)
-- [ ] `npm run subscribers:seed-firestore` (seed from JSON)
-- [ ] GitHub secrets: `FIREBASE_API_KEY`, `FIREBASE_APP_ID`, `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY`
-- [ ] Re-run Pages deploy; test subscribe form on live site
+- [x] Deploy Firestore rules from Epiphoric repo
+- [x] Seed subscribers / GitHub secrets
+- [x] Pages deploy + subscribe form
+
+### GitHub secret scanning alerts
+
+Firebase **web** API keys are meant to appear in client apps (and in built `subscribe.html`). GitHub still flags them if committed in git. **Do not commit keys in workflow files** — use repo secrets (`FIREBASE_API_KEY`, `FIREBASE_APP_ID`) for the Pages build only.
+
+If alerted after a bad commit: revert the commit, close the alert in GitHub, and restrict the key in [Google Cloud Console → Credentials](https://console.cloud.google.com/apis/credentials) (HTTP referrers: `leftyshields.github.io/*`, your Epiphoric domains, `localhost/*`). Rotation is optional unless you suspect abuse; the same key is used by Epiphoric prod.
 
 See `firebase/README.md`.
