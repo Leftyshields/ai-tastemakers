@@ -17,6 +17,7 @@ import { narrateRepos } from "./narrate/claude.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
 import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
+import { resolveDigestRecipients } from "./subscribers/load.js";
 
 export interface PipelineResult {
   briefingDir: string;
@@ -160,10 +161,11 @@ export async function runPipeline(
   const jsonPath = await writeDigestJson(briefingDir, digest);
   const markdownPath = await writeDailyBrief(briefingDir, digest, dateLabel);
 
-  if (shouldSendDigestEmail(config)) {
+  if (await shouldSendDigestEmail(config)) {
     const sendEmail = deps.sendEmail ?? sendDigestEmail;
-    console.error(`Sending digest email to ${config.digestEmailTo.length} recipient(s)…`);
-    const sent = await sendEmail(config, digest, dateLabel);
+    const recipients = await resolveDigestRecipients(config);
+    console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
+    const sent = await sendEmail(config, digest, dateLabel, recipients);
     console.error(`Email sent (id: ${sent.id})`);
   }
 

@@ -30,8 +30,12 @@ Optional email (Resend — skipped if `RESEND_API_KEY` unset):
 
 - `RESEND_API_KEY`
 - `DIGEST_EMAIL_FROM` — verified sender, e.g. `AI Tastemakers <digest@epiphoric.com>`
-- `DIGEST_EMAIL_TO` — comma-separated recipients
+- `DIGEST_EMAIL_TO` — comma-separated extra recipients (merged with `data/subscribers.json`)
 - `DIGEST_SITE_URL` — link in email footer (default: GitHub Pages URL)
+
+Optional subscribe page:
+
+- `SUBSCRIBE_API_URL` — Vercel endpoint, e.g. `https://your-project.vercel.app/api/subscribe` (baked into `site/subscribe.html` at build time)
 
 ## Hard requirements
 
@@ -63,6 +67,7 @@ Secrets:
 
 - `ANTHROPIC_API_KEY` (required)
 - `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`, `DIGEST_EMAIL_TO` (optional — email after each digest)
+- `SUBSCRIBE_API_URL` (optional — enables subscribe form on GitHub Pages)
 
 Manual run: Actions → Daily Digest → Run workflow.
 
@@ -73,10 +78,29 @@ Manual run: Actions → Daily Digest → Run workflow.
    ```bash
    gh secret set RESEND_API_KEY --repo Leftyshields/ai-tastemakers
    gh secret set DIGEST_EMAIL_FROM --repo Leftyshields/ai-tastemakers  # AI Tastemakers <digest@epiphoric.com>
-   gh secret set DIGEST_EMAIL_TO --repo Leftyshields/ai-tastemakers    # you@example.com or a,b@example.com
+   gh secret set DIGEST_EMAIL_TO --repo Leftyshields/ai-tastemakers    # optional extra recipients
    ```
 3. Add same vars to local `.env` for `npm run digest` testing
-4. Email sends automatically at end of pipeline when all three are set
+4. Email sends automatically at end of pipeline when Resend is configured and at least one recipient exists in `data/subscribers.json` and/or `DIGEST_EMAIL_TO`
+
+### Subscribe page
+
+Public signup lives at `/subscribe.html` on GitHub Pages. Recipients are stored in `data/subscribers.json` and merged with `DIGEST_EMAIL_TO` when sending.
+
+**Add a subscriber manually:**
+
+```bash
+npm run subscribers:add -- you@example.com
+git add data/subscribers.json && git commit -m "chore: add subscriber"
+```
+
+**Enable the web form** (GitHub Pages is static — signup needs a small API):
+
+1. Import this repo on [Vercel](https://vercel.com) (deploys `api/subscribe.ts`)
+2. Set Vercel env: `GITHUB_TOKEN` (fine-grained PAT with **Contents: Read and write** on this repo)
+3. Optional: `ALLOWED_ORIGINS=https://leftyshields.github.io`
+4. Add GitHub secret: `gh secret set SUBSCRIBE_API_URL --repo Leftyshields/ai-tastemakers` → your Vercel URL + `/api/subscribe`
+5. Re-run the Pages deploy workflow (or push a change under `briefings/`)
 
 ## GitHub Pages
 

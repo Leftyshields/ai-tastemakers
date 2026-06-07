@@ -1,0 +1,8 @@
+{
+  "functions": {
+    "api/subscribe.ts": {
+      "memory": 128,
+      "maxDuration": 10
+    }
+  }
+}

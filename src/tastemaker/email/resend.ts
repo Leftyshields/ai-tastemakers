@@ -1,13 +1,12 @@
 import { Resend } from "resend";
 import type { AppConfig, Digest } from "../types.js";
+import { resolveDigestRecipients } from "../subscribers/load.js";
 import { digestEmailSubject, renderDigestEmailHtml } from "./html.js";
 
-export function shouldSendDigestEmail(config: AppConfig): boolean {
-  return !!(
-    config.resendApiKey &&
-    config.digestEmailFrom &&
-    config.digestEmailTo.length > 0
-  );
+export async function shouldSendDigestEmail(config: AppConfig): Promise<boolean> {
+  if (!config.resendApiKey || !config.digestEmailFrom) return false;
+  const recipients = await resolveDigestRecipients(config);
+  return recipients.length > 0;
 }
 
 export function parseEmailList(raw?: string): string[] {
@@ -19,20 +18,22 @@ export async function sendDigestEmail(
   config: AppConfig,
   digest: Digest,
   dateLabel: string,
+  recipients?: string[],
 ): Promise<{ id: string }> {
-  if (!shouldSendDigestEmail(config)) {
+  const to = recipients ?? (await resolveDigestRecipients(config));
+  if (!config.resendApiKey || !config.digestEmailFrom || to.length === 0) {
     throw new Error(
-      "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and DIGEST_EMAIL_TO",
+      "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
     );
   }
 
-  const resend = new Resend(config.resendApiKey!);
+  const resend = new Resend(config.resendApiKey);
   const html = renderDigestEmailHtml(digest, dateLabel, config.digestSiteUrl);
   const subject = digestEmailSubject(dateLabel);
 
   const { data, error } = await resend.emails.send({
-    from: config.digestEmailFrom!,
-    to: config.digestEmailTo,
+    from: config.digestEmailFrom,
+    to,
     subject,
     html,
   });

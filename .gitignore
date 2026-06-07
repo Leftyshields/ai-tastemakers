@@ -18,6 +18,7 @@ dist/
 
 # Generated GitHub Pages output (built in CI from briefings/)
 site/index.html
+site/subscribe.html
 site/briefings/
 site/.nojekyll
 site/assets/style.css

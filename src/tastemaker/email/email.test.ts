@@ -66,19 +66,19 @@ describe("shouldSendDigestEmail", () => {
     digestSiteUrl: "https://example.com",
   };
 
-  it("returns false when email env incomplete", () => {
-    expect(shouldSendDigestEmail(base)).toBe(false);
+  it("returns false when email env incomplete", async () => {
+    await expect(shouldSendDigestEmail(base)).resolves.toBe(false);
   });
 
-  it("returns true when fully configured", () => {
-    expect(
+  it("returns true when fully configured", async () => {
+    await expect(
       shouldSendDigestEmail({
         ...base,
         resendApiKey: "re_test",
         digestEmailFrom: "Digest <digest@example.com>",
         digestEmailTo: ["you@example.com"],
       }),
-    ).toBe(true);
+    ).resolves.toBe(true);
   });
 });
 

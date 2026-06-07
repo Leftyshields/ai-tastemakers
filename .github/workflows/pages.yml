@@ -5,7 +5,9 @@ on:
     branches: [main]
     paths:
       - "briefings/**"
+      - "data/subscribers.json"
       - "scripts/build-pages.ts"
+      - "api/subscribe.ts"
       - "site/assets/**"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
@@ -37,6 +39,8 @@ jobs:
 
       - name: Build site
         run: npm run build:pages
+        env:
+          SUBSCRIBE_API_URL: ${{ secrets.SUBSCRIBE_API_URL }}
 
       - name: Verify CSS artifact
         run: test -s site/assets/style.css && test "$(wc -c < site/assets/style.css)" -gt 1000

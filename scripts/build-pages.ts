@@ -7,6 +7,7 @@ const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const BRIEFINGS_DIR = path.join(ROOT, "briefings");
 const SITE_DIR = path.join(ROOT, "site");
 const REPO_URL = "https://github.com/Leftyshields/ai-tastemakers";
+const SUBSCRIBE_API_URL = process.env.SUBSCRIBE_API_URL?.trim() || "";
 
 marked.setOptions({ gfm: true, breaks: false });
 
@@ -24,6 +25,7 @@ function sitePaths(depth: 0 | 1) {
   return {
     css: `${p}assets/style.css`,
     home: depth === 0 ? "./" : "../",
+    subscribe: depth === 0 ? "subscribe.html" : "../subscribe.html",
     brief: (date: string) => (depth === 0 ? `briefings/${date}.html` : `${date}.html`),
   };
 }
@@ -58,6 +60,8 @@ function pageShell(
     </header>
     ${body}
     <footer class="mt-16 border-t border-stone-200 pt-6 text-center font-sans text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400">
+      <a href="${paths.subscribe}" class="text-blue-800 hover:underline dark:text-blue-400">Subscribe</a>
+      <span aria-hidden="true"> · </span>
       <a href="${REPO_URL}" class="text-blue-800 hover:underline dark:text-blue-400">Source on GitHub</a>
       <span aria-hidden="true"> · </span>Updated daily
       <span aria-hidden="true"> · </span>Automated pipeline
@@ -118,9 +122,12 @@ async function buildIndex(dates: string[]): Promise<void> {
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
         <a class="inline-block rounded-full bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white shadow-sm transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-800 dark:bg-blue-600 dark:hover:bg-blue-500 dark:focus-visible:outline-blue-400" href="${paths.brief(latest)}">Read today&rsquo;s brief</a>
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${paths.subscribe}">Get daily email</a>
         <a class="font-sans text-sm font-medium text-stone-500 no-underline hover:text-stone-800 dark:text-stone-400 dark:hover:text-stone-200" href="#archive">Browse archive &rarr;</a>
       </div>`
-    : "";
+    : `<div class="flex flex-wrap items-center gap-3 md:gap-4">
+        <a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${paths.subscribe}">Get daily email</a>
+      </div>`;
 
   const items = dates
     .map(
@@ -180,6 +187,123 @@ async function buildIndex(dates: string[]): Promise<void> {
   );
 }
 
+function subscribeFormScript(apiUrl: string): string {
+  const safeApiUrl = JSON.stringify(apiUrl);
+  return `<script>
+(function () {
+  var form = document.getElementById("subscribe-form");
+  var emailInput = document.getElementById("subscribe-email");
+  var submitBtn = document.getElementById("subscribe-submit");
+  var status = document.getElementById("subscribe-status");
+  var apiUrl = ${safeApiUrl};
+
+  function setStatus(message, kind) {
+    status.textContent = message;
+    status.className = "mt-4 font-sans text-sm " + (kind === "error"
+      ? "text-red-700 dark:text-red-400"
+      : kind === "success"
+        ? "text-green-800 dark:text-green-400"
+        : "text-stone-500 dark:text-stone-400");
+  }
+
+  form.addEventListener("submit", function (event) {
+    event.preventDefault();
+    var email = (emailInput.value || "").trim();
+    if (!email || email.indexOf("@") === -1) {
+      setStatus("Enter a valid email address.", "error");
+      return;
+    }
+    if (!apiUrl) {
+      setStatus("Online signup is not configured yet. Check back soon.", "error");
+      return;
+    }
+
+    submitBtn.disabled = true;
+    setStatus("Subscribing…", "info");
+
+    fetch(apiUrl, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email: email })
+    })
+      .then(function (res) { return res.json().then(function (body) { return { ok: res.ok, body: body }; }); })
+      .then(function (result) {
+        if (!result.ok) {
+          throw new Error(result.body && result.body.error ? result.body.error : "Subscription failed");
+        }
+        emailInput.value = "";
+        setStatus("You are subscribed. The next digest will land in your inbox.", "success");
+      })
+      .catch(function (err) {
+        setStatus(err.message || "Something went wrong. Please try again.", "error");
+      })
+      .finally(function () {
+        submitBtn.disabled = false;
+      });
+  });
+})();
+</script>`;
+}
+
+async function buildSubscribePage(): Promise<void> {
+  const paths = sitePaths(0);
+  const apiConfigured = SUBSCRIBE_API_URL.length > 0;
+  const apiNote = apiConfigured
+    ? ""
+    : `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 font-sans text-sm text-amber-900 dark:border-amber-900/50 dark:bg-amber-950/40 dark:text-amber-200">Signup API is being wired up. You can still browse daily briefs on the site.</p>`;
+
+  const body = `
+    <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; Home</a>
+
+    <section class="mb-8">
+      <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily email</p>
+      <h2 class="mb-4 font-sans text-2xl font-bold tracking-tight">Subscribe to AI Tastemakers</h2>
+      <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
+        One email each morning with the top ten AI-derivative repos gaining momentum on GitHub&mdash;ranked by 7-day star growth, with a short Claude-written brief for each pick.
+      </p>
+    </section>
+
+    ${apiNote}
+
+    <form id="subscribe-form" class="rounded-xl border border-stone-200 bg-white p-6 shadow-sm dark:border-stone-700 dark:bg-stone-950/50" novalidate>
+      <label for="subscribe-email" class="mb-2 block font-sans text-sm font-medium text-stone-800 dark:text-stone-200">Email address</label>
+      <div class="flex flex-col gap-3 sm:flex-row">
+        <input
+          id="subscribe-email"
+          name="email"
+          type="email"
+          autocomplete="email"
+          required
+          placeholder="you@example.com"
+          class="min-w-0 flex-1 rounded-lg border border-stone-300 bg-white px-4 py-3 font-sans text-sm text-stone-900 outline-none ring-blue-800/30 focus:border-blue-800 focus:ring-2 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-blue-500"
+        />
+        <button
+          id="subscribe-submit"
+          type="submit"
+          class="rounded-lg bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-60 dark:bg-blue-600 dark:hover:bg-blue-500"
+        >
+          Subscribe
+        </button>
+      </div>
+      <p id="subscribe-status" class="mt-4 font-sans text-sm text-stone-500 dark:text-stone-400" aria-live="polite"></p>
+      <p class="mt-4 mb-0 font-sans text-xs leading-relaxed text-stone-500 dark:text-stone-400">
+        No spam. One digest per day. Unsubscribe anytime by replying to any email.
+      </p>
+    </form>
+
+    ${subscribeFormScript(SUBSCRIBE_API_URL)}`;
+
+  await fs.writeFile(
+    path.join(SITE_DIR, "subscribe.html"),
+    pageShell(
+      "Subscribe · AI Tastemakers",
+      body,
+      0,
+      "Get the AI Tastemakers daily digest by email — top trending AI open source repos with Claude briefs.",
+    ),
+  );
+}
+
 async function main(): Promise<void> {
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(path.join(SITE_DIR, ".nojekyll"), "");
@@ -192,7 +316,8 @@ async function main(): Promise<void> {
   }
 
   await buildIndex(dates);
-  console.log(`Built ${dates.length} briefing page(s) → site/`);
+  await buildSubscribePage();
+  console.log(`Built ${dates.length} briefing page(s) + subscribe → site/`);
 }
 
 main().catch((err) => {
