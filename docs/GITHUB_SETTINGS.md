@@ -1,46 +1,53 @@
 # GitHub repository settings
 
-Recommended settings for [Leftyshields/project-genesis](https://github.com/Leftyshields/project-genesis).
+Recommended settings for [Leftyshields/ai-tastemakers](https://github.com/Leftyshields/ai-tastemakers).
 
 ---
 
-## Branch protection for `main` (PRs, excluding yourself)
+## Branch protection for `main` (configured 2026-06-07)
 
-**Goal:** Require pull request reviews for merges to `main`, with the PR author excluded from counting as a reviewer. You (owner) can still push directly to `main`.
+**Goal:** Block accidental force-push/delete on `main`; require PR review + CI for merges, with **Leftyshields** bypass so you can still push directly.
 
-### Steps
+### Active rules
 
-1. Go to **Settings** → **Branches** → **Branch protection rules** → **Add rule** (or edit the rule for `main`).
-2. **Branch name pattern:** `main`
-3. Enable:
-   - **Require a pull request before merging**
-     - **Required approvals:** `1` (or more if you want)
-     - GitHub does **not** count the PR author as an approver by default, so “excluding yourself” is already satisfied: a PR you open will need approval from someone else (or from another collaborator you add).
-   - **Require status checks to pass before merging** (optional): add any CI you use later.
-   - **Do not allow bypassing the above settings** — leave **unchecked** if you want to push to `main` without a PR.
-4. **Allow specified actors to bypass required pull requests** — **enable** this, then add:
-   - **Leftyshields** (or your user), or
-   - **Repository administrators**
-   so you can still commit and push directly to `main` while others must use a reviewed PR.
-5. Optionally:
-   - **Dismiss stale pull request approvals when new commits are pushed:** enable if you want fresh approval after new pushes.
-   - **Require conversation resolution before merging:** enable if you want all comments resolved.
-6. Save the rule.
-
-### Summary
+**Classic branch protection** on `main`:
 
 | Setting | Value |
 |--------|--------|
-| Branch name pattern | `main` |
-| Require a pull request | Yes |
-| Required approvals | 1 (author does not count) |
-| Allow bypass | Yes — add Leftyshields (or admins) |
-| Restrict pushes | No (so you can push to main) |
+| Allow force pushes | **No** |
+| Allow deletions | **No** |
 
-Result: You can push to `main`. Contributors (or you when you choose to open a PR) must get at least one approval from someone other than the PR author before merge.
+**Repository ruleset:** Main — require PR + CI (owner bypass) — see repo **Settings → Rules → Rulesets**.
+
+| Setting | Value |
+|--------|--------|
+| Require pull request | Yes (1 approval; author does not count) |
+| Required status check | `test` (from `.github/workflows/ci.yml`) |
+| Bypass | **Leftyshields** — always |
+
+### CI
+
+Workflow: `.github/workflows/ci.yml` — runs `npm test` and `npm run test:digest` on push/PR to `main`.
+
+### Result
+
+- **You (Leftyshields):** Can push directly to `main` (bypass).
+- **PR merges:** Need 1 non-author approval + green `test` check.
+- **Everyone:** Cannot force-push or delete `main`.
+
+---
+
+## Other workflows
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| Daily Digest | Cron + manual | OSS + Skills digest |
+| Deploy GitHub Pages | Path push + manual | Public site |
+
+After GHA digest bot commits, verify Pages deploy ran (see [DEV_RUNBOOK.md](DEV_RUNBOOK.md)).
 
 ---
 
 ## Backlog ↔ GitHub Issues mapping
 
-**Keep issues in sync:** When a backlog story is completed, close the corresponding GitHub issue if you use one (or add a comment with the PR/commit, then close). Issue bodies can include **Done when**, **Depends on**, and a link to `docs/backlog.md`.
+When a story ships, close the matching GitHub issue and link `docs/CLOSURE_*.md`.
