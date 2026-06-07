@@ -159,9 +159,9 @@ export async function runPipeline(
 
   console.error(`Writing briefing to ${briefingDir}…`);
   const jsonPath = await writeDigestJson(briefingDir, digest);
-  const markdownPath = await writeDailyBrief(briefingDir, digest, dateLabel);
+  const markdownPath = await writeDailyBrief(briefingDir, digest, dateLabel, config.editionName);
 
-  if (await shouldSendDigestEmail(config)) {
+  if (config.editionId === "oss" && (await shouldSendDigestEmail(config))) {
     const sendEmail = deps.sendEmail ?? sendDigestEmail;
     const recipients = await resolveDigestRecipients(config);
     console.error(`Sending digest email to ${recipients.length} recipient(s)…`);

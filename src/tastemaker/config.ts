@@ -2,28 +2,14 @@ import { config as loadDotenv } from "dotenv";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import type { AppConfig } from "./types.js";
-
-const DEFAULT_TOPICS = [
-  "llm",
-  "ai-agent",
-  "mcp",
-  "openai",
-  "claude",
-  "langchain",
-  "ai-tools",
-];
-
-const DEFAULT_BLOCKLIST = [
-  "langchain-ai/langchain",
-  "langchain-ai/langgraph",
-  "Significant-Gravitas/AutoGPT",
-  "ollama/ollama",
-  "openai/openai-python",
-  "huggingface/transformers",
-  "n8n-io/n8n",
-  "open-webui/open-webui",
-  "Snailclimb/JavaGuide",
-];
+import {
+  briefingsDirForEdition,
+  getEdition,
+  resolveEditionId,
+  blocklistForEdition,
+  snapshotPathForEdition,
+  type EditionId,
+} from "./editions.js";
 
 export function findRepoRoot(): string {
   const here = path.dirname(fileURLToPath(import.meta.url));
@@ -70,8 +56,11 @@ function loadEnvFiles(rootDir: string): void {
   });
 }
 
-export function loadConfig(rootDir = findRepoRoot()): AppConfig {
+export function loadConfig(options?: { editionId?: EditionId; rootDir?: string }): AppConfig {
+  const rootDir = options?.rootDir ?? findRepoRoot();
   loadEnvFiles(rootDir);
+
+  const edition = getEdition(resolveEditionId(options?.editionId));
 
   const githubToken = process.env.GITHUB_TOKEN?.trim();
   const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim();
@@ -89,18 +78,28 @@ export function loadConfig(rootDir = findRepoRoot()): AppConfig {
     anthropicModel: process.env.ANTHROPIC_MODEL?.trim() || "claude-sonnet-4-6",
     timezone: process.env.TZ?.trim() || "America/Los_Angeles",
     topN: parseEnvInt("DIGEST_TOP_N", "10"),
-    minStars: parseEnvInt("DIGEST_MIN_STARS", "50"),
+    minStars: parseEnvInt(
+      edition.id === "skills" ? "DIGEST_SKILLS_MIN_STARS" : "DIGEST_MIN_STARS",
+      String(edition.minStarsDefault),
+    ),
     pushedWithinDays: parseEnvInt("DIGEST_PUSHED_WITHIN_DAYS", "30"),
-    topics: DEFAULT_TOPICS,
+    topics: edition.topics,
     searchPagesPerTopic: 2,
-    blocklist: new Set(DEFAULT_BLOCKLIST),
-    maxStarsBootstrap: parseEnvInt("DIGEST_MAX_STARS_BOOTSTRAP", "80000"),
+    blocklist: blocklistForEdition(edition),
+    maxStarsBootstrap: parseEnvInt(
+      edition.id === "skills"
+        ? "DIGEST_SKILLS_MAX_STARS_BOOTSTRAP"
+        : "DIGEST_MAX_STARS_BOOTSTRAP",
+      String(edition.maxStarsBootstrapDefault),
+    ),
     softDedupBriefingCount: parseEnvInt("DIGEST_SOFT_DEDUP_BRIEFINGS", "5"),
     softDedupPenalty: parseEnvFloat("DIGEST_SOFT_DEDUP_PENALTY", "0.5", 0.01, 1),
     readmeMaxChars: 4000,
     rootDir,
-    snapshotPath: path.join(rootDir, "data/snapshots/repos.jsonl"),
-    briefingsDir: path.join(rootDir, "briefings"),
+    snapshotPath: snapshotPathForEdition(rootDir, edition),
+    briefingsDir: briefingsDirForEdition(rootDir, edition),
+    editionId: edition.id,
+    editionName: edition.name,
     resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
     digestEmailFrom: process.env.DIGEST_EMAIL_FROM?.trim() || undefined,
     digestEmailTo: parseEmailList(process.env.DIGEST_EMAIL_TO),

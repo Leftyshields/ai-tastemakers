@@ -57,6 +57,8 @@ describe("runPipeline integration", () => {
       briefingsDir: path.join(tmpDir, "briefings"),
       digestEmailTo: [],
       digestSiteUrl: "https://example.com",
+      editionId: "oss",
+      editionName: "AI Tastemakers",
     };
   });
 

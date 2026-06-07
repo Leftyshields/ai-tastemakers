@@ -26,6 +26,8 @@ const base: AppConfig = {
   briefingsDir: "/tmp/briefings",
   digestEmailTo: [],
   digestSiteUrl: "https://example.com",
+  editionId: "oss",
+  editionName: "AI Tastemakers",
 };
 
 describe("subscriberDocId", () => {

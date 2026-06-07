@@ -24,7 +24,7 @@ jobs:
 
       - run: npm install
 
-      - name: Run digest
+      - name: Run digest (OSS + Skills)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -35,7 +35,9 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-        run: npm run digest
+        run: |
+          npm run digest -- --edition oss
+          npm run digest -- --edition skills
 
       - name: Commit briefing
         env:

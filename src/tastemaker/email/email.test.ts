@@ -64,6 +64,8 @@ describe("shouldSendDigestEmail", () => {
     briefingsDir: "/tmp/briefings",
     digestEmailTo: [],
     digestSiteUrl: "https://example.com",
+    editionId: "oss",
+    editionName: "AI Tastemakers",
   };
 
   it("returns false when email env incomplete", async () => {

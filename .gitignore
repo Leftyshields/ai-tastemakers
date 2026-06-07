@@ -20,5 +20,6 @@ dist/
 site/index.html
 site/subscribe.html
 site/briefings/
+site/skills/
 site/.nojekyll
 site/assets/style.css

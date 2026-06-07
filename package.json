@@ -6,6 +6,7 @@
     "test": "node --test lib/loadGenome.test.js lib/decompose.test.js lib/signaling.test.js lib/guardrails.test.js lib/run.test.js lib/repair.test.js scripts/derive-expression-profiles.test.js scripts/molecules-read_file.test.js scripts/instantiate.test.js",
     "test:digest": "vitest run",
     "digest": "tsx src/tastemaker/cli.ts",
+    "digest:skills": "tsx src/tastemaker/cli.ts -- --edition skills",
     "build:digest": "tsc -p tsconfig.json",
     "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
     "subscribers:add": "tsx scripts/add-subscriber.ts",

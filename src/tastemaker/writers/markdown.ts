@@ -9,9 +9,13 @@ function bootstrapNote(mode: string): string {
   return `\n\n> ⚠️ **Bootstrap ranking** (\`${mode}\`): 7-day star history is still maturing. Rankings will improve after a week of daily snapshots.\n`;
 }
 
-export function renderMarkdown(digest: Digest, dateLabel: string): string {
+export function renderMarkdown(
+  digest: Digest,
+  dateLabel: string,
+  editionName = "AI Tastemakers",
+): string {
   const lines: string[] = [
-    `# AI Tastemakers — Daily Brief — ${dateLabel}`,
+    `# ${editionName} — Daily Brief — ${dateLabel}`,
     "",
     `_Ranking: ${digest.ranking_mode} · ${digest.repos.length} repos · generated ${digest.generated_at}_`,
     bootstrapNote(digest.ranking_mode),
@@ -42,9 +46,10 @@ export async function writeDailyBrief(
   dir: string,
   digest: Digest,
   dateLabel: string,
+  editionName = "AI Tastemakers",
 ): Promise<string> {
   await fs.mkdir(dir, { recursive: true });
   const filePath = path.join(dir, "daily_brief.md");
-  await fs.writeFile(filePath, renderMarkdown(digest, dateLabel), "utf-8");
+  await fs.writeFile(filePath, renderMarkdown(digest, dateLabel, editionName), "utf-8");
   return filePath;
 }

@@ -1,3 +1,5 @@
+import type { EditionId } from "./editions.js";
+
 export type RankingMode =
   | "delta_7d"
   | "bootstrap_since_first_seen"
@@ -70,6 +72,8 @@ export interface AppConfig {
   digestEmailFrom?: string;
   digestEmailTo: string[];
   digestSiteUrl: string;
+  editionId: EditionId;
+  editionName: string;
   firebaseProjectId?: string;
   firebaseClientEmail?: string;
   firebasePrivateKey?: string;
