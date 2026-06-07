@@ -42,8 +42,9 @@ jobs:
         env:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_AUTH_DOMAIN: epiphoric-prod.firebaseapp.com
-          FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
-          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          # Public web app keys (safe to commit) — epiphoric-prod Firebase console
+          FIREBASE_API_KEY: AIzaSyBWU5eZCR150Vn92dm4ARo0kwG95f2qeIw
+          FIREBASE_APP_ID: 1:174389116874:web:d7cf9bda6e20bf0d2e5933
 
       - name: Verify CSS artifact
         run: test -s site/assets/style.css && test "$(wc -c < site/assets/style.css)" -gt 1000
