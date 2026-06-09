@@ -70,10 +70,13 @@ See `firebase/README.md` for setup.
 | GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |
 | Subscribe form permission-denied | Firestore rules not deployed to epiphoric-prod | Deploy rules from Epiphoric repo: `firebase deploy --only firestore:rules` |
 | Digest sends to env only, not Firestore list | Firebase Admin not in GHA secrets | Set `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` on repo |
+| Scheduled digest missing at expected time | GitHub `schedule` delay/drop (worse at minute :00) | Wait up to ~90 min; check Actions; manual **Run workflow** if needed |
 
 ## GitHub Actions
 
 Workflow: `.github/workflows/digest.yml`
+
+**Schedule:** ~06:17 `America/Los_Angeles` daily (`cron: "17 6 * * *"` with `timezone`). GitHub does not guarantee exact timing — treat manual dispatch as the backup verification path.
 
 Secrets:
 

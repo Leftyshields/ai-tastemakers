@@ -2,8 +2,9 @@ name: Daily Digest
 
 on:
   schedule:
-    # 06:00 America/Los_Angeles (PDT = 13:00 UTC; PST = 14:00 UTC)
-    - cron: "0 13 * * *"
+    # ~06:17 America/Los_Angeles — avoid minute :00 (GitHub cron congestion/drops)
+    - cron: "17 6 * * *"
+      timezone: "America/Los_Angeles"
   workflow_dispatch:
 
 permissions:
