@@ -98,7 +98,7 @@ Manual run: Actions → Daily Digest → Run workflow.
    gh secret set DIGEST_EMAIL_FROM --repo Leftyshields/ai-tastemakers  # AI Tastemakers <digest@epiphoric.com>
    ```
 3. Add same vars to local `.env` for `npm run digest` testing
-4. Email sends when Resend is configured and at least one subscriber exists in Firestore (production) or `data/subscribers.json` (local dev without Admin). Subscribe at `/subscribe.html` or `npm run subscribers:add`
+4. Email sends when Resend is configured and at least one subscriber exists in Firestore (production) or `data/subscribers.json` (local dev without Admin). Subscribe at `/subscribe.html` or `npm run subscribers:add`. Subscribers are sent as **BCC** so recipient addresses are not visible to each other.
 
 ### Subscribe (Firebase / epiphoric-prod)
 

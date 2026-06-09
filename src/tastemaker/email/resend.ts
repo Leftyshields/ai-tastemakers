@@ -19,6 +19,12 @@ export function parseEmailList(raw?: string): string[] {
   return raw.split(",").map((s) => s.trim()).filter(Boolean);
 }
 
+/** Extract bare address from `Name <addr@domain>` or plain `addr@domain`. */
+export function parseFromAddress(from: string): string {
+  const match = from.match(/<([^>]+)>/);
+  return (match ? match[1] : from).trim();
+}
+
 export async function sendDigestEmail(
   config: AppConfig,
   digest: Digest,
@@ -38,9 +44,11 @@ export async function sendDigestEmail(
   const subject = digestEmailSubject(dateLabel);
 
   const unsubscribeUrl = digestUnsubscribeUrl(config.digestSiteUrl);
+  // BCC hides the subscriber list; Resend requires at least one `to` address.
   const { data, error } = await resend.emails.send({
     from: config.digestEmailFrom,
-    to,
+    to: [parseFromAddress(config.digestEmailFrom)],
+    bcc: to,
     subject,
     html,
     text,
