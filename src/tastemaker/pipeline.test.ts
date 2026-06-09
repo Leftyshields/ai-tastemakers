@@ -178,6 +178,46 @@ describe("renderMarkdown", () => {
     expect(md).toContain("Bootstrap ranking");
     expect(md).toContain("A neat tool.");
   });
+
+  it("marks new repos in markdown headings", () => {
+    const digest: Digest = {
+      schema_version: 1,
+      run_id: "test",
+      generated_at: "2026-06-06T14:00:00.000Z",
+      ranking_mode: "delta_7d",
+      topic_queries: ["llm"],
+      repos: [
+        {
+          rank: 1,
+          full_name: "new/repo",
+          html_url: "https://github.com/new/repo",
+          stars: 100,
+          stars_gained_7d: 10,
+          topics: ["llm"],
+          language: "TS",
+          brief: "Fresh pick.",
+          pushed_at: "2026-06-01T00:00:00Z",
+          is_new: true,
+        },
+        {
+          rank: 2,
+          full_name: "repeat/repo",
+          html_url: "https://github.com/repeat/repo",
+          stars: 90,
+          stars_gained_7d: 5,
+          topics: ["mcp"],
+          language: "TS",
+          brief: "Back again.",
+          pushed_at: "2026-06-01T00:00:00Z",
+          is_new: false,
+        },
+      ],
+    };
+    const md = renderMarkdown(digest, "2026-06-06");
+    expect(md).toContain("## 1. new/repo · **NEW**");
+    expect(md).toContain("## 2. repeat/repo");
+    expect(md).not.toContain("## 2. repeat/repo · **NEW**");
+  });
 });
 
 describe("scoreForRanking", () => {

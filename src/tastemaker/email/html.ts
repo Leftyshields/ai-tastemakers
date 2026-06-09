@@ -1,4 +1,5 @@
 import type { Digest, RankingMode } from "../types.js";
+import { newRepoEmailBadge, newRepoPlainLabel } from "../writers/new-badge.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
 
 const EMAIL_TOPIC_LIMIT = 5;
@@ -96,7 +97,7 @@ export function renderDigestEmailHtml(
 
       return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e7e5e4;">
         <h2 style="margin:0 0 6px;font-family:system-ui,sans-serif;font-size:18px;font-weight:600;color:#1c1917;">
-          ${repo.rank}. <a href="${escapeHtml(repo.html_url)}" style="color:#1e40af;text-decoration:none;">${escapeHtml(repo.full_name)}</a>
+          ${repo.rank}. <a href="${escapeHtml(repo.html_url)}" style="color:#1e40af;text-decoration:none;">${escapeHtml(repo.full_name)}</a>${newRepoEmailBadge(repo.is_new)}
         </h2>
         <p style="margin:0 0 10px;font-family:system-ui,sans-serif;font-size:13px;color:#78716c;">
           ${formatStars(repo, digest.ranking_mode)} · ${topics}
@@ -164,7 +165,7 @@ export function renderDigestEmailText(
       : "[brief unavailable]";
     const topics = formatTopics(repo.topics);
     lines.push(
-      `${repo.rank}. ${repo.full_name}`,
+      `${repo.rank}. ${repo.full_name}${newRepoPlainLabel(repo.is_new)}`,
       repo.html_url,
       `${formatStars(repo, digest.ranking_mode)} · ${topics}`,
       brief,

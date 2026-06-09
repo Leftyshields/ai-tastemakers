@@ -1,6 +1,7 @@
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import type { Digest } from "../types.js";
+import { newRepoMarkdownSuffix } from "./new-badge.js";
 
 function bootstrapNote(mode: string): string {
   if (mode === "delta_7d") {
@@ -30,7 +31,7 @@ export function renderMarkdown(
 
     lines.push(
       "",
-      `## ${repo.rank}. ${repo.full_name}`,
+      `## ${repo.rank}. ${repo.full_name}${newRepoMarkdownSuffix(repo.is_new)}`,
       "",
       `${repo.html_url} · ★ ${repo.stars} ${delta} · ${topics}`,
       "",

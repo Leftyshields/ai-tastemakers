@@ -102,6 +102,15 @@ describe("renderDigestEmailHtml", () => {
     expect(html).toContain("https://example.com/app/briefings/2026-06-06.html");
   });
 
+  it("shows NEW badge for first-time picks", () => {
+    const digest: Digest = {
+      ...sampleDigest,
+      repos: [{ ...sampleDigest.repos[0], is_new: true }],
+    };
+    const html = renderDigestEmailHtml(digest, "2026-06-07", "https://example.com/app");
+    expect(html).toContain(">New</span>");
+  });
+
   it("uses human-readable ranking meta line", () => {
     const digest: Digest = {
       ...sampleDigest,

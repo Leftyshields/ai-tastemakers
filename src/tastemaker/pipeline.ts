@@ -155,6 +155,7 @@ export async function runPipeline(
     language: repo.language,
     brief: briefs.get(repo.full_name) ?? null,
     pushed_at: repo.pushed_at,
+    is_new: !recentlyFeatured.has(repo.full_name),
   }));
 
   const digest: Digest = {

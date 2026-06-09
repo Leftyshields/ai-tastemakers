@@ -39,11 +39,14 @@ One JSON object per line, append-only.
   "topics": ["llm", "mcp"],
   "language": "TypeScript",
   "brief": "Two to three sentences from Claude.",
-  "pushed_at": "2026-06-01T12:00:00Z"
+  "pushed_at": "2026-06-01T12:00:00Z",
+  "is_new": true
 }
 ```
 
 `brief` may be `null` if narration failed.
+
+`is_new` is `true` when the repo was not in any of the recent prior daily briefings (window: `DIGEST_SOFT_DEDUP_BRIEFINGS`, default 5). Omitted or `false` for repeat picks.
 
 ## Markdown briefing (`briefings/YYYY-MM-DD/daily_brief.md`)
 
@@ -54,7 +57,7 @@ Derived from digest JSON. Structure:
 
 _Ranking: delta_7d · 10 repos · generated 2026-06-06T14:00:00Z_
 
-## 1. owner/repo
+## 1. owner/repo · **NEW**
 
 https://github.com/owner/repo · ★ 1234 (+89 this week) · llm, mcp
 
