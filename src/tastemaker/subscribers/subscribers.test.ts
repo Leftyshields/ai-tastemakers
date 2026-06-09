@@ -35,7 +35,6 @@ const baseConfig: AppConfig = {
   rootDir: "/tmp/tastemakers",
   snapshotPath: "/tmp/snap.jsonl",
   briefingsDir: "/tmp/briefings",
-  digestEmailTo: ["admin@example.com"],
   digestSiteUrl: "https://example.com",
   editionId: "oss",
   editionName: "OSS",
@@ -78,13 +77,13 @@ describe("normalizeEmail", () => {
 });
 
 describe("resolveDigestRecipients", () => {
-  it("uses Firestore + admin overrides when Firebase Admin is configured", async () => {
+  it("uses Firestore only when Firebase Admin is configured", async () => {
     vi.mocked(isFirebaseAdminConfigured).mockReturnValue(true);
     vi.mocked(readFirestoreSubscribers).mockResolvedValue(["sub@example.com"]);
 
     const recipients = await resolveDigestRecipients(baseConfig);
 
-    expect(recipients).toEqual(["sub@example.com", "admin@example.com"]);
+    expect(recipients).toEqual(["sub@example.com"]);
     expect(readFirestoreSubscribers).toHaveBeenCalledWith(baseConfig);
   });
 
@@ -94,7 +93,6 @@ describe("resolveDigestRecipients", () => {
 
     const recipients = await resolveDigestRecipients({
       ...baseConfig,
-      digestEmailTo: [],
       rootDir: process.cwd(),
     });
 

@@ -33,7 +33,6 @@ Optional email (Resend — skipped if `RESEND_API_KEY` unset):
 
 - `RESEND_API_KEY`
 - `DIGEST_EMAIL_FROM` — verified sender, e.g. `AI Tastemakers <digest@epiphoric.com>`
-- `DIGEST_EMAIL_TO` — optional comma-separated admin overrides (not managed by subscribe/unsubscribe; when Firebase Admin is set, digest reads Firestore only — not `data/subscribers.json`)
 - `DIGEST_SITE_URL` — link in email footer (default: GitHub Pages URL)
 
 Optional Firebase (epiphoric-prod — subscribe + digest recipients):
@@ -81,7 +80,7 @@ Workflow: `.github/workflows/digest.yml`
 Secrets:
 
 - `ANTHROPIC_API_KEY` (required)
-- `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`, `DIGEST_EMAIL_TO` (optional — email after each digest)
+- `RESEND_API_KEY`, `DIGEST_EMAIL_FROM` (optional — email after each digest; recipients from Firestore)
 - `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` (optional — read Firestore subscribers)
 
 Pages workflow secrets: `FIREBASE_API_KEY`, `FIREBASE_APP_ID` (public web config for subscribe form)
@@ -97,10 +96,9 @@ Manual run: Actions → Daily Digest → Run workflow.
    ```bash
    gh secret set RESEND_API_KEY --repo Leftyshields/ai-tastemakers
    gh secret set DIGEST_EMAIL_FROM --repo Leftyshields/ai-tastemakers  # AI Tastemakers <digest@epiphoric.com>
-   gh secret set DIGEST_EMAIL_TO --repo Leftyshields/ai-tastemakers    # optional admin overrides only
    ```
 3. Add same vars to local `.env` for `npm run digest` testing
-4. Email sends when Resend is configured and at least one recipient exists in Firestore (production) or `data/subscribers.json` (local dev without Admin), plus optional `DIGEST_EMAIL_TO` overrides
+4. Email sends when Resend is configured and at least one subscriber exists in Firestore (production) or `data/subscribers.json` (local dev without Admin). Subscribe at `/subscribe.html` or `npm run subscribers:add`
 
 ### Subscribe (Firebase / epiphoric-prod)
 

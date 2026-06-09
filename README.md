@@ -73,7 +73,7 @@ Required repo secret: `ANTHROPIC_API_KEY`. `GITHUB_TOKEN` uses the default Actio
 
 Optional:
 
-- **Email:** `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`, `DIGEST_EMAIL_TO`
+- **Email:** `RESEND_API_KEY`, `DIGEST_EMAIL_FROM` (recipients from Firestore subscribers)
 - **Subscribers:** `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` (Firestore list)
 - **Subscribe page:** `FIREBASE_API_KEY`, `FIREBASE_APP_ID` (Pages workflow)
 

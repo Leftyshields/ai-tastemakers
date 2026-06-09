@@ -24,7 +24,6 @@ const base: AppConfig = {
   rootDir: "/tmp",
   snapshotPath: "/tmp/snap.jsonl",
   briefingsDir: "/tmp/briefings",
-  digestEmailTo: [],
   digestSiteUrl: "https://example.com",
   editionId: "oss",
   editionName: "AI Tastemakers",

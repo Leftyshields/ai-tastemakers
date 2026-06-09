@@ -1,4 +1,4 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   renderDigestEmailHtml,
   renderDigestEmailText,
@@ -9,6 +9,15 @@ import {
   rankingModeLabel,
 } from "./html.js";
 import { shouldSendDigestEmail, parseEmailList } from "./resend.js";
+import { resolveDigestRecipients } from "../subscribers/load.js";
+
+vi.mock("../subscribers/load.js", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../subscribers/load.js")>();
+  return {
+    ...actual,
+    resolveDigestRecipients: vi.fn(),
+  };
+});
 import type { AppConfig, Digest } from "../types.js";
 
 const sampleDigest: Digest = {
@@ -163,6 +172,10 @@ describe("digestEmailSubject", () => {
 });
 
 describe("shouldSendDigestEmail", () => {
+  beforeEach(() => {
+    vi.mocked(resolveDigestRecipients).mockReset();
+  });
+
   const base: AppConfig = {
     githubToken: "x",
     anthropicApiKey: "y",
@@ -181,7 +194,6 @@ describe("shouldSendDigestEmail", () => {
     rootDir: "/tmp",
     snapshotPath: "/tmp/snap.jsonl",
     briefingsDir: "/tmp/briefings",
-    digestEmailTo: [],
     digestSiteUrl: "https://example.com",
     editionId: "oss",
     editionName: "AI Tastemakers",
@@ -191,13 +203,14 @@ describe("shouldSendDigestEmail", () => {
     await expect(shouldSendDigestEmail(base)).resolves.toBe(false);
   });
 
-  it("returns true when fully configured", async () => {
+  it("returns true when fully configured with Firestore subscribers", async () => {
+    vi.mocked(resolveDigestRecipients).mockResolvedValue(["you@example.com"]);
+
     await expect(
       shouldSendDigestEmail({
         ...base,
         resendApiKey: "re_test",
         digestEmailFrom: "Digest <digest@example.com>",
-        digestEmailTo: ["you@example.com"],
       }),
     ).resolves.toBe(true);
   });

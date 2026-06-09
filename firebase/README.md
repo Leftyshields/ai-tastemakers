@@ -48,11 +48,11 @@ Copy public keys from `epiphoric/.env.production` (`REACT_APP_FIREBASE_*` → `F
 
 - **Subscribe page** (`/subscribe.html`) — Firebase web SDK creates `tastemakers_subscribers/{email}`
 - **Unsubscribe page** (`/unsubscribe.html`) — Firebase web SDK deletes the same document (rules allow public delete by doc ID)
-- **Daily digest** — Admin SDK reads Firestore subscribers + optional `DIGEST_EMAIL_TO` admin overrides. `data/subscribers.json` is **seed-only** when Admin is configured (not merged at send time).
+- **Daily digest** — Admin SDK reads Firestore `tastemakers_subscribers` only. `data/subscribers.json` is **seed-only** when Admin is configured (not merged at send time).
 - **Manual add** — `npm run subscribers:add -- email@example.com` (Firestore when Admin configured; otherwise JSON for local dev)
-- **Manual remove** — `npm run subscribers:remove -- email@example.com` (Firestore + JSON cleanup; does not touch `DIGEST_EMAIL_TO`)
+- **Manual remove** — `npm run subscribers:remove -- email@example.com` (Firestore + JSON cleanup)
 
-Digest emails include an **Unsubscribe** link and `List-Unsubscribe` header pointing at `/unsubscribe.html`. Unsubscribe deletes the Firestore doc — that is sufficient to stop digests in production. Addresses in `DIGEST_EMAIL_TO` are admin overrides and are not managed by the public subscribe/unsubscribe pages.
+Digest emails include an **Unsubscribe** link and `List-Unsubscribe` header pointing at `/unsubscribe.html`. Unsubscribe deletes the Firestore doc — that stops digests for that address.
 
 ## Collection schema
 

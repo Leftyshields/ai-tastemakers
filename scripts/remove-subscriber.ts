@@ -52,9 +52,6 @@ async function main(): Promise<void> {
   }
 
   console.log(`${normalized} removed via ${removedVia.join(" + ")}`);
-  console.log(
-    "Note: addresses in DIGEST_EMAIL_TO env are not removed by this script.",
-  );
 }
 
 main().catch((err) => {

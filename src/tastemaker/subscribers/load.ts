@@ -49,16 +49,16 @@ export async function readSubscribersFile(rootDir: string): Promise<string[]> {
 
 /**
  * Resolve digest recipients.
- * - Production (Firebase Admin configured): Firestore subscribers + optional DIGEST_EMAIL_TO admin overrides.
- * - Local dev without Admin: data/subscribers.json + DIGEST_EMAIL_TO.
- * Web subscribe/unsubscribe only mutates Firestore, so the JSON file is seed/bootstrap only when Admin is available.
+ * - Production (Firebase Admin configured): Firestore `tastemakers_subscribers` only.
+ * - Local dev without Admin: `data/subscribers.json`.
+ * Web subscribe/unsubscribe mutates Firestore; the JSON file is seed/bootstrap for local dev only.
  */
 export async function resolveDigestRecipients(config: AppConfig): Promise<string[]> {
   const fromFirestore = await readFirestoreSubscribers(config);
   const fromFile = isFirebaseAdminConfigured(config)
     ? []
     : await readSubscribersFile(config.rootDir);
-  return mergeRecipientEmails(fromFirestore, fromFile, config.digestEmailTo);
+  return mergeRecipientEmails(fromFirestore, fromFile);
 }
 
 export function subscribersFilePath(rootDir: string): string {

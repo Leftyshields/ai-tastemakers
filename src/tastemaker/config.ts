@@ -34,11 +34,6 @@ function parseEnvFloat(name: string, fallback: string, min: number, max: number)
   return n;
 }
 
-function parseEmailList(raw?: string): string[] {
-  if (!raw?.trim()) return [];
-  return raw.split(",").map((s) => s.trim()).filter(Boolean);
-}
-
 function parseServiceAccount(raw?: string): Record<string, unknown> | undefined {
   if (!raw?.trim()) return undefined;
   try {
@@ -102,7 +97,6 @@ export function loadConfig(options?: { editionId?: EditionId; rootDir?: string }
     editionName: edition.name,
     resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
     digestEmailFrom: process.env.DIGEST_EMAIL_FROM?.trim() || undefined,
-    digestEmailTo: parseEmailList(process.env.DIGEST_EMAIL_TO),
     digestSiteUrl:
       process.env.DIGEST_SITE_URL?.trim() ||
       "https://leftyshields.github.io/ai-tastemakers",
