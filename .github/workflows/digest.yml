@@ -14,6 +14,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 concurrency:
   group: daily-digest
@@ -78,6 +79,7 @@ jobs:
           fi
 
       - name: Commit briefing
+        id: commit
         if: steps.today.outputs.skip != 'true'
         env:
           TZ: America/Los_Angeles
@@ -86,9 +88,17 @@ jobs:
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add briefings/ data/snapshots/
           if git diff --staged --quiet; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
             echo "No briefing changes to commit"
             exit 0
           fi
           git commit -m "chore: daily digest $(date +%Y-%m-%d)"
           git pull --rebase origin main
           git push
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy GitHub Pages
+        if: steps.commit.outputs.committed == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run "Deploy GitHub Pages" --ref main
