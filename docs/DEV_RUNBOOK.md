@@ -97,6 +97,29 @@ gh workflow run "Daily Digest" --repo Leftyshields/ai-tastemakers
 
 **Weekly:** Runs automatically on **Sundays** (America/Los_Angeles) after OSS + Skills daily digests in the same workflow. Skips with exit 0 if the Mon–Sun window is incomplete. Weekly step uses `continue-on-error` so a synthesis failure does not block the daily briefing commit.
 
+### Daily digest verification (`.github/workflows/digest-verify.yml`)
+
+Runs **08:00 and 09:00 Pacific** daily. Checks:
+
+- `briefings/YYYY-MM-DD/` and `briefings/skills/YYYY-MM-DD/` exist on `main`
+- GitHub Pages serves `/briefings/YYYY-MM-DD.html`
+
+**On failure:** email to `DIGEST_ALERT_TO` (Resend) + open GitHub issue labeled `digest-alert`. Workflow shows red in Actions.
+
+One-time setup:
+
+```bash
+gh secret set DIGEST_ALERT_TO --repo Leftyshields/ai-tastemakers --body "you@example.com"
+```
+
+Requires existing `RESEND_API_KEY` and `DIGEST_EMAIL_FROM`. Local check:
+
+```bash
+npm run verify:digest
+```
+
+Manual run: Actions → **Daily Digest Verify** → Run workflow.
+
 **Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).
 
 ### Resend setup

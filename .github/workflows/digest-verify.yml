@@ -1,0 +1,49 @@
+name: Daily Digest Verify
+
+on:
+  schedule:
+    # After digest crons (6:17, 6:45, 7:30 PT). Second slot catches late GitHub schedule drift.
+    - cron: "0 8 * * *"
+      timezone: America/Los_Angeles
+    - cron: "0 9 * * *"
+      timezone: America/Los_Angeles
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: digest-verify
+  cancel-in-progress: false
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    env:
+      TZ: America/Los_Angeles
+      DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Verify today's briefings and Pages
+        id: check
+        run: node scripts/verify-daily-digest.mjs
+        continue-on-error: true
+
+      - name: Alert on failure
+        if: steps.check.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ steps.check.outputs.date }}
+          VERIFY_DIGEST_ERRORS: ${{ steps.check.outputs.errors }}
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Fail job if verification failed
+        if: steps.check.outcome == 'failure'
+        run: exit 1
