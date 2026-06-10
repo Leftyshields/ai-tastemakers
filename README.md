@@ -79,9 +79,12 @@ Optional:
 
 **Deploy GitHub Pages** (`.github/workflows/pages.yml`) builds the site on push to `briefings/`, edition scripts, or manual dispatch.
 
+**Daily Digest Verify** (`.github/workflows/digest-verify.yml`) runs at **8:00 and 9:00 Pacific**. If today's OSS + Skills briefings or Pages URL are missing, you get an **email** (`DIGEST_ALERT_TO`) and a **GitHub issue** (`digest-alert` label).
+
 ```bash
 gh workflow run "Daily Digest" --repo Leftyshields/ai-tastemakers
 gh workflow run "Deploy GitHub Pages" --repo Leftyshields/ai-tastemakers
+npm run verify:digest   # local check
 ```
 
 ---
