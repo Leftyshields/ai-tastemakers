@@ -2,13 +2,22 @@ name: Daily Digest
 
 on:
   schedule:
-    # ~06:17 America/Los_Angeles — avoid minute :00 (GitHub cron congestion/drops)
+    # Primary + backup slots (America/Los_Angeles). GitHub cron is best-effort and
+    # often drops :00 UTC jobs; off-minute + timezone + retries improve reliability.
     - cron: "17 6 * * *"
+      timezone: "America/Los_Angeles"
+    - cron: "45 6 * * *"
+      timezone: "America/Los_Angeles"
+    - cron: "30 7 * * *"
       timezone: "America/Los_Angeles"
   workflow_dispatch:
 
 permissions:
   contents: write
+
+concurrency:
+  group: daily-digest
+  cancel-in-progress: false
 
 jobs:
   digest:
@@ -18,14 +27,30 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Skip if today already published
+        id: today
+        run: |
+          TODAY=$(TZ=America/Los_Angeles date +%Y-%m-%d)
+          echo "date=${TODAY}" >> "$GITHUB_OUTPUT"
+          if [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "Briefings for ${TODAY} already exist — skipping pipeline"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@v4
+        if: steps.today.outputs.skip != 'true'
         with:
           node-version: "20"
           cache: npm
 
-      - run: npm install
+      - name: Install dependencies
+        if: steps.today.outputs.skip != 'true'
+        run: npm install
 
       - name: Run digest (OSS + Skills)
+        if: steps.today.outputs.skip != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -40,6 +65,7 @@ jobs:
           npm run digest -- --edition skills
 
       - name: Run weekly wrap-up (Sundays)
+        if: steps.today.outputs.skip != 'true'
         continue-on-error: true
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -52,6 +78,7 @@ jobs:
           fi
 
       - name: Commit briefing
+        if: steps.today.outputs.skip != 'true'
         env:
           TZ: America/Los_Angeles
         run: |

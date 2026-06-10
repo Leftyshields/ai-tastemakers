@@ -25,6 +25,8 @@ Recommended settings for [Leftyshields/ai-tastemakers](https://github.com/Leftys
 | Required status check | `test` (from `.github/workflows/ci.yml`) |
 | Bypass | **Leftyshields** — always |
 
+**Digest bot:** Add **GitHub Actions** (integration bypass actor) to the same ruleset so `github-actions[bot]` can push `chore: daily digest` commits from `.github/workflows/digest.yml`. Without this, scheduled runs may generate briefings locally on the runner but fail at `git push`.
+
 ### CI
 
 Workflow: `.github/workflows/ci.yml` — runs `npm test` and `npm run test:digest` on push/PR to `main`.
@@ -41,7 +43,7 @@ Workflow: `.github/workflows/ci.yml` — runs `npm test` and `npm run test:diges
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| Daily Digest | Cron + manual | OSS + Skills digest |
+| Daily Digest | 06:17 / 06:45 / 07:30 Pacific cron + manual | OSS + Skills digest (idempotent skip if today exists) |
 | Deploy GitHub Pages | Path push + manual | Public site |
 
 After GHA digest bot commits, verify Pages deploy ran (see [DEV_RUNBOOK.md](DEV_RUNBOOK.md)).

@@ -87,7 +87,15 @@ Pages workflow secrets: `FIREBASE_API_KEY`, `FIREBASE_APP_ID` (public web config
 
 Manual run: Actions → Daily Digest → Run workflow.
 
+**Schedule:** Three Pacific-time cron slots daily (06:17, 06:45, 07:30) — GitHub `schedule` is best-effort and may skip or delay runs; backup slots + idempotent skip (if today's `briefings/YYYY-MM-DD/` already exists) avoid duplicate work. If 07:30 passes with no run, dispatch manually:
+
+```bash
+gh workflow run "Daily Digest" --repo Leftyshields/ai-tastemakers
+```
+
 **Weekly:** Runs automatically on **Sundays** (America/Los_Angeles) after OSS + Skills daily digests in the same workflow. Skips with exit 0 if the Mon–Sun window is incomplete. Weekly step uses `continue-on-error` so a synthesis failure does not block the daily briefing commit.
+
+**Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).
 
 ### Resend setup
 
