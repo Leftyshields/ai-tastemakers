@@ -65,7 +65,7 @@ See `firebase/README.md` for setup.
 | `Weekly skipped` locally | Same completeness gate | Seed 14 `digest.json` files or wait for production data |
 | Same-day re-run reshuffled top 10 | Soft-dedup penalized today's existing `briefings/YYYY-MM-DD/` | Fixed: pipeline excludes current date from dedup; still prefer GHA over local re-run for verification |
 | Digest stars ≠ snapshot stars | Enrich re-fetched live GitHub counts | Fixed: pipeline keeps `stars` from discovery/snapshot; enrich supplies metadata only |
-| Pages stale after GHA digest | Bot commit may not trigger Pages workflow | `gh workflow run "Deploy GitHub Pages"` then verify public URL |
+| Pages stale after GHA digest | Fixed: digest dispatches Pages after commit (`actions: write`). Manual fallback: `gh workflow run "Deploy GitHub Pages"` | Check **Deploy GitHub Pages** run after **Daily Digest**; verify `/briefings/YYYY-MM-DD.html` |
 | GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |
 | Subscribe form permission-denied | Firestore rules not deployed to epiphoric-prod | Deploy rules from Epiphoric repo: `firebase deploy --only firestore:rules` |
 | Digest sends to env only, not Firestore list | Firebase Admin not in GHA secrets | Set `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` on repo |
@@ -74,6 +74,8 @@ See `firebase/README.md` for setup.
 ## GitHub Actions
 
 Workflow: `.github/workflows/digest.yml`
+
+After a successful briefing commit, the workflow runs `gh workflow run "Deploy GitHub Pages"` (bot pushes do not trigger `on: push` for other workflows). Requires `permissions: actions: write`.
 
 **Schedule:** ~06:17 `America/Los_Angeles` daily (`cron: "17 6 * * *"` with `timezone`). GitHub does not guarantee exact timing — treat manual dispatch as the backup verification path.
 
