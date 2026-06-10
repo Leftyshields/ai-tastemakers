@@ -26,4 +26,8 @@
   .brief-content h2 {
     @apply scroll-mt-20 font-sans text-lg font-semibold tracking-tight;
   }
+
+  .new-repo-badge {
+    @apply ml-2 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-emerald-800 align-middle dark:border-emerald-700/60 dark:bg-emerald-950/60 dark:text-emerald-300;
+  }
 }

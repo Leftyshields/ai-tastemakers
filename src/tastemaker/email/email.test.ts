@@ -108,6 +108,7 @@ describe("renderDigestEmailHtml", () => {
       repos: [{ ...sampleDigest.repos[0], is_new: true }],
     };
     const html = renderDigestEmailHtml(digest, "2026-06-07", "https://example.com/app");
+    expect(html).toContain('class="new-repo-badge"');
     expect(html).toContain(">New</span>");
   });
 

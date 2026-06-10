@@ -214,9 +214,10 @@ describe("renderMarkdown", () => {
       ],
     };
     const md = renderMarkdown(digest, "2026-06-06");
-    expect(md).toContain("## 1. new/repo · **NEW**");
+    expect(md).toContain("## 1. new/repo");
+    expect(md).toContain('class="new-repo-badge"');
     expect(md).toContain("## 2. repeat/repo");
-    expect(md).not.toContain("## 2. repeat/repo · **NEW**");
+    expect(md).not.toMatch(/repeat\/repo.*new-repo-badge/);
   });
 });
 

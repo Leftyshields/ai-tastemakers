@@ -6,6 +6,7 @@ import {
   type EditionDefinition,
 } from "../src/tastemaker/editions.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
+import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
 
 marked.setOptions({ gfm: true, breaks: false });
 
@@ -432,6 +433,7 @@ export async function buildEditionSite(
     } catch {
       continue;
     }
+    markdown = normalizeLegacyNewMarkdown(markdown);
     const paths = editionSitePaths(edition.siteSegment, 1);
     const html = marked.parse(markdown) as string;
     const siblingHref =

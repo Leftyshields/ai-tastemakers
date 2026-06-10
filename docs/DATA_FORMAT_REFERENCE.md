@@ -57,7 +57,7 @@ Derived from digest JSON. Structure:
 
 _Ranking: delta_7d · 10 repos · generated 2026-06-06T14:00:00Z_
 
-## 1. owner/repo · **NEW**
+## 1. owner/repo — optional `<span class="new-repo-badge">New</span>` when `is_new`
 
 https://github.com/owner/repo · ★ 1234 (+89 this week) · llm, mcp
 
