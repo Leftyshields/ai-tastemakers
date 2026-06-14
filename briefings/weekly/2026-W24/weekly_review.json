@@ -1,0 +1,225 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W24",
+  "week_start": "2026-06-08",
+  "week_end": "2026-06-14",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 30,
+      "skills": 34
+    },
+    "total_stars_gained": {
+      "oss": 108694,
+      "skills": 29380
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "claude",
+        "ai",
+        "llm",
+        "ai-agent"
+      ],
+      "skills": [
+        "claude-code",
+        "claude",
+        "codex",
+        "cursor",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "chopratejas/headroom",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "mvanhorn/last30days-skill",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "esengine/DeepSeek-Reasonix",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "santifer/career-ops",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "Imbad0202/academic-research-skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "elder-plinius/CL4R1T4S",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "aaif-goose/goose",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "rtk-ai/rtk",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "op7418/guizang-ppt-skill",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "can1357/oh-my-pi",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "jlcodes99/cockpit-tools",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "chopratejas/headroom",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "rohitg00/agentmemory",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "zarazhangrui/frontend-slides",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "open-gsd/gsd-core",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "decolua/9router",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Imbad0202/academic-research-skills-codex",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "JimLiu/baoyu-design",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "NarratorAI-Studio/narrator-ai-cli-skill",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "ogulcancelik/herdr",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "Panniantong/Agent-Reach",
+      "chopratejas/headroom",
+      "op7418/guizang-ppt-skill"
+    ],
+    "ranking_modes": [
+      "bootstrap_since_first_seen",
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "mvanhorn/last30days-skill",
+          "total_stars_gained": 69643,
+          "days_appeared": 7,
+          "excerpt": "An AI agent skill that queries Reddit, X, YouTube, TikTok, HN, Polymarket, and the web in parallel, scores results by real engagement signals (upvotes, likes, prediction market odds), and synthesizes a grounded summary of any topic from the last 30 days."
+        },
+        {
+          "full_name": "chopratejas/headroom",
+          "total_stars_gained": 48361,
+          "days_appeared": 7,
+          "excerpt": "Headroom is a context compression middleware that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% using six algorithms, available as a Python/TypeScript library, drop-in proxy, or MCP server."
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "total_stars_gained": 40735,
+          "days_appeared": 7,
+          "excerpt": "Taste-Skill is a collection of portable agent skills (markdown files) that inject design taste—layout, typography, motion, spacing—into AI coding agents like Codex, Cursor, and Claude Code to prevent them from generating generic-looking UIs."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 27371,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI that gives AI agents free, zero-config access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and a dozen other platforms by wrapping scrapers and open APIs into a single installable tool. It handles authentication, cookie management, and HTML-to-readable-text conversion so agents get clean, structured output instead of raw markup."
+        },
+        {
+          "full_name": "elder-plinius/CL4R1T4S",
+          "total_stars_gained": 16378,
+          "days_appeared": 3,
+          "excerpt": "CL4R1T4S is a public repository of extracted and leaked system prompts from major AI platforms including ChatGPT, Claude, Gemini, and Grok, exposing the hidden instructions that shape model behavior."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "chopratejas/headroom",
+          "total_stars_gained": 23051,
+          "days_appeared": 5,
+          "excerpt": "Headroom is a context compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% using six algorithms, available as a Python/TypeScript library, drop-in proxy, or MCP server."
+        },
+        {
+          "full_name": "op7418/guizang-ppt-skill",
+          "total_stars_gained": 6861,
+          "days_appeared": 7,
+          "excerpt": "Guizang PPT Skill is an AI-agent skill for Claude Code and Codex that generates polished, single-file HTML slide decks in two distinct visual systems—editorial magazine style and Swiss International typography—plus matching social covers and AI-generated slide images."
+        },
+        {
+          "full_name": "can1357/oh-my-pi",
+          "total_stars_gained": 5099,
+          "days_appeared": 6,
+          "excerpt": "oh-my-pi (omp) is a terminal-based AI coding agent with 40+ LLM providers, 32 built-in tools, LSP/DAP integration, and a Rust core that normalizes edit formats across models so diffs land correctly on the first attempt."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 4301,
+          "days_appeared": 2,
+          "excerpt": "Ponytail is a plugin for AI coding agents (Claude Code, Codex, etc.) that enforces a strict laziness hierarchy—YAGNI first, stdlib second, native platform third—before writing any new code, consistently producing 80–94% fewer lines than an unconstrained agent."
+        },
+        {
+          "full_name": "jlcodes99/cockpit-tools",
+          "total_stars_gained": 3670,
+          "days_appeared": 6,
+          "excerpt": "Cockpit Tools is a Rust-built desktop app that centralizes account management across 12 AI IDEs—Cursor, Windsurf, GitHub Copilot, Codex, Kiro, and more—letting you switch accounts instantly, monitor quotas in real time, and run multiple isolated instances of the same IDE simultaneously."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "Week 24 was a compression week in both senses: the OSS lane pulled in **108,694 stars** across 30 repos while the skills lane added **29,380** across 34 — and the dominant technical idea underneath both numbers was *doing more with less context*. Five repos appeared every single day of the week, a sign that the community found genuine signal rather than novelty spikes. A caveat worth keeping front of mind: several early-week rankings ran on bootstrap mode while 7-day star histories were still accumulating, so treat the precise star counts as directional rather than definitive.",
+    "oss": "**mvanhorn/last30days-skill** was the week's blowout at nearly 70K stars — a parallel-query agent that hits Reddit, X, YouTube, TikTok, HN, and Polymarket simultaneously and weights results by actual engagement signals, not recency alone. It's a practical answer to a real problem: agents that hallucinate \"current events\" because their retrieval is either stale or unweighted. **chopratejas/headroom** (48K stars, all seven days) kept its grip on the leaderboard by doing the unglamorous work of shrinking context 60–95% before it ever reaches the model — the fact that it surfaces in *both* lanes tells you this isn't a niche optimization anymore. **elder-plinius/CL4R1T4S** punched hard for a three-day appearance (16K stars), cataloguing leaked system prompts from ChatGPT, Claude, Gemini, and Grok; the community's appetite for that kind of transparency isn't slowing down.",
+    "skills": "**chopratejas/headroom** led the skills lane too (23K stars in five days), which reinforces the point: context budget management is graduating from tip to infrastructure. **op7418/guizang-ppt-skill** was the quiet seven-day constant — a Claude Code / Codex skill that generates single-file HTML decks in editorial and Swiss typography styles — proof that aesthetic scaffolding for agents has a hungry audience. **DietrichGebert/ponytail** only appeared two days but landed 4,300 stars with a blunt premise: enforce a strict YAGNI hierarchy before writing a single line, cutting agent output by 80–94%; that kind of aggressive constraint-as-skill is a pattern worth watching. **jlcodes99/cockpit-tools** (3,670 stars, six days) is pragmatic in a different direction — multi-account orchestration across 12 AI IDEs, which signals that serious builders are now running heterogeneous toolchains and need glue, not more agents.",
+    "cross_lane": "Three repos crossed both lanes this week — **Panniantong/Agent-Reach**, **chopratejas/headroom**, and **op7418/guizang-ppt-skill** — and the overlap is instructive: the community is converging on *agent plumbing* (reach, context, output format) as the shared foundation regardless of whether you're building OSS infrastructure or composable skills. The top topics list is nearly identical across lanes (`claude-code`, `claude`, `llm`) which means the audience is the same people wearing different hats on different days. The divergence to watch: OSS standouts tend to be broader middleware plays, while skills standouts are increasingly opinionated constraints — laziness hierarchies, typography rules, compression budgets — suggesting that the skills format is maturing into a way to encode hard-won engineering judgment, not just shortcuts.",
+    "takeaway": "If you're shipping agent tooling right now, context management and retrieval grounding are the two bets with the most community validation behind them this week — not new model wrappers. The ponytail / headroom pairing suggests a meta-pattern: builders want agents that generate *less* output more precisely, and they'll reach for explicit constraint layers to get there. Keep an eye on the IDE orchestration space too; cockpit-tools signals that multi-tool, multi-account workflows are a real pain point that nobody has cleanly solved yet."
+  },
+  "generated_at": "2026-06-14T13:58:49.095Z"
+}
