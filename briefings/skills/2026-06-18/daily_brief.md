@@ -1,0 +1,104 @@
+# Skill Tastemakers — Daily Brief — 2026-06-18
+
+_Ranking: delta_7d · 10 repos · generated 2026-06-18T14:22:25.895Z_
+
+
+## 1. DietrichGebert/ponytail
+
+https://github.com/DietrichGebert/ponytail · ★ 34850 (+34289 this week) · agent-skills, ai-agents, claude, claude-code, claude-code-plugin, cursor-rules, developer-tools, llm, prompt-engineering, yagni
+
+**What it does:** Ponytail is a prompt ruleset (installable as a Claude Code plugin or cursor rule) that forces AI agents to climb a decision ladder—YAGNI check, stdlib, native platform, tiny library, then custom code—before writing anything, and marks every shortcut with a `ponytail:` comment naming its upgrade path.
+
+**Why now:** It gained 34,000+ stars this week, likely surfacing alongside the Claude Code plugin ecosystem maturing, and its benchmark directly compares against the popular caveman skill, making it a timely reference point for anyone evaluating agent constraints.
+
+**Build with it:** Drop the ruleset into your Claude Code or Cursor setup and run the included promptfoo benchmark against your own task suite to measure whether the code-reduction tradeoff (80–94% less code, but potentially higher cost on reasoning models) holds for your specific workload before committing to it.
+
+## 2. elder-plinius/CL4R1T4S
+
+https://github.com/elder-plinius/CL4R1T4S · ★ 42170 (+15360 this week) · agents, ai, chatgpt, gemini, google, grok, hacking, leak, leaked, openai, prompt, prompt-engineering, prompts, red-team, red-teaming, system, system-info, system-prompts, tools, transparency
+
+**What it does:** CL4R1T4S is a public repository of extracted and leaked system prompts from major AI products including ChatGPT, Claude, Gemini, Grok, Cursor, and Replit, making the hidden instruction scaffolds that shape model behavior visible to anyone.
+
+**Why now:** The repo gained 15,360 stars this week, signaling a spike in developer interest in AI transparency at a moment when agentic systems are being deployed with increasingly complex, opaque prompt architectures.
+
+**Build with it:** Use the extracted prompts as a reference dataset to benchmark your own system prompt design, reverse-engineer persona and refusal patterns across competing models, or build a prompt-auditing tool that flags alignment gaps between stated model behavior and actual instructions.
+
+## 3. addyosmani/agent-skills
+
+https://github.com/addyosmani/agent-skills · ★ 62711 (+12114 this week) · agent-skills, antigravity, antigravity-ide, claude-code, cursor, skills
+
+**What it does:** Agent Skills is a collection of production-grade slash commands (`/spec`, `/plan`, `/build`, `/test`, `/review`, `/ship`) that encode senior engineering workflows into AI coding agents like Claude Code, Cursor, and Gemini CLI, enforcing quality gates at every phase of development.
+
+**Why now:** The repo gained 12,000+ stars this week, signaling a rapid shift toward structured, repeatable AI-assisted development pipelines rather than ad-hoc prompting.
+
+**Build with it:** Drop the skill files into your Claude Code or Cursor setup and immediately get a test-driven, commit-by-commit build loop — use `/build auto` to let the agent execute an entire approved task plan autonomously while still pausing on failures.
+
+## 4. chopratejas/headroom
+
+https://github.com/chopratejas/headroom · ★ 32752 (+11396 this week) · agent, ai, anthropic, claude-code, compression, context-engineering, context-window, cursor, fastapi, langchain, llm, mcp, openai, prompt-engineering, proxy, python, rag, token-optimization, tokens, typescript
+
+**What it does:** Headroom is a context compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% using six algorithms—available as a Python/TypeScript library, an OpenAI-compatible proxy, or an MCP server.
+
+**Why now:** Context window costs and rate limits are the dominant friction point for production agent deployments right now, and this project hit 32K stars this week as teams shipping Claude Code, Cursor, and LangChain pipelines race to cut token spend without degrading answer quality.
+
+**Build with it:** Drop `headroom proxy --port 8787` in front of any existing LLM call to get immediate token reduction with zero code changes, or wrap the library around your RAG retrieval step to fit more relevant chunks into the same context budget.
+
+## 5. Panniantong/Agent-Reach
+
+https://github.com/Panniantong/Agent-Reach · ★ 34057 (+8134 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+
+**What it does:** Agent Reach is a Python CLI that gives AI agents free, zero-config access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and the open web — routing around paywalls and blocks using multi-backend fallbacks and local cookie auth.
+
+**Why now:** It hit #1 on GitHub Trending this week with 8,134 stars added, partly because it just patched a Bilibili breaking change (yt-dlp blocked by risk controls → switched to bili-cli), demonstrating the core promise of maintained, self-healing integrations.
+
+**Build with it:** Drop it into any Claude Code, Cursor, or Windsurf workflow to give your agent real-time internet research — scrape competitor Twitter sentiment, summarize YouTube tutorials, or monitor Reddit threads for bug reports, all without paying for a single API.
+
+## 6. NousResearch/hermes-agent
+
+https://github.com/NousResearch/hermes-agent · ★ 196713 (+7135 this week) · ai, ai-agent, ai-agents, anthropic, chatgpt, claude, claude-code, clawdbot, codex, hermes, hermes-agent, llm, moltbot, nous-research, openai, openclaw
+
+**What it does:** Hermes Agent is a self-improving AI agent framework from Nous Research that runs a continuous learning loop — creating and refining skills from experience, building persistent user models across sessions, and operating across Telegram, Discord, CLI, and cloud backends from a single codebase.
+
+**Why now:** The project gained 7,135 stars this week, signaling a surge of builder interest, and its multi-provider model switching (OpenRouter, NVIDIA NIM, Xiaomi MiMo, and more) makes it immediately useful as the model landscape fragments rapidly.
+
+**Build with it:** Use the batch trajectory generation and skill creation pipeline to fine-tune your own agents on real task completions, or deploy a serverless Telegram bot on Modal that costs near zero when idle and wakes on demand to handle user requests with persistent memory.
+
+## 7. DeusData/codebase-memory-mcp <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/DeusData/codebase-memory-mcp · ★ 6616 (+3504 this week) · aider, ast, claude-code, code-analysis, code-intelligence, codex, cursor, cypher, developer-tools, gemini-cli, graph-visualization, kilocode, knowledge-graph, mcp, mcp-server, model-context-protocol, opencode, sqlite, tree-sitter, windsurf
+
+**What it does:** codebase-memory-mcp is a single static binary MCP server that parses any codebase into a persistent knowledge graph using tree-sitter AST analysis across 158 languages, answering structural queries about functions, classes, and call chains in under 1ms with 99% fewer tokens than file-by-file exploration.
+
+**Why now:** The project gained 3,504 stars this week, signaling rapid adoption across the AI coding agent ecosystem, and its backing arXiv paper demonstrates measurable gains — 83% answer quality and 2.1× fewer tool calls — making it newly credible for production agent workflows.
+
+**Build with it:** Drop this into any Claude Code, Cursor, or Windsurf setup to give your agent persistent, queryable memory of a large monorepo without blowing context limits — or use the 14 MCP tools directly to build your own code navigation, refactoring, or dependency analysis agent on top of the knowledge graph.
+
+## 8. Egonex-AI/Understand-Anything
+
+https://github.com/Egonex-AI/Understand-Anything · ★ 63311 (+6938 this week) · antigravity-skills, business-knowledge, claude-code, claude-skills, codebase-analysis, codex, codex-skills, developer-tools-ai-agent, gemini-cli-skills, karpathy-llm-wiki, knowledge-base, knowledge-graph, memory, opencode-skills, pi-agent, understandcode, vibe-coding
+
+**What it does:** Understand Anything is an open-source TypeScript tool that runs a multi-agent pipeline over any codebase, knowledge base, or docs to produce an interactive, searchable knowledge graph of files, functions, classes, and dependencies — with a built-in Q&A interface.
+
+**Why now:** The repo crossed 63,000 stars this week with nearly 7,000 new stars in seven days, signaling a surge of developers adopting agentic coding tools like Claude Code, Codex, and Gemini CLI who need faster onboarding into large, unfamiliar codebases.
+
+**Build with it:** Drop it into a 200,000-line legacy monorepo, let the pipeline map every dependency and entry point, then wire the graph's search and Q&A layer into your team's internal documentation portal so engineers can ask structural questions about the codebase in plain language.
+
+## 9. farion1231/cc-switch
+
+https://github.com/farion1231/cc-switch · ★ 104051 (+6769 this week) · ai-tools, claude-code, codex, desktop-app, hermes, hermes-agent, mcp, minimax, omo, open-source, openclaw, openclaw-ui, opencode, provider-management, rust, skills, skills-management, tauri, typescript, wsl-support
+
+**What it does:** CC Switch is a cross-platform desktop app (built with Tauri/Rust) that centralizes management of multiple AI coding agents—Claude Code, Codex, Gemini CLI, OpenCode, and others—letting you switch providers, manage credentials, and configure MCP from a single UI.
+
+**Why now:** It gained 6,769 GitHub stars this week, signaling a surge of developer interest precisely as the AI coding agent landscape fragments across incompatible CLIs and auth systems.
+
+**Build with it:** A builder could use CC Switch as a template for a provider-agnostic AI tooling layer—fork the Rust/Tauri core to add custom agent integrations, or treat its MCP and credential-management architecture as a reference for building your own multi-provider orchestration desktop app.
+
+## 10. Leonxlnx/taste-skill
+
+https://github.com/Leonxlnx/taste-skill · ★ 46416 (+6173 this week) · agent, ai, claude, claude-code, codex, coding, design, frontend, lowcode, nocode, skill, skills, vibecoding
+
+**What it does:** Taste-Skill is a collection of portable "Agent Skills" (markdown instruction files) that you drop into Codex, Cursor, or Claude Code to make AI-generated frontends use stronger layout, typography, motion, and spacing instead of generic boilerplate output.
+
+**Why now:** The repo jumped 6,173 stars this week, signaling that the AI coding community is actively looking for ways to raise the quality floor of vibe-coded UIs beyond what default model behavior produces.
+
+**Build with it:** Run `npx skills add https://github.com/Leonxlnx/taste-skill` to inject the design rules into your agent workflow, then pair the image-generation skills with ChatGPT Images to produce reference boards that Claude Code or Codex can implement directly into polished, production-ready interfaces.
