@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W25",
+  "week_start": "2026-06-15",
+  "week_end": "2026-06-21",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 19,
+      "skills": 18
+    },
+    "total_stars_gained": {
+      "oss": 162197,
+      "skills": 169059
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "ai",
+        "claude",
+        "mcp",
+        "llm"
+      ],
+      "skills": [
+        "claude-code",
+        "codex",
+        "claude",
+        "ai",
+        "mcp"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "chopratejas/headroom",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "elder-plinius/CL4R1T4S",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "microsoft/markitdown",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "mvanhorn/last30days-skill",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "tw93/Pake",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "elder-plinius/CL4R1T4S",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "chopratejas/headroom",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Egonex-AI/Understand-Anything",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "mvanhorn/last30days-skill",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "safishamsi/graphify",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DeusData/codebase-memory-mcp",
+      "DietrichGebert/ponytail",
+      "Imbad0202/academic-research-skills",
+      "JuliusBrussee/caveman",
+      "Kilo-Org/kilocode",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "chopratejas/headroom",
+      "elder-plinius/CL4R1T4S",
+      "farion1231/cc-switch",
+      "mvanhorn/last30days-skill",
+      "palmier-io/palmier-pro",
+      "tw93/Pake"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 194920,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a plugin for AI coding agents (Claude Code, Codex, Copilot CLI) that enforces a strict laziness hierarchy — making the agent reach for native platform features, stdlib, or a one-liner before writing any custom code, with every shortcut annotated for future upgrade."
+        },
+        {
+          "full_name": "elder-plinius/CL4R1T4S",
+          "total_stars_gained": 87472,
+          "days_appeared": 7,
+          "excerpt": "CL4R1T4S is a public repository collecting extracted and reverse-engineered system prompts from major AI products including ChatGPT, Claude, Gemini, Grok, Cursor, and Replit, making the hidden instructions that shape AI behavior visible to anyone."
+        },
+        {
+          "full_name": "chopratejas/headroom",
+          "total_stars_gained": 86368,
+          "days_appeared": 7,
+          "excerpt": "Headroom is a context compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% using six algorithms before they consume context window space. It ships as a Python/TypeScript library, a drop-in OpenAI-compatible proxy, an MCP server, and a one-command agent wrapper for Claude Code, Cursor, Codex, and others."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 52806,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI that gives AI agents (Claude Code, Cursor, etc.) the ability to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu without paid APIs, by routing each platform through maintained free backends with automatic fallback when one gets blocked."
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "total_stars_gained": 45658,
+          "days_appeared": 7,
+          "excerpt": "Hermes Agent is a self-improving AI agent from Nous Research that builds persistent skills from experience, maintains cross-session memory, and runs on any LLM backend — deployable on a $5 VPS, Docker, SSH, or serverless infrastructure like Modal and Daytona."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 216691,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a plugin for AI coding agents (Claude Code, Codex, Copilot CLI) that enforces a strict laziness ladder — before writing any code, the agent checks whether the problem can be solved with a native platform feature, an existing dependency, or a single line, only writing new code as a last resort."
+        },
+        {
+          "full_name": "elder-plinius/CL4R1T4S",
+          "total_stars_gained": 87450,
+          "days_appeared": 7,
+          "excerpt": "CL4R1T4S is a public repository that collects and publishes extracted system prompts from major AI products including ChatGPT, Claude, Gemini, Grok, Cursor, and Replit, making the hidden instruction layers that shape AI behavior openly accessible."
+        },
+        {
+          "full_name": "chopratejas/headroom",
+          "total_stars_gained": 74604,
+          "days_appeared": 6,
+          "excerpt": "Headroom is a context compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% tokens while preserving the information needed to get the same answers. It ships as a Python/TypeScript library, a drop-in OpenAI-compatible proxy, an MCP server, and a one-command agent wrapper for Claude Code, Cursor, and Codex."
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "total_stars_gained": 59064,
+          "days_appeared": 6,
+          "excerpt": "Agent Skills is a collection of production-grade slash commands (`/spec`, `/plan`, `/build`, `/test`, `/review`, `/ship`) that encode senior engineering workflows — spec gates, TDD, incremental commits — so AI coding agents follow consistent best practices across the full development lifecycle."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 52803,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI and MCP toolkit that gives AI agents (Claude Code, Cursor, etc.) the ability to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and the open web — without paid APIs, by routing through free backends and browser cookie auth."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "Week 25 was dense: 19 OSS repos and 18 skill repos tracked, generating **162K and 169K stars gained** respectively — with the skills lane narrowly outpacing open source for the second consecutive week. The dominant topics tell the whole story: `claude-code`, `mcp`, and `llm` sat at the top of both lanes, and seven repos held perfect 7-day streaks, signaling sustained builder interest rather than viral spikes. The week's clearest signal is structural — builders aren't just shipping models or wrappers anymore, they're engineering the operating conditions *around* agents: how much context they consume, what they're allowed to reach for, and what they remember between sessions.",
+    "oss": "**DietrichGebert/ponytail** led the OSS lane with ~195K stars gained across all seven days — an unusual sustained run for a tool whose core premise is restraint: make agents prefer existing platform primitives over writing new code, and annotate every shortcut for future upgrade. It reads like a linter for agent ambition, and builders are responding to that framing. **chopratejas/headroom** (~86K stars) and **Panniantong/Agent-Reach** (~53K) rounded out the persistent performers, addressing orthogonal but related problems — headroom attacks context bloat at the token level, Agent-Reach attacks the data-access gap by routing around paywalled platform APIs. **elder-plinius/CL4R1T4S** (~87K stars, 7 days) continued its run as the system-prompt transparency project people keep returning to; its staying power is a reminder that *legibility* of AI behavior is its own category of tooling demand.",
+    "skills": "The skills lane was even more concentrated at the top, with **ponytail** pulling ~217K stars — higher than its OSS-lane number, which is worth noting: the skill packaging of the \"laziness ladder\" concept resonated *more* with the agent-workflow audience than with the general OSS audience. **addyosmani/agent-skills** (~59K stars, 6 days) was the week's clearest new entrant with staying power — it operationalizes a full engineering lifecycle (`/spec` → `/plan` → `/build` → `/test` → `/review` → `/ship`) as slash commands, essentially encoding senior-engineer judgment as reusable agent behavior. **Egonex-AI/Understand-Anything** held a 6-day streak without cracking the top-5 star count, which suggests a loyal niche rather than mass virality — worth watching for what problem it's quietly solving. **mvanhorn/last30days-skill** appeared in both lanes with modest but persistent numbers, pointing to growing appetite for time-bounded memory primitives.",
+    "cross_lane": "Fifteen repos appeared in both the OSS and skills lanes this week — a record overlap for this digest — and the pattern isn't coincidence: the tools builders want *as infrastructure* (headroom, codebase-memory-mcp, hermes-agent) are the same ones they want *as callable skills*, which means the boundary between \"library\" and \"agent capability\" is collapsing in practice. **NousResearch/hermes-agent** is the clearest example: a self-improving agent that builds persistent skills from experience belongs in both categories simultaneously, and its 7-day streak in both lanes (~46K stars OSS) confirms builders are evaluating it from both angles. The **DeusData/codebase-memory-mcp** cross-lane presence is quieter but arguably more telling — persistent codebase memory is becoming a baseline expectation, not a differentiator, and its 3-day streak in both lanes suggests it's being adopted as plumbing rather than celebrated as a feature.",
+    "takeaway": "The week's throughline is **agent operating conditions** — context budgets (headroom), behavioral constraints (ponytail), data access (Agent-Reach), and persistent memory (hermes-agent, codebase-memory-mcp) are all attempts to make agents predictable and resource-efficient at runtime, not just capable in demos. If you're building on top of Claude Code or Codex right now, the repos that held 6–7 day streaks are the ones worth pulling into your stack before they become invisible dependencies everyone assumes you're already using. The skills lane outperforming OSS on stars for the second week running is a structural shift worth tracking: composable, slash-command-style agent behaviors are becoming a first-class distribution format."
+  },
+  "generated_at": "2026-06-21T13:59:15.043Z"
+}
