@@ -62,8 +62,8 @@ jobs:
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
         run: |
-          npm run digest -- --edition oss
-          npm run digest -- --edition skills
+          npm run digest -- --edition oss || true
+          npm run digest -- --edition skills || true
 
       - name: Run weekly wrap-up (Sundays)
         if: steps.today.outputs.skip != 'true'
