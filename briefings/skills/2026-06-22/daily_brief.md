@@ -1,0 +1,102 @@
+# Skill Tastemakers — Daily Brief — 2026-06-22
+
+_Ranking: delta_7d · 10 repos · generated 2026-06-22T15:09:24.994Z_
+
+
+## 1. DietrichGebert/ponytail
+
+https://github.com/DietrichGebert/ponytail · ★ 48764 (+44474 this week) · agent-skills, ai-agents, claude, claude-code, claude-code-plugin, cursor-rules, developer-tools, llm, prompt-engineering, yagni
+
+**What it does:** Ponytail is a Claude Code / cursor-rules plugin that installs a "laziest senior dev" persona into your AI agent, steering it toward native browser primitives, stdlib one-liners, and deleted code over new abstractions.
+**Why now:** AI coding agents default to over-building—this week's agentic benchmark data shows ponytail cuts LOC by 54% and cost by 20% versus no-skill Claude Code, while maintaining 100% safety versus a comparable YAGNI prompt that drops to 95%.
+**Build with it:** Drop the skill file into any Claude Code or Cursor project and immediately get agents that reach for `<input type="date">` instead of flatpickr, shrink real FastAPI/React diffs, and cost measurably less per feature ticket.
+
+## 2. Panniantong/Agent-Reach
+
+https://github.com/Panniantong/Agent-Reach · ★ 37604 (+9256 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+
+**What it does:** Agent Reach is a Python CLI and MCP toolkit that gives AI agents free, zero-API-key access to Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu by routing around paywalls and blocks with platform-specific scrapers and browser cookie injection.
+
+**Why now:** It hit #1 on GitHub Trending this week with 9,256 new stars, driven by the surge in Claude Code and Cursor users who need their agents to read live web content without paying for expensive API tiers.
+
+**Build with it:** Wire it into your Claude Code or Cursor workflow to let your agent autonomously research Twitter sentiment, summarize YouTube tutorials, or pull Reddit bug threads—then extend it by adding a new platform scraper using the existing multi-backend router pattern.
+
+## 3. mvanhorn/last30days-skill <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/mvanhorn/last30days-skill · ★ 45662 (+4012 this week) · ai-prompts, ai-skill, bluesky, claude, claude-code, clawhub, deep-research, hackernews, instagram, openclaw, polymarket, recency, reddit, research, social-media, tiktok, trends, twitter, web-search, youtube
+
+**What it does:** /last30days is a Python-based AI agent skill that runs parallel searches across Reddit, X, YouTube, HN, Polymarket, and the web, then scores results by upvotes, likes, and prediction-market odds to synthesize a grounded summary of any topic from the past 30 days.
+
+**Why now:** It hit #1 on GitHub Trending this week with 4,012 stars in seven days, landing at a moment when every major AI—ChatGPT, Gemini, Claude—has partial platform access but none can bridge all the walled gardens simultaneously.
+
+**Build with it:** Install it as a skill inside Claude Code or any of 50+ agent hosts and wire it into your own research pipelines—pre-call intelligence tools, trend monitors, or competitive trackers that pull real engagement signals instead of SEO-optimized noise.
+
+## 4. elder-plinius/CL4R1T4S
+
+https://github.com/elder-plinius/CL4R1T4S · ★ 43356 (+7928 this week) · agents, ai, chatgpt, gemini, google, grok, hacking, leak, leaked, openai, prompt, prompt-engineering, prompts, red-team, red-teaming, system, system-info, system-prompts, tools, transparency
+
+**What it does:** CL4R1T4S is a public repository of extracted and leaked system prompts from major AI platforms including ChatGPT, Claude, Gemini, and Grok, exposing the hidden instructions that shape model behavior.
+
+**Why now:** The repo gained nearly 8,000 stars this week, signaling a surge in developer interest in AI transparency at a moment when agentic systems are being deployed with increasingly opaque instruction layers.
+
+**Build with it:** Use the extracted prompts as a reference corpus to benchmark your own system prompt design, audit behavioral constraints, or build tooling that detects prompt pattern fingerprints across AI providers.
+
+## 5. DeusData/codebase-memory-mcp
+
+https://github.com/DeusData/codebase-memory-mcp · ★ 11097 (+7621 this week) · aider, ast, claude-code, code-analysis, code-intelligence, codex, cursor, cypher, developer-tools, gemini-cli, graph-visualization, kilocode, knowledge-graph, mcp, mcp-server, model-context-protocol, opencode, sqlite, tree-sitter, windsurf
+
+**What it does:** codebase-memory-mcp is a single static binary MCP server that parses any codebase into a persistent knowledge graph using tree-sitter AST analysis across 158 languages, answering structural queries about functions, call chains, classes, and HTTP routes in under 1ms with zero dependencies.
+
+**Why now:** It gained 7,621 GitHub stars this week, signaling rapid adoption across the AI coding agent ecosystem, and it already ships with native integrations for Claude Code, Cursor, Windsurf, Gemini CLI, and seven other agents out of the box.
+
+**Build with it:** Drop this into any agent workflow to give your LLM a persistent, queryable map of a large codebase — useful for building autonomous refactoring agents, cross-repo dependency analyzers, or code review bots that need structural context without burning tokens on file-by-file reads.
+
+## 6. Egonex-AI/Understand-Anything
+
+https://github.com/Egonex-AI/Understand-Anything · ★ 65957 (+6967 this week) · antigravity-skills, business-knowledge, claude-code, claude-skills, codebase-analysis, codex, codex-skills, developer-tools-ai-agent, gemini-cli-skills, karpathy-llm-wiki, knowledge-base, knowledge-graph, memory, opencode-skills, pi-agent, understandcode, vibe-coding
+
+**What it does:** Understand Anything ingests any codebase and produces an interactive knowledge graph mapping every file, function, class, and dependency, with a natural language query interface layered on top.
+
+**Why now:** The project hit 65,957 stars with nearly 7,000 added this week, coinciding with widespread adoption of agentic coding tools like Claude Code, Codex, and Gemini CLI that leave developers navigating large, unfamiliar repos daily.
+
+**Build with it:** Drop it into your Claude Code or Gemini CLI workflow as a plugin to auto-document a legacy monorepo, generate onboarding materials for new hires, or build a searchable knowledge base that answers architectural questions without digging through source files.
+
+## 7. JuliusBrussee/caveman <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/JuliusBrussee/caveman · ★ 75729 (+3399 this week) · ai, anthropic, caveman, claude, claude-code, llm, meme, prompt-engineering, skill, tokens
+
+**What it does:** Caveman is a Claude Code skill/plugin that forces AI coding agents to respond in compressed, telegraphic language, cutting output tokens by ~75% while preserving full technical accuracy across multiple verbosity levels (lite, full, ultra) and languages.
+
+**Why now:** The project surged to 75,729 stars with 3,399 added this week, signaling widespread frustration with verbose AI outputs inflating API costs and slowing response times in agentic coding workflows.
+
+**Build with it:** Drop the caveman CLAUDE.md skill into any project using Claude Code, Cursor, or Copilot to immediately slash per-session token costs, then fork the prompt logic to experiment with domain-specific compression styles (e.g., terse code review, minimal PR descriptions) tuned to your team's tolerance for brevity.
+
+## 8. NousResearch/hermes-agent
+
+https://github.com/NousResearch/hermes-agent · ★ 199663 (+6447 this week) · ai, ai-agent, ai-agents, anthropic, chatgpt, claude, claude-code, clawdbot, codex, hermes, hermes-agent, llm, moltbot, nous-research, openai, openclaw
+
+**What it does:** Hermes Agent is a self-improving Python AI agent from Nous Research that creates and refines skills from experience, maintains persistent memory across sessions, runs on any infrastructure (local, Docker, SSH, Modal, or a $5 VPS), and connects to 200+ models via OpenRouter or your own endpoint.
+
+**Why now:** The project gained 6,447 stars this week, signaling a surge of builder attention, and its recent integrations with Xiaomi MiMo, GLM, and Kimi/Moonshot make it one of the broadest multi-provider agent frameworks available right now.
+
+**Build with it:** Drop it on a cloud VM, wire it to Telegram or Discord via its built-in gateway, and use its skill-creation loop to build a personal coding assistant that autonomously writes, stores, and improves reusable Python tools across sessions — with cron-scheduled nightly reports delivered straight to your phone.
+
+## 9. tw93/Pake
+
+https://github.com/tw93/Pake · ★ 56654 (+6192 this week) · chatgpt, claude, desktop, gemini, hight-performance, linux, macos, no-electron, package, rust, tauri, windows, youtube
+
+**What it does:** Pake is a Rust/Tauri-based CLI tool that wraps any URL into a native desktop app for macOS, Windows, and Linux, producing installers under 10MB — roughly 20x smaller than Electron equivalents.
+
+**Why now:** The project gained 6,192 stars this week, signaling a surge of developer interest likely driven by demand for lightweight desktop wrappers around AI tools like DeepSeek, Grok, and Claude.
+
+**Build with it:** Run `pake <url>` to ship a branded desktop client for your web app in minutes — useful for internal tools, AI chat interfaces, or SaaS products that need a native feel without maintaining a separate Electron codebase.
+
+## 10. addyosmani/agent-skills
+
+https://github.com/addyosmani/agent-skills · ★ 65223 (+6109 this week) · agent-skills, antigravity, antigravity-ide, claude-code, cursor, skills
+
+**What it does:** Agent Skills is a collection of production-grade slash commands (`/spec`, `/plan`, `/build`, `/test`, `/review`, `/ship`) that encode senior engineering workflows into AI coding agents like Claude Code and Cursor, ensuring consistent quality gates across every phase of development.
+
+**Why now:** The repo gained over 6,000 stars this week, coinciding with growing adoption of agentic coding tools and the need for structured guardrails as developers hand more autonomous control to AI agents.
+
+**Build with it:** Install the plugin into Claude Code or Cursor and use `/build auto` to let an agent take a spec all the way to committed, test-verified code with a single approval — a practical starting point for automating your own team's development pipeline.
