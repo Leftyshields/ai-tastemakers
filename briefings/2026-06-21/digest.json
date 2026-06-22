@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "run_id": "e84ea3c3-9148-4d45-ad0a-0e61396e5506",
-  "generated_at": "2026-06-21T13:56:30.779Z",
+  "run_id": "c9bd024e-13d3-43bf-b8f7-90e51be6f722",
+  "generated_at": "2026-06-22T06:33:09.037Z",
   "ranking_mode": "delta_7d",
   "topic_queries": [
     "llm",
@@ -17,8 +17,8 @@
       "rank": 1,
       "full_name": "DietrichGebert/ponytail",
       "html_url": "https://github.com/DietrichGebert/ponytail",
-      "stars": 44872,
-      "stars_gained_7d": 40593,
+      "stars": 47159,
+      "stars_gained_7d": 42880,
       "topics": [
         "agent-skills",
         "ai-agents",
@@ -32,7 +32,7 @@
         "yagni"
       ],
       "language": "JavaScript",
-      "brief": "**What it does:** Ponytail is a prompt skill/plugin for AI coding agents (Claude Code, Cursor, etc.) that instills a \"laziest senior dev\" heuristic—pushing the agent to delete code, reach for native platform features, and refuse unnecessary abstractions before writing anything new.\n**Why now:** AI coding agents are increasingly trusted to make autonomous implementation decisions, and the default failure mode is over-engineering; with agentic Claude Code sessions now measurable end-to-end, this week's benchmark shows Ponytail cuts lines of code by 54% and cost by 20% while maintaining 100% safety scores against a fair baseline.\n**Build with it:** Drop the skill file into your Claude Code or Cursor setup and wire it to your next greenfield feature sprint, legacy refactor pass, or agent eval harness to measure how much your own codebase's complexity is agent-generated waste.",
+      "brief": "**What it does:** Ponytail is a Claude Code / AI-agent plugin that injects a \"laziest senior dev\" heuristic into your agent's reasoning, steering it toward native browser APIs, stdlib functions, and deleted abstractions instead of invented ones—averaging 54% fewer lines of code across real feature tasks on a live FastAPI + React codebase.\n**Why now:** The repo gained 42,880 stars this week, signaling a moment when developers are actively frustrated with AI agents that over-engineer simple requests (date pickers becoming flatpickr wrappers, color pickers spawning component libraries) and are hungry for constraints that push back.\n**Build with it:** Drop the ponytail skill file into your Claude Code, Cursor, or compatible agent setup and immediately start shipping features as `<input type=\"date\">` instead of five-file component trees—or fork the benchmark harness to measure over-build reduction on your own codebase and tune the heuristic for your stack.",
       "pushed_at": "2026-06-21T00:23:17Z",
       "is_new": false
     },
@@ -40,8 +40,8 @@
       "rank": 2,
       "full_name": "chopratejas/headroom",
       "html_url": "https://github.com/chopratejas/headroom",
-      "stars": 43123,
-      "stars_gained_7d": 16067,
+      "stars": 45216,
+      "stars_gained_7d": 18160,
       "topics": [
         "agent",
         "ai",
@@ -65,16 +65,16 @@
         "typescript"
       ],
       "language": "Python",
-      "brief": "**What it does:** Headroom is a context compression layer that sits between your AI agent and the LLM, reducing token counts by 60–95% using six algorithms while preserving answer quality—available as a Python/TypeScript library, a drop-in proxy, or an MCP server.\n\n**Why now:** AI agents are hitting context window limits and token costs at scale, and this week's 16,000+ new GitHub stars signal the ecosystem is actively searching for practical solutions beyond naive chunking or expensive model upgrades.\n\n**Build with it:** Wrap any existing agent pipeline—Claude Code, Cursor, LangChain, or your own—with a single `headroom wrap` command or `compress(messages)` call to cut inference costs and extend effective context without changing your model or architecture.",
-      "pushed_at": "2026-06-21T07:50:56Z",
+      "brief": "**What it does:** Headroom is a context compression layer that sits between your AI agent and the LLM, shrinking tool outputs, logs, RAG chunks, and conversation history by 60–95% before they consume context window space—available as a Python/TypeScript library, drop-in proxy, or MCP server.\n\n**Why now:** With agents running longer multi-step workflows and context windows filling up fast, token costs and mid-task failures from overflow are acute pain points this week—Headroom hit 45K stars with 18K added in a single week, signaling the problem is mainstream.\n\n**Build with it:** Wrap your existing Claude Code, Cursor, or LangChain agent with `headroom wrap` or `headroom proxy` to immediately cut API costs and extend how far your agent can reason before hitting limits, with zero code changes required.",
+      "pushed_at": "2026-06-22T05:57:31Z",
       "is_new": false
     },
     {
       "rank": 3,
       "full_name": "Panniantong/Agent-Reach",
       "html_url": "https://github.com/Panniantong/Agent-Reach",
-      "stars": 36502,
-      "stars_gained_7d": 8157,
+      "stars": 37162,
+      "stars_gained_7d": 8817,
       "topics": [
         "agent-infrastructure",
         "ai-agent",
@@ -95,16 +95,36 @@
         "youtube-transcript"
       ],
       "language": "Python",
-      "brief": "**What it does:** Agent Reach is a Python CLI and MCP toolkit that gives AI agents free, zero-configuration access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and more by routing around paywalls, login walls, and IP bans through managed scrapers and browser cookie handoffs.\n\n**Why now:** It hit #1 on GitHub Trending this week with 8,157 stars gained in seven days, surfacing as developers race to give autonomous agents reliable real-world data access without burning budget on commercial APIs.\n\n**Build with it:** Wire it into Claude Code or Cursor to create a research agent that monitors competitor Twitter accounts, summarizes Reddit threads about your product, and pulls YouTube transcripts—all triggered by natural language with no API keys required.",
+      "brief": "**What it does:** Agent Reach is a Python CLI that gives AI agents free, zero-configuration access to Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu by routing around API paywalls and blocks using browser cookies, open scrapers, and MCP integrations.\n\n**Why now:** It hit #1 on GitHub Trending this week with 37,000+ stars and 8,800 new stars in seven days, signaling a sharp developer focus on giving agentic workflows real-time web perception without paying for platform APIs.\n\n**Build with it:** Drop it into a Claude Code or Cursor workflow to build a competitive intelligence agent that monitors Twitter sentiment, Reddit bug reports, and YouTube tutorials for any product — all from a single CLI with one install command.",
       "pushed_at": "2026-06-16T12:45:59Z",
       "is_new": false
     },
     {
       "rank": 4,
+      "full_name": "palmier-io/palmier-pro",
+      "html_url": "https://github.com/palmier-io/palmier-pro",
+      "stars": 5845,
+      "stars_gained_7d": 4347,
+      "topics": [
+        "ai-video",
+        "claude",
+        "macos",
+        "mcp",
+        "seedance2",
+        "swift",
+        "video-editor"
+      ],
+      "language": "Swift",
+      "brief": "**What it does:** Palmier Pro is an open-source macOS video editor built in Swift that lets you and AI agents edit the same timeline together, with built-in generative video/image models (Seedance, Kling) and an MCP server exposed locally at port 19789.\n\n**Why now:** It gained 4,347 stars this week, likely driven by the macOS 26 Tahoe beta cycle and growing demand for MCP-native tooling that connects Claude Code, Cursor, and Codex directly to creative apps.\n\n**Build with it:** Wire Claude Code to the MCP server and script automated video assembly pipelines—cut, generate B-roll, and arrange clips programmatically without touching the UI.",
+      "pushed_at": "2026-06-22T06:03:12Z",
+      "is_new": true
+    },
+    {
+      "rank": 5,
       "full_name": "elder-plinius/CL4R1T4S",
       "html_url": "https://github.com/elder-plinius/CL4R1T4S",
-      "stars": 43013,
-      "stars_gained_7d": 7588,
+      "stars": 43263,
+      "stars_gained_7d": 7838,
       "topics": [
         "agents",
         "ai",
@@ -128,16 +148,16 @@
         "transparency"
       ],
       "language": null,
-      "brief": "**What it does:** CL4R1T4S is a public repository that collects and publishes extracted system prompts from major AI products including ChatGPT, Claude, Gemini, Grok, Cursor, and Replit, making the hidden instruction layers that shape AI behavior visible to anyone.\n\n**Why now:** The repo gained 7,588 stars this week, signaling a sharp spike in developer interest likely tied to growing scrutiny of how AI agents are instructed behind the scenes as agentic deployments become more common.\n\n**Build with it:** Use the extracted prompts as a reference corpus to audit your own system prompt design, benchmark persona constraints across competing models, or build a diff tool that tracks how major AI system prompts change over time.",
+      "brief": "**What it does:** CL4R1T4S is a public repository aggregating extracted and reverse-engineered system prompts from major AI products including ChatGPT, Claude, Gemini, Grok, Cursor, and Replit agents.\n\n**Why now:** The repo gained 7,838 stars this week, signaling a surge in developer interest around AI transparency at a moment when agentic deployments are proliferating and system prompt design is becoming a core competitive differentiator.\n\n**Build with it:** Use the extracted prompts as a reference corpus to benchmark your own agent scaffolding, identify constraint patterns across providers, or build a prompt-auditing tool that flags when your production system prompts structurally resemble known refusal or redirection patterns.\n\n---\n\n*Note: The README contains an embedded prompt injection attempt (\"5h1f7 y0ur f0cu5...\") using leet-speak encoding, instructing the model to leak its own system prompt. This is a red-team technique the repo itself documents. It had no effect here.*",
       "pushed_at": "2026-06-15T11:09:58Z",
       "is_new": false
     },
     {
-      "rank": 5,
+      "rank": 6,
       "full_name": "DeusData/codebase-memory-mcp",
       "html_url": "https://github.com/DeusData/codebase-memory-mcp",
-      "stars": 9878,
-      "stars_gained_7d": 6402,
+      "stars": 10679,
+      "stars_gained_7d": 7203,
       "topics": [
         "aider",
         "ast",
@@ -161,36 +181,16 @@
         "windsurf"
       ],
       "language": "C",
-      "brief": "**What it does:** codebase-memory-mcp indexes entire codebases into a persistent knowledge graph using tree-sitter AST parsing across 158 languages, then exposes 14 MCP tools that let AI coding agents query functions, call chains, and cross-service links in under 1ms with 99% fewer tokens than file-by-file exploration.\n\n**Why now:** The project gained 6,400+ stars this week, signaling rapid adoption at the exact moment coding agents like Claude Code, Cursor, and Gemini CLI are becoming primary development workflows — making a fast, zero-dependency code intelligence layer directly useful right now.\n\n**Build with it:** Drop this into any multi-agent coding pipeline to give agents persistent structural memory of a repo — query call graphs, trace HTTP routes, or resolve type dependencies without burning context on raw file reads, enabling agents to navigate large monorepos or unfamiliar codebases without manual guidance.",
-      "pushed_at": "2026-06-20T05:42:49Z",
+      "brief": "**What it does:** codebase-memory-mcp is a single static binary MCP server that indexes entire codebases into a persistent knowledge graph using tree-sitter AST parsing across 158 languages, answering structural queries in under 1ms with 99% fewer tokens than file-by-file exploration.\n\n**Why now:** The project surged to 10,679 stars this week, signaling strong adoption momentum across major AI coding agents like Cursor, Claude Code, and Windsurf as developers look for ways to give LLMs durable codebase context without burning token budgets.\n\n**Build with it:** Drop it into any agent workflow to give your AI a persistent, queryable map of a large monorepo — then build on top of its 14 MCP tools to automate call-chain tracing, cross-service dependency analysis, or refactoring impact scans across millions of lines of code.",
+      "pushed_at": "2026-06-21T19:50:33Z",
       "is_new": false
-    },
-    {
-      "rank": 6,
-      "full_name": "palmier-io/palmier-pro",
-      "html_url": "https://github.com/palmier-io/palmier-pro",
-      "stars": 4278,
-      "stars_gained_7d": 2780,
-      "topics": [
-        "ai-video",
-        "claude",
-        "macos",
-        "mcp",
-        "seedance2",
-        "swift",
-        "video-editor"
-      ],
-      "language": "Swift",
-      "brief": "**What it does:** Palmier Pro is an open-source macOS video editor built in Swift that lets you and an AI agent edit the same timeline together, with built-in generative video/image models (Seedance, Kling) and an MCP server for connecting external agents via Claude Code, Codex, or Cursor.\n\n**Why now:** It gained 2,780 stars this week, likely driven by macOS 26 Tahoe momentum and growing developer interest in agent-native creative tools that expose real app state over MCP rather than wrapping APIs.\n\n**Build with it:** Fork the repo and extend the MCP server to add custom timeline tools—automate cut sequences from a transcript, trigger generative clip insertions based on script annotations, or wire it into a CI pipeline that renders and exports video assets programmatically.",
-      "pushed_at": "2026-06-20T21:03:35Z",
-      "is_new": true
     },
     {
       "rank": 7,
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
-      "stars": 198698,
-      "stars_gained_7d": 5484,
+      "stars": 199257,
+      "stars_gained_7d": 6043,
       "topics": [
         "ai",
         "ai-agent",
@@ -210,16 +210,16 @@
         "openclaw"
       ],
       "language": "Python",
-      "brief": "**What it does:** Hermes Agent is a self-improving AI agent from Nous Research that builds a persistent skill library from experience, maintains cross-session memory and user modeling, and runs across Telegram, Discord, CLI, and cloud backends—all against any LLM endpoint you choose.\n\n**Why now:** The repo just pulled 5,484 stars this week, signaling breakout traction, and its multi-platform model support makes it an immediate practical option as builders evaluate post-ChatGPT-4o and Claude 4 deployment targets.\n\n**Build with it:** Wire it to a $5 VPS via SSH backend, point it at your OpenRouter or Nous Portal key, and use its cron scheduler plus subagent delegation to automate multi-step workflows—data pipelines, nightly reports, or parallel code review—that persist and improve without your laptop staying on.",
-      "pushed_at": "2026-06-21T12:17:13Z",
+      "brief": "**What it does:** Hermes Agent is a self-improving AI agent framework from Nous Research that builds skills from experience, maintains persistent memory across sessions, and runs on any model or infrastructure — from a $5 VPS to serverless GPU clusters.\n\n**Why now:** With 6,043 new stars this week, the project is seeing a sharp spike in traction, likely driven by growing demand for agents that aren't locked to a single provider or local machine.\n\n**Build with it:** Wire it to your own model endpoint via OpenRouter or a custom URL, deploy it on a cloud VM, and let it handle scheduled tasks — nightly backups, daily reports, parallel subagent workstreams — while you interact through Telegram or Discord without touching your laptop.",
+      "pushed_at": "2026-06-22T05:46:55Z",
       "is_new": false
     },
     {
       "rank": 8,
       "full_name": "tw93/Pake",
       "html_url": "https://github.com/tw93/Pake",
-      "stars": 55651,
-      "stars_gained_7d": 5189,
+      "stars": 56435,
+      "stars_gained_7d": 5973,
       "topics": [
         "chatgpt",
         "claude",
@@ -236,16 +236,16 @@
         "youtube"
       ],
       "language": "Rust",
-      "brief": "**What it does:** Pake uses Rust and Tauri to wrap any webpage into a native desktop app (macOS, Windows, Linux) with a single CLI command, producing ~5MB binaries that are roughly 20x smaller than Electron equivalents.\n\n**Why now:** The project jumped 5,189 stars this week, signaling a surge of developer interest likely tied to builders wrapping AI tools like DeepSeek, Grok, and Claude into standalone desktop apps.\n\n**Build with it:** Run `pake <url>` to ship a lightweight desktop client for any internal tool, AI interface, or SaaS product without writing native code or managing an Electron dependency chain.",
-      "pushed_at": "2026-06-21T10:09:38Z",
+      "brief": "**What it does:** Pake wraps any webpage into a native desktop app using Rust and Tauri, producing installers under 10MB—roughly 20x smaller than Electron equivalents—with built-in shortcuts, drag-and-drop, and style customization via a single CLI command.\n\n**Why now:** The project gained nearly 6,000 stars this week, signaling a surge of developer interest likely tied to demand for lightweight native wrappers around fast-moving AI tools like DeepSeek, Grok, and Claude.\n\n**Build with it:** A builder could package any internal web tool or AI chat interface into a distributable desktop app in minutes—no Electron overhead, no complex config—then ship platform-specific binaries for Mac, Windows, and Linux using the GitHub Actions workflow without touching a local Rust environment.",
+      "pushed_at": "2026-06-22T06:10:36Z",
       "is_new": false
     },
     {
       "rank": 9,
       "full_name": "farion1231/cc-switch",
       "html_url": "https://github.com/farion1231/cc-switch",
-      "stars": 105528,
-      "stars_gained_7d": 5051,
+      "stars": 105934,
+      "stars_gained_7d": 5457,
       "topics": [
         "ai-tools",
         "claude-code",
@@ -269,16 +269,16 @@
         "wsl-support"
       ],
       "language": "Rust",
-      "brief": "**What it does:** CC Switch is a cross-platform desktop app (built with Tauri/Rust) that lets you manage and switch between multiple AI coding agents—Claude Code, Codex, Gemini CLI, OpenCode, OpenClaw, and Hermes—from a single interface, including provider credential management and MCP configuration.\n\n**Why now:** It pulled 5,051 GitHub stars this week alone, signaling that developers are actively hitting friction when juggling multiple AI coding tools and looking for a unified control layer.\n\n**Build with it:** Use CC Switch as a reference architecture for building multi-provider AI tool managers—specifically, study how it handles credential switching and MCP server orchestration across agents to add similar provider-agnostic routing to your own developer tooling.",
-      "pushed_at": "2026-06-19T15:38:25Z",
+      "brief": "**What it does:** CC Switch is a cross-platform desktop app (built with Tauri/Rust) that centralizes management of multiple AI coding agents—Claude Code, Codex, Gemini CLI, OpenCode, and others—letting you switch providers, manage API keys, and configure MCP from a single UI.\n\n**Why now:** It pulled 5,457 GitHub stars this week alone, signaling a critical mass of developers frustrated with juggling separate CLI configurations across competing AI coding tools that all launched or matured recently.\n\n**Build with it:** Use CC Switch as the shell around a multi-agent workflow—wire in your own MCP server, point different projects at different providers (e.g., Codex for refactoring, Gemini CLI for long-context), and manage credentials without touching config files manually.",
+      "pushed_at": "2026-06-22T02:59:31Z",
       "is_new": false
     },
     {
       "rank": 10,
       "full_name": "Leonxlnx/taste-skill",
       "html_url": "https://github.com/Leonxlnx/taste-skill",
-      "stars": 48151,
-      "stars_gained_7d": 4714,
+      "stars": 48600,
+      "stars_gained_7d": 5163,
       "topics": [
         "agent",
         "ai",
@@ -295,7 +295,7 @@
         "vibecoding"
       ],
       "language": "JavaScript",
-      "brief": "**What it does:** Taste-Skill is a collection of portable agent skills (markdown instruction files) that you drop into Codex, Cursor, or Claude Code to enforce opinionated layout, typography, spacing, and motion rules, preventing AI coding tools from generating visually generic UIs.\n\n**Why now:** The project jumped 4,714 stars this week, signaling that developers are actively frustrated with AI-generated frontend slop and are reaching for prompt-level guardrails rather than waiting for model improvements.\n\n**Build with it:** Install the skill via `npx skills add`, pair it with ChatGPT Images to generate reference frames, then hand those frames to Claude Code or Codex to produce polished frontends that don't look like Bootstrap defaults.",
+      "brief": "**What it does:** Taste-Skill is a set of portable Agent Skills (Markdown instruction files) you drop into Codex, Cursor, or Claude Code to enforce opinionated layout, typography, spacing, and motion rules so AI-generated frontends stop looking like boilerplate.\n\n**Why now:** It gained 5,163 stars this week, signaling a tipping point where developers are actively looking for ways to raise the quality floor on vibe-coded UIs rather than just accepting whatever the model produces by default.\n\n**Build with it:** Run `npx skills add https://github.com/Leonxlnx/taste-skill` to inject the design rules into your AI coding workflow, then pair the image-generation skills with ChatGPT Images to produce reference boards that feed directly into your Codex or Claude Code implementation loop.",
       "pushed_at": "2026-06-20T23:05:00Z",
       "is_new": false
     }
