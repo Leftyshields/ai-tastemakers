@@ -1,7 +1,7 @@
 {
   "schema_version": 1,
-  "run_id": "34a7eed0-5af8-42a5-b7d5-0fc472b7e9cc",
-  "generated_at": "2026-06-22T15:33:14.304Z",
+  "run_id": "dbf34660-dba0-42c0-b413-d6cfd4c4de45",
+  "generated_at": "2026-06-22T16:07:15.774Z",
   "ranking_mode": "delta_7d",
   "topic_queries": [
     "llm",
@@ -17,8 +17,8 @@
       "rank": 1,
       "full_name": "DietrichGebert/ponytail",
       "html_url": "https://github.com/DietrichGebert/ponytail",
-      "stars": 48837,
-      "stars_gained_7d": 35665,
+      "stars": 48920,
+      "stars_gained_7d": 35748,
       "topics": [
         "agent-skills",
         "ai-agents",
@@ -32,7 +32,7 @@
         "yagni"
       ],
       "language": "JavaScript",
-      "brief": "**What it does:** Ponytail is a prompt/plugin that installs a \"laziest senior dev\" persona into AI coding agents (Claude Code, Cursor, etc.), pushing them to prefer native browser APIs, stdlib, and deletions over generating new code.\n**Why now:** It went viral this week with 48K+ stars, validating a growing builder frustration that AI agents over-engineer by default and that a well-placed constraint prompt measurably cuts LOC, cost, and latency.\n**Build with it:** Drop the skill file into your Claude Code or Cursor setup and wire it into an agent that audits PRs or greenfield scaffolds — you get a automated \"do we actually need this dependency?\" gate before code lands in your repo.",
+      "brief": "**What it does:** Ponytail is a prompt skill/plugin for AI coding agents (Claude Code, Cursor, etc.) that instills a \"laziest senior dev\" mindset, pushing the agent to delete or avoid code rather than generate it, preferring native browser APIs and built-ins over installed dependencies.\n\n**Why now:** AI coding agents are actively trending toward over-building—installing libraries, scaffolding wrappers, and debating abstractions when a single HTML input would suffice—and this week's 35k+ new stars signal developers are feeling that pain acutely right now.\n\n**Build with it:** Drop the skill file into your agent configuration and prototype a feature-complete web app where every component defaults to a native element first, measuring how much smaller your diff is compared to a vanilla agent session.",
       "pushed_at": "2026-06-21T00:23:17Z",
       "is_new": false
     },
@@ -40,8 +40,8 @@
       "rank": 2,
       "full_name": "Panniantong/Agent-Reach",
       "html_url": "https://github.com/Panniantong/Agent-Reach",
-      "stars": 37620,
-      "stars_gained_7d": 7953,
+      "stars": 37646,
+      "stars_gained_7d": 7979,
       "topics": [
         "agent-infrastructure",
         "ai-agent",
@@ -62,7 +62,7 @@
         "youtube-transcript"
       ],
       "language": "Python",
-      "brief": "**What it does:** Agent Reach is a Python CLI that gives AI agents free, zero-API-key access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and more — handling auth, cookie management, and platform-specific scraping under a single unified interface.\n\n**Why now:** The project hit 37,620 stars with nearly 8,000 added this week, signaling a sharp spike in demand for agent-native internet access tooling as developers push Claude Code and Cursor agents beyond local codebases into real-time web research.\n\n**Build with it:** Wire Agent Reach into a Claude Code or Cursor workflow to build a competitive intelligence agent that autonomously pulls product sentiment from Twitter and XiaoHongShu, surfaces relevant Reddit threads, and summarizes YouTube explainers — all without paying for a single API.",
+      "brief": "**What it does:** Agent Reach is a Python CLI that gives AI agents free, zero-API-key access to Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu by routing around paywalls and blocks using browser cookies, MCP servers, and swappable backend adapters.\n\n**Why now:** It hit #1 on GitHub Trending this week with nearly 8,000 new stars, likely driven by the surge in Claude Code and Cursor users who need their agents to read live internet content without paying for platform APIs.\n\n**Build with it:** Drop it into any CLI-capable agent (Claude Code, Cursor, Windsurf) to build research pipelines that pull real-time social signals—competitor mentions on Twitter, Reddit bug threads, YouTube tutorial summaries—without writing a single scraper yourself.",
       "pushed_at": "2026-06-16T12:45:59Z",
       "is_new": false
     },
@@ -70,8 +70,8 @@
       "rank": 3,
       "full_name": "DeusData/codebase-memory-mcp",
       "html_url": "https://github.com/DeusData/codebase-memory-mcp",
-      "stars": 11117,
-      "stars_gained_7d": 7568,
+      "stars": 11158,
+      "stars_gained_7d": 7609,
       "topics": [
         "aider",
         "ast",
@@ -95,7 +95,7 @@
         "windsurf"
       ],
       "language": "C",
-      "brief": "**What it does:** codebase-memory-mcp is a single static binary MCP server that indexes codebases into a persistent knowledge graph using tree-sitter AST parsing across 158 languages, answering structural queries (functions, call chains, HTTP routes) in under 1ms with zero dependencies.\n\n**Why now:** It jumped 7,568 GitHub stars this week, signaling rapid adoption across the major AI coding agents (Cursor, Claude Code, Windsurf, Gemini CLI, Codex), and its backing arXiv paper demonstrates 83% answer quality with 10× fewer tokens than file-by-file exploration.\n\n**Build with it:** Drop it into any agent workflow to give your AI a persistent, queryable map of a large monorepo without burning context — or use its 14 MCP tools to build custom code-navigation tooling that survives across sessions and scales to kernel-sized codebases.",
+      "brief": "**What it does:** codebase-memory-mcp is a single static binary MCP server that indexes codebases into a persistent knowledge graph using tree-sitter AST parsing across 158 languages, answering structural queries about functions, call chains, and cross-service links in under 1ms with 99% fewer tokens than file-by-file exploration.\n\n**Why now:** It gained over 7,600 stars this week, signaling rapid adoption across the AI coding agent ecosystem, and its support for Claude Code, Cursor, Windsuff, Gemini CLI, and 7 other agents makes it immediately applicable to wherever builders are working today.\n\n**Build with it:** Drop it into your agent setup to give any LLM a navigable map of a large monorepo or multi-service codebase without burning context on raw file reads — particularly useful for building refactoring agents, dependency analyzers, or onboarding tools that need to reason about code structure at scale.",
       "pushed_at": "2026-06-22T07:19:51Z",
       "is_new": false
     },
@@ -103,8 +103,8 @@
       "rank": 4,
       "full_name": "tw93/Pake",
       "html_url": "https://github.com/tw93/Pake",
-      "stars": 56659,
-      "stars_gained_7d": 6161,
+      "stars": 56664,
+      "stars_gained_7d": 6166,
       "topics": [
         "chatgpt",
         "claude",
@@ -121,7 +121,7 @@
         "youtube"
       ],
       "language": "Rust",
-      "brief": "**What it does:** Pake is a Rust/Tauri-based CLI tool that wraps any URL into a native desktop app for macOS, Windows, and Linux, producing installers under 10MB—roughly 20x smaller than Electron equivalents.\n\n**Why now:** The project jumped 6,161 stars this week, signaling a surge of builders looking to ship lightweight desktop clients for AI tools like DeepSeek, Grok, and Claude without the overhead of a full Electron stack.\n\n**Build with it:** Run `pake <url>` to instantly package any internal tool, SaaS dashboard, or AI chat interface into a distributable desktop app with custom icons, keyboard shortcuts, and ad-stripping—no Rust experience required.",
+      "brief": "**What it does:** Pake is a Rust/Tauri-based CLI tool that wraps any webpage into a native desktop app for macOS, Windows, and Linux, producing installers under 10MB — roughly 20x smaller than Electron equivalents.\n\n**Why now:** The project gained 6,166 stars this week, signaling a surge of developer interest likely driven by demand for lightweight AI tool wrappers like the included DeepSeek, Grok, and Claude packages.\n\n**Build with it:** Run `pake <url>` to ship a branded desktop client for your web app in minutes — useful for turning internal tools, SaaS products, or AI interfaces into distributable native apps without maintaining a separate Electron codebase.",
       "pushed_at": "2026-06-22T06:10:36Z",
       "is_new": false
     },
@@ -129,8 +129,8 @@
       "rank": 5,
       "full_name": "ZhuLinsen/daily_stock_analysis",
       "html_url": "https://github.com/ZhuLinsen/daily_stock_analysis",
-      "stars": 45595,
-      "stars_gained_7d": 2961,
+      "stars": 45619,
+      "stars_gained_7d": 2985,
       "topics": [
         "a-stock",
         "ai-agent",
@@ -141,7 +141,7 @@
         "quantitative-trading"
       ],
       "language": "Python",
-      "brief": "**What it does:** An LLM-powered stock analysis system that pulls multi-source market data (A-share, HK, US, JP, KR), real-time news, and technical indicators, then generates daily AI decision reports with buy/sell signals pushed to WeChat Work, Feishu, Telegram, Slack, or email via GitHub Actions at zero hosting cost.\n\n**Why now:** It gained nearly 3,000 stars this week alone, hitting #1 Python Repository of the Day on Trendshift, signaling strong community momentum and active real-world use during a period of high retail investor interest in AI-augmented trading tools.\n\n**Build with it:** Fork the repo, wire in your own LLM API key (DeepSeek, Gemini, or Ollama locally), add your watchlist, and extend the 15 built-in strategy agents—momentum, Chan theory, wave analysis—to build a personalized automated research assistant that pushes nightly briefings to your team's Slack channel.",
+      "brief": "**What it does:** An LLM-powered stock analysis system that pulls multi-source market data (A-share, HK, US, JP, KR), runs AI-generated buy/sell decision reports with scoring and risk alerts, and pushes results to Slack, Telegram, WeChat, or email on a schedule via GitHub Actions at zero hosting cost.\n\n**Why now:** It gained nearly 3,000 stars this week, signaling strong community traction around agentic finance tooling at a moment when LLM APIs are cheap enough to make automated daily equity analysis practically free to run.\n\n**Build with it:** Fork the repo, wire in your own watchlist and an OpenAI-compatible API key, then extend the 15 built-in strategy agents (trend, momentum, event-driven, etc.) to prototype a custom quant signal pipeline that delivers daily briefings directly to your team's chat tool.",
       "pushed_at": "2026-06-22T14:42:54Z",
       "is_new": true
     },
@@ -149,8 +149,8 @@
       "rank": 6,
       "full_name": "NousResearch/hermes-agent",
       "html_url": "https://github.com/NousResearch/hermes-agent",
-      "stars": 199680,
-      "stars_gained_7d": 5475,
+      "stars": 199715,
+      "stars_gained_7d": 5510,
       "topics": [
         "ai",
         "ai-agent",
@@ -170,7 +170,7 @@
         "openclaw"
       ],
       "language": "Python",
-      "brief": "**What it does:** Hermes Agent is a self-improving AI agent from Nous Research that creates and refines skills from experience, maintains persistent memory across sessions, and runs across terminals, Telegram, Discord, Slack, and more — all pointing at any model you choose via a single config swap.\n\n**Why now:** The project crossed 199K stars with 5,475 added this week, signaling a sharp spike in builder attention likely tied to its multi-platform messaging support and serverless deployment options that make always-on agents cheap to run.\n\n**Build with it:** Drop it on a $5 VPS, wire it to Telegram or Discord, and let it autonomously schedule nightly backups, run parallel subagents on long research tasks, or accumulate a persistent skill library tailored to your specific workflow — without touching a line of model-switching code.",
+      "brief": "**What it does:** Hermes Agent is a self-improving AI agent framework from Nous Research that creates and refines skills from experience, maintains persistent memory across sessions, and runs on any infrastructure — from a $5 VPS to serverless Modal deployments — while connecting to 200+ models via OpenRouter and similar providers.\n\n**Why now:** The project gained 5,510 GitHub stars this week, signaling a surge in developer attention, and its multi-platform messaging support (Telegram, Discord, Slack, WhatsApp, Signal) makes it immediately deployable as a persistent cloud agent rather than a laptop-bound tool.\n\n**Build with it:** A builder could wire Hermes to a cheap cloud VM, expose it over Telegram, and let it autonomously run nightly data pipelines or cron-scheduled reports — accumulating task-specific skills over time without any manual prompt engineering between sessions.",
       "pushed_at": "2026-06-22T14:18:18Z",
       "is_new": false
     },
@@ -178,8 +178,8 @@
       "rank": 7,
       "full_name": "palmier-io/palmier-pro",
       "html_url": "https://github.com/palmier-io/palmier-pro",
-      "stars": 6822,
-      "stars_gained_7d": 5324,
+      "stars": 6860,
+      "stars_gained_7d": 5362,
       "topics": [
         "ai-video",
         "claude",
@@ -190,7 +190,7 @@
         "video-editor"
       ],
       "language": "Swift",
-      "brief": "**What it does:** Palmier Pro is an open-source macOS video editor built in Swift that lets you and AI agents edit the same timeline together, with built-in generative video/image models (Seedance, Kling) and an MCP server exposed locally at port 19789.\n\n**Why now:** It gained 5,324 stars this week, signaling strong builder interest, and ships with native MCP support for Claude Code, Codex, and Cursor—making it immediately usable with the agent toolchains most developers already run.\n\n**Build with it:** Connect your Claude or Cursor agent via MCP to programmatically cut, arrange, and generate video clips inside a real timeline editor, or fork the open-source Swift core to build your own AI-native video tooling on top of a working AVFoundation foundation.",
+      "brief": "**What it does:** Palmier Pro is an open-source macOS video editor built in Swift that lets you and AI agents collaboratively edit timelines, with built-in access to generative video models like Seedance and Kling, plus an MCP server for connecting Claude, Cursor, or Codex directly to your project.\n\n**Why now:** It gained 5,362 stars this week, likely surfing the wave of macOS 26 (Tahoe) developer excitement and growing demand for agent-native creative tools that go beyond chatbots into real application control.\n\n**Build with it:** Wire up a Claude Code agent via MCP to autonomously cut, arrange, and generate video clips on a live timeline—or extend the open-source Swift editor itself to add custom AI-driven effects, automated captioning, or domain-specific editing workflows.",
       "pushed_at": "2026-06-22T08:49:12Z",
       "is_new": false
     },
@@ -198,8 +198,8 @@
       "rank": 8,
       "full_name": "mukul975/Anthropic-Cybersecurity-Skills",
       "html_url": "https://github.com/mukul975/Anthropic-Cybersecurity-Skills",
-      "stars": 18328,
-      "stars_gained_7d": 2544,
+      "stars": 18359,
+      "stars_gained_7d": 2575,
       "topics": [
         "ai-agents",
         "claude-code",
@@ -223,7 +223,7 @@
         "threat-intelligence"
       ],
       "language": "Python",
-      "brief": "**What it does:** This open-source library provides 762 structured cybersecurity skills for AI agents across 26 security domains, each mapped to six industry frameworks (MITRE ATT&CK, NIST CSF 2.0, MITRE ATLAS, D3FEND, NIST AI RMF, and MITRE F3) in a standardized format compatible with Claude Code, Copilot, Cursor, and 20+ other platforms.\n\n**Why now:** The repo gained 2,544 stars this week, signaling strong community momentum, and the timing aligns with rapid adoption of agentic coding tools that lack domain-specific security context out of the box.\n\n**Build with it:** Drop these skill files into your AI agent's context to give it analyst-grade guidance for tasks like scoping a cloud breach, writing Sigma detection rules, or triaging a memory dump — without hand-crafting security prompts from scratch.",
+      "brief": "**What it does:** This open-source library provides 762 structured cybersecurity skills for AI agents, spanning 26 security domains and mapped across six frameworks including MITRE ATT&CK v19.1 and NIST CSF 2.0, following the agentskills.io standard for consistent skill definitions.\n\n**Why now:** The repo gained 2,575 stars this week, signaling strong community traction, and the addition of the MITRE Fight Fraud Framework (F3 v1.1) mapping makes it one of the first libraries to offer unified cross-framework coverage in a single structured format.\n\n**Build with it:** Drop these skills into Claude Code, Cursor, or any of the 26+ supported platforms to give your security agent the context to triage memory dumps, write Sigma rules, or scope cloud breaches without hand-holding every step.",
       "pushed_at": "2026-06-22T11:17:21Z",
       "is_new": true
     },
@@ -231,8 +231,8 @@
       "rank": 9,
       "full_name": "asgeirtj/system_prompts_leaks",
       "html_url": "https://github.com/asgeirtj/system_prompts_leaks",
-      "stars": 44900,
-      "stars_gained_7d": 2537,
+      "stars": 44905,
+      "stars_gained_7d": 2542,
       "topics": [
         "ai",
         "ai-agents",
@@ -256,7 +256,7 @@
         "prompt-engineering"
       ],
       "language": "JavaScript",
-      "brief": "**What it does:** A GitHub repository that extracts and publishes the hidden system prompts governing major AI assistants—Claude, ChatGPT, Gemini, Grok, Copilot, and others—making the exact instructions shaping their behavior publicly readable.\n\n**Why now:** The repo crossed 44,900 stars this week and added prompts for Claude Fable 5, GPT-5.5 Codex, and Claude Design, making it one of the most current public records of how frontier AI systems are actually instructed.\n\n**Build with it:** Use the leaked prompts as a reference corpus to reverse-engineer persona design, safety framing, and tool-use patterns—then apply those structures when writing system prompts for your own agents or fine-tuning datasets.",
+      "brief": "**What it does:** A regularly updated GitHub repository that extracts and publishes the hidden system prompts governing AI assistants like Claude, ChatGPT, Gemini, Grok, and Copilot, exposing the exact instructions shaping their behavior.\n\n**Why now:** The repo crossed 44,900 stars this week while adding prompts for Claude Fable 5, GPT-5.5 Codex, Claude Design, and GitHub Copilot for macOS, making it the most current public snapshot of how frontier AI systems are actually instructed.\n\n**Build with it:** Use the extracted prompts as a reference library to reverse-engineer tone, constraint patterns, and tool-calling conventions when designing your own agents, or diff consecutive model versions to detect capability and policy shifts before they're officially documented.",
       "pushed_at": "2026-06-22T00:28:36Z",
       "is_new": true
     },
@@ -264,8 +264,8 @@
       "rank": 10,
       "full_name": "hugohe3/ppt-master",
       "html_url": "https://github.com/hugohe3/ppt-master",
-      "stars": 30307,
-      "stars_gained_7d": 2499,
+      "stars": 30318,
+      "stars_gained_7d": 2510,
       "topics": [
         "ai-agent",
         "aippt",
@@ -279,7 +279,7 @@
         "slides"
       ],
       "language": "Python",
-      "brief": "**What it does:** PPT Master is a Python tool that uses AI to generate fully editable PPTX files—with native shapes, animations, speaker notes, and optional audio narration—from any input document, and can match an existing `.pptx` template you provide.\n\n**Why now:** The repo jumped 2,499 stars this week, signaling a surge of developer interest, and v2.11.0 just shipped with expanded template-following and narration features that make it practically useful rather than just a demo.\n\n**Build with it:** Wire it into a document pipeline—legal briefs, research papers, sales docs—to auto-generate client-ready decks on demand, or wrap it in an API endpoint that lets users upload a PDF and download a branded, editable PPTX in seconds.",
+      "brief": "**What it does:** PPT Master is a Python tool that converts any document into a natively editable PPTX file using AI, generating real shapes, animations, speaker notes, and optional audio narration — not slide screenshots — while respecting your own template file.\n\n**Why now:** The repo gained 2,510 stars this week, signaling a spike in developer interest, and v2.11.0 is freshly tagged, making this a good moment to catch an active release cycle before the API stabilizes.\n\n**Build with it:** Wire it into a document-to-deck pipeline — feed it meeting transcripts, research PDFs, or technical specs and auto-generate branded client presentations, investor decks, or internal reports that recipients can actually edit in PowerPoint.",
       "pushed_at": "2026-06-22T15:19:00Z",
       "is_new": true
     }
