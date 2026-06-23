@@ -27,33 +27,49 @@ jobs:
       TZ: America/Los_Angeles
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 10 # Fetch enough history to see today's earlier commits
 
-      - name: Check if already run today
-        id: duplicate_check
+      - name: Determine what to run
+        id: gate
         run: |
           TODAY=$(TZ=America/Los_Angeles date +%Y-%m-%d)
-          # Search the latest commit messages for today's date stamp
-          if git log --oneline -n 10 | grep -q "chore: daily digest ${TODAY}"; then
-            echo "already_run=true" >> "$GITHUB_OUTPUT"
-            echo "Digest for ${TODAY} was already committed earlier today. Skipping."
+          echo "date=${TODAY}" >> "$GITHUB_OUTPUT"
+
+          if [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
+            echo "skip_daily=true" >> "$GITHUB_OUTPUT"
+            echo "Daily briefings for ${TODAY} already exist — skipping digest pipeline"
           else
-            echo "already_run=false" >> "$GITHUB_OUTPUT"
+            echo "skip_daily=false" >> "$GITHUB_OUTPUT"
+          fi
+
+          RUN_WEEKLY=false
+          if [ "$(TZ=America/Los_Angeles date +%u)" -eq 7 ]; then
+            WEEK_ID=$(TZ=America/Los_Angeles date +%G-W%V)
+            echo "week_id=${WEEK_ID}" >> "$GITHUB_OUTPUT"
+            if [ ! -f "briefings/weekly/${WEEK_ID}/weekly_review.json" ]; then
+              RUN_WEEKLY=true
+              echo "Weekly review for ${WEEK_ID} missing — will run wrap-up"
+            else
+              echo "Weekly review for ${WEEK_ID} already exists"
+            fi
+          fi
+          echo "run_weekly=${RUN_WEEKLY}" >> "$GITHUB_OUTPUT"
+
+          if [ "${RUN_WEEKLY}" = "false" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
+            echo "Nothing to do — daily and weekly (if applicable) already published"
           fi
 
       - uses: actions/setup-node@v4
-        if: steps.duplicate_check.outputs.already_run != 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true'
         with:
           node-version: "20"
           cache: npm
 
       - name: Install dependencies
-        if: steps.duplicate_check.outputs.already_run != 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true'
         run: npm install
 
       - name: Run digest (OSS + Skills)
-        if: steps.duplicate_check.outputs.already_run != 'true'
+        if: steps.gate.outputs.skip_daily != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -68,21 +84,16 @@ jobs:
           npm run digest -- --edition skills
 
       - name: Run weekly wrap-up (Sundays)
-        if: steps.duplicate_check.outputs.already_run != 'true'
-        continue-on-error: true
+        if: steps.gate.outputs.run_weekly == 'true'
+        continue-on-error: ${{ steps.gate.outputs.skip_daily != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
-        run: |
-          if [ "$(TZ=America/Los_Angeles date +%u)" -eq 7 ]; then
-            npm run weekly
-          else
-            echo "Not Sunday in America/Los_Angeles — skipping weekly wrap-up"
-          fi
+        run: npm run weekly
 
       - name: Commit briefing
         id: commit
-        if: steps.duplicate_check.outputs.already_run != 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true'
         env:
           TZ: America/Los_Angeles
         run: |
@@ -94,13 +105,17 @@ jobs:
             echo "No briefing changes to commit"
             exit 0
           fi
-          git commit -m "chore: daily digest $(date +%Y-%m-%d)"
+          if [ "${{ steps.gate.outputs.skip_daily }}" = "true" ]; then
+            git commit -m "chore: weekly wrap-up ${{ steps.gate.outputs.week_id }}"
+          else
+            git commit -m "chore: daily digest $(date +%Y-%m-%d)"
+          fi
           git pull --rebase origin main
           git push
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
       - name: Deploy GitHub Pages
-        if: steps.duplicate_check.outputs.already_run != 'true' && steps.commit.outputs.committed == 'true'
+        if: steps.commit.outputs.committed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run "Deploy GitHub Pages" --ref main
