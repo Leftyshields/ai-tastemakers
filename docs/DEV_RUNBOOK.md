@@ -6,6 +6,7 @@
 |------|---------|
 | **Digest pipeline** | `npm run digest` — GitHub discovery → rank → Claude → briefing files |
 | **Weekly wrap-up** | `npm run weekly` — aggregate 7 days of digests → Claude editorial → `briefings/weekly/` |
+| **Monthly rollup** | `npm run monthly` — aggregate weekly reviews in month → Claude editorial → `briefings/monthly/` |
 | **Genesis runtime** | `lib/`, `npm test` — framework organism tests |
 | **Bootstrap ranking** | First ~7 days before 7-day star deltas are reliable |
 
@@ -15,6 +16,7 @@
 |---------|---------|-------|
 | Daily digest | `npm run digest` | Requires `.env` with tokens |
 | Weekly wrap-up | `npm run weekly` | Requires 7 full days × both editions; `--week 2026-W23` to target ISO week |
+| Monthly rollup | `npm run monthly` | Requires 2+ weekly reviews in month before rollup week; `--month 2026-06` |
 | Skills digest | `npm run digest:skills` | Same tokens as daily |
 | Digest tests | `npm run test:digest` | Mocked GitHub/Claude |
 | Typecheck/build | `npm run build:digest` | Emits `dist/tastemaker/` |
@@ -62,6 +64,7 @@ See `firebase/README.md` for setup.
 | Empty briefing | Filters too strict or search returned nothing | Lower `DIGEST_MIN_STARS` temporarily for debug |
 | GHA commit step skipped | No file changes | Expected if digest identical; check workflow logs |
 | `Skipping weekly … Incomplete week` | Fewer than 7 days × both editions | Normal until ~7 daily runs complete; first weekly ~Sunday after full week |
+| `Skipping monthly … Incomplete month` | Fewer than 2 weekly reviews in month before rollup week | Normal early in month or if weekly runs failed |
 | `Weekly skipped` locally | Same completeness gate | Seed 14 `digest.json` files or wait for production data |
 | Same-day re-run reshuffled top 10 | Soft-dedup penalized today's existing `briefings/YYYY-MM-DD/` | Fixed: pipeline excludes current date from dedup; still prefer GHA over local re-run for verification |
 | Digest stars ≠ snapshot stars | Enrich re-fetched live GitHub counts | Fixed: pipeline keeps `stars` from discovery/snapshot; enrich supplies metadata only |

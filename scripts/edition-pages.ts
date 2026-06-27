@@ -152,6 +152,130 @@ export async function listWeeklyReviewWeeks(repoRoot: string): Promise<string[]>
     .sort((a, b) => b.localeCompare(a));
 }
 
+export async function listMonthlyReviewMonths(repoRoot: string): Promise<string[]> {
+  const monthlyDir = path.join(repoRoot, "briefings", "monthly");
+  let entries: string[];
+  try {
+    entries = await fs.readdir(monthlyDir);
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((e) => /^\d{4}-\d{2}$/.test(e))
+    .sort((a, b) => b.localeCompare(a));
+}
+
+async function readGeneratedAt(jsonPath: string): Promise<string | undefined> {
+  try {
+    const raw = await fs.readFile(jsonPath, "utf8");
+    const parsed = JSON.parse(raw) as { generated_at?: string };
+    return parsed.generated_at;
+  } catch {
+    return undefined;
+  }
+}
+
+export interface WrapUpArchive {
+  weeks: string[];
+  months: string[];
+  weeklyLatest?: string;
+  monthlyLatest?: string;
+  weeklyGeneratedAt?: string;
+  monthlyGeneratedAt?: string;
+  weekHref: (weekId: string) => string;
+  monthHref: (monthId: string) => string;
+}
+
+export async function buildWrapUpArchive(
+  repoRoot: string,
+  siteSegment?: string,
+): Promise<WrapUpArchive | undefined> {
+  const weeks = await listWeeklyReviewWeeks(repoRoot);
+  const months = await listMonthlyReviewMonths(repoRoot);
+  if (weeks.length === 0 && months.length === 0) return undefined;
+
+  const weeklyLatest = weeks[0];
+  const monthlyLatest = months[0];
+  const weeklyGeneratedAt = weeklyLatest
+    ? await readGeneratedAt(
+        path.join(repoRoot, "briefings", "weekly", weeklyLatest, "weekly_review.json"),
+      )
+    : undefined;
+  const monthlyGeneratedAt = monthlyLatest
+    ? await readGeneratedAt(
+        path.join(repoRoot, "briefings", "monthly", monthlyLatest, "monthly_review.json"),
+      )
+    : undefined;
+
+  const weekHref = (weekId: string) =>
+    siteSegment ? `../weekly/${weekId}.html` : `weekly/${weekId}.html`;
+  const monthHref = (monthId: string) =>
+    siteSegment ? `../monthly/${monthId}.html` : `monthly/${monthId}.html`;
+
+  return {
+    weeks,
+    months,
+    weeklyLatest,
+    monthlyLatest,
+    weeklyGeneratedAt,
+    monthlyGeneratedAt,
+    weekHref,
+    monthHref,
+  };
+}
+
+function formatMonthLabel(monthId: string): string {
+  const [y, m] = monthId.split("-").map(Number);
+  return new Date(y, m - 1, 1).toLocaleDateString("en-US", {
+    year: "numeric",
+    month: "long",
+  });
+}
+
+function wrapUpCtaHtml(wrap?: WrapUpArchive): string {
+  if (!wrap) return "";
+
+  const weeklyTime = wrap.weeklyGeneratedAt ?? "";
+  const monthlyTime = wrap.monthlyGeneratedAt ?? "";
+  const pill =
+    "inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800";
+
+  if (
+    wrap.monthlyLatest &&
+    monthlyTime &&
+    (monthlyTime >= weeklyTime || !wrap.weeklyLatest)
+  ) {
+    return `<a class="${pill}" href="${wrap.monthHref(wrap.monthlyLatest)}">This month&rsquo;s rollup</a>`;
+  }
+  if (wrap.weeklyLatest) {
+    return `<a class="${pill}" href="${wrap.weekHref(wrap.weeklyLatest)}">This week&rsquo;s wrap-up</a>`;
+  }
+  return "";
+}
+
+function monthlyArchiveSection(
+  months: string[],
+  monthHref: (monthId: string) => string,
+): string {
+  if (months.length === 0) return "";
+  const items = months
+    .map(
+      (m) =>
+        `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
+          <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${monthHref(m)}">
+            ${formatMonthLabel(m)}
+          </a>
+        </li>`,
+    )
+    .join("\n");
+  return `
+    <section id="monthly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
+      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Monthly rollups</h2>
+      <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Fourth-Sunday synthesis across weekly reviews &mdash; month-level themes and builder takeaways.</p>
+      <ul class="m-0 list-none p-0">${items}</ul>
+    </section>`;
+}
+
 export async function listBriefingDates(briefingsDir: string): Promise<string[]> {
   let entries: string[];
   try {
@@ -205,12 +329,9 @@ function ossIndexBody(
   paths: SitePaths,
   dates: string[],
   latest?: string,
-  weekly?: { weeks: string[]; latest?: string; weekHref: (weekId: string) => string },
+  wrapUp?: WrapUpArchive,
 ): string {
-  const weeklyCta =
-    weekly?.latest
-      ? `<a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm transition hover:border-stone-400 hover:bg-stone-50 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100 dark:hover:border-stone-500 dark:hover:bg-stone-800" href="${weekly.weekHref(weekly.latest)}">This week&rsquo;s wrap-up</a>`
-      : "";
+  const weeklyCta = wrapUpCtaHtml(wrapUp);
 
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
@@ -270,7 +391,8 @@ function ossIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>
-    ${weekly ? weeklyArchiveSection(weekly.weeks, weekly.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "skills")}`;
 }
 
@@ -299,16 +421,13 @@ function skillsIndexBody(
   dates: string[],
   edition: EditionDefinition,
   latest?: string,
-  weekly?: { weeks: string[]; latest?: string; weekHref: (weekId: string) => string },
+  wrapUp?: WrapUpArchive,
 ): string {
   const inspiration = edition.inspiration
     ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a> — installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
     : "";
 
-  const weeklyCta =
-    weekly?.latest
-      ? `<a class="inline-block rounded-full border border-stone-300 bg-white px-6 py-3 font-sans text-sm font-semibold text-stone-800 shadow-sm dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100" href="${weekly.weekHref(weekly.latest)}">Weekly wrap-up</a>`
-      : "";
+  const weeklyCta = wrapUpCtaHtml(wrapUp);
 
   const heroActions = latest
     ? `<div class="flex flex-wrap items-center gap-3 md:gap-4">
@@ -346,8 +465,68 @@ function skillsIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.</li>"}</ul>
     </section>
-    ${weekly ? weeklyArchiveSection(weekly.weeks, weekly.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "oss")}`;
+}
+
+function monthlyPagePaths(): SitePaths {
+  return {
+    css: "../assets/style.css",
+    home: "../",
+    subscribe: "../subscribe.html",
+    brief: () => "../",
+    editionNav: { ossHref: "../", skillsHref: "../skills/", active: undefined },
+  };
+}
+
+export async function buildMonthlySite(
+  repoRoot: string,
+  siteDir: string,
+  escapeHtml: (t: string) => string,
+): Promise<number> {
+  const months = await listMonthlyReviewMonths(repoRoot);
+  const outDir = path.join(siteDir, "monthly");
+  await fs.mkdir(outDir, { recursive: true });
+
+  const brand = {
+    name: "Tastemakers Monthly",
+    tagline: "Monthly rollup of AI Tastemakers and Skill Tastemakers",
+  };
+  const paths = monthlyPagePaths();
+
+  for (const monthId of months) {
+    const mdPath = path.join(repoRoot, "briefings", "monthly", monthId, "monthly_review.md");
+    let markdown: string;
+    try {
+      markdown = await fs.readFile(mdPath, "utf8");
+    } catch {
+      continue;
+    }
+    const html = marked.parse(markdown) as string;
+    const body = `
+      <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}#monthly-archive">All monthly rollups</a>
+      </nav>
+      <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+    await fs.writeFile(
+      path.join(outDir, `${monthId}.html`),
+      pageShell(
+        `Monthly Rollup — ${monthId}`,
+        body,
+        paths,
+        brand,
+        "Monthly editorial synthesis across weekly Tastemakers reviews.",
+        escapeHtml,
+      ),
+    );
+  }
+
+  return months.length;
 }
 
 function weeklyPagePaths(): SitePaths {
@@ -452,25 +631,13 @@ export async function buildEditionSite(
     );
   }
 
-  const weeklyWeeks = await listWeeklyReviewWeeks(repoRoot);
-  const weeklyLatest = weeklyWeeks[0];
-  const weeklyForEdition =
-    weeklyWeeks.length > 0
-      ? {
-          weeks: weeklyWeeks,
-          latest: weeklyLatest,
-          weekHref: (weekId: string) =>
-            edition.siteSegment
-              ? `../weekly/${weekId}.html`
-              : `weekly/${weekId}.html`,
-        }
-      : undefined;
+  const wrapUp = await buildWrapUpArchive(repoRoot, edition.siteSegment);
 
   const indexPaths = editionSitePaths(edition.siteSegment, 0);
   const indexBody =
     edition.id === "skills"
-      ? skillsIndexBody(indexPaths, dates, edition, dates[0], weeklyForEdition)
-      : ossIndexBody(indexPaths, dates, dates[0], weeklyForEdition);
+      ? skillsIndexBody(indexPaths, dates, edition, dates[0], wrapUp)
+      : ossIndexBody(indexPaths, dates, dates[0], wrapUp);
 
   const indexDescription =
     edition.id === "skills"

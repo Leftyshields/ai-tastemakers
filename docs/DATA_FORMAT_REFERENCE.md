@@ -121,6 +121,50 @@ _2026-06-01 – 2026-06-07 · generated …_
 
 Published as `site/weekly/YYYY-Www.html` via `npm run build:pages`.
 
+## Monthly review envelope (`briefings/monthly/YYYY-MM/monthly_review.json`)
+
+```json
+{
+  "schema_version": 1,
+  "month_id": "2026-06",
+  "month_start": "2026-06-01",
+  "month_end": "2026-06-30",
+  "source_week_ids": ["2026-W23", "2026-W24", "2026-W25"],
+  "month_stats": {
+    "total_stars_gained": { "oss": 1350, "skills": 900 },
+    "top_topics": { "oss": ["llm", "mcp"], "skills": ["ai-skill"] },
+    "source_week_ids": ["2026-W23", "2026-W24", "2026-W25"]
+  },
+  "narrative": {
+    "opening": "…",
+    "oss": "…",
+    "skills": "…",
+    "cross_lane": "…",
+    "takeaway": "…"
+  },
+  "generated_at": "2026-06-22T14:00:00.000Z"
+}
+```
+
+Stats sum weekly `total_stars_gained` per edition (no cross-week repo dedupe). Narrative is Claude-generated from weekly `narrative` text + `month_stats` (not concatenation). Runs on the **fourth Sunday** of each month; replaces that week's weekly artifact.
+
+## Monthly markdown (`briefings/monthly/YYYY-MM/monthly_review.md`)
+
+```markdown
+# Tastemakers Monthly — 2026-06
+
+_2026-06-01 – 2026-06-30 · generated …_
+
+## Month at a glance
+- **AI Tastemakers:** …
+- **Skill Tastemakers:** …
+
+## Opening
+…
+```
+
+Published as `site/monthly/YYYY-MM.html` via `npm run build:pages`.
+
 ## GitHub Search → candidate (internal)
 
 Maps GitHub API `items[]` fields: `full_name`, `html_url`, `stargazers_count` → `stars`, `topics`, `description`, `pushed_at`, `language`, `fork`, `archived`.
@@ -138,4 +182,6 @@ Structured text block: name, description, topics, stars, delta, readme excerpt (
 | Negative star delta | ranking | exclude from top 10 |
 | Missing 7d snapshot | ranking_mode | bootstrap per design_decisions |
 | 7× daily digest.json (×2 editions) | weekly_review.json stats | aggregate in `weekly/aggregate.ts` |
+| weekly_review.json (×2+ in month) | monthly_review.json month_stats | sum in `monthly/aggregate.ts` |
+| weekly_review.narrative | monthly_review narrative | Claude synthesis in `narrate/monthly.ts` |
 | daily repo.brief | weekly standouts excerpt | parse `**What it does:**` first sentence |

@@ -123,6 +123,48 @@ export interface WeeklyConfig {
   anthropicModel: string;
 }
 
+/** Same section keys as weekly editorial synthesis. */
+export type MonthlyNarrative = WeeklyNarrative;
+
+export interface MonthEditionStats {
+  total_stars_gained: number;
+  top_topics: string[];
+}
+
+export interface MonthStats {
+  total_stars_gained: { oss: number; skills: number };
+  top_topics: { oss: string[]; skills: string[] };
+  source_week_ids: string[];
+}
+
+export interface MonthlySourceWeek {
+  week_id: string;
+  week_start: string;
+  week_end: string;
+  review: WeeklyReview;
+}
+
+export interface MonthlyAggregate {
+  month_id: string;
+  month_start: string;
+  month_end: string;
+  sources: MonthlySourceWeek[];
+  stats: MonthStats;
+}
+
+export interface MonthlyReview {
+  schema_version: 1;
+  month_id: string;
+  month_start: string;
+  month_end: string;
+  source_week_ids: string[];
+  month_stats: MonthStats;
+  narrative: MonthlyNarrative;
+  generated_at: string;
+}
+
+export type MonthlyConfig = WeeklyConfig;
+
 export interface AppConfig {
   githubToken: string;
   anthropicApiKey: string;

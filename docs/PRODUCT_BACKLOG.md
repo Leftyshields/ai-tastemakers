@@ -11,8 +11,8 @@ Follow-on work for the digest app (`src/tastemaker/`). Ordered loosely by priori
 | DIST-1 | Slack / Substack distribution | Backlog | Optional channels beyond Resend email |
 | RANK-1 | Ranking tuning | Backlog | Bootstrap quality after ~7 days of snapshots; tune `DIGEST_MAX_STARS_BOOTSTRAP`, blocklist |
 | UX-1 | Brief page repo cards + TOC | Backlog | Richer brief pages on GitHub Pages |
-| OPS-1 | Alert on digest/email failure | Backlog | Notify when GHA digest or Resend send fails |
-| QA-1 | Manual `/qa_checklist` pass | Backlog | Checklist run documented |
+| OPS-1 | Alert on digest/email failure | **Partial** | Verify workflow + `DIGEST_ALERT_TO` shipped; direct GHA failure alert + non-blocking email still open |
+| QA-1 | Manual `/qa_checklist` pass | **Done** | `.ai/context/qa_checklist_daily-digest-reliability.md`; production spot-check 2026-06-27 |
 
 ---
 

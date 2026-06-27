@@ -41,31 +41,27 @@ jobs:
             echo "skip_daily=false" >> "$GITHUB_OUTPUT"
           fi
 
-          RUN_WEEKLY=false
-          if [ "$(TZ=America/Los_Angeles date +%u)" -eq 7 ]; then
-            WEEK_ID=$(TZ=America/Los_Angeles date +%G-W%V)
-            echo "week_id=${WEEK_ID}" >> "$GITHUB_OUTPUT"
-            if [ ! -f "briefings/weekly/${WEEK_ID}/weekly_review.json" ]; then
-              RUN_WEEKLY=true
-              echo "Weekly review for ${WEEK_ID} missing — will run wrap-up"
-            else
-              echo "Weekly review for ${WEEK_ID} already exists"
-            fi
-          fi
-          echo "run_weekly=${RUN_WEEKLY}" >> "$GITHUB_OUTPUT"
+          node scripts/sunday-wrap-gate.mjs >> "$GITHUB_OUTPUT"
 
-          if [ "${RUN_WEEKLY}" = "false" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
-            echo "Nothing to do — daily and weekly (if applicable) already published"
+          if [ "$(grep '^run_weekly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "true" ]; then
+            echo "Sunday weekly wrap-up will run if gate passed"
+          fi
+          if [ "$(grep '^run_monthly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "true" ]; then
+            echo "Fourth-Sunday monthly rollup will run if gate passed"
+          fi
+
+          if [ "$(grep '^run_weekly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ "$(grep '^run_monthly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
+            echo "Nothing to do — daily and wrap-up (if applicable) already published"
           fi
 
       - uses: actions/setup-node@v4
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true'
         with:
           node-version: "20"
           cache: npm
 
       - name: Install dependencies
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true'
         run: npm install
 
       - name: Run digest (OSS + Skills)
@@ -83,6 +79,14 @@ jobs:
           npm run digest -- --edition oss
           npm run digest -- --edition skills
 
+      - name: Run monthly rollup (fourth Sunday)
+        if: steps.gate.outputs.run_monthly == 'true'
+        continue-on-error: ${{ steps.gate.outputs.skip_daily != 'true' }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: npm run monthly
+
       - name: Run weekly wrap-up (Sundays)
         if: steps.gate.outputs.run_weekly == 'true'
         continue-on-error: ${{ steps.gate.outputs.skip_daily != 'true' }}
@@ -93,7 +97,7 @@ jobs:
 
       - name: Commit briefing
         id: commit
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true'
         env:
           TZ: America/Los_Angeles
         run: |
@@ -106,7 +110,15 @@ jobs:
             exit 0
           fi
           if [ "${{ steps.gate.outputs.skip_daily }}" = "true" ]; then
-            git commit -m "chore: weekly wrap-up ${{ steps.gate.outputs.week_id }}"
+            if [ "${{ steps.gate.outputs.run_monthly }}" = "true" ]; then
+              git commit -m "chore: monthly rollup ${{ steps.gate.outputs.month_id }}"
+            else
+              git commit -m "chore: weekly wrap-up ${{ steps.gate.outputs.week_id }}"
+            fi
+          elif [ "${{ steps.gate.outputs.run_monthly }}" = "true" ]; then
+            git commit -m "chore: daily digest $(date +%Y-%m-%d) + monthly rollup ${{ steps.gate.outputs.month_id }}"
+          elif [ "${{ steps.gate.outputs.run_weekly }}" = "true" ]; then
+            git commit -m "chore: daily digest $(date +%Y-%m-%d) + weekly wrap-up ${{ steps.gate.outputs.week_id }}"
           else
             git commit -m "chore: daily digest $(date +%Y-%m-%d)"
           fi

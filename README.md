@@ -22,7 +22,9 @@ Each daily run (both editions):
 4. Writes `briefings/<edition>/YYYY-MM-DD/daily_brief.md` + `digest.json`
 5. Optionally emails subscribers (Resend) and deploys to GitHub Pages
 
-**Sundays:** After both daily digests, `npm run weekly` aggregates seven days of `digest.json` (OSS + Skills), calls Claude once for a combined editorial, and writes `briefings/weekly/YYYY-Www/weekly_review.{md,json}`. Skips cleanly until all seven Mon–Sun days exist for both editions.
+**Sundays (1st–3rd):** After both daily digests, `npm run weekly` aggregates seven days of `digest.json` (OSS + Skills), calls Claude once for a combined editorial, and writes `briefings/weekly/YYYY-Www/weekly_review.{md,json}`.
+
+**Fourth Sunday each month:** `npm run monthly` runs instead of weekly — synthesizes prior weekly reviews in that calendar month into `briefings/monthly/YYYY-MM/monthly_review.{md,json}`.
 
 ### Editions
 
@@ -31,6 +33,7 @@ Each daily run (both editions):
 | AI Tastemakers (OSS) | `npm run digest` | `briefings/YYYY-MM-DD/` | `/` |
 | Skill Tastemakers | `npm run digest:skills` | `briefings/skills/YYYY-MM-DD/` | `/skills/` |
 | Tastemakers Weekly | `npm run weekly` | `briefings/weekly/YYYY-Www/` | `/weekly/YYYY-Www.html` |
+| Tastemakers Monthly | `npm run monthly` | `briefings/monthly/YYYY-MM/` | `/monthly/YYYY-MM.html` |
 
 ---
 
@@ -58,6 +61,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 | `npm run digest` | Run OSS digest pipeline |
 | `npm run digest:skills` | Run Skill Tastemakers pipeline |
 | `npm run weekly` | Weekly wrap-up from daily digests (`--week 2026-W23` optional) |
+| `npm run monthly` | Monthly rollup from weekly reviews (`--month 2026-06` optional) |
 | `npm run test:digest` | Unit + integration tests (75) |
 | `npm run build:digest` | Compile TypeScript |
 | `npm run build:pages` | Build static site from `briefings/` → `site/` (Tailwind CSS) |
@@ -67,7 +71,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 
 ## Scheduling & deploy
 
-**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays**, the same workflow runs `npm run weekly` after the daily digests (skips if the week is incomplete; `continue-on-error` so a synthesis failure does not block the daily commit).
+**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays** (except fourth Sunday), runs `npm run weekly` after daily digests. On **fourth Sunday**, runs `npm run monthly` instead (`continue-on-error` on wrap-up so synthesis failure does not block daily commit).
 
 Required repo secret: `ANTHROPIC_API_KEY`. `GITHUB_TOKEN` uses the default Actions token for public search.
 

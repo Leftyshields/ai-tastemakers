@@ -1,0 +1,30 @@
+# Tastemakers Monthly — 2026-06
+
+_2026-06-01 – 2026-06-30 · generated 2026-06-27T23:14:33.163Z_
+
+## Month at a glance
+
+- **AI Tastemakers:** +278,859 stars gained (summed across weekly rollups) · top topics: c, l, a, u, d
+- **Skill Tastemakers:** +205,624 stars gained (summed across weekly rollups) · top topics: c, l, a, u, d
+- **Weekly sources:** 2026-W24, 2026-W25
+
+## Opening
+
+June 2026 was a two-week sprint that generated **278,859 stars** in the OSS lane and **205,624** in skills — numbers that would have been a strong full month twelve months ago. The month opened in W24 with a compression thesis and closed in W25 with that thesis validated at a scale that made people double-check the data: Ponytail alone pulled over 400K combined stars across both lanes in its second week. What changed between the weeks wasn't the cast of characters — most of the top repos carried over — but the *magnitude* of conviction behind them, as the community moved from "this is interesting" to "this is infrastructure." June was less a discovery month than a consolidation month, and that distinction matters for where you place your bets in July.
+
+## AI Tastemakers
+
+The OSS lane's defining arc was the shift from *capability* to *efficiency* as the primary optimization target. W24's headliner was **mvanhorn/last30days-skill** — a parallel-retrieval agent that weighted results by actual engagement signals — which read as a capability story: agents that know what's actually happening right now. By W25, the two dominant repos were **DietrichGebert/ponytail** and **chopratejas/headroom**, both of which succeed by reducing what an agent does rather than expanding it: one enforces a laziness hierarchy before writing any code, the other compresses context 60–95% before it reaches the model. **elder-plinius/CL4R1T4S** and **Panniantong/Agent-Reach** ran strong across both weeks, signaling that transparency (what are models actually being told?) and reach (what can agents actually see?) are durable interests, not spikes. The month's OSS lesson is blunt: the repos that compounded week-over-week were the ones solving runtime cost and behavioral predictability, not raw capability.
+
+## Skill Tastemakers
+
+The skills lane in June made one thing unmistakably clear — opinionated constraints packaged as portable behavioral contracts are the format that sticks. **chopratejas/headroom** led the skills lane in W24 before **DietrichGebert/ponytail** overtook everything in W25 with 219K stars in the skills lane alone, actually *outpacing* its own OSS number, which means the skills community adopted it as a behavioral contract to drop directly into agent workflows rather than as a library to integrate. **addyosmani/agent-skills** was the month's most actionable new entry: six slash commands encoding senior-engineer gate logic — spec, plan, build, test, review, ship — as enforced sequence rather than suggestions. **op7418/guizang-ppt-skill** running all seven days of W24 quietly proved that aesthetic scaffolding (typography rules, layout systems for generated slides) has a real audience, a category that barely existed six months ago. The skills format is maturing into a medium for encoding hard-won engineering judgment, not just prompt shortcuts.
+
+## Cross-Lane Themes
+
+The cross-lane overlap rate jumped sharply from W24 (three shared repos) to W25 (fifteen), and that isn't noise — it reflects a genuine architectural moment where the boundary between "a library you install" and "a skill you give your agent" is dissolving. **Headroom** is the clearest illustration: it ships as a Python library, an MCP server, and a one-command agent wrapper simultaneously, and builders starred it in both contexts across both weeks. The shared topic lists — `claude-code`, `claude`, `llm`, `mcp` — were nearly identical across lanes all month, confirming the audience is the same builders wearing different hats, not two separate communities. When a repo charted in both lanes for a full week in June, the pattern was consistent: it solved a *runtime* problem (context budget, cross-session memory, multi-platform access) rather than a task-specific one, and that's the architectural category to track going forward.
+
+## Builder Takeaway
+
+June's compounding stars went to tools that make agents **cheaper to run and harder to break**, not smarter — internalize that before designing your next project. The ponytail-plus-headroom pairing suggests a concrete meta-pattern: enforce what the agent *won't* do (YAGNI ladder) before optimizing what it *can* do (context compression), and you get predictable, auditable behavior without touching the model. If you're building skills, study **addyosmani/agent-skills** as a structural template — encoding workflow gates as slash commands rather than prose instructions is the difference between a suggestion and a contract. The repos that held rankings across both weeks weren't riding a launch announcement; they were solving retrieval grounding, context cost, and behavioral discipline — the three unglamorous problems that determine whether an agent actually ships value in production.
+

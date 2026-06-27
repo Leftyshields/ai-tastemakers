@@ -5,6 +5,7 @@ import { config as loadDotenv } from "dotenv";
 import {
   allEditions,
   buildEditionSite,
+  buildMonthlySite,
   buildWeeklySite,
   editionSitePaths,
   pageShell,
@@ -341,11 +342,13 @@ async function main(): Promise<void> {
   }
   const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml);
   total += weeklyCount;
+  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml);
+  total += monthlyCount;
 
   await buildSubscribePage();
   await buildUnsubscribePage();
   console.log(
-    `Built ${total} page(s) (briefings + weekly) across editions + subscribe + unsubscribe → site/`,
+    `Built ${total} page(s) (briefings + weekly + monthly) across editions + subscribe + unsubscribe → site/`,
   );
 }
 
