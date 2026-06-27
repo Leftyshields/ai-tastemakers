@@ -1,0 +1,104 @@
+# Skill Tastemakers — Daily Brief — 2026-06-27
+
+_Ranking: delta_7d · 10 repos · generated 2026-06-27T13:55:43.758Z_
+
+
+## 1. DietrichGebert/ponytail
+
+https://github.com/DietrichGebert/ponytail · ★ 61097 (+22008 this week) · agent-skills, ai-agents, claude, claude-code, claude-code-plugin, cursor-rules, developer-tools, llm, prompt-engineering, yagni
+
+**What it does:** Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that injects a "laziest senior dev" heuristic—pushing the agent to delete, simplify, or skip code entirely rather than over-build, averaging 54% fewer lines of code written per task.
+
+**Why now:** It hit 61,097 stars with 22,008 added this week, coinciding with peak adoption of agentic coding tools where runaway code generation and token costs are a real pain point for teams running Claude Code at scale.
+
+**Build with it:** Drop the skill into your Claude Code or Cursor setup to cut token costs ~20% and generation time ~27% on feature work—useful if you're building internal dev tooling, scaffolding agents for a product, or just trying to keep an AI-assisted codebase from bloating under daily iteration.
+
+## 2. calesthio/OpenMontage
+
+https://github.com/calesthio/OpenMontage · ★ 24602 (+10219 this week) · agent, agentic-ai, ai, claude, copilot, cursor, elevenlabs, ffmpeg, flux, image-generation, open-source, openai, python, remotion, stable-diffusion, text-to-speech, text-to-video, video-generation, video-production
+
+**What it does:** OpenMontage is an open-source agentic video production system that gives AI coding assistants (Cursor, Claude, Copilot) 52 tools and 12 pipelines to handle the full stack — research, scripting, asset generation, editing, and final render — producing real motion-clip videos, not just animated slideshows.
+
+**Why now:** It hit #1 on GitHub Trending this week with 10k+ new stars, and its demo outputs (a $1.33 animated short, a $0.69 product ad) are circulating as concrete proof that agentic video pipelines are now cheap enough to matter for indie builders.
+
+**Build with it:** Wire it into your existing AI coding assistant and ship a video pipeline for your product — think auto-generated changelogs as narrated demos, personalized video ads from a prompt, or a batch content engine pulling from stock footage archives and rendering finished cuts without touching a timeline editor.
+
+## 3. DeusData/codebase-memory-mcp
+
+https://github.com/DeusData/codebase-memory-mcp · ★ 16521 (+8843 this week) · aider, ast, claude-code, code-analysis, code-intelligence, codex, cursor, cypher, developer-tools, gemini-cli, graph-visualization, kilocode, knowledge-graph, mcp, mcp-server, model-context-protocol, opencode, sqlite, tree-sitter, windsurf
+
+**What it does:** codebase-memory-mcp is a single static binary MCP server that indexes entire codebases into a persistent knowledge graph using tree-sitter AST parsing across 158 languages, answering structural queries about functions, call chains, and HTTP routes in under 1ms with 99% fewer tokens than file-by-file exploration.
+
+**Why now:** The project gained 8,843 stars this week, signaling rapid adoption across the major AI coding agent ecosystem (Cursor, Claude Code, Windsurf, Gemini CLI, Codex, and more) right as developers are hitting context-window and token-cost walls with large repos.
+
+**Build with it:** Drop this into any agent workflow to give your AI a persistent, queryable map of a monorepo or legacy codebase — then build on top of its 14 MCP tools to power automated refactoring agents, cross-service dependency audits, or custom graph visualizations via the built-in localhost UI.
+
+## 4. affaan-m/ECC <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/affaan-m/ECC · ★ 222405 (+4369 this week) · ai-agents, anthropic, claude, claude-code, developer-tools, llm, mcp, productivity
+
+**What it does:** ECC is an operator system for AI coding agents (Claude Code, Codex, Cursor, and others) that layers skills, memory, security scanning, and persistent instincts on top of existing agent harnesses to make them perform consistently across complex, multi-step engineering workflows.
+
+**Why now:** With 4,369 stars added this week and active cross-harness adoption, ECC is gaining traction at the moment developers are hitting the ceiling of raw agent prompting and need structured infrastructure to manage reliability, context, and security at scale.
+
+**Build with it:** Drop ECC into an existing Claude Code or Cursor setup to give your agent a persistent memory layer and skill registry, then use the AgentShield npm package to add prompt-injection and security scanning to any automated coding pipeline you're shipping to production.
+
+## 5. Panniantong/Agent-Reach
+
+https://github.com/Panniantong/Agent-Reach · ★ 43070 (+8219 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+
+**What it does:** Agent Reach is a Python CLI that gives AI agents free, zero-configuration access to Twitter, Reddit, YouTube, GitHub, Bilibili, Xiaohongshu, and more by routing around paywalls, login walls, and IP blocks through a unified command interface.
+
+**Why now:** The project hit #1 on GitHub Trending this week with 43,070 stars and 8,219 new stars in seven days, signaling strong builder demand for cheap, reliable internet access layers for agents without per-call API costs.
+
+**Build with it:** Wire Agent Reach into a Claude Code or Cursor workflow to build a competitive intelligence agent that continuously monitors Twitter sentiment, Reddit threads, and Xiaohongshu reviews about a product—all free, all scriptable, no API keys required.
+
+## 6. palmier-io/palmier-pro
+
+https://github.com/palmier-io/palmier-pro · ★ 9152 (+7653 this week) · ai-video, claude, macos, mcp, seedance2, swift, video-editor
+
+**What it does:** Palmier Pro is an open-source macOS video editor built in Swift that lets you and AI agents collaborate directly on a timeline, with built-in generative video/image models (Seedance, Kling) and an MCP server that Claude, Codex, or Cursor can connect to at runtime.
+
+**Why now:** It gained 7,653 stars this week, signaling a breakout moment, and ships on macOS 26 (Tahoe) which just entered developer preview — making this an early-mover opportunity on a new platform.
+
+**Build with it:** Wire Claude Code to the MCP endpoint (`http://127.0.0.1:19789/mcp`) and script automated video edits — cut, arrange, and generate clips programmatically — or fork the Swift source to prototype your own AI-native editing tool on top of a real timeline engine.
+
+## 7. tw93/Pake
+
+https://github.com/tw93/Pake · ★ 58003 (+7301 this week) · chatgpt, claude, desktop, gemini, hight-performance, linux, macos, no-electron, package, rust, tauri, windows, youtube
+
+**What it does:** Pake is a Rust/Tauri-based CLI tool that wraps any URL into a native desktop app for macOS, Windows, and Linux, producing installers under 10MB — roughly 20x smaller than Electron equivalents.
+
+**Why now:** The project gained 7,301 stars this week, signaling a surge of developer interest likely tied to demand for lightweight native wrappers around AI tools like DeepSeek, Grok, and Claude.
+
+**Build with it:** Run `pake <url>` to ship a branded desktop client for any internal tool, AI interface, or web app — with custom icons, keyboard shortcuts, and ad removal — without writing a line of Rust.
+
+## 8. safishamsi/graphify <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/safishamsi/graphify · ★ 72814 (+3424 this week) · antigravity, claude-code, codex, gemini, graphrag, knowledge-graph, leiden, openclaw, rag, skills, tree-sitter
+
+**What it does:** Graphify is a Python tool that ingests any mix of code, SQL schemas, docs, PDFs, images, and videos from a local folder and constructs a queryable knowledge graph, accessible via a `/graphify` slash command inside AI coding assistants like Claude Code, Cursor, and Gemini CLI.
+
+**Why now:** The project gained 3,424 stars this week, likely riding the wave of slash-command tooling becoming standard in agentic coding workflows as assistants like Claude Code and Gemini CLI mature into primary development environments.
+
+**Build with it:** Wire Graphify into a monorepo containing your app code, database migrations, and Terraform configs so your AI assistant can answer cross-cutting questions like "what downstream services break if I rename this column" without manual context-stuffing.
+
+## 9. NousResearch/hermes-agent
+
+https://github.com/NousResearch/hermes-agent · ★ 204097 (+6707 this week) · ai, ai-agent, ai-agents, anthropic, chatgpt, claude, claude-code, clawdbot, codex, hermes, hermes-agent, llm, moltbot, nous-research, openai, openclaw
+
+**What it does:** Hermes Agent is a self-improving AI agent from Nous Research that builds persistent skills from experience, maintains cross-session memory, and runs across terminals, messaging platforms, and cloud backends—all switchable to any LLM endpoint without code changes.
+
+**Why now:** With 6,700 new stars this week, Hermes is gaining rapid traction as a serious alternative to Claude Code and Codex-style agents, signaling real builder momentum around open, model-agnostic agentic infrastructure.
+
+**Build with it:** Deploy it on a $5 VPS connected to Telegram, let it autonomously generate and refine reusable skills from your workflows, then extend it with Python RPC scripts that parallelize multi-step pipelines into single low-context-cost turns.
+
+## 10. headroomlabs-ai/headroom
+
+https://github.com/headroomlabs-ai/headroom · ★ 52351 (+5786 this week) · agent, ai, anthropic, claude-code, compression, context-engineering, context-window, cursor, fastapi, langchain, llm, mcp, openai, prompt-engineering, proxy, python, rag, token-optimization, tokens, typescript
+
+**What it does:** Headroom is a context compression layer that sits between your AI agent and the LLM, compressing tool outputs, logs, RAG chunks, files, and conversation history by 60–95% before they reach the model—using six algorithms including a fine-tuned Kompress-v2 model—while remaining reversible via a cached original store.
+
+**Why now:** Context windows are filling faster than they're growing as agents run longer multi-step workflows, and this week's 5,786-star surge (to 52,351 total) signals the developer community is actively hitting token limits in production agent pipelines.
+
+**Build with it:** Drop in the Python/TypeScript library with a single `compress(messages)` call, spin up a zero-code-change proxy with `headroom proxy --port 8787`, or wrap Claude Code/Cursor/Codex in one command to slash API costs and prevent context overflow in any agentic application.
