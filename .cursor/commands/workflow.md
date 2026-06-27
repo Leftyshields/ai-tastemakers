@@ -190,7 +190,7 @@ For smaller changes or bug fixes:
 
 **Repo:** https://github.com/Leftyshields/ai-tastemakers
 
-**Closure:** [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) (latest) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
+**Closure:** [docs/CLOSURE_EPH-20260627-NEWF.md](docs/CLOSURE_EPH-20260627-NEWF.md) (latest) · [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
 
 **Ops runbook:** [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md)
 
@@ -206,7 +206,7 @@ For smaller changes or bug fixes:
 2. **Forgetting backend parity** - Document all HTTP entry points in `docs/ARCHITECTURE.md`; update every entry point that mounts your API router (not a fixed pair of filenames)
 3. **Skipping MVP QA gate** - After `/execute_plan` on a milestone, run `/qa_checklist` and `/code_review` before the next `/capture_issue`
 4. **Confusing product mission with `.genome/mission.md`** - App goals live in capture/plan/closure docs; genome mission is framework metadata
-5. **Stale Closures** - Use functional state updates when updating state based on props/state
+5. **Stale Closures** - Update `docs/CLOSURE_<ISSUE_ID>.md` and workflow links when shipping; do not leave "latest" pointing at an old issue
 6. **Missing Format Conversions** - Document and implement all format conversions
 7. **Skipping Pre-Implementation Checklist** - Verify all requirements before coding
 8. **Forgetting to stage before commit** - Run `git add -A` before `git commit` when shipping changes
@@ -222,6 +222,8 @@ For smaller changes or bug fixes:
 18. **Same-day pipeline re-run** - Re-running `npm run digest` when `briefings/YYYY-MM-DD/` already exists can reshuffle rankings (soft-dedup) and drift star counts (enrich vs snapshot). Prefer `npm run test:digest` + GHA dispatch for prompt/format verification
 19. **Stale `execution_plan.md` on follow-on issues** - Run `/create_plan` for the new issue ID; do not reuse a closed issue’s plan file
 20. **GHA digest without Pages** - Bot commits to `briefings/` may not trigger Pages; verify deploy or `gh workflow run "Deploy GitHub Pages"` after digest
+21. **Badge vs ranking history** - Reader-facing flags (e.g. digest `is_new`) must not reuse soft-dedup lookback windows; use lifetime per-edition history when semantics are "never seen before"
+22. **`build:digest` vs `test:digest`** - Pre-existing `tsc` failures may exist; treat `npm run test:digest` as the tastemaker ship gate until build is green
 
 ---
 
@@ -236,4 +238,4 @@ For smaller changes or bug fixes:
 
 ---
 
-**Last Updated:** 2026-06-07
+**Last Updated:** 2026-06-27

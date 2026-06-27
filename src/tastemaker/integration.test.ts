@@ -183,4 +183,57 @@ describe("runPipeline integration", () => {
     expect(result.digest.repos[0].full_name).toBe("acme/one");
     expect(result.digest.repos[1].full_name).toBe("acme/two");
   });
+
+  async function writePriorDigest(date: string, repos: string[]): Promise<void> {
+    const dateDir = path.join(config.briefingsDir, date);
+    await fs.mkdir(dateDir, { recursive: true });
+    const digest: Digest = {
+      schema_version: 1,
+      run_id: `prior-${date}`,
+      generated_at: `${date}T10:00:00.000Z`,
+      ranking_mode: "bootstrap_total_stars",
+      topic_queries: ["llm"],
+      repos: repos.map((full_name, i) => ({
+        rank: i + 1,
+        full_name,
+        html_url: `https://github.com/${full_name}`,
+        stars: 100,
+        stars_gained_7d: 10,
+        topics: ["llm"],
+        language: "TS",
+        brief: "Old brief",
+        pushed_at: "2026-06-01T00:00:00Z",
+      })),
+    };
+    await fs.writeFile(path.join(dateDir, "digest.json"), JSON.stringify(digest), "utf-8");
+  }
+
+  it("marks is_new false when repo was featured outside the soft-dedup window", async () => {
+    await writePriorDigest("2026-06-01", ["acme/one"]);
+    await writePriorDigest("2026-06-02", ["acme/other-a"]);
+    await writePriorDigest("2026-06-03", ["acme/other-b"]);
+    await writePriorDigest("2026-06-04", ["acme/other-c"]);
+    await writePriorDigest("2026-06-05", ["acme/other-d"]);
+
+    const result = await runPipeline(config, {
+      now: new Date("2026-06-06T14:00:00.000Z"),
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) => candidates),
+      narrate: vi.fn().mockResolvedValue(
+        new Map([
+          ["acme/one", structuredBrief],
+          ["acme/two", structuredBrief],
+        ]),
+      ),
+    });
+
+    const one = result.digest.repos.find((r) => r.full_name === "acme/one");
+    const two = result.digest.repos.find((r) => r.full_name === "acme/two");
+    expect(one?.is_new).toBe(false);
+    expect(two?.is_new).toBe(true);
+  });
 });

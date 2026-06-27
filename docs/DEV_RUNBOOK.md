@@ -67,6 +67,7 @@ See `firebase/README.md` for setup.
 | `Skipping monthly … Incomplete month` | Fewer than 2 weekly reviews in month before rollup week | Normal early in month or if weekly runs failed |
 | `Weekly skipped` locally | Same completeness gate | Seed 14 `digest.json` files or wait for production data |
 | Same-day re-run reshuffled top 10 | Soft-dedup penalized today's existing `briefings/YYYY-MM-DD/` | Fixed: pipeline excludes current date from dedup; still prefer GHA over local re-run for verification |
+| "New" badge on refeatured repo | `is_new` uses lifetime prior digests per edition | Run `npx tsx scripts/qa-is-new-spot-check.ts`; see `docs/CLOSURE_EPH-20260627-NEWF.md` |
 | Digest stars ≠ snapshot stars | Enrich re-fetched live GitHub counts | Fixed: pipeline keeps `stars` from discovery/snapshot; enrich supplies metadata only |
 | Pages stale after GHA digest | Fixed: digest dispatches Pages after commit (`actions: write`). Manual fallback: `gh workflow run "Deploy GitHub Pages"` | Check **Deploy GitHub Pages** run after **Daily Digest**; verify `/briefings/YYYY-MM-DD.html` |
 | GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |

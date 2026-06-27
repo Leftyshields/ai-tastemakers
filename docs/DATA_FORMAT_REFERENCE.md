@@ -46,7 +46,7 @@ One JSON object per line, append-only.
 
 `brief` may be `null` if narration failed.
 
-`is_new` is `true` when the repo was not in any of the recent prior daily briefings (window: `DIGEST_SOFT_DEDUP_BRIEFINGS`, default 5). Omitted or `false` for repeat picks.
+`is_new` is `true` when the repo has **never** appeared in any prior daily digest for this edition (all `digest.json` dates before today). Omitted or `false` when the repo was featured on an earlier date. Independent of `DIGEST_SOFT_DEDUP_BRIEFINGS`, which affects ranking penalty only.
 
 ## Markdown briefing (`briefings/YYYY-MM-DD/daily_brief.md`)
 

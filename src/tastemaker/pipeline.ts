@@ -12,7 +12,10 @@ import {
   scoreForRanking,
 } from "./snapshot/delta.js";
 import { filterCandidates, excludeNegativeDelta, applyBootstrapMaxStars } from "./rank/filter.js";
-import { applySoftDedupPenalty, loadRecentBriefingRepos } from "./rank/score.js";
+import {
+  applySoftDedupPenalty,
+  loadBriefingFeaturedSets,
+} from "./rank/score.js";
 import { narrateRepos } from "./narrate/claude.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
@@ -94,7 +97,7 @@ export async function runPipeline(
 
   const dateLabel = formatDateInTimezone(now, config.timezone);
 
-  const recentlyFeatured = await loadRecentBriefingRepos(
+  const { recentlyFeatured, previouslyFeatured } = await loadBriefingFeaturedSets(
     config.briefingsDir,
     config.softDedupBriefingCount,
     dateLabel,
@@ -155,7 +158,7 @@ export async function runPipeline(
     language: repo.language,
     brief: briefs.get(repo.full_name) ?? null,
     pushed_at: repo.pushed_at,
-    is_new: !recentlyFeatured.has(repo.full_name),
+    is_new: !previouslyFeatured.has(repo.full_name),
   }));
 
   const digest: Digest = {

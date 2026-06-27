@@ -39,7 +39,7 @@ export interface DigestRepo {
   language: string | null;
   brief: string | null;
   pushed_at: string;
-  /** True when this repo was not in a recent prior daily briefing (see DIGEST_SOFT_DEDUP_BRIEFINGS). */
+  /** True when this repo has never appeared in a prior daily digest for this edition. */
   is_new?: boolean;
 }
 
