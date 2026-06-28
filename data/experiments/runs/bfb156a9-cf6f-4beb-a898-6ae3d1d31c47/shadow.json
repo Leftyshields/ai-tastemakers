@@ -1,0 +1,80 @@
+{
+  "run_id": "bfb156a9-cf6f-4beb-a898-6ae3d1d31c47",
+  "date": "2026-06-28",
+  "edition": "skills",
+  "enrich_web_requested": true,
+  "generated_at": "2026-06-28T16:48:57.399Z",
+  "ranking_mode": "delta_7d",
+  "repos": [
+    {
+      "rank": 1,
+      "full_name": "DietrichGebert/ponytail",
+      "html_url": "https://github.com/DietrichGebert/ponytail",
+      "brief": "**What it does:** Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that installs a \"laziest senior dev\" persona, pushing the agent to reach for `<input type=\"date\">` instead of installing flatpickr—cutting generated code by ~54% on average across real agentic sessions.\n\n**Why now:** It hit 63,000+ stars this week (+18,584), surfacing at the exact moment Claude Code and agentic coding workflows are becoming default for serious builders, making token and cost bloat a real daily expense.\n\n**Build with it:** Drop the npm package into your Claude Code or Cursor setup and immediately reduce the cost and noise of AI-generated PRs—especially useful if you're building internal tools or prototypes where over-engineered output slows review cycles.",
+      "is_new": false
+    },
+    {
+      "rank": 2,
+      "full_name": "calesthio/OpenMontage",
+      "html_url": "https://github.com/calesthio/OpenMontage",
+      "brief": "**What it does:** OpenMontage is an open-source agentic video production system that gives AI coding assistants 12 pipelines and 52 tools to handle scripting, asset generation, editing, and final rendering — producing real motion-clip videos, not just slideshows of stills.\n\n**Why now:** It hit #1 on GitHub Trending this week with 12,000+ new stars, signaling a breakout moment where the tooling for AI-native video production just crossed a usability threshold builders will actually ship with.\n\n**Build with it:** Drop it into Cursor or Claude and prompt your way to a finished short film, product demo, or explainer video — the $1.33 Kling-animated short and $0.02 history documentary in the README are concrete cost benchmarks to beat or match with your own pipeline.",
+      "is_new": false
+    },
+    {
+      "rank": 3,
+      "full_name": "DeusData/codebase-memory-mcp",
+      "html_url": "https://github.com/DeusData/codebase-memory-mcp",
+      "brief": "**What it does:** codebase-memory-mcp is a single static binary MCP server that indexes entire codebases into a persistent SQLite knowledge graph using tree-sitter AST parsing across 158 languages, answering structural queries about functions, call chains, and class relationships in under 1ms with 14 MCP tools.\n\n**Why now:** The project gained over 9,000 stars this week and sits at the intersection of every major AI coding agent ecosystem — Cursor, Claude Code, Gemini CLI, Windsurf, and more — at the exact moment those tools are competing hard for developer adoption.\n\n**Build with it:** Drop this into any AI coding agent setup to give your agent a persistent, queryable map of a large codebase instead of burning tokens on file-by-file exploration — particularly useful for building refactoring tools, dependency auditors, or cross-service call-graph analyzers on top of codebases too large for context windows.",
+      "is_new": false
+    },
+    {
+      "rank": 4,
+      "full_name": "Panniantong/Agent-Reach",
+      "html_url": "https://github.com/Panniantong/Agent-Reach",
+      "brief": "**What it does:** Agent Reach is a Python CLI and MCP toolkit that gives AI agents (Claude Code, Cursor, Windsurf, etc.) the ability to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu without paid API keys, routing around blocks via swappable backends.\n\n**Why now:** It hit #1 on GitHub Trending this week with 7,736 stars in seven days, partly because its Bilibili backend just survived a platform-level block by swapping yt-dlp for bili-cli — a live demonstration of its core \"zero-maintenance\" routing promise.\n\n**Build with it:** Drop `agent-reach doctor` into your agent's workflow to wire up a multi-platform research pipeline — competitive monitoring across Twitter and Reddit, YouTube transcript summarization, and GitHub issue triage — all from one CLI with no per-call fees.",
+      "is_new": false
+    },
+    {
+      "rank": 5,
+      "full_name": "xbtlin/ai-berkshire",
+      "html_url": "https://github.com/xbtlin/ai-berkshire",
+      "brief": "**What it does:** AI Berkshire is a Python framework of structured investment research prompts and multi-agent workflows for Claude Code/Codex that forces deterministic outputs—pass/fail verdicts, price targets, and scored rubrics—using the methodologies of Buffett, Munger, Duan Yongping, and Li Lu applied simultaneously as adversarial agents.\n\n**Why now:** The repo exploded to 5,145 stars with 3,850 added this week, likely driven by Claude Code's rising adoption and renewed interest in AI agents doing real financial work rather than generating boilerplate analysis.\n\n**Build with it:** Fork the multi-agent `/investment-team` skill pattern and adapt it to your own domain—replace the four investor personas with four expert roles (e.g., security researcher, compliance officer, architect, red-teamer) to get structured adversarial analysis on any high-stakes decision, not just stocks.",
+      "is_new": true
+    },
+    {
+      "rank": 6,
+      "full_name": "headroomlabs-ai/headroom",
+      "html_url": "https://github.com/headroomlabs-ai/headroom",
+      "brief": "**What it does:** Headroom is a context compression layer that sits between your AI agent and the LLM, compressing tool outputs, logs, RAG chunks, and conversation history by 60–95% before they hit the model—with reversible caching so originals are retrievable on demand.\n\n**Why now:** As agentic workflows explode in complexity and context windows fill up faster than they expand, token costs and context overflow are becoming the primary scaling bottleneck for production agent systems this week.\n\n**Build with it:** Drop it into any agent stack as a Python/TypeScript library, a zero-code proxy, or an MCP server to slash API costs and fit more reasoning steps into a single context window—then use `headroom learn` to mine failed sessions and auto-write corrections back to your agent's instruction files.",
+      "is_new": false
+    },
+    {
+      "rank": 7,
+      "full_name": "NousResearch/hermes-agent",
+      "html_url": "https://github.com/NousResearch/hermes-agent",
+      "brief": "**What it does:** Hermes Agent is an open-source, self-improving AI agent from Nous Research that creates and refines skills from experience, maintains persistent memory across sessions, and runs on any model or infrastructure — from a $5 VPS to serverless GPU clusters.\n\n**Why now:** With 6,109 stars added this week and 204K total, Hermes is seeing a sharp surge in adoption, likely driven by growing demand for agents that aren't locked to a single provider or local machine.\n\n**Build with it:** Deploy a personal coding or ops agent on Modal or Daytona so it hibernates when idle, wire it to Telegram for remote control, then use its batch trajectory tools to generate fine-tuning data for your own tool-calling model.",
+      "is_new": false
+    },
+    {
+      "rank": 8,
+      "full_name": "cobusgreyling/loop-engineering",
+      "html_url": "https://github.com/cobusgreyling/loop-engineering",
+      "brief": "**What it does:** Loop Engineering is a JavaScript toolkit of CLI tools (`loop-audit`, `loop-init`, `loop-cost`) and pattern libraries for designing automated systems that orchestrate AI coding agents—replacing the human who manually prompts Claude Code, Codex, Grok, or Cursor with a repeatable, auditable loop architecture.\n\n**Why now:** The repo gained 3,026 stars this week alone, signaling that agentic coding workflows are hitting a tipping point where developers need structured patterns—not ad hoc prompts—to manage multi-step agent tasks reliably.\n\n**Build with it:** Scaffold a GitHub Actions pipeline that runs a self-auditing AI coding loop on every PR: `loop-init` bootstraps the config, `loop-cost` gates runaway token spend, and `loop-audit` validates the agent's output before merge.",
+      "is_new": true
+    },
+    {
+      "rank": 9,
+      "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+      "html_url": "https://github.com/nextlevelbuilder/ui-ux-pro-max-skill",
+      "brief": "**What it does:** UI UX Pro Max is a Python-based AI skill layer that injects design intelligence into coding tools like Claude, Cursor, and Copilot, carrying 161 reasoning rules and 67 UI styles to generate production-ready interfaces across web and mobile frameworks.\n\n**Why now:** It crossed 97,000 GitHub stars with nearly 3,000 added this week, signaling a surge of builders hitting the ceiling of what raw LLM code generation produces without structured design reasoning behind it.\n\n**Build with it:** Install the CLI, point it at your next client project or SaaS landing page, and let it output a complete design system—typography, layout pattern, color logic, and section order—before you write a single component.",
+      "is_new": true
+    },
+    {
+      "rank": 10,
+      "full_name": "stablyai/orca",
+      "html_url": "https://github.com/stablyai/orca",
+      "brief": "**What it does:** Orca is an open-source ADE (Agent Development Environment) that lets you run multiple coding agents—Claude Code, Codex, OpenCode, or Pi—simultaneously in isolated git worktrees, with a mobile companion app for monitoring and steering them remotely.\n\n**Why now:** It gained 2,781 GitHub stars this week, signaling a sharp uptick in developer interest around parallel agent orchestration as teams move beyond single-agent workflows toward fleet-based coding pipelines.\n\n**Build with it:** Fan a single feature prompt across five agents in parallel worktrees, compare their diffs side-by-side, and merge the winner—cutting exploratory coding time dramatically without managing multiple terminal sessions by hand.",
+      "is_new": true
+    }
+  ]
+}

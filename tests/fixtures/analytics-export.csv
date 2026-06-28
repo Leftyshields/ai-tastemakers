@@ -1,0 +1,5 @@
+type,key,count
+pageview,/briefings/2026-06-27.html,42
+pageview,/briefings/skills/2026-06-27.html,18
+outbound_click,acme/cool-tool,5
+outbound_click,repo:other/lib,3

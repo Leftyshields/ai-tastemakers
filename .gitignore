@@ -21,5 +21,8 @@ site/index.html
 site/subscribe.html
 site/briefings/
 site/skills/
+site/lab/
+site/weekly/
+site/monthly/
 site/.nojekyll
 site/assets/style.css

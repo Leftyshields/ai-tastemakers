@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "id": "EXP-YYYYMMDD-slug",
+  "hypothesis": "What we expect to improve if this change works.",
+  "change_summary": "One sentence describing the pipeline or site change.",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "YYYY-MM-DD",
+    "end": "YYYY-MM-DD"
+  },
+  "treatment_window": {
+    "start": "YYYY-MM-DD",
+    "end": "YYYY-MM-DD"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_ENRICH_WEB": "0",
+      "DIGEST_ENRICH_SHADOW": "0"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": ""
+}

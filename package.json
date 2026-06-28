@@ -12,6 +12,8 @@
     "monthly": "tsx src/tastemaker/monthly-cli.ts",
     "build:digest": "tsc -p tsconfig.json",
     "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
+    "inventory:tools": "tsx src/tastemaker/inventory-cli.ts",
+    "experiment": "tsx src/tastemaker/experiments-cli.ts",
     "verify:digest": "node scripts/verify-daily-digest.mjs",
     "subscribers:add": "tsx scripts/add-subscriber.ts",
     "subscribers:remove": "tsx scripts/remove-subscriber.ts",

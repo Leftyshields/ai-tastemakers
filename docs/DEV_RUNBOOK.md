@@ -19,6 +19,10 @@
 | Monthly rollup | `npm run monthly` | Requires 2+ weekly reviews in month before rollup week; `--month 2026-06` |
 | Skills digest | `npm run digest:skills` | Same tokens as daily |
 | Digest tests | `npm run test:digest` | Mocked GitHub/Claude |
+| Tool inventory | `npm run inventory:tools` | Scans `briefings/` → `data/tool-inventory.json` + lab markdown |
+| Experiment CLI | `npm run experiment -- list` | List registered experiments |
+| Experiment snapshot | `npm run experiment -- snapshot <EXP-id> --csv <path>` | Import PostHog/simplified CSV into experiment |
+| Build site | `npm run build:pages` | Briefings + weekly/monthly + `/lab/` (includes `experiments-data.json`) |
 | Typecheck/build | `npm run build:digest` | Emits `dist/tastemaker/` |
 | Genesis tests | `npm test` | Organism unit tests |
 
@@ -43,6 +47,27 @@ Optional Firebase (epiphoric-prod — subscribe + digest recipients):
 - `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` — Admin SDK (digest reads Firestore; optional `FIREBASE_SERVICE_ACCOUNT` JSON instead)
 
 See `firebase/README.md` for setup.
+
+Optional Lab / experiments (EPH-20260628-SRCH):
+
+- `POSTHOG_KEY` — PostHog project token (`phc_…`); injects analytics at Pages build (Milestone B)
+- `POSTHOG_HOST` — PostHog API host (default `https://us.i.posthog.com`; use `https://eu.i.posthog.com` for EU)
+- `POSTHOG_PROJECT_ID` — optional; for future API export scripts (not needed for site snippet)
+- `DIGEST_ENRICH_WEB` — `1` enables post-rank web/HN fetch (default `0`; Milestone E)
+- `DIGEST_ENRICH_SHADOW` — `1` writes shadow output under `data/experiments/runs/` instead of `briefings/` (default `0`)
+- `DIGEST_ENRICH_MAX_REPOS` — cap enrichment API calls per run (default `3`)
+- `DIGEST_ENRICH_MAX_CHARS` — snippet budget per source (default `1500`)
+- `EXPERIMENT_ID` — when set with shadow mode, appends run metadata to `data/experiments/{id}.json`
+
+Shadow run (side-by-side control vs treatment blurbs):
+
+```bash
+EXPERIMENT_ID=EXP-20260628-web-enrich-skills \
+  DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_SHADOW=1 \
+  npm run digest:skills
+```
+
+Output: `data/experiments/runs/{run_id}/shadow.json` plus `{owner-repo}.json` bundle files. Review with `briefings/lab/shadow-rubric.md`.
 
 ## Hard requirements
 

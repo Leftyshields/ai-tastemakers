@@ -21,6 +21,18 @@ import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
 import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
 import { resolveDigestRecipients } from "./subscribers/load.js";
+import { appendShadowRun } from "./experiments/load.js";
+import {
+  writeShadowDigest,
+  shadowReposFromDigest,
+} from "./experiments/shadow.js";
+import type { EnrichmentBundle } from "./enrich/types.js";
+import {
+  enrichExternalContext,
+  applyExternalContext,
+  writeEnrichmentBundles,
+  enrichmentBundleRef,
+} from "./enrich/index.js";
 
 export interface PipelineResult {
   briefingDir: string;
@@ -33,6 +45,7 @@ export interface PipelineDeps {
   narrate?: typeof narrateRepos;
   search?: typeof searchByTopics;
   enrich?: typeof enrichCandidates;
+  externalEnrich?: typeof enrichExternalContext;
   sendEmail?: typeof sendDigestEmail;
   now?: Date;
 }
@@ -45,6 +58,7 @@ export async function runPipeline(
   const narrate = deps.narrate ?? narrateRepos;
   const search = deps.search ?? searchByTopics;
   const enrich = deps.enrich ?? enrichCandidates;
+  const externalEnrich = deps.externalEnrich ?? enrichExternalContext;
   const client = new GitHubClient(config.githubToken);
   const pushedAfter = pushedAfterIso(config.pushedWithinDays);
 
@@ -146,7 +160,26 @@ export async function runPipeline(
 
   console.error(`Narrating top ${top.length} repos…`);
 
-  const briefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
+  const useExternalEnrich = config.enrichWeb;
+  let externalBundles = new Map<string, EnrichmentBundle>();
+
+  if (useExternalEnrich) {
+    console.error(
+      `Fetching external context for top ${Math.min(config.enrichMaxRepos, top.length)} repos…`,
+    );
+    externalBundles = await externalEnrich(top, {
+      maxRepos: config.enrichMaxRepos,
+      maxChars: config.enrichMaxChars,
+    });
+  }
+
+  const controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
+
+  let treatmentBriefs = controlBriefs;
+  if (useExternalEnrich) {
+    const enrichedTop = applyExternalContext(top, externalBundles);
+    treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+  }
 
   const digestRepos: DigestRepo[] = top.map((repo, i) => ({
     rank: i + 1,
@@ -156,7 +189,7 @@ export async function runPipeline(
     stars_gained_7d: repo.stars_gained_7d,
     topics: repo.topics,
     language: repo.language,
-    brief: briefs.get(repo.full_name) ?? null,
+    brief: treatmentBriefs.get(repo.full_name) ?? null,
     pushed_at: repo.pushed_at,
     is_new: !previouslyFeatured.has(repo.full_name),
   }));
@@ -169,6 +202,64 @@ export async function runPipeline(
     topic_queries: config.topics,
     repos: digestRepos,
   };
+
+  if (config.enrichShadow) {
+    const bundleRefs = new Map<string, string>();
+    for (const repo of top.slice(0, config.enrichMaxRepos)) {
+      if (externalBundles.has(repo.full_name)) {
+        bundleRefs.set(repo.full_name, enrichmentBundleRef(repo.full_name));
+      }
+    }
+
+    const runDir = path.join(config.rootDir, "data", "experiments", "runs", digest.run_id);
+    if (useExternalEnrich && externalBundles.size > 0) {
+      await writeEnrichmentBundles(runDir, externalBundles);
+    }
+
+    const shadowRepos = shadowReposFromDigest(
+      digestRepos,
+      useExternalEnrich,
+      controlBriefs,
+      treatmentBriefs,
+      bundleRefs,
+    );
+
+    const shadowPath = await writeShadowDigest(
+      config.rootDir,
+      {
+        run_id: digest.run_id,
+        generated_at: digest.generated_at,
+        ranking_mode: rankingMode,
+        enrich_web_requested: useExternalEnrich,
+        repos: shadowRepos,
+      },
+      dateLabel,
+      config.editionId,
+    );
+    console.error(`Shadow run written to ${path.dirname(shadowPath)} (skipping briefings/)`);
+
+    if (config.experimentId) {
+      try {
+        await appendShadowRun(config.rootDir, config.experimentId, {
+          run_id: digest.run_id,
+          date: dateLabel,
+          edition: config.editionId,
+        });
+      } catch (err) {
+        console.warn(
+          `Warning: could not append shadow run to ${config.experimentId}:`,
+          err instanceof Error ? err.message : err,
+        );
+      }
+    }
+
+    return {
+      briefingDir: path.dirname(shadowPath),
+      markdownPath: "",
+      jsonPath: shadowPath,
+      digest,
+    };
+  }
 
   const briefingDir = path.join(config.briefingsDir, dateLabel);
 

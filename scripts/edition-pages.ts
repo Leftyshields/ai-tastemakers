@@ -7,13 +7,92 @@ import {
 } from "../src/tastemaker/editions.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
 import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
+import { writeExperimentsData } from "./lab/aggregate-experiments.js";
 
 marked.setOptions({ gfm: true, breaks: false });
+
+function escapeScriptString(value: string): string {
+  return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
+}
+
+export function posthogAnalyticsEnabled(): boolean {
+  return Boolean(process.env.POSTHOG_KEY?.trim());
+}
+
+export function posthogScriptHtml(): string {
+  const key = process.env.POSTHOG_KEY?.trim();
+  if (!key) return "";
+  const host = (process.env.POSTHOG_HOST?.trim() || "https://us.i.posthog.com").replace(/\/$/, "");
+  const safeKey = escapeScriptString(key);
+  const safeHost = escapeScriptString(host);
+  return `<script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('${safeKey}', {
+      api_host: '${safeHost}',
+      autocapture: false,
+      capture_pageview: true,
+      disable_session_recording: true
+    });
+  </script>`;
+}
+
+export function briefOutboundTrackingScript(editionId: string, pageDate: string): string {
+  if (!posthogAnalyticsEnabled()) return "";
+  const edition = escapeScriptString(editionId);
+  const pageDateSafe = escapeScriptString(pageDate);
+  return `<script>
+(function () {
+  function repoFromHref(href) {
+    try {
+      var u = new URL(href);
+      if (u.hostname !== "github.com") return "";
+      var parts = u.pathname.replace(/^\\/+/, "").split("/");
+      if (parts.length < 2) return "";
+      return parts[0] + "/" + parts[1];
+    } catch (e) {
+      return "";
+    }
+  }
+
+  function rankForAnchor(anchor) {
+    var block = anchor.closest("p") || anchor;
+    var el = block;
+    while (el && el.closest && el.closest(".brief-content")) {
+      var prev = el.previousElementSibling;
+      while (prev) {
+        if (prev.tagName === "H2" || prev.tagName === "H3") {
+          var m = prev.textContent.match(/^\\s*(\\d+)\\./);
+          if (m) return m[1];
+        }
+        prev = prev.previousElementSibling;
+      }
+      el = el.parentElement;
+    }
+    return "";
+  }
+
+  document.querySelectorAll(".brief-content a[href]").forEach(function (anchor) {
+    anchor.addEventListener("click", function () {
+      if (typeof posthog === "undefined" || !posthog.capture) return;
+      var repo = repoFromHref(anchor.href);
+      if (!repo) return;
+      posthog.capture("outbound_repo_click", {
+        edition: "${edition}",
+        repo: repo,
+        rank: rankForAnchor(anchor),
+        page_date: "${pageDateSafe}"
+      });
+    });
+  });
+})();
+</script>`;
+}
 
 export interface SitePaths {
   css: string;
   home: string;
   subscribe: string;
+  lab: string;
   brief: (date: string) => string;
   crossEdition?: { href: string; label: string };
   editionNav: EditionNav;
@@ -70,6 +149,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
       css: `${assetPrefix}assets/style.css`,
       home: "./",
       subscribe: siteSegment ? "../subscribe.html" : "subscribe.html",
+      lab: siteSegment ? "../lab/" : "lab/",
       brief: (date) => `briefings/${date}.html`,
       crossEdition: siteSegment
         ? { href: "../", label: "AI Tastemakers" }
@@ -83,11 +163,51 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
     css: `${assetPrefix}assets/style.css`,
     home: "../",
     subscribe: siteSegment ? "../../subscribe.html" : "../subscribe.html",
+    lab: siteSegment ? "../../lab/" : "../lab/",
     brief: (date) => `${date}.html`,
     crossEdition: siteSegment
       ? { href: "../../", label: "AI Tastemakers" }
       : { href: "../skills/", label: "Skill Tastemakers" },
     editionNav,
+  };
+}
+
+export function labNavHtml(
+  active: "home" | "tools" | "experiments" | "posts",
+  escapeHtml: (t: string) => string,
+  depth: 0 | 1 = 0,
+): string {
+  const pill = (href: string, label: string, isActive: boolean) => {
+    const base =
+      "inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
+    const activeCls =
+      "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
+    const idle =
+      "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+    return `<a href="${href}" class="${base} ${isActive ? activeCls : idle}"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+  };
+
+  const prefix = depth === 0 ? "" : "../";
+  const postsHref = depth === 0 ? "posts/" : "./";
+
+  return `<nav aria-label="Lab section" class="mb-8 flex flex-wrap gap-2">
+      ${pill(`${prefix}${depth === 0 ? "./" : ""}`, "Lab home", active === "home")}
+      ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
+      ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
+      ${pill(postsHref, "Posts", active === "posts")}
+    </nav>`;
+}
+
+export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
+  const up = depth === 0 ? ".." : "../..";
+  const labRoot = depth === 0 ? "./" : "../";
+  return {
+    css: `${up}/assets/style.css`,
+    home: `${up}/`,
+    subscribe: `${up}/subscribe.html`,
+    lab: labRoot,
+    brief: (date) => `${up}/briefings/${date}.html`,
+    editionNav: { ossHref: `${up}/`, skillsHref: `${up}/skills/` },
   };
 }
 
@@ -98,6 +218,7 @@ export function pageShell(
   brand: { name: string; tagline: string },
   description?: string,
   escapeHtml: (t: string) => string = (t) => t,
+  options?: { labLayout?: boolean },
 ): string {
   const safeTitle = escapeHtml(title);
   const meta = description
@@ -107,6 +228,12 @@ export function pageShell(
     ? `<span aria-hidden="true"> · </span><a href="${paths.crossEdition.href}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(paths.crossEdition.label)}</a>`
     : "";
   const nav = editionNavHtml(paths.editionNav, escapeHtml);
+  const labLayout = options?.labLayout === true;
+  const shellClass = labLayout
+    ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12"
+    : "mx-auto min-h-screen max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12";
+  const mainHtml = labLayout ? `<main class="lab-main">${body}</main>` : body;
+  const footerMt = labLayout ? "mt-10" : "mt-16";
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -116,19 +243,22 @@ export function pageShell(
   <title>${safeTitle}</title>
   ${meta}
   <link rel="stylesheet" href="${paths.css}">
+  ${posthogScriptHtml()}
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
-  <div class="mx-auto min-h-screen max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12">
-    <header class="mb-10 border-b border-stone-200 pb-6 dark:border-stone-800">
+  <div class="${shellClass}">
+    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-800">
       <h1 class="font-sans text-2xl font-bold tracking-tight">
         <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">${escapeHtml(brand.name)}</a>
       </h1>
       <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brand.tagline)}</p>
       ${nav}
     </header>
-    ${body}
-    <footer class="mt-16 border-t border-stone-200 pt-6 text-center font-sans text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400">
+    ${mainHtml}
+    <footer class="${footerMt} border-t border-stone-200 pt-6 text-center font-sans text-xs leading-relaxed text-stone-500 dark:border-stone-800 dark:text-stone-400">
       <a href="${paths.subscribe}" class="text-blue-800 hover:underline dark:text-blue-400">Subscribe</a>${cross}
+      <span aria-hidden="true"> · </span>
+      <a href="${paths.lab}" class="text-blue-800 hover:underline dark:text-blue-400">Lab — how we measure improvements</a>
       <span aria-hidden="true"> · </span>
       <a href="https://github.com/Leftyshields/ai-tastemakers" class="text-blue-800 hover:underline dark:text-blue-400">Source on GitHub</a>
       <span aria-hidden="true"> · </span>Updated daily
@@ -624,7 +754,8 @@ export async function buildEditionSite(
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${siblingHref}">${siblingLabel} &rarr;</a>
       </nav>
-      <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+      <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>
+      ${briefOutboundTrackingScript(edition.id, date)}`;
     await fs.writeFile(
       path.join(briefOutDir, `${date}.html`),
       pageShell(`Daily Brief — ${date} · ${edition.name}`, body, paths, brand, undefined, escapeHtml),
@@ -650,6 +781,115 @@ export async function buildEditionSite(
   );
 
   return dates.length;
+}
+
+export async function buildLabSite(
+  repoRoot: string,
+  siteDir: string,
+  escapeHtml: (t: string) => string,
+): Promise<number> {
+  const labSiteDir = path.join(siteDir, "lab");
+  await fs.mkdir(labSiteDir, { recursive: true });
+  const paths = labSitePaths();
+  const brand = {
+    name: "Tastemakers Lab",
+    tagline:
+      "Public notes on how we pick repos, test pipeline changes, and measure what readers engage with.",
+  };
+
+  const labShell = { labLayout: true as const };
+
+  const labIndexMd = path.join(repoRoot, "briefings", "lab", "index.md");
+  let indexBody = `${labNavHtml("home", escapeHtml)}`;
+  try {
+    const markdown = await fs.readFile(labIndexMd, "utf8");
+    const html = marked.parse(markdown) as string;
+    indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
+  } catch {
+    indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans">
+      <p>Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>
+    </section>`;
+  }
+
+  const labIndexDescription =
+    "How AI Tastemakers measures site engagement, runs digest pipeline experiments, and publishes results openly.";
+
+  await fs.writeFile(
+    path.join(labSiteDir, "index.html"),
+    pageShell("Lab · Tastemakers", indexBody, paths, brand, labIndexDescription, escapeHtml, labShell),
+  );
+
+  const inventoryMd = path.join(repoRoot, "briefings", "lab", "tool-inventory.md");
+  let toolsBody = `${labNavHtml("tools", escapeHtml)}`;
+  try {
+    const markdown = await fs.readFile(inventoryMd, "utf8");
+    const html = marked.parse(markdown) as string;
+    toolsBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-table:text-sm">${html}</article>`;
+  } catch {
+    toolsBody += `<p class="font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run inventory:tools</code> to generate the inventory.</p>`;
+  }
+
+  await fs.writeFile(
+    path.join(labSiteDir, "tools.html"),
+    pageShell("Tool inventory · Lab", toolsBody, paths, brand, undefined, escapeHtml, labShell),
+  );
+
+  const experimentsBody = `
+    ${labNavHtml("experiments", escapeHtml)}
+    <div id="experiments-root" class="font-sans text-sm">
+      <div id="experiments-table-wrap" class="space-y-3"></div>
+      <div id="experiment-detail" class="hidden">
+        <button type="button" id="detail-back" class="mb-6 text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; All experiments</button>
+        <h2 id="detail-title" class="mb-4 font-mono text-lg font-bold"></h2>
+        <div id="detail-body" class="prose prose-stone max-w-none dark:prose-invert prose-sm prose-headings:font-sans"></div>
+        <button type="button" id="export-markdown" class="mt-6 rounded-full border border-blue-800 px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-200 dark:hover:bg-blue-950/40">Export markdown</button>
+      </div>
+    </div>
+    <script src="experiments.js"></script>`;
+
+  await writeExperimentsData(repoRoot, labSiteDir);
+  await fs.copyFile(
+    path.join(repoRoot, "scripts", "lab", "experiments.js"),
+    path.join(labSiteDir, "experiments.js"),
+  );
+
+  await fs.writeFile(
+    path.join(labSiteDir, "experiments.html"),
+    pageShell("Experiments · Lab", experimentsBody, paths, brand, undefined, escapeHtml, labShell),
+  );
+
+  await fs.mkdir(path.join(labSiteDir, "posts"), { recursive: true });
+  const postsDir = path.join(repoRoot, "briefings", "lab", "posts");
+  let postsBody = `${labNavHtml("posts", escapeHtml, 1)}`;
+  try {
+    const postFiles = (await fs.readdir(postsDir))
+      .filter((f) => f.endsWith(".md") && !f.startsWith("_"))
+      .sort();
+    if (postFiles.length === 0) {
+      postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Dogfood write-ups will appear here after the first experiment cycle.</p>`;
+    } else {
+      postsBody += `<ul class="font-sans text-sm">${postFiles.map((f) => `<li><a href="${f.replace(/\.md$/, ".html")}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(f.replace(/\.md$/, ""))}</a></li>`).join("")}</ul>`;
+
+      for (const file of postFiles) {
+        const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
+        const html = marked.parse(markdown) as string;
+        const slug = file.replace(/\.md$/, "");
+        const postBody = `${labNavHtml("posts", escapeHtml, 1)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
+        await fs.writeFile(
+          path.join(labSiteDir, "posts", `${slug}.html`),
+          pageShell(`${slug} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
+        );
+      }
+    }
+  } catch {
+    postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Dogfood write-ups will appear here after the first experiment cycle.</p>`;
+  }
+  await fs.writeFile(
+    path.join(labSiteDir, "posts", "index.html"),
+    pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
+  );
+
+  return 4;
 }
 
 export function allEditions(): EditionDefinition[] {

@@ -27,6 +27,10 @@ const base: AppConfig = {
   digestSiteUrl: "https://example.com",
   editionId: "oss",
   editionName: "AI Tastemakers",
+  enrichWeb: false,
+  enrichShadow: false,
+  enrichMaxRepos: 3,
+  enrichMaxChars: 1500,
 };
 
 describe("subscriberDocId", () => {

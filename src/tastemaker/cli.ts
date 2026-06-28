@@ -14,9 +14,14 @@ async function main(): Promise<void> {
     const editionId = resolveEditionId(parseEditionArg());
     const config = loadConfig({ editionId });
     const result = await runPipeline(config);
-    console.log(`Briefing written (${config.editionName}):`);
-    console.log(`  ${result.markdownPath}`);
-    console.log(`  ${result.jsonPath}`);
+    if (config.enrichShadow) {
+      console.log(`Shadow run written (${config.editionName}, not published to briefings/):`);
+      console.log(`  ${result.jsonPath}`);
+    } else {
+      console.log(`Briefing written (${config.editionName}):`);
+      console.log(`  ${result.markdownPath}`);
+      console.log(`  ${result.jsonPath}`);
+    }
     console.log(`  ${result.digest.repos.length} repos (${result.digest.ranking_mode})`);
   } catch (err) {
     console.error("Digest failed:", err instanceof Error ? err.message : err);

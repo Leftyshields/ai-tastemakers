@@ -2,17 +2,24 @@
 
 ## Overview
 
-AI Tastemakers v1 is a **batch CLI pipeline** (no HTTP server) that produces daily GitHub AI-derivative repo briefings. Product code lives in `src/tastemaker/`. The Genesis organism runtime (`lib/`, `.genome/`) is separate framework infrastructure.
+AI Tastemakers is a **batch CLI pipeline** (no HTTP server) that produces daily GitHub AI-derivative repo briefings, weekly/monthly rollups, and a static GitHub Pages site. Product code lives in `src/tastemaker/`. The Genesis organism runtime (`lib/`, `.genome/`) is separate framework infrastructure.
+
+EPH-20260628-SRCH adds a **Lab** layer: tool inventory from briefing history, PostHog analytics, file-based experiments, and static `/lab/` reporting pages — without changing GitHub discovery.
 
 ## Module layout
 
 ```
 ai-tastemakers/
 ├── src/tastemaker/           # Product digest pipeline
-│   ├── cli.ts                # Entry point
+│   ├── cli.ts                # Daily digest entry
+│   ├── inventory-cli.ts      # Scan briefings → tool inventory
 │   ├── pipeline.ts           # Orchestration
 │   ├── config.ts
 │   ├── github/               # Search, enrich, client
+│   ├── inventory/            # Tool scan, classify, merge (EPH-20260628-SRCH)
+│   ├── enrich/               # Web/HN post-rank enrichment (Jina + HN Algolia)
+│   ├── experiments/          # Experiment registry, snapshot import, shadow output
+│   ├── experiments-cli.ts    # list | register | snapshot
 │   ├── snapshot/             # jsonl store, delta math
 │   ├── rank/                 # filter, score, top-N
 │   ├── narrate/              # Claude client (daily briefs + weekly/monthly synthesis)
@@ -21,9 +28,17 @@ ai-tastemakers/
 │   ├── weekly-cli.ts         # Weekly wrap-up entry
 │   ├── monthly-cli.ts        # Monthly rollup entry
 │   └── writers/              # markdown + json (daily + weekly + monthly)
-├── data/snapshots/           # repos.jsonl (star history)
-├── briefings/                # Daily + weekly output artifacts
-├── .github/workflows/        # digest.yml scheduler
+├── data/
+│   ├── snapshots/            # repos.jsonl (star history)
+│   ├── tool-inventory.json   # Generated tool candidate matrix
+│   └── experiments/          # Experiment JSON + shadow run output
+├── briefings/                # Daily + weekly + monthly + lab markdown
+├── site/                     # Static GitHub Pages output
+│   └── lab/                  # Inventory, experiments, posts
+├── scripts/
+│   ├── build-pages.ts        # Site generator (+ lab pages)
+│   └── edition-pages.ts      # Page shell, PostHog snippet at build time
+├── .github/workflows/        # digest.yml, pages.yml
 ├── lib/                      # Genesis runtime (unchanged)
 └── docs/
 ```
@@ -35,9 +50,12 @@ ai-tastemakers/
 | Local dev | `src/tastemaker/cli.ts` | `npm run digest` |
 | Local dev | `src/tastemaker/weekly-cli.ts` | `npm run weekly` |
 | Local dev | `src/tastemaker/monthly-cli.ts` | `npm run monthly` |
+| Local dev | `src/tastemaker/inventory-cli.ts` | `npm run inventory:tools` |
+| Local dev | `src/tastemaker/experiments-cli.ts` | `npm run experiment -- list|register|snapshot` |
 | GitHub Actions | `.github/workflows/digest.yml` | daily digest + Sunday weekly or fourth-Sunday monthly |
+| GitHub Actions | `.github/workflows/pages.yml` | static site deploy |
 
-**Parity:** GHA invokes the same `npm run digest`, `npm run weekly`, and `npm run monthly` — Sunday gate uses `scripts/sunday-wrap-gate.mjs` (plain Node, no npm install required).
+**Parity:** GHA invokes the same npm scripts as local dev. Enrichment experiment flags (`DIGEST_ENRICH_*`) default **off** in production until operator enables after baseline window.
 
 ## External services
 
@@ -45,38 +63,40 @@ ai-tastemakers/
 |---------|-------|------|
 | GitHub REST | Search repositories, get repo, get README | `GITHUB_TOKEN` |
 | Anthropic Messages API | Daily repo briefs + weekly/monthly synthesis | `ANTHROPIC_API_KEY` |
+| PostHog | Pageviews + `outbound_repo_click` on GitHub Pages | Public script; `POSTHOG_KEY` + `POSTHOG_HOST` at build time |
+| Jina Reader | Post-rank web snippet fetch (`r.jina.ai/{url}`) | No key for basic use |
+| HN Algolia | Post-rank story search by repo name | Public API |
+| Firebase | Subscribe/unsubscribe + digest recipients only | epiphoric-prod |
 
 ## Data flow
 
 ```
 Daily:
 GitHub Search (topics) → dedupe candidates → filter/enrich
-  → append snapshot jsonl → rank by 7d delta → Claude narrate top 10
+  → append snapshot jsonl → rank by 7d delta → [optional external enrich] → Claude narrate top 10
   → write briefings/YYYY-MM-DD/daily_brief.md + digest.json
   (skills edition: briefings/skills/YYYY-MM-DD/)
 
-Weekly (Sundays 1–3, after daily):
-Load 7× digest.json (OSS + Skills) → aggregate stats in TypeScript
-  → Claude synthesize one combined editorial
-  → write briefings/weekly/YYYY-Www/weekly_review.{md,json}
-  → build:pages → site/weekly/YYYY-Www.html
+Inventory (on demand):
+Scan briefings/**/digest.json + weekly JSON → classify → data/tool-inventory.json
+  → briefings/lab/tool-inventory.md → site/lab/tools.html
 
-Monthly (fourth Sunday of month, after daily):
-Load prior weekly_review.json in same calendar month → aggregate month stats
-  → Claude synthesize month-level editorial from weekly narratives
-  → write briefings/monthly/YYYY-MM/monthly_review.{md,json}
-  → build:pages → site/monthly/YYYY-MM.html
-  (no weekly artifact for that ISO week)
+Weekly / Monthly: (unchanged)
+  → build:pages → site/
+
+Site:
+npm run build:pages → site/ (+ lab/) → GitHub Pages
 ```
 
 ## Security
 
-- Secrets in `.env` only; never written to briefing artifacts
+- Secrets in `.env` or GitHub Actions secrets only; never written to briefing or experiment artifacts
 - GitHub token: public repo read scope sufficient
-- No user auth, no HTTP surface in v1
+- `/lab/` experiment JSON is public — no secrets in committed records
+- No user auth, no HTTP API surface
 
 ## Web → API
 
-**N/A** — v1 has no web client or API.
+**N/A** — static site + batch CLI only.
 
 See [DATA_FORMAT_REFERENCE.md](DATA_FORMAT_REFERENCE.md) for file schemas.

@@ -24,4 +24,13 @@ describe("buildPrompt", () => {
     expect(prompt).not.toContain("No markdown headings");
     expect(prompt).not.toContain("2–3 sentences");
   });
+
+  it("includes external context when provided", () => {
+    const prompt = buildPrompt({
+      ...sampleRepo,
+      external_context: "[Web]\nRecent launch thread on HN.",
+    });
+    expect(prompt).toContain("External context (web/HN snippets");
+    expect(prompt).toContain("Recent launch thread on HN.");
+  });
 });

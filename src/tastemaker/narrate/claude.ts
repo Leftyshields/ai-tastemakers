@@ -17,6 +17,13 @@ export function buildPrompt(repo: ScoredRepo): string {
     parts.push("README: unavailable — use description and topics only.");
   }
 
+  if (repo.external_context?.trim()) {
+    parts.push(
+      "External context (web/HN snippets — may include noise; prefer README when they conflict):",
+      repo.external_context.trim(),
+    );
+  }
+
   parts.push(
     "",
     "Write a brief in English using exactly three labeled sections in this order, each with one to two sentences:",

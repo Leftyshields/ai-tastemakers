@@ -6,6 +6,8 @@ on:
     paths:
       - "briefings/**"
       - "data/subscribers.json"
+      - "data/tool-inventory.json"
+      - "data/experiments/*.json"
       - "scripts/build-pages.ts"
       - "scripts/edition-pages.ts"
       - "firebase/**"
@@ -45,6 +47,8 @@ jobs:
           FIREBASE_AUTH_DOMAIN: epiphoric-prod.firebaseapp.com
           FIREBASE_API_KEY: ${{ secrets.FIREBASE_API_KEY }}
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
+          POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
+          POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
 
       - name: Verify CSS artifact
         run: test -s site/assets/style.css && test "$(wc -c < site/assets/style.css)" -gt 1000

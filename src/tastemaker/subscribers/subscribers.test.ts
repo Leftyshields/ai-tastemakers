@@ -38,6 +38,10 @@ const baseConfig: AppConfig = {
   digestSiteUrl: "https://example.com",
   editionId: "oss",
   editionName: "OSS",
+  enrichWeb: false,
+  enrichShadow: false,
+  enrichMaxRepos: 3,
+  enrichMaxChars: 1500,
 };
 
 beforeEach(() => {

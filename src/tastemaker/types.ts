@@ -27,6 +27,8 @@ export interface SnapshotRecord {
 export interface ScoredRepo extends CandidateRepo {
   stars_gained_7d: number;
   score: number;
+  /** Post-rank web/HN snippets merged for narration when DIGEST_ENRICH_WEB is set. */
+  external_context?: string;
 }
 
 export interface DigestRepo {
@@ -192,4 +194,9 @@ export interface AppConfig {
   firebaseClientEmail?: string;
   firebasePrivateKey?: string;
   firebaseServiceAccount?: Record<string, unknown>;
+  enrichWeb: boolean;
+  enrichShadow: boolean;
+  enrichMaxRepos: number;
+  enrichMaxChars: number;
+  experimentId?: string;
 }

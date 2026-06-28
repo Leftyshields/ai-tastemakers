@@ -25,6 +25,12 @@ function parseEnvInt(name: string, fallback: string): number {
   return n;
 }
 
+function parseEnvBool(name: string, fallback = false): boolean {
+  const raw = process.env[name]?.trim();
+  if (!raw) return fallback;
+  return raw === "1" || raw.toLowerCase() === "true";
+}
+
 function parseEnvFloat(name: string, fallback: string, min: number, max: number): number {
   const raw = process.env[name]?.trim() || fallback;
   const n = parseFloat(raw);
@@ -104,6 +110,18 @@ export function loadConfig(options?: { editionId?: EditionId; rootDir?: string }
     firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL?.trim() || undefined,
     firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY?.trim() || undefined,
     firebaseServiceAccount: parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT),
+    enrichWeb: parseEnvBool("DIGEST_ENRICH_WEB"),
+    enrichShadow: parseEnvBool("DIGEST_ENRICH_SHADOW"),
+    enrichMaxRepos: parseEnvInt("DIGEST_ENRICH_MAX_REPOS", "3"),
+    enrichMaxChars: parseEnvInt("DIGEST_ENRICH_MAX_CHARS", "1500"),
+    experimentId: (() => {
+      const id = process.env.EXPERIMENT_ID?.trim();
+      if (!id) return undefined;
+      if (!/^EXP-[0-9]{8}-[a-z0-9-]+$/.test(id)) {
+        throw new Error(`EXPERIMENT_ID must match EXP-YYYYMMDD-slug (got "${id}")`);
+      }
+      return id;
+    })(),
   };
 }
 

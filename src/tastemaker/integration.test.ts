@@ -58,6 +58,10 @@ describe("runPipeline integration", () => {
       digestSiteUrl: "https://example.com",
       editionId: "oss",
       editionName: "AI Tastemakers",
+      enrichWeb: false,
+      enrichShadow: false,
+      enrichMaxRepos: 3,
+      enrichMaxChars: 1500,
     };
   });
 
@@ -235,5 +239,147 @@ describe("runPipeline integration", () => {
     const two = result.digest.repos.find((r) => r.full_name === "acme/two");
     expect(one?.is_new).toBe(false);
     expect(two?.is_new).toBe(true);
+  });
+
+  it("writes shadow run instead of briefings when enrichShadow is set", async () => {
+    const fixedNow = new Date("2026-06-06T14:00:00.000Z");
+    const experimentId = "EXP-20260628-web-enrich-skills";
+
+    await fs.mkdir(path.join(tmpDir, "data/experiments"), { recursive: true });
+    await fs.writeFile(
+      path.join(tmpDir, "data/experiments/_template.json"),
+      JSON.stringify({
+        schema_version: 1,
+        id: "EXP-YYYYMMDD-slug",
+        hypothesis: "",
+        change_summary: "",
+        status: "draft",
+        edition: "skills",
+        baseline_window: { start: "", end: "" },
+        treatment_window: { start: "", end: "" },
+        change: { flags: {} },
+        snapshots: [],
+        shadow_runs: [],
+        verdict: "",
+        keep_change: null,
+        notes: "",
+      }),
+      "utf-8",
+    );
+    await fs.writeFile(
+      path.join(tmpDir, "data/experiments", `${experimentId}.json`),
+      JSON.stringify({
+        schema_version: 1,
+        id: experimentId,
+        hypothesis: "test",
+        change_summary: "test",
+        status: "draft",
+        edition: "skills",
+        baseline_window: { start: "2026-06-01", end: "2026-06-14" },
+        treatment_window: { start: "2026-06-15", end: "2026-06-28" },
+        change: { flags: {} },
+        snapshots: [],
+        shadow_runs: [],
+        verdict: "",
+        keep_change: null,
+        notes: "",
+      }),
+      "utf-8",
+    );
+
+    config.enrichShadow = true;
+    config.enrichWeb = true;
+    config.experimentId = experimentId;
+
+    const narrateMock = vi
+      .fn()
+      .mockResolvedValueOnce(
+        new Map([
+          ["acme/one", "control one"],
+          ["acme/two", "control two"],
+        ]),
+      )
+      .mockResolvedValueOnce(
+        new Map([
+          ["acme/one", "treatment one"],
+          ["acme/two", "treatment two"],
+        ]),
+      );
+
+    const result = await runPipeline(config, {
+      now: fixedNow,
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) => candidates),
+      externalEnrich: vi.fn().mockResolvedValue(
+        new Map([
+          [
+            "acme/one",
+            {
+              full_name: "acme/one",
+              sources: [{ kind: "web", label: "Web", text: "snippet" }],
+              combined_text: "snippet",
+              fetched_at: "2026-06-06T14:00:00.000Z",
+              errors: [],
+            },
+          ],
+        ]),
+      ),
+      narrate: narrateMock,
+    });
+
+    expect(narrateMock).toHaveBeenCalledTimes(2);
+
+    expect(result.jsonPath).toContain("data/experiments/runs");
+    expect(result.jsonPath).toContain("shadow.json");
+    expect(result.markdownPath).toBe("");
+
+    const shadow = JSON.parse(await fs.readFile(result.jsonPath, "utf-8"));
+    expect(shadow.run_id).toBe(result.digest.run_id);
+    expect(shadow.enrich_web_requested).toBe(true);
+    expect(shadow.repos).toHaveLength(2);
+    expect(shadow.repos[0].brief_control).toBe("control one");
+    expect(shadow.repos[0].brief_treatment).toBe("treatment one");
+    expect(shadow.repos[0].enrichment_bundle_ref).toBe("acme-one.json");
+
+    await expect(
+      fs.access(path.join(path.dirname(result.jsonPath), "acme-one.json")),
+    ).resolves.toBeUndefined();
+
+    const briefingDateDir = path.join(config.briefingsDir, "2026-06-06");
+    await expect(fs.access(briefingDateDir)).rejects.toThrow();
+
+    const experiment = JSON.parse(
+      await fs.readFile(path.join(tmpDir, "data/experiments", `${experimentId}.json`), "utf-8"),
+    );
+    expect(experiment.shadow_runs).toHaveLength(1);
+    expect(experiment.shadow_runs[0].run_id).toBe(result.digest.run_id);
+  });
+
+  it("still writes shadow run when experiment registry is missing", async () => {
+    config.enrichShadow = true;
+    config.experimentId = "EXP-20260628-web-enrich-skills";
+
+    const result = await runPipeline(config, {
+      now: new Date("2026-06-06T14:00:00.000Z"),
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) => candidates),
+      narrate: vi.fn().mockResolvedValue(
+        new Map([
+          ["acme/one", structuredBrief],
+          ["acme/two", structuredBrief],
+        ]),
+      ),
+    });
+
+    expect(result.jsonPath).toContain("shadow.json");
+    await expect(fs.access(result.jsonPath)).resolves.toBeUndefined();
   });
 });
