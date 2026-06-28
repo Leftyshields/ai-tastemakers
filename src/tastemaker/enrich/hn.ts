@@ -27,7 +27,7 @@ export async function fetchHnContext(
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const maxChars = options.maxChars ?? 2000;
   const maxHits = options.maxHits ?? 3;
-  const query = encodeURIComponent(repoFullName.split("/").pop() ?? repoFullName);
+  const query = encodeURIComponent(repoFullName);
   const url = `${HN_SEARCH}?query=${query}&tags=story&hitsPerPage=${maxHits}`;
 
   const controller = new AbortController();

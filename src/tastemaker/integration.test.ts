@@ -382,4 +382,45 @@ describe("runPipeline integration", () => {
     expect(result.jsonPath).toContain("shadow.json");
     await expect(fs.access(result.jsonPath)).resolves.toBeUndefined();
   });
+
+  it("narrates once when enrichWeb is on without shadow (production treatment)", async () => {
+    config.enrichWeb = true;
+    config.enrichShadow = false;
+
+    const narrateMock = vi.fn().mockResolvedValue(
+      new Map([
+        ["acme/one", structuredBrief],
+        ["acme/two", structuredBrief],
+      ]),
+    );
+
+    await runPipeline(config, {
+      now: new Date("2026-06-06T14:00:00.000Z"),
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) => candidates),
+      externalEnrich: vi.fn().mockResolvedValue(
+        new Map([
+          [
+            "acme/one",
+            {
+              full_name: "acme/one",
+              sources: [],
+              combined_text: "HN snippet",
+              fetched_at: "2026-06-06T14:00:00.000Z",
+              errors: [],
+            },
+          ],
+        ]),
+      ),
+      narrate: narrateMock,
+    });
+
+    expect(narrateMock).toHaveBeenCalledTimes(1);
+    const enrichedArg = narrateMock.mock.calls[0][2] as Array<{ external_context?: string }>;
+    expect(enrichedArg[0].external_context).toBe("HN snippet");
+  });
 });

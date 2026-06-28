@@ -15,7 +15,7 @@ function usage(): void {
   console.error(`Usage:
   npm run experiment -- list
   npm run experiment -- register <EXP-id>
-  npm run experiment -- snapshot <EXP-id> --csv <path> [--period-start YYYY-MM-DD] [--period-end YYYY-MM-DD]
+  npm run experiment -- snapshot <EXP-id> --csv <path> [--period-start YYYY-MM-DD] [--period-end YYYY-MM-DD] [--dry-run]
 `);
 }
 
@@ -25,6 +25,7 @@ function parseArgs(argv: string[]): {
   csvPath?: string;
   periodStart?: string;
   periodEnd?: string;
+  dryRun?: boolean;
 } {
   const args = argv.slice(2);
   const command = args[0];
@@ -37,6 +38,8 @@ function parseArgs(argv: string[]): {
       out.periodStart = args[++i];
     } else if (args[i] === "--period-end" && args[i + 1]) {
       out.periodEnd = args[++i];
+    } else if (args[i] === "--dry-run") {
+      out.dryRun = true;
     } else if (!out.id && args[i]?.startsWith("EXP-")) {
       out.id = args[i];
     }
@@ -82,6 +85,7 @@ async function cmdSnapshot(
   csvPath: string,
   periodStart?: string,
   periodEnd?: string,
+  dryRun = false,
 ): Promise<void> {
   const absCsv = path.isAbsolute(csvPath) ? csvPath : path.join(rootDir, csvPath);
   const csvContent = await fs.readFile(absCsv, "utf8");
@@ -93,13 +97,18 @@ async function cmdSnapshot(
   };
 
   const snapshot = parseSnapshotCsv(csvContent, { period, source: absCsv });
+  if (dryRun) {
+    console.log(JSON.stringify(snapshot, null, 2));
+    console.error("(dry-run — experiment JSON not modified)");
+    return;
+  }
   const updated = appendSnapshotToExperiment(record, snapshot);
   const saved = await saveExperiment(rootDir, updated);
   console.log(`Appended snapshot to ${saved} (${updated.snapshots.length} total)`);
 }
 
 async function main(): Promise<void> {
-  const { command, id, csvPath, periodStart, periodEnd } = parseArgs(process.argv);
+  const { command, id, csvPath, periodStart, periodEnd, dryRun } = parseArgs(process.argv);
   if (!command) {
     usage();
     process.exit(1);
@@ -119,7 +128,7 @@ async function main(): Promise<void> {
     }
     if (command === "snapshot") {
       if (!id || !csvPath) throw new Error("snapshot requires EXP-id and --csv path");
-      await cmdSnapshot(rootDir, id, csvPath, periodStart, periodEnd);
+      await cmdSnapshot(rootDir, id, csvPath, periodStart, periodEnd, dryRun);
       return;
     }
     usage();

@@ -16,7 +16,7 @@ describe("fetchHnContext", () => {
     expect(result.text).toContain("Show HN: Demo");
     expect(result.text).toContain("42 pts");
     expect(fetchFn).toHaveBeenCalledWith(
-      expect.stringContaining("query=demo"),
+      expect.stringContaining("query=acme%2Fdemo"),
       expect.any(Object),
     );
   });

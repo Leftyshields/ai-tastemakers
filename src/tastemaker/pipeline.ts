@@ -161,6 +161,7 @@ export async function runPipeline(
   console.error(`Narrating top ${top.length} repos…`);
 
   const useExternalEnrich = config.enrichWeb;
+  const sideBySideNarrate = useExternalEnrich && config.enrichShadow;
   let externalBundles = new Map<string, EnrichmentBundle>();
 
   if (useExternalEnrich) {
@@ -173,12 +174,18 @@ export async function runPipeline(
     });
   }
 
-  const controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
+  let controlBriefs = new Map<string, string | null>();
+  let treatmentBriefs: Map<string, string | null>;
 
-  let treatmentBriefs = controlBriefs;
-  if (useExternalEnrich) {
+  if (sideBySideNarrate) {
+    controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
     const enrichedTop = applyExternalContext(top, externalBundles);
     treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+  } else if (useExternalEnrich) {
+    const enrichedTop = applyExternalContext(top, externalBundles);
+    treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+  } else {
+    treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
   }
 
   const digestRepos: DigestRepo[] = top.map((repo, i) => ({
@@ -219,7 +226,7 @@ export async function runPipeline(
     const shadowRepos = shadowReposFromDigest(
       digestRepos,
       useExternalEnrich,
-      controlBriefs,
+      sideBySideNarrate ? controlBriefs : treatmentBriefs,
       treatmentBriefs,
       bundleRefs,
     );
