@@ -19,6 +19,55 @@ export function posthogAnalyticsEnabled(): boolean {
   return Boolean(process.env.POSTHOG_KEY?.trim());
 }
 
+async function listHtmlFiles(dir: string): Promise<string[]> {
+  const results: string[] = [];
+  let entries;
+  try {
+    entries = await fs.readdir(dir, { withFileTypes: true });
+  } catch {
+    return results;
+  }
+  for (const entry of entries) {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) {
+      results.push(...(await listHtmlFiles(full)));
+    } else if (entry.name.endsWith(".html")) {
+      results.push(full);
+    }
+  }
+  return results;
+}
+
+/** Ensures every built HTML page includes PostHog when POSTHOG_KEY is set. */
+export async function verifyPosthogInBuiltSite(siteDir: string): Promise<number> {
+  if (!posthogAnalyticsEnabled()) {
+    if (process.env.GITHUB_ACTIONS === "true") {
+      throw new Error(
+        "POSTHOG_KEY is required for GitHub Pages deploy — all HTML pages must ship with analytics.",
+      );
+    }
+    console.warn("Warning: POSTHOG_KEY not set — built HTML has no PostHog snippet.");
+    return 0;
+  }
+
+  const htmlFiles = await listHtmlFiles(siteDir);
+  const missing: string[] = [];
+  for (const file of htmlFiles) {
+    const content = await fs.readFile(file, "utf8");
+    if (!content.includes("posthog.init")) {
+      missing.push(path.relative(siteDir, file));
+    }
+  }
+
+  if (missing.length > 0) {
+    const preview = missing.slice(0, 8).join(", ");
+    const suffix = missing.length > 8 ? ` (+${missing.length - 8} more)` : "";
+    throw new Error(`PostHog snippet missing from ${missing.length} page(s): ${preview}${suffix}`);
+  }
+
+  return htmlFiles.length;
+}
+
 export function posthogScriptHtml(): string {
   const key = process.env.POSTHOG_KEY?.trim();
   if (!key) return "";

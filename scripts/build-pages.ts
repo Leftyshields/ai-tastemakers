@@ -10,6 +10,7 @@ import {
   buildWeeklySite,
   editionSitePaths,
   pageShell,
+  verifyPosthogInBuiltSite,
 } from "./edition-pages.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -349,8 +350,11 @@ async function main(): Promise<void> {
   await buildSubscribePage();
   await buildUnsubscribePage();
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml);
+  const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);
+  const posthogNote =
+    posthogPages > 0 ? `; PostHog on ${posthogPages} HTML page(s)` : "";
   console.log(
-    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/`,
+    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/${posthogNote}`,
   );
 }
 
