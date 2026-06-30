@@ -39,7 +39,7 @@ DIGEST_ENRICH_SHADOW=1 \
 npm run digest:skills
 ```
 
-Review `data/experiments/runs/{run_id}/shadow.json` using [shadow rubric](../shadow-rubric.md).
+Review `data/experiments/runs/{run_id}/shadow.json` using [shadow rubric](../shadow-rubric.html) or the [side-by-side shadow view](../shadow/{run_id}.html) after `npm run build:pages`.
 
 ### Import metrics (after windows)
 
@@ -62,5 +62,6 @@ If CTR flat and rubric passes, keep enrichment for Skills only. If quality fails
 
 - Experiment ID: `EXP-20260628-web-enrich-skills`
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Shadow rubric: [briefings/lab/shadow-rubric.md](https://github.com/Leftyshields/ai-tastemakers/blob/main/briefings/lab/shadow-rubric.md)
+- Side-by-side shadow view: [/lab/shadow/{run_id}.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html) (after `npm run build:pages`)
+- Shadow rubric: [/lab/shadow-rubric.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow-rubric.html) · [source on GitHub](https://github.com/Leftyshields/ai-tastemakers/blob/main/briefings/lab/shadow-rubric.md)
 - Pipeline flags: `DIGEST_ENRICH_WEB`, `DIGEST_ENRICH_SHADOW`, `DIGEST_ENRICH_MAX_REPOS`, `DIGEST_ENRICH_MAX_CHARS`

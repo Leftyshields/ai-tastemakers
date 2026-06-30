@@ -260,6 +260,171 @@ export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
   };
 }
 
+interface ShadowRepoEntry {
+  rank: number;
+  full_name: string;
+  html_url: string;
+  brief_control?: string | null;
+  brief_treatment?: string | null;
+  enrichment_bundle_ref?: string;
+  brief?: string | null;
+  is_new?: boolean;
+}
+
+interface ShadowDigestPayload {
+  run_id: string;
+  date: string;
+  edition: string;
+  enrich_web_requested: boolean;
+  generated_at: string;
+  ranking_mode: string;
+  repos: ShadowRepoEntry[];
+}
+
+function renderBriefMarkdown(brief: string | null | undefined): string {
+  if (!brief?.trim()) {
+    return '<p class="text-stone-500">—</p>';
+  }
+  return marked.parse(brief) as string;
+}
+
+function renderShadowRepoSection(
+  repo: ShadowRepoEntry,
+  escapeHtml: (t: string) => string,
+): string {
+  const title = `<h3 class="mb-1 font-sans text-base font-semibold"><a href="${escapeHtml(repo.html_url)}" class="text-blue-800 no-underline hover:underline dark:text-blue-400">${escapeHtml(repo.full_name)}</a> <span class="font-normal text-stone-500">#${repo.rank}</span></h3>`;
+  const prose =
+    "prose prose-stone max-w-none dark:prose-invert prose-sm prose-a:text-blue-800 dark:prose-a:text-blue-400";
+
+  const hasSideBySide =
+    repo.brief_control != null ||
+    repo.brief_treatment != null ||
+    Boolean(repo.enrichment_bundle_ref);
+
+  if (hasSideBySide) {
+    return `<section class="mb-10 border-b border-stone-200 pb-8 last:border-b-0 dark:border-stone-700">
+      ${title}
+      <div class="mt-4 grid gap-4 md:grid-cols-2">
+        <div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+          <h4 class="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-stone-500">Control (README only)</h4>
+          <article class="brief-content ${prose}">${renderBriefMarkdown(repo.brief_control)}</article>
+        </div>
+        <div class="rounded-lg border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-800 dark:bg-blue-950/20">
+          <h4 class="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-blue-800 dark:text-blue-300">Treatment (README + web/HN)</h4>
+          <article class="brief-content ${prose}">${renderBriefMarkdown(repo.brief_treatment)}</article>
+        </div>
+      </div>
+    </section>`;
+  }
+
+  return `<section class="mb-10 border-b border-stone-200 pb-8 last:border-b-0 dark:border-stone-700">
+    ${title}
+    <div class="mt-4 rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+      <article class="brief-content ${prose}">${renderBriefMarkdown(repo.brief)}</article>
+    </div>
+  </section>`;
+}
+
+export function renderShadowCompareBody(
+  shadow: ShadowDigestPayload,
+  escapeHtml: (t: string) => string,
+): string {
+  const hasSideBySide = shadow.repos.some(
+    (repo) =>
+      repo.brief_control != null ||
+      repo.brief_treatment != null ||
+      Boolean(repo.enrichment_bundle_ref),
+  );
+
+  const notice =
+    shadow.enrich_web_requested && !hasSideBySide
+      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output — repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
+      : "";
+
+  const repos = shadow.repos.map((repo) => renderShadowRepoSection(repo, escapeHtml)).join("");
+
+  return `${labNavHtml("experiments", escapeHtml, 1)}
+    <p class="mb-2"><a href="../experiments.html" class="text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; Experiments</a></p>
+    <h2 class="font-mono text-lg font-bold">${escapeHtml(shadow.run_id)}</h2>
+    <p class="text-sm text-stone-500 dark:text-stone-400">${escapeHtml(shadow.date)} · ${escapeHtml(shadow.edition)} · ${escapeHtml(shadow.ranking_mode)}</p>
+    <p class="mt-2 text-sm"><a href="../shadow-rubric.html" class="text-blue-800 hover:underline dark:text-blue-400">Shadow rubric</a></p>
+    ${notice}
+    ${repos}`;
+}
+
+async function buildLabMarkdownPage(
+  repoRoot: string,
+  labSiteDir: string,
+  markdownRelPath: string,
+  htmlName: string,
+  pageTitle: string,
+  brand: { name: string; tagline: string },
+  escapeHtml: (t: string) => string,
+  labShell: { labLayout: true },
+  navActive: "home" | "tools" | "experiments" | "posts" = "home",
+): Promise<boolean> {
+  const markdownPath = path.join(repoRoot, markdownRelPath);
+  try {
+    const markdown = await fs.readFile(markdownPath, "utf8");
+    const html = marked.parse(markdown) as string;
+    const body = `${labNavHtml(navActive, escapeHtml)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
+    await fs.writeFile(
+      path.join(labSiteDir, htmlName),
+      pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, labShell),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function buildShadowPages(
+  repoRoot: string,
+  labSiteDir: string,
+  brand: { name: string; tagline: string },
+  escapeHtml: (t: string) => string,
+  labShell: { labLayout: true },
+): Promise<number> {
+  const runsDir = path.join(repoRoot, "data", "experiments", "runs");
+  const shadowSiteDir = path.join(labSiteDir, "shadow");
+  await fs.mkdir(shadowSiteDir, { recursive: true });
+
+  let count = 0;
+  let entries: string[] = [];
+  try {
+    entries = await fs.readdir(runsDir);
+  } catch {
+    return 0;
+  }
+
+  for (const runId of entries) {
+    if (runId.startsWith(".") || runId === "README.md") continue;
+    const shadowPath = path.join(runsDir, runId, "shadow.json");
+    try {
+      const raw = await fs.readFile(shadowPath, "utf8");
+      const shadow = JSON.parse(raw) as ShadowDigestPayload;
+      const body = renderShadowCompareBody(shadow, escapeHtml);
+      await fs.writeFile(
+        path.join(shadowSiteDir, `${runId}.html`),
+        pageShell(
+          `Shadow ${runId.slice(0, 8)} · Lab`,
+          body,
+          labSitePaths(1),
+          brand,
+          "Side-by-side control vs treatment blurbs from a digest pipeline shadow run.",
+          escapeHtml,
+          labShell,
+        ),
+      );
+      count++;
+    } catch {
+      // skip missing or invalid shadow runs
+    }
+  }
+
+  return count;
+}
+
 export function pageShell(
   title: string,
   body: string,
@@ -907,6 +1072,20 @@ export async function buildLabSite(
     pageShell("Experiments · Lab", experimentsBody, paths, brand, undefined, escapeHtml, labShell),
   );
 
+  await buildLabMarkdownPage(
+    repoRoot,
+    labSiteDir,
+    path.join("briefings", "lab", "shadow-rubric.md"),
+    "shadow-rubric.html",
+    "Shadow rubric · Lab",
+    brand,
+    escapeHtml,
+    labShell,
+    "experiments",
+  );
+
+  const shadowCount = await buildShadowPages(repoRoot, labSiteDir, brand, escapeHtml, labShell);
+
   await fs.mkdir(path.join(labSiteDir, "posts"), { recursive: true });
   const postsDir = path.join(repoRoot, "briefings", "lab", "posts");
   let postsBody = `${labNavHtml("posts", escapeHtml, 1)}`;
@@ -938,7 +1117,7 @@ export async function buildLabSite(
     pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
   );
 
-  return 4;
+  return 4 + shadowCount + 1;
 }
 
 export function allEditions(): EditionDefinition[] {

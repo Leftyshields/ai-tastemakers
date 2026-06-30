@@ -22,7 +22,7 @@ Shadow runs let us preview enriched blurbs side-by-side with production output b
 - **[Tool inventory](tools.html)** — repos that appeared in briefing history, tagged by pipeline role (search, compaction, eval, analytics). Candidates for adoption, not endorsements.
 - **[Experiments](experiments.html)** — active and completed tests with baseline/treatment windows, imported metrics, and plain-language verdicts.
 - **[Posts](posts/)** — onboarding notes and outcome stories when we adopt a digest-featured tool in our own stack.
-- **[Shadow rubric](shadow-rubric.md)** — how we score control vs treatment blurbs before enabling enrichment in production.
+- **[Shadow rubric](shadow-rubric.html)** — how we score control vs treatment blurbs before enabling enrichment in production.
 
 ## How to read an experiment
 

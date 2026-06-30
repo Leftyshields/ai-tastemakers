@@ -112,7 +112,7 @@
     const shadows = (exp.shadow_runs || [])
       .map(
         (run) =>
-          `<tr><td class="py-1 font-mono text-xs">${esc(run.run_id)}</td><td class="py-1">${esc(run.date)}</td><td class="py-1">${esc(run.edition)}</td></tr>`,
+          `<tr><td class="py-1 font-mono text-xs"><a href="shadow/${esc(run.run_id)}.html" class="text-blue-800 hover:underline dark:text-blue-400">${esc(run.run_id)}</a></td><td class="py-1">${esc(run.date)}</td><td class="py-1">${esc(run.edition)}</td></tr>`,
       )
       .join("");
 
@@ -134,7 +134,7 @@
         <thead><tr class="text-xs text-stone-500"><th class="pb-1 text-left">Run ID</th><th class="pb-1 text-left">Date</th><th class="pb-1 text-left">Edition</th></tr></thead>
         <tbody>${shadows || '<tr><td colspan="3" class="text-stone-500">None</td></tr>'}</tbody>
       </table>
-      <p class="mt-1 text-xs text-stone-500">Shadow JSON lives in repo <code>data/experiments/runs/{run_id}/</code> (not deployed to Pages).</p>
+      <p class="mt-1 text-xs text-stone-500">Side-by-side blurbs: <code>lab/shadow/{run_id}.html</code> (rebuilt with <code>npm run build:pages</code>). Raw JSON: <code>data/experiments/runs/{run_id}/</code>.</p>
       <h3 class="mt-6 text-base font-semibold">Verdict</h3>
       <p>${esc(verdict)}</p>
       <p class="mt-2 text-sm"><strong>Keep change:</strong> ${exp.keep_change == null ? "—" : exp.keep_change ? "Yes" : "No"}</p>
