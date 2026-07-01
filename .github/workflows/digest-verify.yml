@@ -12,6 +12,7 @@ on:
 permissions:
   contents: read
   issues: write
+  actions: write
 
 concurrency:
   group: digest-verify
@@ -33,8 +34,33 @@ jobs:
         run: node scripts/verify-daily-digest.mjs
         continue-on-error: true
 
+      - name: Redeploy Pages when briefings exist but site is stale
+        id: pages_redeploy
+        if: steps.check.outcome == 'failure' && steps.check.outputs.pages_stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Briefings OK on main — triggering Pages redeploy (prior deploy may have hit a transient GitHub 500)."
+          gh workflow run "Deploy GitHub Pages" --ref main
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            echo "Waiting for Pages deploy (attempt ${attempt}/12)..."
+            sleep 30
+            if node scripts/verify-daily-digest.mjs --pages-only; then
+              echo "recovered=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "recovered=false" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Re-verify after Pages redeploy
+        if: steps.pages_redeploy.outcome == 'success'
+        run: node scripts/verify-daily-digest.mjs
+
       - name: Alert on failure
-        if: steps.check.outcome == 'failure'
+        if: |
+          steps.check.outcome == 'failure' &&
+          (steps.pages_redeploy.outcome != 'success' || steps.pages_redeploy.outputs.recovered != 'true')
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -42,8 +68,12 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           VERIFY_DIGEST_DATE: ${{ steps.check.outputs.date }}
           VERIFY_DIGEST_ERRORS: ${{ steps.check.outputs.errors }}
+          VERIFY_DIGEST_BRIEFINGS_OK: ${{ steps.check.outputs.briefings_ok }}
+          VERIFY_DIGEST_PAGES_OK: ${{ steps.check.outputs.pages_ok }}
         run: node scripts/send-digest-alert.mjs
 
       - name: Fail job if verification failed
-        if: steps.check.outcome == 'failure'
+        if: |
+          steps.check.outcome == 'failure' &&
+          (steps.pages_redeploy.outcome != 'success' || steps.pages_redeploy.outputs.recovered != 'true')
         run: exit 1
