@@ -11,6 +11,11 @@ on:
     - cron: "30 7 * * *"
       timezone: "America/Los_Angeles"
   workflow_dispatch:
+    inputs:
+      resend_email:
+        description: Resend OSS digest email from today's briefing (when pipeline is skipped)
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -36,7 +41,7 @@ jobs:
 
           if [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
             echo "skip_daily=true" >> "$GITHUB_OUTPUT"
-            echo "Daily briefings for ${TODAY} already exist — skipping digest pipeline"
+            echo "Daily briefings for ${TODAY} already exist — skipping digest pipeline (no email unless resend_email is checked)"
           else
             echo "skip_daily=false" >> "$GITHUB_OUTPUT"
           fi
@@ -55,14 +60,25 @@ jobs:
           fi
 
       - uses: actions/setup-node@v4
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || inputs.resend_email == true
         with:
           node-version: "20"
           cache: npm
 
       - name: Install dependencies
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || inputs.resend_email == true
         run: npm install
+
+      - name: Resend digest email from existing briefing
+        if: inputs.resend_email == true && steps.gate.outputs.skip_daily == 'true'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+          FIREBASE_PROJECT_ID: epiphoric-prod
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: npm run digest:resend-email
 
       - name: Run digest (OSS + Skills)
         if: steps.gate.outputs.skip_daily != 'true'
