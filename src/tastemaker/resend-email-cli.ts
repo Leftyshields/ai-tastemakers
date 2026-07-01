@@ -20,7 +20,7 @@ function todayPacific(): string {
 async function main(): Promise<void> {
   try {
     const dateLabel = parseDateArg() ?? todayPacific();
-    const config = loadConfig({ editionId: "oss" });
+    const config = loadConfig({ editionId: "oss", requirePipelineSecrets: false });
     const result = await resendDigestEmailForDate(config, dateLabel);
     console.log(
       `Digest email resent for ${dateLabel} to ${result.recipientCount} recipient(s) (id: ${result.id})`,

@@ -57,20 +57,28 @@ function loadEnvFiles(rootDir: string): void {
   });
 }
 
-export function loadConfig(options?: { editionId?: EditionId; rootDir?: string }): AppConfig {
+export function loadConfig(options?: {
+  editionId?: EditionId;
+  rootDir?: string;
+  /** When false, GITHUB_TOKEN and ANTHROPIC_API_KEY are optional (email/subscriber ops). */
+  requirePipelineSecrets?: boolean;
+}): AppConfig {
   const rootDir = options?.rootDir ?? findRepoRoot();
   loadEnvFiles(rootDir);
 
   const edition = getEdition(resolveEditionId(options?.editionId));
+  const requirePipelineSecrets = options?.requirePipelineSecrets !== false;
 
-  const githubToken = process.env.GITHUB_TOKEN?.trim();
-  const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim();
+  const githubToken = process.env.GITHUB_TOKEN?.trim() || "";
+  const anthropicApiKey = process.env.ANTHROPIC_API_KEY?.trim() || "";
 
-  if (!githubToken) {
-    throw new Error("GITHUB_TOKEN is required");
-  }
-  if (!anthropicApiKey) {
-    throw new Error("ANTHROPIC_API_KEY is required");
+  if (requirePipelineSecrets) {
+    if (!githubToken) {
+      throw new Error("GITHUB_TOKEN is required");
+    }
+    if (!anthropicApiKey) {
+      throw new Error("ANTHROPIC_API_KEY is required");
+    }
   }
 
   return {
