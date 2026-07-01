@@ -61,3 +61,15 @@ jobs:
 
       - id: deployment
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+
+      - name: Retry Pages deployment (transient GitHub 500s)
+        if: steps.deployment.outcome == 'failure'
+        id: deployment_retry
+        uses: actions/deploy-pages@v4
+
+      - name: Fail if Pages deployment did not succeed
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        run: |
+          echo "GitHub Pages deployment failed after retry. Re-run this workflow manually."
+          exit 1
