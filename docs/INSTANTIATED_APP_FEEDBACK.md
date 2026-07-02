@@ -160,7 +160,7 @@ Static HTML generators treated Tailwind class strings like React JSX utilities, 
 
 ### Changes incorporated into Genesis
 
-**Pending upstream PR** — app-repo workflow updated (see below). Proposed Genesis targets: `WORKFLOW_COURSE.md` case study, `/execute_plan` static-HTML styling note, `/qa_checklist` browser gate.
+[project-genesis PR #17](https://github.com/Leftyshields/project-genesis/pull/17) (`improve/tastemakers-postmortem-land`) — explore WIP conflicts, static HTML styling in design_decisions, qa_checklist browser gate, workflow mistakes #21–24, WORKFLOW_COURSE case study C. Builds on open PR #16 (COPY postmortem).
 
 ### App-repo fixes already applied
 
