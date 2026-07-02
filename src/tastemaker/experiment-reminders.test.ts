@@ -5,11 +5,11 @@ import os from "node:os";
 import type { ExperimentRecord } from "./experiments/types.js";
 import type { AppConfig } from "./types.js";
 import {
-  buildChecklist,
   findMilestonesForDate,
   renderReminderEmail,
   runExperimentReminders,
 } from "./experiment-reminders.js";
+import { buildChecklist } from "./experiment-reminder-content.js";
 
 vi.mock("./email/resend.js", () => ({
   canSendOpsEmail: vi.fn(),
@@ -98,8 +98,9 @@ describe("findMilestonesForDate", () => {
 describe("buildChecklist", () => {
   it("includes digest flag hints at treatment_start", () => {
     const lines = buildChecklist("treatment_start", sampleRecord());
-    expect(lines.some((l) => l.includes("DIGEST_ENRICH_WEB=1"))).toBe(true);
+    expect(lines.some((l) => l.includes("DIGEST_ENRICH_WEB"))).toBe(true);
     expect(lines.some((l) => l.includes("digest.yml"))).toBe(true);
+    expect(lines.some((l) => l.includes('DIGEST_ENRICH_SHADOW: "0"'))).toBe(true);
   });
 
   it("routes SITE_ flags to Pages build env", () => {
@@ -109,8 +110,8 @@ describe("buildChecklist", () => {
         change: { flags: { SITE_LANDING_LAYOUT_V2: "1" } },
       }),
     );
-    expect(lines.some((l) => l.includes("SITE_LANDING_LAYOUT_V2=1"))).toBe(true);
-    expect(lines.some((l) => l.includes("Pages build env"))).toBe(true);
+    expect(lines.some((l) => l.includes("SITE_LANDING_LAYOUT_V2"))).toBe(true);
+    expect(lines.some((l) => l.includes("Variables"))).toBe(true);
   });
 });
 
@@ -133,7 +134,8 @@ describe("renderReminderEmail", () => {
     expect(email.subject).toBe("Lab reminder — 2 experiment milestones (2026-07-11 PT)");
     expect(email.text).toContain("EXP-20260628-web-enrich-skills");
     expect(email.text).toContain("EXP-20260701-landing-layout");
-    expect(email.text).toContain("snapshot EXP-20260628-web-enrich-skills");
+    expect(email.text).toContain("POSTHOG EXPORT");
+    expect(email.text).toContain("--period-start 2026-06-28");
   });
 
   it("escapes HTML in experiment notes", () => {

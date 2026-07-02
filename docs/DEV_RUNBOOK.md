@@ -171,6 +171,8 @@ npm run experiment:reminders -- --dry-run --date 2026-07-11
 
 Manual run: Actions → **Experiment Reminders** → Run workflow (optional `date` input).
 
+**Step-by-step operator guide:** [EXPERIMENT_LIFECYCLE_PLAYBOOK.md](./EXPERIMENT_LIFECYCLE_PLAYBOOK.md) — PostHog export, snapshot import, flag changes, verdicts.
+
 **Cron caveat:** GitHub `schedule` is best-effort — two Pacific slots (07:00, 07:30) improve reliability; there is still no catch-up if both runs are skipped. Check [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) for dates.
 
 **Misconfigured secrets:** If milestones match but `EXPERIMENT_REMINDER_TO` (or Resend vars) is unset, the workflow exits **non-zero** so Actions shows red.

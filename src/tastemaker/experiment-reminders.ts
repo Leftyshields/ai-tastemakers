@@ -3,12 +3,10 @@ import { formatDateInTimezone } from "./config.js";
 import { listExperimentIds, loadExperiment } from "./experiments/load.js";
 import type { ExperimentRecord } from "./experiments/types.js";
 import { canSendOpsEmail, sendOpsEmail } from "./email/resend.js";
+import { buildMilestoneInstructions } from "./experiment-reminder-content.js";
+import type { ExperimentMilestoneType } from "./experiment-reminder-content.js";
 
-export type ExperimentMilestoneType =
-  | "baseline_start"
-  | "baseline_end"
-  | "treatment_start"
-  | "treatment_end";
+export type { ExperimentMilestoneType } from "./experiment-reminder-content.js";
 
 export interface ExperimentMilestoneMatch {
   experimentId: string;
@@ -18,6 +16,9 @@ export interface ExperimentMilestoneMatch {
 }
 
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+
+const PLAYBOOK_URL =
+  "https://github.com/Leftyshields/ai-tastemakers/blob/main/docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md";
 
 const RUNBOOK_URL =
   "https://github.com/Leftyshields/ai-tastemakers/blob/main/docs/DEV_RUNBOOK.md#experiment-lifecycle-reminders";
@@ -64,59 +65,6 @@ export function findMilestonesForDate(
   return matches;
 }
 
-function isSiteBuildFlag(flag: string): boolean {
-  return flag.startsWith("SITE_");
-}
-
-export function buildChecklist(
-  milestoneType: ExperimentMilestoneType,
-  record: ExperimentRecord,
-): string[] {
-  const lines: string[] = [];
-  const flags = Object.entries(record.change.flags ?? {}).filter(
-    ([, value]) => value !== undefined && value !== "",
-  );
-
-  switch (milestoneType) {
-    case "baseline_start":
-      lines.push("Confirm experiment is in baseline (control configuration).");
-      lines.push("Keep treatment flags off in GitHub Actions until treatment start.");
-      lines.push("Monitor PostHog during the baseline window.");
-      break;
-    case "baseline_end":
-      lines.push("Export PostHog metrics for the baseline window.");
-      lines.push(
-        `Import snapshot: npm run experiment -- snapshot ${record.id} --csv path/to/posthog-export.csv`,
-      );
-      lines.push("When starting treatment, set status to active in experiment JSON if appropriate.");
-      break;
-    case "treatment_start":
-      for (const [flag, value] of flags) {
-        if (isSiteBuildFlag(flag)) {
-          lines.push(`Set ${flag}=${value} in Pages build env (pages.yml or build step).`);
-        } else {
-          lines.push(`Set ${flag}=${value} in digest.yml env for Daily Digest workflow.`);
-        }
-      }
-      if (flags.length === 0) {
-        lines.push("Enable treatment configuration per change_summary and notes.");
-      }
-      lines.push("Redeploy GitHub Pages if site build flags changed.");
-      lines.push("Confirm treatment window dates in experiment JSON.");
-      break;
-    case "treatment_end":
-      lines.push("Export PostHog metrics for the treatment window.");
-      lines.push(
-        `Import snapshot: npm run experiment -- snapshot ${record.id} --csv path/to/posthog-export.csv`,
-      );
-      lines.push("Record verdict and keep_change in experiment JSON.");
-      lines.push("Set status to complete; disable treatment flags if not keeping the change.");
-      break;
-  }
-
-  return lines;
-}
-
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -125,10 +73,25 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function isSectionHeading(line: string): boolean {
+  const headings = new Set([
+    "WHAT THIS MEANS",
+    "STEPS",
+    "POSTHOG EXPORT (step by step)",
+    "IMPORT SNAPSHOT",
+    "PUBLISH TO LAB DASHBOARD",
+    "OPTIONAL BEFORE TREATMENT (web-enrich quality check)",
+    "NEXT MILESTONE",
+    "RECORD VERDICT",
+    "IF NOT KEEPING THE CHANGE",
+  ]);
+  return headings.has(line);
+}
+
 function renderSectionText(match: ExperimentMilestoneMatch, siteUrl: string): string {
   const { record, milestoneType, date } = match;
   const labUrl = `${siteUrl.replace(/\/$/, "")}/lab/experiments.html`;
-  const checklist = buildChecklist(milestoneType, record);
+  const instructions = buildMilestoneInstructions(milestoneType, record);
   const lines = [
     `Experiment: ${record.id}`,
     `Status: ${record.status}`,
@@ -136,13 +99,12 @@ function renderSectionText(match: ExperimentMilestoneMatch, siteUrl: string): st
     `Milestone: ${MILESTONE_LABELS[milestoneType]} (${date} PT)`,
     `Change: ${record.change_summary}`,
     "",
-    "Checklist:",
-    ...checklist.map((item) => `- ${item}`),
+    ...instructions,
     "",
     `Lab dashboard: ${labUrl}`,
   ];
   if (record.notes?.trim()) {
-    lines.push("", `Notes: ${record.notes.trim()}`);
+    lines.push("", `Experiment notes: ${record.notes.trim()}`);
   }
   return lines.join("\n");
 }
@@ -150,20 +112,65 @@ function renderSectionText(match: ExperimentMilestoneMatch, siteUrl: string): st
 function renderSectionHtml(match: ExperimentMilestoneMatch, siteUrl: string): string {
   const { record, milestoneType, date } = match;
   const labUrl = `${siteUrl.replace(/\/$/, "")}/lab/experiments.html`;
-  const checklist = buildChecklist(milestoneType, record);
-  const items = checklist.map((item) => `<li>${escapeHtml(item)}</li>`).join("");
-  let html = [
+  const instructions = buildMilestoneInstructions(milestoneType, record);
+  const htmlParts: string[] = [
     `<p><strong>Experiment:</strong> ${escapeHtml(record.id)}</p>`,
     `<p><strong>Status:</strong> ${escapeHtml(record.status)} | <strong>Edition:</strong> ${escapeHtml(record.edition)}</p>`,
     `<p><strong>Milestone:</strong> ${escapeHtml(MILESTONE_LABELS[milestoneType])} (${escapeHtml(date)} PT)</p>`,
     `<p>${escapeHtml(record.change_summary)}</p>`,
-    `<p><strong>Checklist:</strong></p><ul>${items}</ul>`,
-    `<p><a href="${escapeHtml(labUrl)}">Lab dashboard</a></p>`,
-  ].join("\n");
-  if (record.notes?.trim()) {
-    html += `\n<p><strong>Notes:</strong> ${escapeHtml(record.notes.trim())}</p>`;
+  ];
+
+  let inPre = false;
+  const preLines: string[] = [];
+
+  const flushPre = (): void => {
+    if (preLines.length > 0) {
+      htmlParts.push(
+        `<pre style="font-family:monospace;font-size:13px;white-space:pre-wrap">${escapeHtml(preLines.join("\n"))}</pre>`,
+      );
+      preLines.length = 0;
+    }
+    inPre = false;
+  };
+
+  for (const line of instructions) {
+    if (!line.trim()) {
+      flushPre();
+      continue;
+    }
+    if (isSectionHeading(line)) {
+      flushPre();
+      htmlParts.push(`<p><strong>${escapeHtml(line)}</strong></p>`);
+      continue;
+    }
+    if (
+      line.startsWith("npm run") ||
+      line.startsWith("git ") ||
+      line.startsWith("EXPERIMENT_") ||
+      line.startsWith("type,") ||
+      line.startsWith("pageview,") ||
+      line.startsWith("outbound_") ||
+      line.startsWith("   ") ||
+      line.endsWith("\\")
+    ) {
+      inPre = true;
+      preLines.push(line);
+      continue;
+    }
+    if (inPre) {
+      flushPre();
+    }
+    htmlParts.push(`<p>${escapeHtml(line)}</p>`);
   }
-  return html;
+  flushPre();
+
+  htmlParts.push(`<p><a href="${escapeHtml(labUrl)}">Lab dashboard</a></p>`);
+  if (record.notes?.trim()) {
+    htmlParts.push(
+      `<p><strong>Experiment notes:</strong> ${escapeHtml(record.notes.trim())}</p>`,
+    );
+  }
+  return htmlParts.join("\n");
 }
 
 export function renderReminderEmail(
@@ -187,6 +194,7 @@ export function renderReminderEmail(
     ),
     "",
     "---",
+    `Playbook (step-by-step): ${PLAYBOOK_URL}`,
     `Runbook: ${RUNBOOK_URL}`,
   ].join("\n");
 
@@ -196,7 +204,7 @@ export function renderReminderEmail(
     ...sectionHtml.flatMap((section, index) =>
       index === 0 ? [section] : ["<hr />", section],
     ),
-    `<p><a href="${escapeHtml(RUNBOOK_URL)}">Runbook</a></p>`,
+    `<p><a href="${escapeHtml(RUNBOOK_URL)}">Runbook</a> · <a href="${escapeHtml(PLAYBOOK_URL)}">Full playbook</a></p>`,
   ].join("\n");
 
   return { subject, text, html };
