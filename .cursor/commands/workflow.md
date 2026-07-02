@@ -190,7 +190,7 @@ For smaller changes or bug fixes:
 
 **Repo:** https://github.com/Leftyshields/ai-tastemakers
 
-**Closure:** [docs/CLOSURE_EPH-20260627-NEWF.md](docs/CLOSURE_EPH-20260627-NEWF.md) (latest) · [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
+**Closure:** [docs/CLOSURE_EPH-20260701-LAND.md](docs/CLOSURE_EPH-20260701-LAND.md) (latest) · [docs/CLOSURE_EPH-20260627-NEWF.md](docs/CLOSURE_EPH-20260627-NEWF.md) · [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
 
 **Ops runbook:** [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md)
 
@@ -224,6 +224,8 @@ For smaller changes or bug fixes:
 20. **GHA digest without Pages** - Bot commits to `briefings/` may not trigger Pages; verify deploy or `gh workflow run "Deploy GitHub Pages"` after digest
 21. **Badge vs ranking history** - Reader-facing flags (e.g. digest `is_new`) must not reuse soft-dedup lookback windows; use lifetime per-edition history when semantics are "never seen before"
 22. **`build:digest` vs `test:digest`** - Pre-existing `tsc` failures may exist; treat `npm run test:digest` as the tastemaker ship gate until build is green
+23. **Tailwind in HTML generators** - Spacing/layout in `edition-pages.ts` (or other TS string templates) must use **component classes in `site/assets/input.css`**, not Tailwind utility strings alone; add explicit HTML separators (`&middot;`, flex gap via CSS) for inline link rows. Verify with `npm run build:pages` + browser refresh
+24. **Partial implementations vs revised capture** - Before `/execute_plan`, reconcile flag-gated or WIP code against capture; update experiment JSON and design doc in the same milestone when direction changes (sidebar-heavy → reflow-first, etc.)
 
 ---
 
@@ -238,4 +240,4 @@ For smaller changes or bug fixes:
 
 ---
 
-**Last Updated:** 2026-06-27
+**Last Updated:** 2026-07-02

@@ -6,10 +6,19 @@
   <title>Unsubscribe · Tastemakers</title>
   <meta name="description" content="Unsubscribe from the AI Tastemakers daily digest email.">
   <link rel="stylesheet" href="assets/style.css">
+  <script>
+    !function(t,e){var o,n,p,r;e.__SV||(window.posthog=e,e._i=[],e.init=function(i,s,a){function g(t,e){var o=e.split(".");2==o.length&&(t=t[o[0]],e=o[1]),t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}}(p=t.createElement("script")).type="text/javascript",p.crossOrigin="anonymous",p.async=!0,p.src=s.api_host.replace(".i.posthog.com","-assets.i.posthog.com")+"/static/array.js",(r=t.getElementsByTagName("script")[0]).parentNode.insertBefore(p,r);var u=e;for(void 0!==a?u=e[a]=[]:a="posthog",u.people=u.people||[],u.toString=function(t){var e="posthog";return"posthog"!==a&&(e+="."+a),t||(e+=" (stub)"),e},u.people.toString=function(){return u.toString(1)+".people (stub)"},o="capture identify alias people.set people.set_once set_config register register_once unregister opt_out_capturing has_opted_out_capturing opt_in_capturing reset isFeatureEnabled onFeatureFlags getFeatureFlag getFeatureFlagPayload reloadFeatureFlags group updateEarlyAccessFeatureEnrollment getEarlyAccessFeatures getActiveMatchingSurveys getSurveys getNextSurveyStep onSessionId".split(" "),n=0;n<o.length;n++)g(u,o[n]);e._i.push([i,s,a])},e.__SV=1)}(document,window.posthog||[]);
+    posthog.init('phc_yW4oScFyTyXy9vturGdUGdFfSaMv3RLZbq773xeeWcwF', {
+      api_host: 'https://us.i.posthog.com',
+      autocapture: false,
+      capture_pageview: true,
+      disable_session_recording: true
+    });
+  </script>
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="mx-auto min-h-screen max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12">
-    <header class="mb-10 border-b border-stone-200 pb-6 dark:border-stone-800">
+    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-800">
       <h1 class="font-sans text-2xl font-bold tracking-tight">
         <a href="./" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">Tastemakers</a>
       </h1>
@@ -117,12 +126,9 @@ form.addEventListener("submit", async function (event) {
   }
 });
 </script>
-    <footer class="mt-16 border-t border-stone-200 pt-6 text-center font-sans text-xs text-stone-500 dark:border-stone-800 dark:text-stone-400">
-      <a href="subscribe.html" class="text-blue-800 hover:underline dark:text-blue-400">Subscribe</a><span aria-hidden="true"> · </span><a href="skills/" class="text-blue-800 hover:underline dark:text-blue-400">Skill Tastemakers</a>
-      <span aria-hidden="true"> · </span>
-      <a href="https://github.com/Leftyshields/ai-tastemakers" class="text-blue-800 hover:underline dark:text-blue-400">Source on GitHub</a>
-      <span aria-hidden="true"> · </span>Updated daily
-      <span aria-hidden="true"> · </span>Automated pipeline
+    <footer class="site-footer mt-16">
+      <nav aria-label="Site footer" class="site-footer__links"><a href="subscribe.html" class="site-footer__link">Subscribe</a><span class="site-footer__sep" aria-hidden="true">&middot;</span><a href="skills/" class="site-footer__link">Skill Tastemakers</a><span class="site-footer__sep" aria-hidden="true">&middot;</span><a href="lab/" class="site-footer__link">Lab — how we measure improvements</a><span class="site-footer__sep" aria-hidden="true">&middot;</span><a href="https://github.com/Leftyshields/ai-tastemakers" class="site-footer__link">Source on GitHub</a></nav>
+      <p class="site-footer__meta">Updated daily &middot; Automated pipeline</p>
     </footer>
   </div>
 </body>

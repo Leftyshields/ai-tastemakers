@@ -181,6 +181,7 @@ Workflow: `.github/workflows/pages.yml` (runs on push to `briefings/` or `script
 
 - **Live:** https://leftyshields.github.io/ai-tastemakers/
 - **Build locally:** `npm run build:pages` then `npx serve site`
+- **Landing layout v2 (experiment):** Preview with `SITE_LANDING_LAYOUT_V2=1 npm run build:pages` — OSS and Skills index pages only. Layout reflows How it works / About, month-tile archive heat-map, and weekly/monthly into the main column; sidebar is promo-only. Leave flag unset in production until EXP-20260701-landing-layout treatment window (~2026-08-10). PostHog captures `homepage_index_click` on index CTAs when `POSTHOG_KEY` is set.
 - **CSS:** Tailwind compiles `site/assets/input.css` → `site/assets/style.css` (generated, not committed)
 - **Paths:** Use relative asset URLs for project sites (`assets/style.css`, not `/assets/style.css`)
 

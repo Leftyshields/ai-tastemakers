@@ -97,6 +97,40 @@ See [project-genesis PR #15](https://github.com/Leftyshields/project-genesis/pul
 - `excludeDate` for same-day ranking stability; snapshot star preservation on enrich merge
 - Closure: `docs/CLOSURE_EPH-20260607-COPY.md`
 
+## 2026-07-02 — AI Tastemakers (Landing Layout v2, EPH-20260701-LAND)
+
+**Source:** Full workflow (capture → explore → design → plan → execute → code review → QA → post-MVP footer fix → postmortem). Flag-gated static layout experiment.
+
+### Friction observed
+
+| Area | Issue |
+|------|--------|
+| Direction drift | Partial v2 code implemented sidebar-heavy synthesis; revised capture required reflow-first refactor |
+| Experiment JSON | Hypothesis/`change_summary` lagged capture until mid-implementation |
+| Footer UX | Tailwind utilities in TS HTML strings did not guarantee spacing; links visually collided (`SubscribeSkill TastemakersLab`) |
+| QA gap | Automated tests green; layout/footer bug found only by human browser check |
+| Scope during QA | Hero copy + global footer refactor without mini-capture |
+| Context files | `last_capture.md` overwritten by unrelated issue (REPL) before postmortem |
+| Git | Local main behind GHA bot commits at ship time |
+
+### Root cause (process)
+
+Static HTML generators treated Tailwind class strings like React JSX utilities, but Tailwind v4 content scanning does not reliably emit rules from dynamic TS template literals. Combined with adjacent `<a>` tags and no explicit separators, footer spacing failed despite “correct-looking” class names in source.
+
+### Recommended Genesis / workflow changes
+
+- `/explore` — require “conflicts with existing code” table when partial implementations exist
+- `/design_decisions` — static sites: component CSS in scanned `input.css` for layout-critical UI
+- `/qa_checklist` — manual browser check after `build:pages` for layout/footer changes
+- `/workflow` — common mistakes #23–24 (Tailwind in generators; partial impl vs capture)
+- Optional: issue-scoped capture files to avoid `last_capture.md` overwrite
+
+### App-repo fixes already applied
+
+- Reflow v2 layout + month-tile archive (`SITE_LANDING_LAYOUT_V2=1`)
+- `.site-footer__*` component CSS + `footerLinkRowHtml()` separators
+- Closure: `docs/CLOSURE_EPH-20260701-LAND.md`
+
 ---
 
 **How to add entries:** After `/postmortem` in an instantiated app, open a PR to [project-genesis](https://github.com/Leftyshields/project-genesis) or append a row here via PR from your app repo.
