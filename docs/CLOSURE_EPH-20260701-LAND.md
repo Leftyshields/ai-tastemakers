@@ -48,7 +48,6 @@
 |------|--------|
 | **Production v2 layout** | Keep flag off until EXP-20260628 completes and baseline window starts (~2026-07-27 – 2026-08-09) |
 | **Treatment deploy** | Set `SITE_LANDING_LAYOUT_V2=1` in Pages build ~2026-08-10 |
-| **Manual visual QA** | Column balance, mobile promo order, keyboard focus — checklist in postmortem |
 | **PostHog baseline snapshots** | After baseline window: `npm run experiment -- snapshot EXP-20260701-landing-layout --csv …` |
 | **`npm run build:digest`** | Pre-existing TS errors in inventory/firestore — unrelated |
 | **Year-strip heat-map** | Follow-up; month tiles sufficient for v1 |
@@ -101,6 +100,7 @@ git push origin main
 | Anchors `#archive`, `#weekly-archive`, `#monthly-archive` preserved | Yes |
 | Experiment JSON describes reflow hypothesis | Yes |
 | Automated tests pass | Yes |
+| Manual QA (local v2 preview) | Yes — closed 2026-07-02 |
 | Live production v2 treatment | **Deferred** (~2026-08-10) |
 
 ---
@@ -113,14 +113,22 @@ git push origin main
 
 ---
 
+## QA
+
+**Checklist:** `.ai/context/qa_checklist_landing-reflow.md` (closed 2026-07-02)
+
+Automated + browser verification on `SITE_LANDING_LAYOUT_V2=1` local preview (`localhost:8999`): OSS/Skills index layout, footer spacing, mobile promo order, archive links, and anchors — all pass.
+
+---
+
 ## Live verification (manual)
 
 After local v2 build:
 
-- [ ] OSS index — main column taller blocks, narrow promo sidebar
-- [ ] Skills index — About block + OSS promo sidebar
-- [ ] Footer — `Subscribe · Skill Tastemakers · Lab · Source on GitHub` on row 1; metadata on row 2
-- [ ] Mobile — promo card after weekly/monthly
-- [ ] Archive day cells link to correct brief dates
+- [x] OSS index — main column taller blocks, narrow promo sidebar
+- [x] Skills index — About block + OSS promo sidebar
+- [x] Footer — `Subscribe · Skill Tastemakers · Lab · Source on GitHub` on row 1; metadata on row 2
+- [x] Mobile — promo card after weekly/monthly
+- [x] Archive day cells link to correct brief dates
 
 **Live site (legacy layout until treatment):** https://leftyshields.github.io/ai-tastemakers/
