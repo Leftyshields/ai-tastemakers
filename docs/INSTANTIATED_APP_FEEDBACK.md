@@ -4,6 +4,39 @@ Changelog of workflow improvements derived from real app development (postmortem
 
 ---
 
+## How to add entries (after `/postmortem`)
+
+Each closed issue should produce **one dated section** below, using the same structure as prior entries (Source → Friction → Root cause → Genesis changes → App-repo fixes).
+
+### Path A — App repo (always do this first)
+
+1. Write `.ai/context/postmortem_<ISSUE_ID>.md` (local; gitignored).
+2. Write or update `docs/CLOSURE_<ISSUE_ID>.md`.
+3. Update `.cursor/commands/workflow.md` (or related commands) if lessons apply.
+4. **Append a section to this file** (`docs/INSTANTIATED_APP_FEEDBACK.md`) summarizing friction and recommended Genesis changes.
+5. Open a PR from your app repo (or push to `main` if solo):
+
+```bash
+git add docs/INSTANTIATED_APP_FEEDBACK.md docs/CLOSURE_*.md .cursor/commands/workflow.md
+git commit -m "Docs: postmortem feedback for EPH-XXXX"
+git push origin HEAD
+```
+
+Link the closure doc and this entry in the PR description.
+
+### Path B — Project Genesis upstream (when templates should change)
+
+When friction points to **missing or wrong Genesis templates/commands**, open a PR to [project-genesis](https://github.com/Leftyshields/project-genesis):
+
+1. Copy the **Recommended Genesis / workflow changes** bullets from this entry.
+2. Apply them to the relevant Genesis paths (e.g. `.cursor/commands/`, `docs/WORKFLOW_COURSE.md`, `DEV_RUNBOOK_TEMPLATE.md`).
+3. Reference the app-repo issue ID and link back to this file on the app repo.
+4. In this entry, add a **Changes incorporated into Genesis** subsection with the PR link (e.g. `improve/tastemakers-postmortem-land`).
+
+**Do both paths when warranted:** log here first (Path A), then upstream template fixes (Path B). Path A alone is sufficient when only app-repo workflow/docs changed.
+
+---
+
 ## 2026-05-31 — Wallet Watcher (Transactions, EPH-20260531-H3M8)
 
 **Source:** Greenfield feature after MVP; full Genesis workflow (capture → explore → design → plan → execute → code review → QA → postmortem).
@@ -99,7 +132,7 @@ See [project-genesis PR #15](https://github.com/Leftyshields/project-genesis/pul
 
 ## 2026-07-02 — AI Tastemakers (Landing Layout v2, EPH-20260701-LAND)
 
-**Source:** Full workflow (capture → explore → design → plan → execute → code review → QA → post-MVP footer fix → postmortem). Flag-gated static layout experiment.
+**Source:** Full workflow (capture → explore → design → plan → execute → code review → QA → post-MVP footer fix → postmortem → QA closed). Flag-gated static layout experiment.
 
 ### Friction observed
 
@@ -111,7 +144,7 @@ See [project-genesis PR #15](https://github.com/Leftyshields/project-genesis/pul
 | QA gap | Automated tests green; layout/footer bug found only by human browser check |
 | Scope during QA | Hero copy + global footer refactor without mini-capture |
 | Context files | `last_capture.md` overwritten by unrelated issue (REPL) before postmortem |
-| Git | Local main behind GHA bot commits at ship time |
+| Git | Local main behind GHA bot commits at ship time; rebase conflict in `edition-pages.ts` on push |
 
 ### Root cause (process)
 
@@ -125,12 +158,16 @@ Static HTML generators treated Tailwind class strings like React JSX utilities, 
 - `/workflow` — common mistakes #23–24 (Tailwind in generators; partial impl vs capture)
 - Optional: issue-scoped capture files to avoid `last_capture.md` overwrite
 
+### Changes incorporated into Genesis
+
+**Pending upstream PR** — app-repo workflow updated (see below). Proposed Genesis targets: `WORKFLOW_COURSE.md` case study, `/execute_plan` static-HTML styling note, `/qa_checklist` browser gate.
+
 ### App-repo fixes already applied
 
 - Reflow v2 layout + month-tile archive (`SITE_LANDING_LAYOUT_V2=1`)
 - `.site-footer__*` component CSS + `footerLinkRowHtml()` separators
-- Closure: `docs/CLOSURE_EPH-20260701-LAND.md`
+- `.cursor/commands/workflow.md` — common mistakes #23–24; latest closure link
+- Closure: [docs/CLOSURE_EPH-20260701-LAND.md](CLOSURE_EPH-20260701-LAND.md) (QA closed 2026-07-02)
+- Shipped on `main`: `d8c3492`, QA closure `160da7c`
 
 ---
-
-**How to add entries:** After `/postmortem` in an instantiated app, open a PR to [project-genesis](https://github.com/Leftyshields/project-genesis) or append a row here via PR from your app repo.
