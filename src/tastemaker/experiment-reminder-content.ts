@@ -6,7 +6,9 @@ export type ExperimentMilestoneType =
   | "treatment_start"
   | "treatment_end";
 
-const POSTHOG_PROJECT_URL = "https://us.posthog.com/project/489599";
+const POSTHOG_HOME_URL = "https://us.posthog.com/project/489599/home";
+const POSTHOG_WEB_ANALYTICS_URL = "https://us.posthog.com/project/489599/web";
+const POSTHOG_TRENDS_URL = "https://us.posthog.com/project/489599/insights/new";
 const PLAYBOOK_URL =
   "https://github.com/Leftyshields/ai-tastemakers/blob/main/docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md";
 
@@ -56,11 +58,16 @@ function snapshotExportBlock(
 
   return [
     "POSTHOG EXPORT (step by step)",
-    `1. Open PostHog: ${POSTHOG_PROJECT_URL}`,
-    `2. Set date range: ${periodStart} through ${periodEnd} (inclusive). Use Pacific / project timezone.`,
-    `3. Pageviews — Web analytics → Top paths (or Trends: $pageview broken down by $pathname).`,
-    `   Collect: ${hints.pageviews}`,
-    `4. Events — Product analytics → Trends → event "${hints.event}".`,
+    `1. Open PostHog home: ${POSTHOG_HOME_URL}`,
+    "   (Default project — you'll land on the Home screen with sidebar on the left.)",
+    `2. Set date range: ${periodStart} through ${periodEnd} (inclusive). Use the date picker at the top of each view (Pacific / project timezone).`,
+    "3. Pageviews — in left sidebar: Analytics → Web analytics",
+    `   Direct link: ${POSTHOG_WEB_ANALYTICS_URL}`,
+    `   Collect top paths for: ${hints.pageviews}`,
+    "   Export or copy counts per path from the Top paths / pages table.",
+    "4. Events — in left sidebar: Analytics → Product analytics → Trends",
+    `   Direct link (new insight): ${POSTHOG_TRENDS_URL}`,
+    `   Add event "${hints.event}"; set the same date range.`,
     hints.eventFilter ? `   Filter: ${hints.eventFilter}.` : "",
     "   Note total event count (per-repo breakdown optional).",
     `5. Save a CSV locally, e.g. ${csvPath}`,
@@ -111,7 +118,7 @@ export function buildMilestoneInstructions(
         `1. Open data/experiments/${record.id}.json — set "status": "baseline" if still draft.`,
         `2. Confirm baseline window: ${bw.start} → ${bw.end} (PT).`,
         "3. Do NOT enable treatment flags in digest.yml or Pages build yet.",
-        "4. Optional: open a live briefing page → PostHog → Live events → confirm $pageview appears.",
+        "4. Optional: open a live briefing page → PostHog home → Activity (sidebar) → confirm $pageview in live stream.",
         `5. Lab dashboard: watch window dates until baseline ends on ${bw.end}.`,
       );
       break;

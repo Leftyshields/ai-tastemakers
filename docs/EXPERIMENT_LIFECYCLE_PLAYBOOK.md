@@ -8,7 +8,9 @@ Reminders fire on window boundary dates in `data/experiments/EXP-*.json` (Pacifi
 | Resource | URL |
 |----------|-----|
 | Lab dashboard | https://leftyshields.github.io/ai-tastemakers/lab/experiments.html |
-| PostHog (US project) | https://us.posthog.com/project/489599 |
+| PostHog home | https://us.posthog.com/project/489599/home |
+| PostHog web analytics | https://us.posthog.com/project/489599/web |
+| PostHog new trend | https://us.posthog.com/project/489599/insights/new |
 | This repo | https://github.com/Leftyshields/ai-tastemakers |
 
 ---
@@ -90,14 +92,14 @@ For **landing-layout** (both editions):
 
 ### B. PostHog UI steps (manual export)
 
-1. Open [PostHog project 489599](https://us.posthog.com/project/489599).
-2. Set **date range** to the experiment window (e.g. baseline: 2026-06-28 through 2026-07-11 inclusive).
+1. Open [PostHog home](https://us.posthog.com/project/489599/home) (Default project — sidebar on the left).
+2. Set **date range** to the experiment window (e.g. baseline: 2026-06-28 through 2026-07-11 inclusive) using the date picker at the top of each view.
 3. **Pageviews**
-   - Go to **Web analytics** → **Top paths** (or **Product analytics → Trends** with `$pageview` broken down by `$pathname`).
+   - Sidebar: **Analytics → Web analytics** ([direct link](https://us.posthog.com/project/489599/web))
    - Filter paths relevant to the experiment (Skills briefs or index pages).
    - Export CSV if available, or copy counts into the simplified format below.
 4. **Custom events**
-   - **Product analytics → Trends**
+   - Sidebar: **Analytics → Product analytics → Trends** ([new insight](https://us.posthog.com/project/489599/insights/new))
    - Event: `outbound_repo_click` or `homepage_index_click`
    - Add filters (e.g. `edition = skills` for enrich experiment)
    - Note total events; for per-repo breakdown use breakdown by a repo property if you configured one, or use aggregate count.
