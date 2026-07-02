@@ -171,3 +171,37 @@ Static HTML generators treated Tailwind class strings like React JSX utilities, 
 - Shipped on `main`: `d8c3492`, QA closure `160da7c`
 
 ---
+
+## 2026-07-02 — AI Tastemakers (Experiment Reminder Emails, EPH-20260702-MAIL)
+
+**Source:** Full workflow (capture → explore → design → plan → execute → code review → QA → post-ship email iteration → prod verify → postmortem). Direct to prod (no experiment gate).
+
+### Friction observed
+
+| Area | Issue |
+|------|--------|
+| Email content v1 | Short checklist + doc links; user needed full PostHog export + snapshot steps **in the email body** |
+| Post-ship iteration | Playbook doc first, then “put in email” — second pass after initial push |
+| PostHog URLs | Project root link; operator lands on Home (`/home`) — fixed with sidebar navigation + deep links |
+| Trigger docs | “How will emails know when to trigger?” answered post-ship |
+
+### Root cause (process)
+
+Ops mail scoped as signal + doc pointer; actual JTBD is **runbook-in-inbox** for tasks months apart. PostHog URLs written from assumption, not verified UI.
+
+### Recommended Genesis / workflow changes
+
+- `/design_decisions` — Ops notifications: default inline runbook in message body
+- `/explore` — Verify third-party dashboard entry URLs with operator
+- `/qa_checklist` — Review `--dry-run` email on a real milestone date before prod
+- `/workflow` — common mistakes #25–26
+
+### App-repo fixes already applied
+
+- Reminders CLI + GHA 07:00/07:30 PT; `experiment-reminder-content.ts`
+- `docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md`
+- `.cursor/commands/workflow.md` — mistakes #25–26; latest closure → EPH-20260702-MAIL
+- Closure: [docs/CLOSURE_EPH-20260702-MAIL.md](CLOSURE_EPH-20260702-MAIL.md)
+- Shipped: `d02e1d6`, `9f971d9`, `298e685`; GHA Experiment Reminders #1 verified
+
+---

@@ -190,7 +190,7 @@ For smaller changes or bug fixes:
 
 **Repo:** https://github.com/Leftyshields/ai-tastemakers
 
-**Closure:** [docs/CLOSURE_EPH-20260701-LAND.md](docs/CLOSURE_EPH-20260701-LAND.md) (latest) · [docs/CLOSURE_EPH-20260627-NEWF.md](docs/CLOSURE_EPH-20260627-NEWF.md) · [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
+**Closure:** [docs/CLOSURE_EPH-20260702-MAIL.md](docs/CLOSURE_EPH-20260702-MAIL.md) (latest) · [docs/CLOSURE_EPH-20260701-LAND.md](docs/CLOSURE_EPH-20260701-LAND.md) · [docs/CLOSURE_EPH-20260627-NEWF.md](docs/CLOSURE_EPH-20260627-NEWF.md) · [docs/CLOSURE_EPH-20260607-COPY.md](docs/CLOSURE_EPH-20260607-COPY.md) · [docs/CLOSURE_EPH-20260606-DIG1.md](docs/CLOSURE_EPH-20260606-DIG1.md) (v1)
 
 **Ops runbook:** [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md)
 
@@ -226,6 +226,8 @@ For smaller changes or bug fixes:
 22. **`build:digest` vs `test:digest`** - Pre-existing `tsc` failures may exist; treat `npm run test:digest` as the tastemaker ship gate until build is green
 23. **Tailwind in HTML generators** - Spacing/layout in `edition-pages.ts` (or other TS string templates) must use **component classes in `site/assets/input.css`**, not Tailwind utility strings alone; add explicit HTML separators (`&middot;`, flex gap via CSS) for inline link rows. Verify with `npm run build:pages` + browser refresh
 24. **Partial implementations vs revised capture** - Before `/execute_plan`, reconcile flag-gated or WIP code against capture; update experiment JSON and design doc in the same milestone when direction changes (sidebar-heavy → reflow-first, etc.)
+25. **Ops emails link-only** - Infrequent operator reminders (experiment milestones, alerts) need **self-contained inbox runbooks** (PostHog clicks, CLI commands, dates)—not just links to `docs/`; dry-run and user-review email body before first prod send
+26. **Third-party dashboard URLs** - Verify entry URLs against operator UI (e.g. PostHog `/home` not project root); share constants between playbook and email generator
 
 ---
 
