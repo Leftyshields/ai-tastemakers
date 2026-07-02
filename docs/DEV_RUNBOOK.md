@@ -40,6 +40,8 @@ Optional email (Resend — skipped if `RESEND_API_KEY` unset):
 - `RESEND_API_KEY`
 - `DIGEST_EMAIL_FROM` — verified sender, e.g. `AI Tastemakers <digest@epiphoric.com>`
 - `DIGEST_SITE_URL` — link in email footer (default: GitHub Pages URL)
+- `EXPERIMENT_REMINDER_TO` — Lab lifecycle reminder recipient (GHA secret; see below)
+- `DIGEST_ALERT_TO` — digest verification failure alerts
 
 Optional Firebase (epiphoric-prod — subscribe + digest recipients):
 
@@ -148,6 +150,40 @@ npm run verify:digest
 ```
 
 Manual run: Actions → **Daily Digest Verify** → Run workflow.
+
+### Experiment lifecycle reminders (`.github/workflows/experiment-reminders.yml`)
+
+Runs **07:00 Pacific** daily (between digest and digest-verify). Scans `data/experiments/EXP-*.json` for baseline/treatment window milestones on today's date and sends **one batched ops email** via Resend when matches exist.
+
+**Triggers:** `baseline_window.start/end`, `treatment_window.start/end` (day-of PT only). Skips experiments with `status: complete`.
+
+One-time setup:
+
+```bash
+gh secret set EXPERIMENT_REMINDER_TO --repo Leftyshields/ai-tastemakers --body "brianshields@gmail.com"
+```
+
+Requires existing `RESEND_API_KEY` and `DIGEST_EMAIL_FROM`. Local dry-run (no API call):
+
+```bash
+npm run experiment:reminders -- --dry-run --date 2026-07-11
+```
+
+Manual run: Actions → **Experiment Reminders** → Run workflow (optional `date` input).
+
+**Cron caveat:** GitHub `schedule` is best-effort — two Pacific slots (07:00, 07:30) improve reliability; there is still no catch-up if both runs are skipped. Check [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) for dates.
+
+**Misconfigured secrets:** If milestones match but `EXPERIMENT_REMINDER_TO` (or Resend vars) is unset, the workflow exits **non-zero** so Actions shows red.
+
+**Imminent milestones (registered experiments):**
+
+| Date (PT) | Experiment | Milestone |
+|-----------|------------|-----------|
+| 2026-07-11 | EXP-20260628-web-enrich-skills | Baseline ends → import snapshot |
+| 2026-07-12 | EXP-20260628-web-enrich-skills | Treatment starts → enable enrich flags in GHA |
+| 2026-07-26 | EXP-20260628-web-enrich-skills | Treatment ends → snapshot + verdict |
+| 2026-07-27 | EXP-20260701-landing-layout | Baseline starts (queued; draft) |
+| 2026-08-10 | EXP-20260701-landing-layout | Treatment starts → `SITE_LANDING_LAYOUT_V2=1` at build |
 
 **Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).
 

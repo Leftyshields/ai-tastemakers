@@ -187,6 +187,7 @@ export interface AppConfig {
   briefingsDir: string;
   resendApiKey?: string;
   digestEmailFrom?: string;
+  experimentReminderTo?: string;
   digestSiteUrl: string;
   editionId: EditionId;
   editionName: string;

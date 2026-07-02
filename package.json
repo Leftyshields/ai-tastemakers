@@ -14,6 +14,7 @@
     "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
     "inventory:tools": "tsx src/tastemaker/inventory-cli.ts",
     "experiment": "tsx src/tastemaker/experiments-cli.ts",
+    "experiment:reminders": "tsx src/tastemaker/experiment-reminders-cli.ts",
     "verify:digest": "node scripts/verify-daily-digest.mjs",
     "subscribers:add": "tsx scripts/add-subscriber.ts",
     "subscribers:remove": "tsx scripts/remove-subscriber.ts",

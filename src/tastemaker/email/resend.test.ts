@@ -9,7 +9,7 @@ vi.mock("resend", () => ({
   })),
 }));
 
-import { parseFromAddress, sendDigestEmail } from "./resend.js";
+import { parseFromAddress, sendDigestEmail, sendOpsEmail } from "./resend.js";
 
 const sampleDigest: Digest = {
   schema_version: 1,
@@ -82,5 +82,27 @@ describe("sendDigestEmail", () => {
       "alice@example.com",
       "bob@example.com",
     ]);
+  });
+});
+
+describe("sendOpsEmail", () => {
+  it("sends to a single ops recipient", async () => {
+    await sendOpsEmail(baseConfig, {
+      to: "ops@example.com",
+      subject: "Test alert",
+      text: "Hello",
+      html: "<p>Hello</p>",
+    });
+
+    expect(sendMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        from: "AI Tastemakers <digest@epiphoric.com>",
+        to: ["ops@example.com"],
+        subject: "Test alert",
+        text: "Hello",
+        html: "<p>Hello</p>",
+      }),
+    );
+    expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
   });
 });

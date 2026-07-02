@@ -66,3 +66,45 @@ export async function sendDigestEmail(
 
   return { id: data.id };
 }
+
+export interface OpsEmailPayload {
+  to: string;
+  subject: string;
+  text: string;
+  html?: string;
+}
+
+export function canSendOpsEmail(config: AppConfig, to?: string): boolean {
+  const recipient = to?.trim() || config.experimentReminderTo?.trim();
+  return Boolean(config.resendApiKey && config.digestEmailFrom && recipient);
+}
+
+export async function sendOpsEmail(
+  config: AppConfig,
+  payload: OpsEmailPayload,
+): Promise<{ id: string }> {
+  const to = payload.to.trim();
+  if (!config.resendApiKey || !config.digestEmailFrom || !to) {
+    throw new Error(
+      "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and recipient",
+    );
+  }
+
+  const resend = new Resend(config.resendApiKey);
+  const { data, error } = await resend.emails.send({
+    from: config.digestEmailFrom,
+    to: [to],
+    subject: payload.subject,
+    text: payload.text,
+    html: payload.html,
+  });
+
+  if (error) {
+    throw new Error(`Resend API error: ${error.message}`);
+  }
+  if (!data?.id) {
+    throw new Error("Resend API returned no message id");
+  }
+
+  return { id: data.id };
+}

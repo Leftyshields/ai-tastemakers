@@ -95,6 +95,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 | `npm run inventory:tools` | Scan briefings → tool inventory JSON + lab markdown |
 | `npm run experiment -- list` | List registered pipeline experiments |
 | `npm run experiment -- snapshot EXP-id --csv file.csv` | Import PostHog/analytics CSV into experiment record (`--dry-run` to preview) |
+| `npm run experiment:reminders` | Send batched lifecycle reminder email for today's PT milestones (`--dry-run`, `--date YYYY-MM-DD`) |
 | `npm run test:digest` | Unit + integration tests (136) |
 | `npm run build:digest` | Compile TypeScript |
 | `npm run build:pages` | Build static site from `briefings/` → `site/` (Tailwind CSS) |

@@ -20,6 +20,8 @@ ai-tastemakers/
 │   ├── enrich/               # Web/HN post-rank enrichment (Jina + HN Algolia)
 │   ├── experiments/          # Experiment registry, snapshot import, shadow output
 │   ├── experiments-cli.ts    # list | register | snapshot
+│   ├── experiment-reminders-cli.ts  # lifecycle reminder emails (EPH-20260702-MAIL)
+│   ├── experiment-reminders.ts
 │   ├── snapshot/             # jsonl store, delta math
 │   ├── rank/                 # filter, score, top-N
 │   ├── narrate/              # Claude client (daily briefs + weekly/monthly synthesis)
@@ -38,7 +40,7 @@ ai-tastemakers/
 ├── scripts/
 │   ├── build-pages.ts        # Site generator (+ lab pages)
 │   └── edition-pages.ts      # Page shell, PostHog snippet at build time
-├── .github/workflows/        # digest.yml, pages.yml
+├── .github/workflows/        # digest.yml, pages.yml, experiment-reminders.yml
 ├── lib/                      # Genesis runtime (unchanged)
 └── docs/
 ```
@@ -52,7 +54,9 @@ ai-tastemakers/
 | Local dev | `src/tastemaker/monthly-cli.ts` | `npm run monthly` |
 | Local dev | `src/tastemaker/inventory-cli.ts` | `npm run inventory:tools` |
 | Local dev | `src/tastemaker/experiments-cli.ts` | `npm run experiment -- list|register|snapshot` |
+| Local dev | `src/tastemaker/experiment-reminders-cli.ts` | `npm run experiment:reminders [-- --dry-run] [-- --date YYYY-MM-DD]` |
 | GitHub Actions | `.github/workflows/digest.yml` | daily digest + Sunday weekly or fourth-Sunday monthly |
+| GitHub Actions | `.github/workflows/experiment-reminders.yml` | daily experiment lifecycle reminder email (07:00 PT) |
 | GitHub Actions | `.github/workflows/pages.yml` | static site deploy |
 
 **Parity:** GHA invokes the same npm scripts as local dev. Enrichment experiment flags (`DIGEST_ENRICH_*`) default **off** in production until operator enables after baseline window.
@@ -67,6 +71,7 @@ ai-tastemakers/
 | Jina Reader | Post-rank web snippet fetch (`r.jina.ai/{url}`) | No key for basic use |
 | HN Algolia | Post-rank story search by repo name | Public API |
 | Firebase | Subscribe/unsubscribe + digest recipients only | epiphoric-prod |
+| Resend | Daily digest BCC, digest-verify ops alerts, experiment lifecycle reminders | `RESEND_API_KEY`, `DIGEST_EMAIL_FROM`; recipients via Firestore, `DIGEST_ALERT_TO`, or `EXPERIMENT_REMINDER_TO` |
 
 ## Data flow
 

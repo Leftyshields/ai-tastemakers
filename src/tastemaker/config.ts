@@ -111,6 +111,7 @@ export function loadConfig(options?: {
     editionName: edition.name,
     resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
     digestEmailFrom: process.env.DIGEST_EMAIL_FROM?.trim() || undefined,
+    experimentReminderTo: process.env.EXPERIMENT_REMINDER_TO?.trim() || undefined,
     digestSiteUrl:
       process.env.DIGEST_SITE_URL?.trim() ||
       "https://leftyshields.github.io/ai-tastemakers",

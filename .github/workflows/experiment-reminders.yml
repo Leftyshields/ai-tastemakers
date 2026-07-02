@@ -1,0 +1,53 @@
+name: Experiment Reminders
+
+on:
+  schedule:
+    # Primary + backup (GitHub schedule is best-effort; mirror digest.yml pattern).
+    - cron: "0 7 * * *"
+      timezone: America/Los_Angeles
+    - cron: "30 7 * * *"
+      timezone: America/Los_Angeles
+  workflow_dispatch:
+    inputs:
+      date:
+        description: Override date (YYYY-MM-DD, Pacific). Defaults to today.
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: experiment-reminders
+  cancel-in-progress: false
+
+jobs:
+  reminders:
+    runs-on: ubuntu-latest
+    env:
+      TZ: America/Los_Angeles
+      DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Send experiment lifecycle reminders
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          EXPERIMENT_REMINDER_TO: ${{ secrets.EXPERIMENT_REMINDER_TO }}
+        run: |
+          if [ -n "${{ inputs.date }}" ]; then
+            npm run experiment:reminders -- --date "${{ inputs.date }}"
+          else
+            npm run experiment:reminders
+          fi
