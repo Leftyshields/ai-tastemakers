@@ -54,19 +54,22 @@ jobs:
           if [ "$(grep '^run_monthly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "true" ]; then
             echo "Fourth-Sunday monthly rollup will run if gate passed"
           fi
+          if [ "$(grep '^is_sunday=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "true" ]; then
+            echo "Sunday tool inventory refresh will run after wrap-up (or alone if briefings already published)"
+          fi
 
-          if [ "$(grep '^run_weekly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ "$(grep '^run_monthly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
+          if [ "$(grep '^run_weekly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ "$(grep '^run_monthly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ "$(grep '^is_sunday=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
             echo "Nothing to do — daily and wrap-up (if applicable) already published"
           fi
 
       - uses: actions/setup-node@v4
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || inputs.resend_email == true
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true
         with:
           node-version: "20"
           cache: npm
 
       - name: Install dependencies
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || inputs.resend_email == true
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true
         run: npm install
 
       - name: Resend digest email from existing briefing
@@ -111,32 +114,42 @@ jobs:
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
         run: npm run weekly
 
-      - name: Commit briefing
+      - name: Refresh tool inventory (Sundays)
+        if: steps.gate.outputs.is_sunday == 'true'
+        run: npm run inventory:tools
+
+      - name: Commit briefing and tool inventory
         id: commit
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true'
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true'
         env:
           TZ: America/Los_Angeles
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add briefings/ data/snapshots/
+          git add briefings/ data/snapshots/ data/tool-inventory.json
           if git diff --staged --quiet; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
-            echo "No briefing changes to commit"
+            echo "No briefing or inventory changes to commit"
             exit 0
           fi
-          if [ "${{ steps.gate.outputs.skip_daily }}" = "true" ]; then
+          INV_SUFFIX=""
+          if [ "${{ steps.gate.outputs.is_sunday }}" = "true" ]; then
+            INV_SUFFIX=" + tool inventory"
+          fi
+          if [ "${{ steps.gate.outputs.skip_daily }}" = "true" ] && [ "${{ steps.gate.outputs.run_weekly }}" != "true" ] && [ "${{ steps.gate.outputs.run_monthly }}" != "true" ] && [ "${{ steps.gate.outputs.is_sunday }}" = "true" ]; then
+            git commit -m "chore: refresh tool inventory"
+          elif [ "${{ steps.gate.outputs.skip_daily }}" = "true" ]; then
             if [ "${{ steps.gate.outputs.run_monthly }}" = "true" ]; then
-              git commit -m "chore: monthly rollup ${{ steps.gate.outputs.month_id }}"
+              git commit -m "chore: monthly rollup ${{ steps.gate.outputs.month_id }}${INV_SUFFIX}"
             else
-              git commit -m "chore: weekly wrap-up ${{ steps.gate.outputs.week_id }}"
+              git commit -m "chore: weekly wrap-up ${{ steps.gate.outputs.week_id }}${INV_SUFFIX}"
             fi
           elif [ "${{ steps.gate.outputs.run_monthly }}" = "true" ]; then
-            git commit -m "chore: daily digest $(date +%Y-%m-%d) + monthly rollup ${{ steps.gate.outputs.month_id }}"
+            git commit -m "chore: daily digest $(date +%Y-%m-%d) + monthly rollup ${{ steps.gate.outputs.month_id }}${INV_SUFFIX}"
           elif [ "${{ steps.gate.outputs.run_weekly }}" = "true" ]; then
-            git commit -m "chore: daily digest $(date +%Y-%m-%d) + weekly wrap-up ${{ steps.gate.outputs.week_id }}"
+            git commit -m "chore: daily digest $(date +%Y-%m-%d) + weekly wrap-up ${{ steps.gate.outputs.week_id }}${INV_SUFFIX}"
           else
-            git commit -m "chore: daily digest $(date +%Y-%m-%d)"
+            git commit -m "chore: daily digest $(date +%Y-%m-%d)${INV_SUFFIX}"
           fi
           git pull --rebase origin main
           git push

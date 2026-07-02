@@ -19,7 +19,7 @@
 | Monthly rollup | `npm run monthly` | Requires 2+ weekly reviews in month before rollup week; `--month 2026-06` |
 | Skills digest | `npm run digest:skills` | Same tokens as daily |
 | Digest tests | `npm run test:digest` | Mocked GitHub/Claude |
-| Tool inventory | `npm run inventory:tools` | Scans `briefings/` → `data/tool-inventory.json` + lab markdown |
+| Tool inventory | `npm run inventory:tools` | Scans `briefings/` → `data/tool-inventory.json` + lab markdown; **also auto-runs Sundays** in Daily Digest GHA after weekly/monthly |
 | Experiment CLI | `npm run experiment -- list` | List registered experiments |
 | Experiment snapshot | `npm run experiment -- snapshot <EXP-id> --csv <path>` | Import PostHog/simplified CSV into experiment |
 | Build site | `npm run build:pages` | Briefings + weekly/monthly + `/lab/` (includes `experiments-data.json`) |

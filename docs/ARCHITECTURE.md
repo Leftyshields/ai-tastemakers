@@ -55,7 +55,7 @@ ai-tastemakers/
 | Local dev | `src/tastemaker/inventory-cli.ts` | `npm run inventory:tools` |
 | Local dev | `src/tastemaker/experiments-cli.ts` | `npm run experiment -- list|register|snapshot` |
 | Local dev | `src/tastemaker/experiment-reminders-cli.ts` | `npm run experiment:reminders [-- --dry-run] [-- --date YYYY-MM-DD]` |
-| GitHub Actions | `.github/workflows/digest.yml` | daily digest + Sunday weekly or fourth-Sunday monthly |
+| GitHub Actions | `.github/workflows/digest.yml` | daily digest + Sunday weekly or fourth-Sunday monthly + Sunday tool inventory |
 | GitHub Actions | `.github/workflows/experiment-reminders.yml` | daily experiment lifecycle reminder email (07:00 PT) |
 | GitHub Actions | `.github/workflows/pages.yml` | static site deploy |
 
@@ -82,9 +82,9 @@ GitHub Search (topics) → dedupe candidates → filter/enrich
   → write briefings/YYYY-MM-DD/daily_brief.md + digest.json
   (skills edition: briefings/skills/YYYY-MM-DD/)
 
-Inventory (on demand):
-Scan briefings/**/digest.json + weekly JSON → classify → data/tool-inventory.json
-  → briefings/lab/tool-inventory.md → site/lab/tools.html
+Inventory (weekly + on demand):
+Sunday digest GHA (`is_sunday` gate) or local `npm run inventory:tools` → scan briefings/**/digest.json + weekly JSON
+  → classify → data/tool-inventory.json → briefings/lab/tool-inventory.md → site/lab/tools.html
 
 Weekly / Monthly: (unchanged)
   → build:pages → site/

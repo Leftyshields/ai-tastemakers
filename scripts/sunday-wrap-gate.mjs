@@ -1,6 +1,6 @@
 /**
  * Sunday wrap-up gate for GHA (plain Node — no tsx/npm install required).
- * Outputs GitHub Actions step outputs: week_id, month_id, run_weekly, run_monthly.
+ * Outputs GitHub Actions step outputs: week_id, month_id, run_weekly, run_monthly, is_sunday.
  */
 import fs from "node:fs";
 
@@ -76,13 +76,14 @@ function monthIdFromDateLabel(label) {
 
 const now = new Date();
 const today = dateLabelInTimezone(now, timezone);
+const isSunday = isSundayDateLabel(today);
 
 let runWeekly = false;
 let runMonthly = false;
 let weekId = "";
 let monthId = "";
 
-if (isSundayDateLabel(today)) {
+if (isSunday) {
   weekId = isoWeekIdFromDateLabel(today);
   if (isFourthSunday(now, timezone)) {
     monthId = monthIdFromDateLabel(today);
@@ -103,6 +104,7 @@ for (const line of [
   `month_id=${monthId}`,
   `run_weekly=${runWeekly}`,
   `run_monthly=${runMonthly}`,
+  `is_sunday=${isSunday}`,
 ]) {
   console.log(line);
 }
