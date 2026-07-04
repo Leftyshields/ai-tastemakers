@@ -10,6 +10,8 @@ on:
       timezone: "America/Los_Angeles"
     - cron: "30 7 * * *"
       timezone: "America/Los_Angeles"
+    - cron: "0 8 * * *"
+      timezone: "America/Los_Angeles"
   workflow_dispatch:
     inputs:
       resend_email:

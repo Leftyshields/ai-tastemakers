@@ -56,6 +56,7 @@ function writeGithubOutputs(today, errors, briefingsOk, pagesOk) {
   appendFileSync(outFile, `briefings_ok=${briefingsOk ? 'true' : 'false'}\n`);
   appendFileSync(outFile, `pages_ok=${pagesOk ? 'true' : 'false'}\n`);
   appendFileSync(outFile, `pages_stale=${briefingsOk && !pagesOk ? 'true' : 'false'}\n`);
+  appendFileSync(outFile, `briefings_missing=${!briefingsOk ? 'true' : 'false'}\n`);
   if (errors.length) {
     appendFileSync(outFile, `errors<<EOF\n${errors.join('\n')}\nEOF\n`);
   }
@@ -109,6 +110,9 @@ async function main() {
         `Actions: https://github.com/Leftyshields/ai-tastemakers/actions/workflows/pages.yml`,
       );
     } else {
+      console.error(
+        `\nDigest files use date label ${today} (${TZ}). If your local calendar day is ahead, the next brief publishes after ~06:17 ${TZ}.`,
+      );
       console.error(`\nActions: https://github.com/Leftyshields/ai-tastemakers/actions/workflows/digest.yml`);
     }
 
