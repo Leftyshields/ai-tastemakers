@@ -100,7 +100,8 @@ Output: `data/experiments/runs/{run_id}/shadow.json` plus `{owner-repo}.json` bu
 | GitHub Pages unstyled | CSS path uses `/assets/…` (domain root) | Rebuild with `npm run build:pages`; links must be relative (`assets/`, `../assets/`) |
 | Subscribe form permission-denied | Firestore rules not deployed to epiphoric-prod | Deploy rules from Epiphoric repo: `firebase deploy --only firestore:rules` |
 | Digest sends to env only, not Firestore list | Firebase Admin not in GHA secrets | Set `FIREBASE_CLIENT_EMAIL` + `FIREBASE_PRIVATE_KEY` on repo |
-| Scheduled digest missing at expected time | GitHub `schedule` delay/drop (worse at minute :00) | Wait up to ~90 min; check Actions; manual **Run workflow** if needed |
+| Scheduled digest missing at expected time | GitHub `schedule` delay/drop (worse at minute :00) | **Daily Digest Verify** (8/9/10 AM PT) auto-dispatches digest if briefings missing; manual **Run workflow** fallback |
+| "No digest today" but site shows yesterday | Briefings dated `America/Los_Angeles`; UTC/Europe morning is still prior Pacific date until ~06:17 PT | Latest brief is `/briefings/YYYY-MM-DD.html` for Pacific today; wait for cron or check Actions |
 
 ## GitHub Actions
 
