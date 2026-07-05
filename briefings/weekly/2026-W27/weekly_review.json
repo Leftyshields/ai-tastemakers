@@ -1,0 +1,235 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W27",
+  "week_start": "2026-06-29",
+  "week_end": "2026-07-05",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 24,
+      "skills": 24
+    },
+    "total_stars_gained": {
+      "oss": 149273,
+      "skills": 144320
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "claude",
+        "llm",
+        "mcp",
+        "ai"
+      ],
+      "skills": [
+        "claude-code",
+        "claude",
+        "ai",
+        "llm",
+        "mcp"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "xbtlin/ai-berkshire",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "headroomlabs-ai/headroom",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "ZhuLinsen/daily_stock_analysis",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "xbtlin/ai-berkshire",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "headroomlabs-ai/headroom",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "JCodesMore/ai-website-cloner-template",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DeusData/codebase-memory-mcp",
+      "DietrichGebert/ponytail",
+      "JCodesMore/ai-website-cloner-template",
+      "JuliusBrussee/caveman",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "asgeirtj/system_prompts_leaks",
+      "calesthio/OpenMontage",
+      "cobusgreyling/loop-engineering",
+      "diegosouzapw/OmniRoute",
+      "farion1231/cc-switch",
+      "headroomlabs-ai/headroom",
+      "mukul975/Anthropic-Cybersecurity-Skills",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "santifer/career-ops",
+      "xbtlin/ai-berkshire"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 111732,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that enforces a \"laziest senior dev\" philosophy—prompting the agent to reach for native browser features, stdlib, or a single line before writing new code."
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "total_stars_gained": 79299,
+          "days_appeared": 7,
+          "excerpt": "OpenMontage is an open-source agentic video production system that gives AI coding assistants 12 pipelines and 52 tools to handle the full stack—research, scripting, asset generation, editing, and final render—producing real motion-clip videos, not just animated stills."
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "total_stars_gained": 69731,
+          "days_appeared": 7,
+          "excerpt": "codebase-memory-mcp is a single static binary MCP server that parses any codebase into a persistent knowledge graph using tree-sitter AST analysis across 158 languages, answering structural queries about functions, classes, call chains, and HTTP routes in under 1ms with zero dependencies."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 57973,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI and MCP toolkit that gives AI agents (Claude Code, Cursor, etc.) the ability to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, Xiaohongshu, and other platforms without paid APIs, by routing through free scrapers and browser session reuse."
+        },
+        {
+          "full_name": "xbtlin/ai-berkshire",
+          "total_stars_gained": 37667,
+          "days_appeared": 6,
+          "excerpt": "AI Berkshire is a structured investment research framework for Claude Code/Codex that encodes the methodologies of Buffett, Munger, and two Chinese value investors into multi-agent workflows that produce forced buy/no-buy verdicts with price targets, not hedged non-answers."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 111721,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that enforces a \"laziest senior dev\" philosophy—systematically pushing the agent toward minimal, already-available solutions instead of over-engineered ones, cutting generated code by ~54% on average."
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "total_stars_gained": 79280,
+          "days_appeared": 7,
+          "excerpt": "OpenMontage is an open-source agentic video production system that gives your AI coding assistant 12 pipelines and 52 tools to handle scripting, asset generation, editing, and final rendering — producing real motion-clip videos, not just slideshows of stills."
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "total_stars_gained": 69720,
+          "days_appeared": 7,
+          "excerpt": "codebase-memory-mcp is a single static binary MCP server that parses any codebase into a persistent knowledge graph using tree-sitter AST analysis across 158 languages, answering structural queries about functions, call chains, and HTTP routes in under 1ms with 99% fewer tokens than file-by-file exploration."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 57979,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI and MCP toolkit that gives AI agents authenticated, parsed access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and more — without paid APIs, by routing through free backends and browser login state."
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "total_stars_gained": 39455,
+          "days_appeared": 7,
+          "excerpt": "Hermes Agent is an open-source, self-improving AI agent from Nous Research that maintains a persistent learning loop — creating and refining skills from experience, modeling users across sessions, and running on any infrastructure from a $5 VPS to serverless Modal deployments via any LLM provider."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "Week 27 was a high-conviction week: 24 repos on each side of the ledger, with the OSS lane pulling **149,273 stars** and Skills landing **144,320** — a spread of less than 4%, which tells you the community is buying tooling and workflow patterns at nearly identical rates right now. The dominant topic tags — `claude-code`, `claude`, `llm`, `mcp`, `ai` — were identical across both lanes, in the same order, which hasn't happened in recent memory. The week's story isn't any single repo; it's the consolidation of a stack: persistent memory, minimal code generation, and agent-accessible data pipelines are no longer experiments, they're table stakes.",
+    "oss": "**Ponytail** (111,732 stars, 7/7 days) was the week's runaway, and its premise is almost contrarian: a plugin whose entire job is to stop Claude Code from writing code. The \"laziest senior dev\" framing landed because it names a real pain — agents that over-engineer — and solves it at the prompt layer rather than post-hoc review. Close behind it, **OpenMontage** (79,299 stars) demonstrated that agentic video production is now a systems-design problem, not an API-stitching one — 12 pipelines and 52 tools is an architecture, not a demo. **codebase-memory-mcp** (69,731 stars) and **Agent-Reach** (57,973 stars) both held the top five for all seven days, signaling sustained builder demand rather than viral spikes; when a repo appears every day of the week, that's adoption pressure, not hype.",
+    "skills": "The Skills lane's top four are a mirror of OSS — Ponytail, OpenMontage, codebase-memory-mcp, Agent-Reach in near-identical star counts — but the fifth slot diverges meaningfully: **Hermes Agent** (39,455 stars, 7/7 days from Nous Research) made the Skills podium and not the OSS one. A self-improving agent that persists skill graphs across sessions and user-models across conversations is a different category of artifact than a tool or plugin — it's infrastructure for agent continuity, and the Skills audience recognized that first. **nextlevelbuilder/ui-ux-pro-max-skill** appearing twice across both lanes is worth a flag: UI/UX as a packaged agent skill is a quiet but growing sub-genre, and it's starting to develop repeat-visitor behavior.",
+    "cross_lane": "Eighteen of the week's repos appeared in both the OSS and Skills editions — an unusually high overlap that reflects how blurry the line between \"open source tool\" and \"agent skill\" has become when the artifact is an MCP server or a structured prompt framework. The clearest theme cutting across both lanes is **memory and context compression**: codebase-memory-mcp attacks token waste at the code-graph level, Ponytail attacks it at the generation level, and Hermes Agent attacks it at the session-continuity level — three different attack surfaces, same underlying problem. **Agent-Reach** sits in a separate but adjacent theme: once you've solved what the agent *knows*, you need to solve what it can *see*, and frictionless access to social and public data without paid API dependencies is the next unsexy-but-critical layer builders are reaching for.",
+    "takeaway": "If you're shipping an agent or coding-assistant workflow this month, the week's data gives you a clear priority order: first, give your agent structural memory of the codebase (codebase-memory-mcp); second, constrain it from over-generating (Ponytail's philosophy is forkable even if you don't use the plugin); third, extend its reach to live external data (Agent-Reach). The Hermes Agent result is the longer signal to watch — self-improving, session-persistent agents running on commodity infrastructure suggest the next competitive moat isn't the model, it's the skill graph the agent has accumulated. Build the plumbing now before that gap closes."
+  },
+  "generated_at": "2026-07-05T14:55:11.383Z"
+}
