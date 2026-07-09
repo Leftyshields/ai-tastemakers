@@ -1,0 +1,104 @@
+# Skill Tastemakers — Daily Brief — 2026-07-09
+
+_Ranking: delta_7d · 10 repos · generated 2026-07-09T16:11:07.061Z_
+
+
+## 1. DietrichGebert/ponytail
+
+https://github.com/DietrichGebert/ponytail · ★ 78905 (+7579 this week) · agent-skills, ai-agents, claude, claude-code, claude-code-plugin, cursor-rules, developer-tools, llm, prompt-engineering, yagni
+
+**What it does:** Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that enforces a "laziest senior dev" heuristic—pushing agents to reach for native browser/platform primitives and delete code rather than install dependencies and build abstractions.
+
+**Why now:** It's trending at +7,579 stars this week, with a freshly published agentic benchmark showing measurable reductions in LOC (−54%), cost (−20%), and time (−27%) on real Claude Code sessions against a real FastAPI + React codebase.
+
+**Build with it:** Drop the skill into your Claude Code or Cursor setup to automatically constrain AI-generated PRs in cost-sensitive or complexity-sensitive codebases—particularly useful if you're prototyping fast and want agents that won't bury you in wrapper components, third-party libraries, and timezone discussions.
+
+## 2. JuliusBrussee/caveman
+
+https://github.com/JuliusBrussee/caveman · ★ 87176 (+7378 this week) · ai, anthropic, caveman, claude, claude-code, llm, meme, prompt-engineering, skill, tokens
+
+**What it does:** Caveman is a prompt skill/plugin that instructs AI coding agents (Claude Code, Cursor, Copilot, and 30+ others) to strip filler language from responses, cutting output tokens by ~65% while leaving code, commands, and error messages byte-for-exact.
+
+**Why now:** The repo hit 87,176 stars with 7,378 added this week, signaling that token cost and response verbosity are live pain points as developers scale agentic workflows beyond single sessions.
+
+**Build with it:** Fork the caveman prompt spec and tune your own compression level—strip it further for pure CLI output, or adapt the pattern to enforce structured JSON-only responses from agents in automated pipelines where chatty prose breaks downstream parsing.
+
+## 3. asgeirtj/system_prompts_leaks
+
+https://github.com/asgeirtj/system_prompts_leaks · ★ 54893 (+7107 this week) · ai, ai-agents, anthropic, awesome, chatbot, chatgpt, claude, claude-code, codex, deep-learning, education, gemini, generative-ai, google, llm, machine-learning, nlp, open-source, openai, prompt-engineering
+
+**What it does:** A regularly updated GitHub repository that extracts and publishes the full system prompts from major AI products including Claude, ChatGPT, Gemini, Grok, Copilot, and Cursor, giving you the exact hidden instructions these models run on.
+
+**Why now:** The repo gained 7,107 stars this week and just added Claude Sonnet 5's system prompt on July 1, 2026, making it the fastest source for reverse-engineering the latest model behaviors as they ship.
+
+**Build with it:** Use the extracted prompts as a reference to craft tighter system prompts for your own agents, reverse-engineer why competitor AI products behave the way they do, or benchmark your prompt designs directly against what production systems actually use.
+
+## 4. addyosmani/agent-skills
+
+https://github.com/addyosmani/agent-skills · ★ 75595 (+7059 this week) · agent-skills, antigravity, claude-code, codex, cursor, skills
+
+**What it does:** Agent Skills is a collection of 24 production-grade engineering workflows packaged as slash commands (`/spec`, `/plan`, `/build`, `/test`, `/review`, `/ship`) that guide AI coding agents through the full development lifecycle with enforced quality gates.
+
+**Why now:** The project gained over 7,000 stars this week, coinciding with growing adoption of agentic coding tools like Claude Code, Cursor, and Codex — making standardized, reusable agent behavior a pressing practical need.
+
+**Build with it:** Install the skills into your agent via `npx skills add addyosmani/agent-skills`, then use `/build auto` to let the agent generate a plan, implement tasks test-first, and commit each slice autonomously while pausing only on failures or risky steps.
+
+## 5. Leonxlnx/taste-skill
+
+https://github.com/Leonxlnx/taste-skill · ★ 61125 (+6310 this week) · agent, ai, claude, claude-code, codex, coding, design, frontend, lowcode, nocode, skill, skills, vibecoding
+
+**What it does:** Taste-Skill is a collection of portable agent skills (markdown files) that you drop into Codex, Cursor, or Claude Code to enforce opinionated layout, typography, spacing, and motion rules—replacing AI's default boilerplate UI output with higher-quality frontend decisions.
+
+**Why now:** It gained 6,310 stars this week, likely riding the wave of Claude Code and Codex adoption as developers look for structured ways to constrain AI coding agents toward better visual output rather than generic component soup.
+
+**Build with it:** Install the skill via `npx skills add` and pair it with a reference image board generated by ChatGPT Images, then hand both to Claude Code to scaffold a polished landing page or dashboard that doesn't look like every other AI-generated UI.
+
+## 6. affaan-m/ECC
+
+https://github.com/affaan-m/ECC · ★ 227739 (+2816 this week) · ai-agents, anthropic, claude, claude-code, developer-tools, llm, mcp, productivity
+
+**What it does:** ECC is an agent harness operating system that layers skills, memory, instincts, and security scanning on top of AI coding agents like Claude Code, Codex, and Cursor, giving them persistent context and structured workflows across sessions.
+
+**Why now:** With 2,816 stars added this week, developer interest in wrapping raw AI coding agents with production-grade scaffolding is clearly peaking as teams move from toy prompts to repeatable, multi-step agentic pipelines.
+
+**Build with it:** Drop ECC into an existing Claude Code or Cursor setup to give your agent persistent memory and security scanning, then extend it to orchestrate cross-harness workflows where one agent hands off context to another without losing state.
+
+## 7. Panniantong/Agent-Reach
+
+https://github.com/Panniantong/Agent-Reach · ★ 53741 (+4882 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+
+**What it does:** Agent Reach is a Python CLI toolkit that gives AI agents free, zero-API-key access to Twitter, Reddit, YouTube, GitHub, Bilibili, XiaoHongShu, and more by routing around paywalls and blocks through multi-backend fallback strategies.
+
+**Why now:** It hit GitHub's #1 trending repository this week with 53,741 stars (+4,882 this week), and its recent live example—silently switching from yt-dlp to bili-cli after Bilibili blocked yt-dlp—demonstrates the routing resilience that makes it production-relevant right now.
+
+**Build with it:** Drop it into a Claude Code or Cursor workflow to build agents that monitor competitor Twitter activity, summarize YouTube or Bilibili tutorials, scrape Reddit bug threads for your product, or aggregate XiaoHongShu sentiment—all without touching a paid API.
+
+## 8. iOfficeAI/OfficeCLI
+
+https://github.com/iOfficeAI/OfficeCLI · ★ 13103 (+4803 this week) · agent, ai, claude-code, cli, codex, docx, excel, office, openclaw, pptx, presentation, skills, word, xlsx
+
+**What it does:** OfficeCLI is an open-source, single-binary CLI tool that lets AI agents read, write, and render Word, Excel, and PowerPoint files without any Office installation, exposing a structured command interface plus an HTML/PNG rendering engine so agents can see what they produce.
+
+**Why now:** The project spiked to 13,000+ stars this week, signaling strong community validation right as agentic coding tools like Claude Code and Cursor are becoming mainstream workflows where file-output tasks (reports, decks, spreadsheets) have had no clean programmatic path.
+
+**Build with it:** Wire OfficeCLI into an AI coding agent to auto-generate client-ready deliverables — think a sales agent that pulls CRM data and outputs a formatted Excel pipeline report, or a research agent that compiles findings into a polished PowerPoint, all without touching a GUI.
+
+## 9. ogulcancelik/herdr
+
+https://github.com/ogulcancelik/herdr · ★ 14688 (+4737 this week) · agent, agent-orchestration, ai, ai-agents, claude-code, cli, codex, coding-agents, developer-tools, devtools, multiplexer, rust, terminal, terminal-multiplexer, terminal-ui, tmux, tui, workspace-manager
+
+**What it does:** herdr is a Rust-based terminal multiplexer that lets you run multiple AI coding agents (Claude Code, Codex, etc.) simultaneously in split panes, with sessions that persist across detaches and SSH connections via a pure socket API.
+
+**Why now:** It gained 4,737 stars this week, signaling a sharp spike in developer interest around orchestrating multiple agents in parallel rather than running them one at a time.
+
+**Build with it:** Wire herdr's socket API into your own agent pipeline so agents can spawn subprocesses, read terminal output, and gate on each other's completion without any GUI layer. You could build a self-healing CI loop where one agent writes code, another reviews it, and a third runs tests—all coordinated through herdr panes from a single terminal session.
+
+## 10. DeusData/codebase-memory-mcp
+
+https://github.com/DeusData/codebase-memory-mcp · ★ 29017 (+4658 this week) · aider, ast, claude-code, code-analysis, code-intelligence, codex, cursor, cypher, developer-tools, gemini-cli, graph-visualization, kilocode, knowledge-graph, mcp, mcp-server, model-context-protocol, opencode, sqlite, tree-sitter, windsurf
+
+**What it does:** codebase-memory-mcp is a single static binary MCP server that indexes entire codebases into a persistent knowledge graph using tree-sitter AST parsing across 158 languages, answering structural queries in under 1ms with 99% fewer tokens than file-by-file exploration.
+
+**Why now:** It gained 4,658 GitHub stars this week and supports 11 major coding agents including Claude Code, Cursor, Gemini CLI, and Windsurf, making it immediately useful as those agent ecosystems mature rapidly.
+
+**Build with it:** Drop this into any AI coding agent setup to give it instant, persistent memory of a large codebase — particularly useful for building agents that navigate monorepos, trace call chains, or map HTTP routes without burning context on raw file reads.
