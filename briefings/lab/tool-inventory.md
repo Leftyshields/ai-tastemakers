@@ -1,6 +1,6 @@
 # Tool inventory — digest-featured candidates
 
-_Generated 2026-07-05T16:15:11.706Z from 62 briefing artifact(s)._
+_Generated 2026-07-12T14:40:25.034Z from 77 briefing artifact(s)._
 
 Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by capability and mapped to pipeline roles.
 
@@ -8,119 +8,121 @@ Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by
 
 | Repo | Appearances | Pipeline roles | Capability tags |
 |------|-------------|------------------|-----------------|
-| [Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) | 55 | agent-tooling, context-enrichment, editorial-quality, multi-source-search | agent-skill, mcp, search |
-| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 47 | editorial-quality | agent-skill |
-| [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) | 44 | compaction, cross-run-memory, token-optimization | compression, memory |
-| [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | 37 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
+| [Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) | 69 | agent-tooling, context-enrichment, editorial-quality, multi-source-search | agent-skill, mcp, search |
+| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 62 | editorial-quality | agent-skill |
+| [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) | 49 | compaction, cross-run-memory, token-optimization | compression, memory |
+| [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | 47 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
+| [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | 43 | editorial-quality | agent-skill |
+| [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | 31 | editorial-quality | agent-skill |
 | [chopratejas/headroom](https://github.com/chopratejas/headroom) | 28 | agent-tooling, compaction, cross-run-memory, editorial-quality, token-optimization | agent-skill, compression, mcp, memory |
-| [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | 28 | editorial-quality | agent-skill |
-| [farion1231/cc-switch](https://github.com/farion1231/cc-switch) | 21 | agent-tooling, editorial-quality | agent-skill, mcp |
+| [farion1231/cc-switch](https://github.com/farion1231/cc-switch) | 24 | agent-tooling, editorial-quality | agent-skill, mcp |
+| [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | 20 | context-enrichment, editorial-quality, multi-source-search, usage-measurement | agent-skill, analytics, search |
+| [xbtlin/ai-berkshire](https://github.com/xbtlin/ai-berkshire) | 20 | agent-tooling, editorial-quality | agent-skill, mcp |
+| [asgeirtj/system_prompts_leaks](https://github.com/asgeirtj/system_prompts_leaks) | 19 | experiment-framework | eval |
 | [elder-plinius/CL4R1T4S](https://github.com/elder-plinius/CL4R1T4S) | 19 | experiment-framework | eval |
-| [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | 17 | compaction, editorial-quality, experiment-framework, token-optimization | agent-skill, compression, eval |
-| [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | 17 | context-enrichment, editorial-quality, multi-source-search, usage-measurement | agent-skill, analytics, search |
+| [headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom) | 17 | agent-tooling, compaction, editorial-quality, token-optimization | agent-skill, compression, mcp |
 | [palmier-io/palmier-pro](https://github.com/palmier-io/palmier-pro) | 17 | agent-tooling, editorial-quality | agent-skill, mcp |
-| [xbtlin/ai-berkshire](https://github.com/xbtlin/ai-berkshire) | 15 | agent-tooling, editorial-quality | agent-skill, mcp |
-| [headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom) | 14 | agent-tooling, compaction, editorial-quality, token-optimization | agent-skill, compression, mcp |
-| [affaan-m/ECC](https://github.com/affaan-m/ECC) | 12 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
-| [Egonex-AI/Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) | 11 | cross-run-memory, editorial-quality | agent-skill, memory |
+| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 16 | editorial-quality | agent-skill |
+| [affaan-m/ECC](https://github.com/affaan-m/ECC) | 15 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
+| [Egonex-AI/Understand-Anything](https://github.com/Egonex-AI/Understand-Anything) | 12 | cross-run-memory, editorial-quality | agent-skill, memory |
+| [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 12 | context-enrichment, multi-source-search | search |
 | [mukul975/Anthropic-Cybersecurity-Skills](https://github.com/mukul975/Anthropic-Cybersecurity-Skills) | 11 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
-| [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 10 | editorial-quality | agent-skill |
+| [diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute) | 10 | agent-tooling, compaction, editorial-quality, token-optimization | agent-skill, compression, mcp |
 | [santifer/career-ops](https://github.com/santifer/career-ops) | 10 | editorial-quality | agent-skill |
 | [Imbad0202/academic-research-skills](https://github.com/Imbad0202/academic-research-skills) | 9 | editorial-quality | agent-skill |
+| [ogulcancelik/herdr](https://github.com/ogulcancelik/herdr) | 9 | editorial-quality | agent-skill |
 | [op7418/guizang-ppt-skill](https://github.com/op7418/guizang-ppt-skill) | 9 | editorial-quality | agent-skill |
 | [can1357/oh-my-pi](https://github.com/can1357/oh-my-pi) | 7 | agent-tooling, experiment-framework | eval, mcp |
-| [esengine/DeepSeek-Reasonix](https://github.com/esengine/DeepSeek-Reasonix) | 7 | cross-run-memory | memory |
-| [asgeirtj/system_prompts_leaks](https://github.com/asgeirtj/system_prompts_leaks) | 6 | experiment-framework | eval |
-| [rohitg00/agentmemory](https://github.com/rohitg00/agentmemory) | 6 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
-| [rtk-ai/rtk](https://github.com/rtk-ai/rtk) | 5 | compaction, editorial-quality, token-optimization | agent-skill, compression |
 
 ## Role matrix
 
 ### agent-tooling
 
-- **Panniantong/Agent-Reach** — 55 appearances (2026-06-07 → 2026-07-05)
-- **DeusData/codebase-memory-mcp** — 37 appearances (2026-06-12 → 2026-07-05)
+- **Panniantong/Agent-Reach** — 69 appearances (2026-06-07 → 2026-07-12)
+- **DeusData/codebase-memory-mcp** — 47 appearances (2026-06-12 → 2026-07-12)
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
-- **farion1231/cc-switch** — 21 appearances (2026-06-14 → 2026-07-05)
+- **farion1231/cc-switch** — 24 appearances (2026-06-14 → 2026-07-12)
+- **xbtlin/ai-berkshire** — 20 appearances (2026-06-28 → 2026-07-12)
+- **headroomlabs-ai/headroom** — 17 appearances (2026-06-24 → 2026-07-12)
 - **palmier-io/palmier-pro** — 17 appearances (2026-06-21 → 2026-06-28)
-- **xbtlin/ai-berkshire** — 15 appearances (2026-06-28 → 2026-07-05)
-- **headroomlabs-ai/headroom** — 14 appearances (2026-06-24 → 2026-07-05)
-- **affaan-m/ECC** — 12 appearances (2026-06-14 → 2026-07-05)
+- **affaan-m/ECC** — 15 appearances (2026-06-14 → 2026-07-12)
 
 ### compaction
 
-- **NousResearch/hermes-agent** — 44 appearances (2026-06-14 → 2026-07-05)
+- **NousResearch/hermes-agent** — 49 appearances (2026-06-14 → 2026-07-12)
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
-- **JuliusBrussee/caveman** — 17 appearances (2026-06-08 → 2026-07-05)
-- **headroomlabs-ai/headroom** — 14 appearances (2026-06-24 → 2026-07-05)
+- **headroomlabs-ai/headroom** — 17 appearances (2026-06-24 → 2026-07-12)
+- **diegosouzapw/OmniRoute** — 10 appearances (2026-07-01 → 2026-07-12)
 - **rtk-ai/rtk** — 5 appearances (2026-06-08 → 2026-06-24)
 - **open-gsd/gsd-core** — 4 appearances (2026-06-09 → 2026-06-14)
 - **decolua/9router** — 3 appearances (2026-06-08 → 2026-06-14)
-- **diegosouzapw/OmniRoute** — 3 appearances (2026-07-01 → 2026-07-05)
+- **jarrodwatts/claude-hud** — 1 appearances (2026-06-07 → 2026-06-07)
 
 ### context-enrichment
 
-- **Panniantong/Agent-Reach** — 55 appearances (2026-06-07 → 2026-07-05)
-- **mvanhorn/last30days-skill** — 17 appearances (2026-06-07 → 2026-06-23)
-- **firecrawl/firecrawl** — 4 appearances (2026-06-14 → 2026-07-02)
+- **Panniantong/Agent-Reach** — 69 appearances (2026-06-07 → 2026-07-12)
+- **mvanhorn/last30days-skill** — 20 appearances (2026-06-07 → 2026-07-12)
+- **firecrawl/firecrawl** — 12 appearances (2026-06-14 → 2026-07-12)
+- **cheahjs/free-llm-api-resources** — 2 appearances (2026-06-07 → 2026-07-10)
 - **bytedance/deer-flow** — 1 appearances (2026-06-24 → 2026-06-24)
 - **D4Vinci/Scrapling** — 1 appearances (2026-06-09 → 2026-06-09)
 
 ### cross-run-memory
 
-- **NousResearch/hermes-agent** — 44 appearances (2026-06-14 → 2026-07-05)
-- **DeusData/codebase-memory-mcp** — 37 appearances (2026-06-12 → 2026-07-05)
+- **NousResearch/hermes-agent** — 49 appearances (2026-06-14 → 2026-07-12)
+- **DeusData/codebase-memory-mcp** — 47 appearances (2026-06-12 → 2026-07-12)
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
-- **affaan-m/ECC** — 12 appearances (2026-06-14 → 2026-07-05)
-- **Egonex-AI/Understand-Anything** — 11 appearances (2026-06-16 → 2026-06-30)
+- **affaan-m/ECC** — 15 appearances (2026-06-14 → 2026-07-12)
+- **Egonex-AI/Understand-Anything** — 12 appearances (2026-06-16 → 2026-07-12)
 - **mukul975/Anthropic-Cybersecurity-Skills** — 11 appearances (2026-06-09 → 2026-07-05)
 - **esengine/DeepSeek-Reasonix** — 7 appearances (2026-06-07 → 2026-06-14)
 - **rohitg00/agentmemory** — 6 appearances (2026-06-07 → 2026-06-14)
 
 ### editorial-quality
 
-- **Panniantong/Agent-Reach** — 55 appearances (2026-06-07 → 2026-07-05)
-- **DietrichGebert/ponytail** — 47 appearances (2026-06-13 → 2026-07-05)
-- **DeusData/codebase-memory-mcp** — 37 appearances (2026-06-12 → 2026-07-05)
+- **Panniantong/Agent-Reach** — 69 appearances (2026-06-07 → 2026-07-12)
+- **DietrichGebert/ponytail** — 62 appearances (2026-06-13 → 2026-07-12)
+- **DeusData/codebase-memory-mcp** — 47 appearances (2026-06-12 → 2026-07-12)
+- **Leonxlnx/taste-skill** — 43 appearances (2026-06-07 → 2026-07-12)
+- **JuliusBrussee/caveman** — 31 appearances (2026-06-08 → 2026-07-12)
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
-- **Leonxlnx/taste-skill** — 28 appearances (2026-06-07 → 2026-07-05)
-- **farion1231/cc-switch** — 21 appearances (2026-06-14 → 2026-07-05)
-- **JuliusBrussee/caveman** — 17 appearances (2026-06-08 → 2026-07-05)
-- **mvanhorn/last30days-skill** — 17 appearances (2026-06-07 → 2026-06-23)
+- **farion1231/cc-switch** — 24 appearances (2026-06-14 → 2026-07-12)
+- **mvanhorn/last30days-skill** — 20 appearances (2026-06-07 → 2026-07-12)
 
 ### experiment-framework
 
+- **asgeirtj/system_prompts_leaks** — 19 appearances (2026-06-22 → 2026-07-12)
 - **elder-plinius/CL4R1T4S** — 19 appearances (2026-06-12 → 2026-06-21)
-- **JuliusBrussee/caveman** — 17 appearances (2026-06-08 → 2026-07-05)
 - **can1357/oh-my-pi** — 7 appearances (2026-06-08 → 2026-06-14)
-- **asgeirtj/system_prompts_leaks** — 6 appearances (2026-06-22 → 2026-07-05)
 - **safishamsi/graphify** — 5 appearances (2026-06-15 → 2026-07-03)
 - **Imbad0202/academic-research-skills-codex** — 3 appearances (2026-06-08 → 2026-06-14)
 - **Donchitos/Claude-Code-Game-Studios** — 1 appearances (2026-06-11 → 2026-06-11)
 - **FareedKhan-dev/train-llm-from-scratch** — 1 appearances (2026-06-11 → 2026-06-11)
+- **promptfoo/promptfoo** — 1 appearances (2026-06-07 → 2026-06-07)
 
 ### multi-source-search
 
-- **Panniantong/Agent-Reach** — 55 appearances (2026-06-07 → 2026-07-05)
-- **mvanhorn/last30days-skill** — 17 appearances (2026-06-07 → 2026-06-23)
-- **firecrawl/firecrawl** — 4 appearances (2026-06-14 → 2026-07-02)
+- **Panniantong/Agent-Reach** — 69 appearances (2026-06-07 → 2026-07-12)
+- **mvanhorn/last30days-skill** — 20 appearances (2026-06-07 → 2026-07-12)
+- **firecrawl/firecrawl** — 12 appearances (2026-06-14 → 2026-07-12)
+- **cheahjs/free-llm-api-resources** — 2 appearances (2026-06-07 → 2026-07-10)
 - **bytedance/deer-flow** — 1 appearances (2026-06-24 → 2026-06-24)
 - **D4Vinci/Scrapling** — 1 appearances (2026-06-09 → 2026-06-09)
 
 ### token-optimization
 
-- **NousResearch/hermes-agent** — 44 appearances (2026-06-14 → 2026-07-05)
+- **NousResearch/hermes-agent** — 49 appearances (2026-06-14 → 2026-07-12)
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
-- **JuliusBrussee/caveman** — 17 appearances (2026-06-08 → 2026-07-05)
-- **headroomlabs-ai/headroom** — 14 appearances (2026-06-24 → 2026-07-05)
+- **headroomlabs-ai/headroom** — 17 appearances (2026-06-24 → 2026-07-12)
+- **diegosouzapw/OmniRoute** — 10 appearances (2026-07-01 → 2026-07-12)
 - **rtk-ai/rtk** — 5 appearances (2026-06-08 → 2026-06-24)
 - **open-gsd/gsd-core** — 4 appearances (2026-06-09 → 2026-06-14)
 - **decolua/9router** — 3 appearances (2026-06-08 → 2026-06-14)
-- **diegosouzapw/OmniRoute** — 3 appearances (2026-07-01 → 2026-07-05)
+- **jarrodwatts/claude-hud** — 1 appearances (2026-06-07 → 2026-06-07)
 
 ### usage-measurement
 
-- **mvanhorn/last30days-skill** — 17 appearances (2026-06-07 → 2026-06-23)
+- **mvanhorn/last30days-skill** — 20 appearances (2026-06-07 → 2026-07-12)
 
 ## Operator notes
 

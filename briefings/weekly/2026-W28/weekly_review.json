@@ -1,0 +1,245 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W28",
+  "week_start": "2026-07-06",
+  "week_end": "2026-07-12",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 22,
+      "skills": 23
+    },
+    "total_stars_gained": {
+      "oss": 103730,
+      "skills": 117656
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "claude",
+        "ai",
+        "llm",
+        "ai-agents"
+      ],
+      "skills": [
+        "claude-code",
+        "codex",
+        "claude",
+        "ai",
+        "ai-agents"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "firecrawl/firecrawl",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "JCodesMore/ai-website-cloner-template",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "xbtlin/ai-berkshire",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "iOfficeAI/OfficeCLI",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "DeusData/codebase-memory-mcp",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "ogulcancelik/herdr",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "JCodesMore/ai-website-cloner-template",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "xbtlin/ai-berkshire",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DeusData/codebase-memory-mcp",
+      "DietrichGebert/ponytail",
+      "JCodesMore/ai-website-cloner-template",
+      "JuliusBrussee/caveman",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "asgeirtj/system_prompts_leaks",
+      "calesthio/OpenMontage",
+      "diegosouzapw/OmniRoute",
+      "farion1231/cc-switch",
+      "headroomlabs-ai/headroom",
+      "mvanhorn/last30days-skill",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "xbtlin/ai-berkshire"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 55167,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that enforces a \"laziest senior dev\" heuristic—systematically pushing the agent toward minimal, already-available solutions instead of over-engineered ones, cutting generated code by ~54% on average."
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "total_stars_gained": 46201,
+          "days_appeared": 7,
+          "excerpt": "Caveman is a prompt skill/plugin that instructs AI coding agents (Claude Code, Cursor, Copilot, and 30+ others) to strip filler from their responses and answer in terse, caveman-style prose while keeping code, commands, and error output byte-for-byte intact. One install script deploys it across every detected agent on your machine, cutting claimed output token usage by 65%."
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "total_stars_gained": 43521,
+          "days_appeared": 7,
+          "excerpt": "Taste-Skill is a collection of portable \"Agent Skills\" (markdown instruction files) that you drop into Codex, Cursor, or Claude Code to enforce opinionated layout, typography, spacing, and motion rules so AI-generated frontends stop looking like Bootstrap templates."
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "total_stars_gained": 42346,
+          "days_appeared": 6,
+          "excerpt": "This repo collects and publishes extracted system prompts from major AI products including Claude Fable 5, GPT-5.5, Gemini 3.5 Flash, and dozens more, giving developers direct visibility into the exact instructions shaping each model's behavior."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 37081,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI that gives AI agents (Claude Code, Cursor, etc.) free, zero-API-key access to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu through a single install command pasted to your agent."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 55163,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a prompt-based skill/plugin for AI coding agents (Claude Code, Cursor, etc.) that biases them toward minimal solutions—using native browser inputs instead of installing libraries, deleting over adding, and defaulting to the simplest thing that works."
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "total_stars_gained": 43520,
+          "days_appeared": 7,
+          "excerpt": "Taste-Skill is a set of portable agent skills (markdown instruction files) that you drop into Codex, Cursor, or Claude Code to enforce opinionated layout, typography, spacing, and motion rules, preventing AI coding tools from generating generic-looking UIs."
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "total_stars_gained": 42352,
+          "days_appeared": 6,
+          "excerpt": "This repo collects and publishes extracted system prompts from major AI products—Claude, ChatGPT, Gemini, Grok, Copilot, and others—updated regularly as new model versions ship."
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "total_stars_gained": 41380,
+          "days_appeared": 6,
+          "excerpt": "Caveman is a prompt skill/plugin that forces AI coding agents (Claude Code, Cursor, Copilot, and 30+ others) to respond in compressed, filler-free \"caveman\" language, cutting output token counts by ~65% while leaving code, commands, and error messages untouched."
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "total_stars_gained": 34600,
+          "days_appeared": 5,
+          "excerpt": "Agent Skills is a collection of production-grade slash commands (`/spec`, `/plan`, `/build`, `/test`, `/review`, `/ship`) that encode senior engineering workflows into AI coding agents like Claude Code and Cursor, enforcing quality gates at every stage of development."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "Week 28 was the week the community decided AI agents need a stern editor — the dominant theme across both lanes was constraint, not capability. OSS repos pulled in 103,730 stars across 22 projects; Skills came in even hotter at 117,656 across 23, a signal that prompt-layer tooling is outpacing runtime infrastructure in raw developer interest right now. Seven repos held the top charts all seven days without slipping, which is unusual staying power and suggests these aren't viral-for-a-day curiosities. The market is voting for discipline.",
+    "oss": "**Ponytail** (55K stars, 7 days straight) led the OSS lane by a wide margin with a simple premise: make Claude Code and Cursor behave like a senior dev who's tired and doesn't want to write unnecessary code — cutting generated output by roughly half. Right behind it, **Caveman** (46K) took the same anti-verbosity instinct to the prose layer, stripping agent responses down to grunts while leaving code untouched. **Agent-Reach** (37K) was the functional outlier — a Python CLI giving agents keyless, zero-config read access to Twitter, Reddit, YouTube, and more — pointing toward a quieter but serious demand for agents that can actually browse the social web without OAuth gymnastics. The thread connecting all three: developers don't want more from their agents, they want less noise and more leverage.",
+    "skills": "The Skills lane mirrored OSS at the top but diverged meaningfully mid-table. **Taste-Skill** (43K stars, 7 days) held its ground as the definitive answer to \"why does every AI-generated UI look like a Bootstrap demo,\" dropping opinionated typography and layout rules directly into Codex, Cursor, and Claude Code as portable markdown files. **Addyosmani/agent-skills** (34K, 5 days) was the week's most substantive new entry — a set of production-grade slash commands (`/spec`, `/plan`, `/build`, `/review`, `/ship`) that encode senior engineering process as agent-executable gates, not just vibes. The **system_prompts_leaks** repo (42K) crossing into the Skills lane confirms that developers are treating leaked system prompts as skill blueprints — studying how Anthropic, OpenAI, and Google prompt their own models to learn how to prompt theirs.",
+    "cross_lane": "Sixteen repos appeared in both OSS and Skills rankings this week, which is the highest overlap we've tracked — it reflects a blurring line between \"a tool you install\" and \"a prompt you drop in,\" since the winning projects are often both simultaneously. The dominant cross-lane signal is **agent output reduction**: Ponytail, Caveman, and the leaks repo all attract builders who are frustrated that agents are verbose, over-engineered, and opaque — and who want mechanical, enforceable fixes rather than better prompting habits. **Codebase-memory-mcp** and **OmniRoute** appearing in both lanes for multiple days also hints at a maturing MCP/routing infrastructure layer that's finding its audience across skill authors and OSS contributors alike.",
+    "takeaway": "If you're shipping agent tooling right now, the market is clearly rewarding constraint primitives over feature additions — anything that makes an agent produce less, think smaller, or stay on a tighter rail is getting immediate traction. The Taste-Skill and agent-skills pattern is also worth watching closely: portable markdown instruction files with zero runtime dependency are proving easier to distribute and star than full frameworks. Build the skill first, validate demand, then add the scaffolding. And if you haven't read the **system_prompts_leaks** repo yet, do it for the craft — the gap between how frontier labs prompt their own models and how most developers prompt theirs is still embarrassingly large."
+  },
+  "generated_at": "2026-07-12T14:40:00.715Z"
+}
