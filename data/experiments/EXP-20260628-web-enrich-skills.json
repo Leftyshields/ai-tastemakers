@@ -19,7 +19,25 @@
       "DIGEST_ENRICH_SHADOW": "1"
     }
   },
-  "snapshots": [],
+  "snapshots": [
+    {
+      "imported_at": "2026-07-13T01:03:25.941Z",
+      "period": {
+        "start": "2026-06-28",
+        "end": "2026-07-11"
+      },
+      "metrics": {
+        "pageviews_by_path": {
+          "/ai-tastemakers/skills/briefings/2026-07-07.html": 3,
+          "/ai-tastemakers/skills/briefings/2026-07-09.html": 1
+        },
+        "outbound_clicks": {
+          "_aggregate": 0
+        }
+      },
+      "source": "/home/brian/docker/ai-tastemakers/data/experiments/exports/EXP-20260628-web-enrich-skills-baseline.csv"
+    }
+  ],
   "shadow_runs": [
     {
       "run_id": "bfb156a9-cf6f-4beb-a898-6ae3d1d31c47",
