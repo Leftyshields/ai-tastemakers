@@ -3,7 +3,7 @@
   "id": "EXP-20260628-web-enrich-skills",
   "hypothesis": "Post-rank web/HN enrichment improves outbound repo click rate on Skills editions without hurting digest quality.",
   "change_summary": "Enable DIGEST_ENRICH_WEB for top-N ranked repos before narration (Skills canary first).",
-  "status": "baseline",
+  "status": "active",
   "edition": "skills",
   "baseline_window": {
     "start": "2026-06-28",
@@ -16,7 +16,7 @@
   "change": {
     "flags": {
       "DIGEST_ENRICH_WEB": "1",
-      "DIGEST_ENRICH_SHADOW": "1"
+      "DIGEST_ENRICH_SHADOW": "0"
     }
   },
   "snapshots": [
