@@ -10,6 +10,7 @@ Follow-on work for the digest app (`src/tastemaker/`). Ordered loosely by priori
 |----|--------|--------|-----------|
 | DIST-1 | Slack / Substack distribution | Backlog | Optional channels beyond Resend email |
 | RANK-1 | Ranking tuning | Backlog | Bootstrap quality after ~7 days of snapshots; tune `DIGEST_MAX_STARS_BOOTSTRAP`, blocklist |
+| RANK-2 | Soft-dedup diversity (Skills) | **Queued** | Experiment [EXP-20260715-soft-dedup-diversity-skills](../data/experiments/EXP-20260715-soft-dedup-diversity-skills.json) registered as `draft`. **Blocked on** [EXP-20260701-landing-layout](../data/experiments/EXP-20260701-landing-layout.json) completing (~2026-08-23). Then: run baseline → tighten `DIGEST_SOFT_DEDUP_BRIEFINGS=14` / `DIGEST_SOFT_DEDUP_PENALTY=0.15` on Skills only → import snapshots → verdict. Done when verdict + keep/revert recorded |
 | UX-1 | Brief page repo cards + TOC | Backlog | Richer brief pages on GitHub Pages |
 | OPS-1 | Alert on digest/email failure | **Partial** | Verify workflow + `DIGEST_ALERT_TO` shipped; direct GHA failure alert + non-blocking email still open |
 | QA-1 | Manual `/qa_checklist` pass | **Done** | `.ai/context/qa_checklist_daily-digest-reliability.md`; production spot-check 2026-06-27 |

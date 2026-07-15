@@ -35,7 +35,7 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
-## Registered experiments (as of 2026-07-02)
+## Registered experiments (as of 2026-07-15)
 
 ### EXP-20260628-web-enrich-skills (Skills digest enrichment)
 
@@ -71,6 +71,33 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 - `SITE_LANDING_LAYOUT_V2=1` — reflow homepage index pages (OSS + Skills)
 
 **Primary metric:** PostHog event `homepage_index_click` (props: `edition`, `cta`, `target_path`).
+
+---
+
+### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity)
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | 2026-08-24 → 2026-09-06 |
+| Treatment | 2026-09-07 → 2026-09-20 |
+
+**Queued behind** landing-layout — do not start baseline until redesign experiment is complete (~2026-08-23). Also requires web-enrich-skills to be complete (Skills pipeline should not run two treatments at once).
+
+**Hypothesis:** Stronger soft-dedup (longer memory of recent picks + harsher score penalty) opens more list slots for less-repeated repos without abandoning 7-day momentum ranking.
+
+**Treatment flags (Skills digest step in `digest.yml` only):**
+
+- `DIGEST_SOFT_DEDUP_BRIEFINGS=14` (default `5`)
+- `DIGEST_SOFT_DEDUP_PENALTY=0.15` (default `0.5`; lower = harsher on repeats)
+
+Leave OSS digest soft-dedup at defaults during this canary.
+
+**Primary metrics:**
+
+1. Structural (from `digest.json`): consecutive-day overlap, unique repos / week, share of `is_new` in top 10
+2. Engagement: PostHog `outbound_repo_click` where `edition = skills`
+
+**Backlog:** [RANK-2](./PRODUCT_BACKLOG.md)
 
 ---
 
