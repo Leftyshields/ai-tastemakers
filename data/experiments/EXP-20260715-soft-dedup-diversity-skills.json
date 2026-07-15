@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260715-soft-dedup-diversity-skills",
+  "hypothesis": "Stronger soft-dedup (14-day window, 0.15 penalty) reduces consecutive-day list overlap and raises weekly unique / NEW share on Skills digests, while still ranking by 7-day momentum so the list stays about discovery of real activity.",
+  "change_summary": "Tighten soft-dedup for Skills digests only: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 (defaults today: 5 and 0.5).",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-08-24",
+    "end": "2026-09-06"
+  },
+  "treatment_window": {
+    "start": "2026-09-07",
+    "end": "2026-09-20"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_SOFT_DEDUP_BRIEFINGS": "14",
+      "DIGEST_SOFT_DEDUP_PENALTY": "0.15"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Queued behind EXP-20260701-landing-layout — do not start baseline until landing-layout treatment ends (~2026-08-23) and verdict is recorded. Also waits until EXP-20260628-web-enrich-skills is complete so Skills pipeline has only one treatment at a time. Backlog: RANK-2. METRIC PRIORITY (low traffic): (1) PRIMARY — structural diversity from digest.json: mean consecutive-day overlap, unique repos / 7 days, share of is_new in top 10. Decide keep/revert mainly on these. Success bar (suggested): overlap down ≥15pp vs baseline. (2) SECONDARY — PostHog outbound_repo_click (edition=skills) and pageviews. Keep collecting for future signal; do not treat sparse clicks as a pass/fail gate while engagement is low. Note click/CTR trends in the verdict for later. If primary diversity under-delivers, plan Experiment B (discovery-slot quota) separately. Treatment: set DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on the Skills digest step in digest.yml; leave OSS at defaults. Import snapshots via npm run experiment -- snapshot after each window."
+}

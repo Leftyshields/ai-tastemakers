@@ -27,6 +27,18 @@ function metricsHints(record: ExperimentRecord): MetricsHints {
       eventFilter: "edition = skills",
     };
   }
+  if (
+    flags.DIGEST_SOFT_DEDUP_PENALTY ||
+    flags.DIGEST_SOFT_DEDUP_BRIEFINGS ||
+    record.id.includes("soft-dedup") ||
+    record.id.includes("diversity")
+  ) {
+    return {
+      pageviews: "Skills briefing pages (/briefings/skills/YYYY-MM-DD.html)",
+      event: "outbound_repo_click",
+      eventFilter: "edition = skills",
+    };
+  }
   if (flags.SITE_LANDING_LAYOUT_V2 || record.id.includes("landing")) {
     return {
       pageviews: "Homepage index pages (/index.html and /skills/index.html)",
@@ -169,6 +181,28 @@ export function buildMilestoneInstructions(
         lines.push(
           "4. Run Actions → Deploy GitHub Pages (or push a change that triggers pages.yml).",
           "5. Verify live homepage layout on OSS and Skills index URLs.",
+        );
+      } else if (
+        flags.some(
+          ([f]) => f === "DIGEST_SOFT_DEDUP_BRIEFINGS" || f === "DIGEST_SOFT_DEDUP_PENALTY",
+        ) ||
+        record.id.includes("soft-dedup")
+      ) {
+        lines.push(
+          "3. Edit .github/workflows/digest.yml — apply soft-dedup env to the Skills digest only",
+          "   (split OSS vs Skills into separate steps if they currently share one env block):",
+        );
+        for (const [flag, value] of flags) {
+          if (!flag.startsWith("SITE_")) {
+            lines.push(`   ${flag}: "${value}"`);
+          }
+        }
+        lines.push(
+          "   Leave OSS digest on defaults (BRIEFINGS=5, PENALTY=0.5).",
+          "4. git add .github/workflows/digest.yml data/experiments/",
+          `5. git commit -m "chore: start treatment for ${record.id}"`,
+          "6. git push origin main",
+          "7. Confirm next Skills digest uses the new soft-dedup values; OSS stays default.",
         );
       } else {
         lines.push(
