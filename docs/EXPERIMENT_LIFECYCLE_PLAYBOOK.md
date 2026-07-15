@@ -92,10 +92,15 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 Leave OSS digest soft-dedup at defaults during this canary.
 
-**Primary metrics:**
+**Primary metrics (decide keep/revert on these):**
 
-1. Structural (from `digest.json`): consecutive-day overlap, unique repos / week, share of `is_new` in top 10
-2. Engagement: PostHog `outbound_repo_click` where `edition = skills`
+1. Structural diversity from `digest.json`: consecutive-day overlap, unique repos / week, share of `is_new` in top 10
+2. Suggested success bar: consecutive-day overlap down ≥15pp vs baseline
+
+**Secondary metrics (collect, do not gate):**
+
+- PostHog `outbound_repo_click` where `edition = skills`, plus Skills briefing pageviews
+- Site traffic is still low — expect sparse click counts; record trends for later growth, but do not fail the experiment solely on CTR
 
 **Backlog:** [RANK-2](./PRODUCT_BACKLOG.md)
 
