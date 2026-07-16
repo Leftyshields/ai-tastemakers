@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-07-12T16:03:55.193Z",
+  "generated_at": "2026-07-16T01:43:10.424Z",
   "scan_sources": [
     "briefings/2026-06-07/digest.json",
     "briefings/2026-06-08/digest.json",
@@ -38,6 +38,9 @@
     "briefings/2026-07-10/digest.json",
     "briefings/2026-07-11/digest.json",
     "briefings/2026-07-12/digest.json",
+    "briefings/2026-07-13/digest.json",
+    "briefings/2026-07-14/digest.json",
+    "briefings/2026-07-15/digest.json",
     "briefings/monthly/2026-06/monthly_review.json",
     "briefings/skills/2026-06-07/digest.json",
     "briefings/skills/2026-06-08/digest.json",
@@ -75,6 +78,9 @@
     "briefings/skills/2026-07-10/digest.json",
     "briefings/skills/2026-07-11/digest.json",
     "briefings/skills/2026-07-12/digest.json",
+    "briefings/skills/2026-07-13/digest.json",
+    "briefings/skills/2026-07-14/digest.json",
+    "briefings/skills/2026-07-15/digest.json",
     "briefings/weekly/2026-W24/weekly_review.json",
     "briefings/weekly/2026-W25/weekly_review.json",
     "briefings/weekly/2026-W27/weekly_review.json",
@@ -114,9 +120,9 @@
         "editorial-quality",
         "multi-source-search"
       ],
-      "appearance_count": 69,
+      "appearance_count": 71,
       "first_seen": "2026-06-07",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "DietrichGebert/ponytail",
@@ -139,9 +145,9 @@
       "pipeline_roles": [
         "editorial-quality"
       ],
-      "appearance_count": 62,
+      "appearance_count": 68,
       "first_seen": "2026-06-13",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "NousResearch/hermes-agent",
@@ -173,9 +179,9 @@
         "cross-run-memory",
         "token-optimization"
       ],
-      "appearance_count": 49,
+      "appearance_count": 51,
       "first_seen": "2026-06-14",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "DeusData/codebase-memory-mcp",
@@ -212,9 +218,9 @@
         "cross-run-memory",
         "editorial-quality"
       ],
-      "appearance_count": 47,
+      "appearance_count": 48,
       "first_seen": "2026-06-12",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "Leonxlnx/taste-skill",
@@ -240,9 +246,9 @@
       "pipeline_roles": [
         "editorial-quality"
       ],
-      "appearance_count": 43,
+      "appearance_count": 47,
       "first_seen": "2026-06-07",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "calesthio/OpenMontage",
@@ -270,9 +276,9 @@
       ],
       "capability_tags": [],
       "pipeline_roles": [],
-      "appearance_count": 32,
+      "appearance_count": 34,
       "first_seen": "2026-06-24",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "JuliusBrussee/caveman",
@@ -342,6 +348,41 @@
       "last_seen": "2026-06-21"
     },
     {
+      "full_name": "asgeirtj/system_prompts_leaks",
+      "html_url": "https://github.com/asgeirtj/system_prompts_leaks",
+      "topics": [
+        "ai",
+        "ai-agents",
+        "anthropic",
+        "awesome",
+        "chatbot",
+        "chatgpt",
+        "claude",
+        "claude-code",
+        "codex",
+        "deep-learning",
+        "education",
+        "gemini",
+        "generative-ai",
+        "google",
+        "llm",
+        "machine-learning",
+        "nlp",
+        "open-source",
+        "openai",
+        "prompt-engineering"
+      ],
+      "capability_tags": [
+        "eval"
+      ],
+      "pipeline_roles": [
+        "experiment-framework"
+      ],
+      "appearance_count": 25,
+      "first_seen": "2026-06-22",
+      "last_seen": "2026-07-15"
+    },
+    {
       "full_name": "farion1231/cc-switch",
       "html_url": "https://github.com/farion1231/cc-switch",
       "topics": [
@@ -374,9 +415,9 @@
         "agent-tooling",
         "editorial-quality"
       ],
-      "appearance_count": 24,
+      "appearance_count": 25,
       "first_seen": "2026-06-14",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "mvanhorn/last30days-skill",
@@ -414,9 +455,9 @@
         "multi-source-search",
         "usage-measurement"
       ],
-      "appearance_count": 20,
+      "appearance_count": 22,
       "first_seen": "2026-06-07",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "xbtlin/ai-berkshire",
@@ -456,39 +497,26 @@
       "last_seen": "2026-07-12"
     },
     {
-      "full_name": "asgeirtj/system_prompts_leaks",
-      "html_url": "https://github.com/asgeirtj/system_prompts_leaks",
+      "full_name": "addyosmani/agent-skills",
+      "html_url": "https://github.com/addyosmani/agent-skills",
       "topics": [
-        "ai",
-        "ai-agents",
-        "anthropic",
-        "awesome",
-        "chatbot",
-        "chatgpt",
-        "claude",
+        "agent-skills",
+        "antigravity",
+        "antigravity-ide",
         "claude-code",
         "codex",
-        "deep-learning",
-        "education",
-        "gemini",
-        "generative-ai",
-        "google",
-        "llm",
-        "machine-learning",
-        "nlp",
-        "open-source",
-        "openai",
-        "prompt-engineering"
+        "cursor",
+        "skills"
       ],
       "capability_tags": [
-        "eval"
+        "agent-skill"
       ],
       "pipeline_roles": [
-        "experiment-framework"
+        "editorial-quality"
       ],
       "appearance_count": 19,
-      "first_seen": "2026-06-22",
-      "last_seen": "2026-07-12"
+      "first_seen": "2026-06-15",
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "elder-plinius/CL4R1T4S",
@@ -590,26 +618,31 @@
       "last_seen": "2026-06-28"
     },
     {
-      "full_name": "addyosmani/agent-skills",
-      "html_url": "https://github.com/addyosmani/agent-skills",
+      "full_name": "affaan-m/ECC",
+      "html_url": "https://github.com/affaan-m/ECC",
       "topics": [
-        "agent-skills",
-        "antigravity",
-        "antigravity-ide",
+        "ai-agents",
+        "anthropic",
+        "claude",
         "claude-code",
-        "codex",
-        "cursor",
-        "skills"
+        "developer-tools",
+        "llm",
+        "mcp",
+        "productivity"
       ],
       "capability_tags": [
-        "agent-skill"
+        "agent-skill",
+        "mcp",
+        "memory"
       ],
       "pipeline_roles": [
+        "agent-tooling",
+        "cross-run-memory",
         "editorial-quality"
       ],
       "appearance_count": 16,
-      "first_seen": "2026-06-15",
-      "last_seen": "2026-07-12"
+      "first_seen": "2026-06-14",
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "tw93/Pake",
@@ -636,31 +669,81 @@
       "last_seen": "2026-06-27"
     },
     {
-      "full_name": "affaan-m/ECC",
-      "html_url": "https://github.com/affaan-m/ECC",
+      "full_name": "diegosouzapw/OmniRoute",
+      "html_url": "https://github.com/diegosouzapw/OmniRoute",
       "topics": [
+        "a2a",
         "ai-agents",
+        "ai-gateway",
         "anthropic",
         "claude",
         "claude-code",
-        "developer-tools",
-        "llm",
+        "cline",
+        "codex",
+        "copilot",
+        "cursor",
+        "deepseek",
+        "free-ai",
+        "gemini",
+        "gemini-cli",
+        "llm-gateway",
         "mcp",
-        "productivity"
+        "openai",
+        "openai-proxy",
+        "qwen",
+        "token-saver"
       ],
       "capability_tags": [
         "agent-skill",
-        "mcp",
-        "memory"
+        "compression",
+        "mcp"
       ],
       "pipeline_roles": [
         "agent-tooling",
-        "cross-run-memory",
-        "editorial-quality"
+        "compaction",
+        "editorial-quality",
+        "token-optimization"
+      ],
+      "appearance_count": 15,
+      "first_seen": "2026-07-01",
+      "last_seen": "2026-07-15"
+    },
+    {
+      "full_name": "firecrawl/firecrawl",
+      "html_url": "https://github.com/firecrawl/firecrawl",
+      "topics": [
+        "ai",
+        "ai-agents",
+        "ai-crawler",
+        "ai-scraping",
+        "ai-search",
+        "crawler",
+        "data-extraction",
+        "html-to-markdown",
+        "llm",
+        "markdown",
+        "scraper",
+        "scraping",
+        "web-crawler",
+        "web-data",
+        "web-data-extraction",
+        "web-scraper",
+        "web-scraping",
+        "web-search",
+        "webscraping"
+      ],
+      "capability_tags": [
+        "search"
+      ],
+      "pipeline_roles": [
+        "context-enrichment",
+        "multi-source-search"
       ],
       "appearance_count": 15,
       "first_seen": "2026-06-14",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15",
+      "recommendation": "try",
+      "notes": "ENRICH-2 / EXP-20260716-firecrawl-enrich-skills: candidate to replace Jina Reader for post-rank web context on Skills digests. Primary success = shadow rubric quality; clicks secondary."
     },
     {
       "full_name": "Egonex-AI/Understand-Anything",
@@ -697,39 +780,22 @@
       "last_seen": "2026-07-12"
     },
     {
-      "full_name": "firecrawl/firecrawl",
-      "html_url": "https://github.com/firecrawl/firecrawl",
+      "full_name": "ZhuLinsen/daily_stock_analysis",
+      "html_url": "https://github.com/ZhuLinsen/daily_stock_analysis",
       "topics": [
-        "ai",
-        "ai-agents",
-        "ai-crawler",
-        "ai-scraping",
-        "ai-search",
-        "crawler",
-        "data-extraction",
-        "html-to-markdown",
+        "a-stock",
+        "ai-agent",
+        "aigc",
         "llm",
-        "markdown",
-        "scraper",
-        "scraping",
-        "web-crawler",
-        "web-data",
-        "web-data-extraction",
-        "web-scraper",
-        "web-scraping",
-        "web-search",
-        "webscraping"
+        "quant",
+        "quantitative-finance",
+        "quantitative-trading"
       ],
-      "capability_tags": [
-        "search"
-      ],
-      "pipeline_roles": [
-        "context-enrichment",
-        "multi-source-search"
-      ],
+      "capability_tags": [],
+      "pipeline_roles": [],
       "appearance_count": 12,
-      "first_seen": "2026-06-14",
-      "last_seen": "2026-07-12"
+      "first_seen": "2026-06-11",
+      "last_seen": "2026-07-13"
     },
     {
       "full_name": "JCodesMore/ai-website-cloner-template",
@@ -801,64 +867,6 @@
       "last_seen": "2026-07-05"
     },
     {
-      "full_name": "ZhuLinsen/daily_stock_analysis",
-      "html_url": "https://github.com/ZhuLinsen/daily_stock_analysis",
-      "topics": [
-        "a-stock",
-        "ai-agent",
-        "aigc",
-        "llm",
-        "quant",
-        "quantitative-finance",
-        "quantitative-trading"
-      ],
-      "capability_tags": [],
-      "pipeline_roles": [],
-      "appearance_count": 11,
-      "first_seen": "2026-06-11",
-      "last_seen": "2026-07-07"
-    },
-    {
-      "full_name": "diegosouzapw/OmniRoute",
-      "html_url": "https://github.com/diegosouzapw/OmniRoute",
-      "topics": [
-        "a2a",
-        "ai-agents",
-        "ai-gateway",
-        "anthropic",
-        "claude",
-        "claude-code",
-        "cline",
-        "codex",
-        "copilot",
-        "cursor",
-        "deepseek",
-        "free-ai",
-        "gemini",
-        "gemini-cli",
-        "llm-gateway",
-        "mcp",
-        "openai",
-        "openai-proxy",
-        "qwen",
-        "token-saver"
-      ],
-      "capability_tags": [
-        "agent-skill",
-        "compression",
-        "mcp"
-      ],
-      "pipeline_roles": [
-        "agent-tooling",
-        "compaction",
-        "editorial-quality",
-        "token-optimization"
-      ],
-      "appearance_count": 10,
-      "first_seen": "2026-07-01",
-      "last_seen": "2026-07-12"
-    },
-    {
       "full_name": "santifer/career-ops",
       "html_url": "https://github.com/santifer/career-ops",
       "topics": [
@@ -911,6 +919,53 @@
       "appearance_count": 9,
       "first_seen": "2026-06-07",
       "last_seen": "2026-06-21"
+    },
+    {
+      "full_name": "iOfficeAI/OfficeCLI",
+      "html_url": "https://github.com/iOfficeAI/OfficeCLI",
+      "topics": [
+        "agent",
+        "ai",
+        "claude-code",
+        "cli",
+        "codex",
+        "docx",
+        "excel",
+        "office",
+        "openclaw",
+        "pptx",
+        "presentation",
+        "skills",
+        "word",
+        "xlsx"
+      ],
+      "capability_tags": [
+        "agent-skill"
+      ],
+      "pipeline_roles": [
+        "editorial-quality"
+      ],
+      "appearance_count": 9,
+      "first_seen": "2026-07-08",
+      "last_seen": "2026-07-15"
+    },
+    {
+      "full_name": "microsoft/markitdown",
+      "html_url": "https://github.com/microsoft/markitdown",
+      "topics": [
+        "autogen",
+        "autogen-extension",
+        "langchain",
+        "markdown",
+        "microsoft-office",
+        "openai",
+        "pdf"
+      ],
+      "capability_tags": [],
+      "pipeline_roles": [],
+      "appearance_count": 9,
+      "first_seen": "2026-06-14",
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "ogulcancelik/herdr",
@@ -970,24 +1025,6 @@
       "appearance_count": 9,
       "first_seen": "2026-06-08",
       "last_seen": "2026-06-14"
-    },
-    {
-      "full_name": "microsoft/markitdown",
-      "html_url": "https://github.com/microsoft/markitdown",
-      "topics": [
-        "autogen",
-        "autogen-extension",
-        "langchain",
-        "markdown",
-        "microsoft-office",
-        "openai",
-        "pdf"
-      ],
-      "capability_tags": [],
-      "pipeline_roles": [],
-      "appearance_count": 8,
-      "first_seen": "2026-06-14",
-      "last_seen": "2026-06-30"
     },
     {
       "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
@@ -1103,23 +1140,20 @@
       "last_seen": "2026-06-14"
     },
     {
-      "full_name": "iOfficeAI/OfficeCLI",
-      "html_url": "https://github.com/iOfficeAI/OfficeCLI",
+      "full_name": "Graphify-Labs/graphify",
+      "html_url": "https://github.com/Graphify-Labs/graphify",
       "topics": [
-        "agent",
-        "ai",
+        "antigravity",
         "claude-code",
-        "cli",
         "codex",
-        "docx",
-        "excel",
-        "office",
+        "gemini",
+        "graphrag",
+        "knowledge-graph",
+        "leiden",
         "openclaw",
-        "pptx",
-        "presentation",
+        "rag",
         "skills",
-        "word",
-        "xlsx"
+        "tree-sitter"
       ],
       "capability_tags": [
         "agent-skill"
@@ -1129,7 +1163,7 @@
       ],
       "appearance_count": 6,
       "first_seen": "2026-07-08",
-      "last_seen": "2026-07-12"
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "rohitg00/agentmemory",
@@ -1162,6 +1196,39 @@
       "appearance_count": 6,
       "first_seen": "2026-06-07",
       "last_seen": "2026-06-14"
+    },
+    {
+      "full_name": "stablyai/orca",
+      "html_url": "https://github.com/stablyai/orca",
+      "topics": [
+        "ade",
+        "agent-ide",
+        "ai-agents",
+        "claude-code",
+        "cli",
+        "codex",
+        "cursor-agent",
+        "devtools",
+        "ghostty",
+        "ide",
+        "mobile-app",
+        "opencode",
+        "orchestration",
+        "parallel-agents",
+        "pi",
+        "terminal",
+        "worktrees",
+        "yc-backed"
+      ],
+      "capability_tags": [
+        "agent-skill"
+      ],
+      "pipeline_roles": [
+        "editorial-quality"
+      ],
+      "appearance_count": 6,
+      "first_seen": "2026-06-28",
+      "last_seen": "2026-07-15"
     },
     {
       "full_name": "hugohe3/ppt-master",
@@ -1326,6 +1393,33 @@
       "last_seen": "2026-07-05"
     },
     {
+      "full_name": "HKUDS/Vibe-Trading",
+      "html_url": "https://github.com/HKUDS/Vibe-Trading",
+      "topics": [
+        "ai-agent",
+        "algorithmic-trading",
+        "backtesting",
+        "fintech",
+        "llm",
+        "mcp",
+        "multi-agent",
+        "python",
+        "quantitative-finance",
+        "trading"
+      ],
+      "capability_tags": [
+        "analytics",
+        "mcp"
+      ],
+      "pipeline_roles": [
+        "agent-tooling",
+        "usage-measurement"
+      ],
+      "appearance_count": 4,
+      "first_seen": "2026-07-01",
+      "last_seen": "2026-07-15"
+    },
+    {
       "full_name": "open-gsd/gsd-core",
       "html_url": "https://github.com/open-gsd/gsd-core",
       "topics": [
@@ -1403,32 +1497,6 @@
       "appearance_count": 3,
       "first_seen": "2026-06-08",
       "last_seen": "2026-06-14"
-    },
-    {
-      "full_name": "Graphify-Labs/graphify",
-      "html_url": "https://github.com/Graphify-Labs/graphify",
-      "topics": [
-        "antigravity",
-        "claude-code",
-        "codex",
-        "gemini",
-        "graphrag",
-        "knowledge-graph",
-        "leiden",
-        "openclaw",
-        "rag",
-        "skills",
-        "tree-sitter"
-      ],
-      "capability_tags": [
-        "agent-skill"
-      ],
-      "pipeline_roles": [
-        "editorial-quality"
-      ],
-      "appearance_count": 3,
-      "first_seen": "2026-07-08",
-      "last_seen": "2026-07-12"
     },
     {
       "full_name": "Imbad0202/academic-research-skills-codex",
@@ -1548,37 +1616,35 @@
       "last_seen": "2026-06-19"
     },
     {
-      "full_name": "stablyai/orca",
-      "html_url": "https://github.com/stablyai/orca",
+      "full_name": "ruvnet/RuView",
+      "html_url": "https://github.com/ruvnet/RuView",
       "topics": [
-        "ade",
-        "agent-ide",
-        "ai-agents",
-        "claude-code",
-        "cli",
-        "codex",
-        "cursor-agent",
-        "devtools",
-        "ghostty",
-        "ide",
-        "mobile-app",
-        "opencode",
-        "orchestration",
-        "parallel-agents",
-        "pi",
-        "terminal",
-        "worktrees",
-        "yc-backed"
+        "awesome",
+        "claude",
+        "densepose",
+        "esp32",
+        "firmware",
+        "home-assistant",
+        "home-automation",
+        "iot",
+        "monitoring",
+        "networking",
+        "npm",
+        "pose-estimation",
+        "react",
+        "rf",
+        "self-learning",
+        "skills",
+        "spatial-intelligence",
+        "typescript",
+        "wifi",
+        "wifi-security"
       ],
-      "capability_tags": [
-        "agent-skill"
-      ],
-      "pipeline_roles": [
-        "editorial-quality"
-      ],
+      "capability_tags": [],
+      "pipeline_roles": [],
       "appearance_count": 3,
-      "first_seen": "2026-06-28",
-      "last_seen": "2026-07-10"
+      "first_seen": "2026-06-08",
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "alibaba/page-agent",
@@ -1692,60 +1758,43 @@
       "last_seen": "2026-06-13"
     },
     {
-      "full_name": "HKUDS/Vibe-Trading",
-      "html_url": "https://github.com/HKUDS/Vibe-Trading",
+      "full_name": "coreyhaines31/marketingskills",
+      "html_url": "https://github.com/coreyhaines31/marketingskills",
       "topics": [
-        "ai-agent",
-        "algorithmic-trading",
-        "backtesting",
-        "fintech",
-        "llm",
-        "mcp",
-        "multi-agent",
-        "python",
-        "quantitative-finance",
-        "trading"
+        "claude",
+        "codex",
+        "marketing"
       ],
       "capability_tags": [
-        "mcp"
+        "agent-skill"
       ],
       "pipeline_roles": [
-        "agent-tooling"
+        "editorial-quality"
       ],
       "appearance_count": 2,
-      "first_seen": "2026-07-01",
-      "last_seen": "2026-07-07"
+      "first_seen": "2026-07-15",
+      "last_seen": "2026-07-15"
     },
     {
-      "full_name": "ruvnet/RuView",
-      "html_url": "https://github.com/ruvnet/RuView",
+      "full_name": "router-for-me/CLIProxyAPI",
+      "html_url": "https://github.com/router-for-me/CLIProxyAPI",
       "topics": [
-        "awesome",
-        "claude",
-        "densepose",
-        "esp32",
-        "firmware",
-        "home-assistant",
-        "home-automation",
-        "iot",
-        "monitoring",
-        "networking",
-        "npm",
-        "pose-estimation",
-        "react",
-        "rf",
-        "self-learning",
-        "skills",
-        "spatial-intelligence",
-        "typescript",
-        "wifi",
-        "wifi-security"
+        "antigravity",
+        "claude-code",
+        "cluade",
+        "codex",
+        "gemini",
+        "openai"
       ],
-      "capability_tags": [],
-      "pipeline_roles": [],
+      "capability_tags": [
+        "agent-skill"
+      ],
+      "pipeline_roles": [
+        "editorial-quality"
+      ],
       "appearance_count": 2,
-      "first_seen": "2026-06-08",
-      "last_seen": "2026-07-08"
+      "first_seen": "2026-07-14",
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "shanraisshan/claude-code-best-practice",
@@ -2322,6 +2371,33 @@
       "last_seen": "2026-06-11"
     },
     {
+      "full_name": "MadsLorentzen/ai-job-search",
+      "html_url": "https://github.com/MadsLorentzen/ai-job-search",
+      "topics": [
+        "ai",
+        "ai-agents",
+        "career",
+        "claude-code",
+        "cover-letter",
+        "cv",
+        "interview-preparation",
+        "job-application",
+        "job-hunting",
+        "job-search",
+        "latex",
+        "resume"
+      ],
+      "capability_tags": [
+        "agent-skill"
+      ],
+      "pipeline_roles": [
+        "editorial-quality"
+      ],
+      "appearance_count": 1,
+      "first_seen": "2026-07-15",
+      "last_seen": "2026-07-15"
+    },
+    {
       "full_name": "manaflow-ai/cmux",
       "html_url": "https://github.com/manaflow-ai/cmux",
       "topics": [
@@ -2652,6 +2728,35 @@
       "last_seen": "2026-06-07"
     },
     {
+      "full_name": "TencentCloud/TencentDB-Agent-Memory",
+      "html_url": "https://github.com/TencentCloud/TencentDB-Agent-Memory",
+      "topics": [
+        "agent",
+        "ai-agent",
+        "embedding",
+        "llm",
+        "local-first",
+        "long-term-memory",
+        "memory",
+        "openclaw-plugin",
+        "vector-search"
+      ],
+      "capability_tags": [
+        "compression",
+        "eval",
+        "memory"
+      ],
+      "pipeline_roles": [
+        "compaction",
+        "cross-run-memory",
+        "experiment-framework",
+        "token-optimization"
+      ],
+      "appearance_count": 1,
+      "first_seen": "2026-07-13",
+      "last_seen": "2026-07-13"
+    },
+    {
       "full_name": "VoltAgent/awesome-agent-skills",
       "html_url": "https://github.com/VoltAgent/awesome-agent-skills",
       "topics": [
@@ -2679,6 +2784,35 @@
       "appearance_count": 1,
       "first_seen": "2026-06-07",
       "last_seen": "2026-06-07"
+    },
+    {
+      "full_name": "vxcontrol/pentagi",
+      "html_url": "https://github.com/vxcontrol/pentagi",
+      "topics": [
+        "ai-agents",
+        "ai-security-tool",
+        "anthropic",
+        "autonomous-agents",
+        "golang",
+        "gpt",
+        "graphql",
+        "multi-agent-system",
+        "offensive-security",
+        "open-source",
+        "openai",
+        "penetration-testing",
+        "penetration-testing-tools",
+        "react",
+        "security-automation",
+        "security-testing",
+        "security-tools",
+        "self-hosted"
+      ],
+      "capability_tags": [],
+      "pipeline_roles": [],
+      "appearance_count": 1,
+      "first_seen": "2026-07-14",
+      "last_seen": "2026-07-14"
     },
     {
       "full_name": "wanshuiyin/Auto-claude-code-research-in-sleep",
@@ -2774,6 +2908,32 @@
       "appearance_count": 1,
       "first_seen": "2026-06-09",
       "last_seen": "2026-06-09"
+    },
+    {
+      "full_name": "wonderwhy-er/DesktopCommanderMCP",
+      "html_url": "https://github.com/wonderwhy-er/DesktopCommanderMCP",
+      "topics": [
+        "agent",
+        "ai",
+        "code-analysis",
+        "code-generation",
+        "gemini-cli-extension",
+        "mcp",
+        "terminal-ai",
+        "terminal-automation",
+        "vibe-coding"
+      ],
+      "capability_tags": [
+        "mcp",
+        "memory"
+      ],
+      "pipeline_roles": [
+        "agent-tooling",
+        "cross-run-memory"
+      ],
+      "appearance_count": 1,
+      "first_seen": "2026-07-15",
+      "last_seen": "2026-07-15"
     }
   ]
 }
