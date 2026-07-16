@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260716-firecrawl-enrich-skills",
+  "hypothesis": "Replacing Jina Reader with Firecrawl for post-rank web context improves Skills brief quality (shadow rubric: specificity, accuracy, timely hooks) while keeping HN enrichment and 7-day momentum ranking unchanged.",
+  "change_summary": "Keep DIGEST_ENRICH_WEB=1 on Skills; swap web fetch provider from Jina Reader (default) to Firecrawl via DIGEST_ENRICH_WEB_PROVIDER=firecrawl (requires FIRECRAWL_API_KEY).",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-07-27",
+    "end": "2026-08-09"
+  },
+  "treatment_window": {
+    "start": "2026-08-10",
+    "end": "2026-08-23"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_ENRICH_WEB": "1",
+      "DIGEST_ENRICH_WEB_PROVIDER": "firecrawl",
+      "DIGEST_ENRICH_SHADOW": "0"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Catalog pick: firecrawl/firecrawl (Lab tool inventory — context-enrichment / multi-source-search). Queued behind EXP-20260628-web-enrich-skills — do not start until that experiment completes (~2026-07-26) with enrich kept on (DIGEST_ENRICH_WEB=1). Runs in parallel with EXP-20260701-landing-layout (site-only; different surface). Soft-dedup (EXP-20260715) waits until this completes. Backlog: ENRICH-2. Implementation not shipped yet — add Firecrawl adapter behind DIGEST_ENRICH_WEB_PROVIDER before treatment. Baseline = current Jina Reader web fetch + HN. Treatment = Firecrawl web fetch + HN. METRIC PRIORITY (low traffic): (1) PRIMARY — shadow rubric scores (control Jina vs treatment Firecrawl) and qualitative brief quality; structural check that enrichment still attaches. (2) SECONDARY — PostHog outbound_repo_click / pageviews; collect but do not gate. Pre-treatment: local shadow run with provider=firecrawl and DIGEST_ENRICH_SHADOW=1; score with briefings/lab/shadow-rubric.md. Secrets: FIRECRAWL_API_KEY in GHA. Import snapshots via npm run experiment -- snapshot after each window."
+}

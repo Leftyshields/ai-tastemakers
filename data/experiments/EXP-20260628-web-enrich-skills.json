@@ -47,5 +47,5 @@
   ],
   "verdict": "",
   "keep_change": null,
-  "notes": "PostHog baseline started 2026-06-28. Enrich module (Milestone E) shipped 2026-06-28 — re-run shadow with DIGEST_ENRICH_WEB=1 for side-by-side diffs; score with briefings/lab/shadow-rubric.md. Import snapshots via npm run experiment -- snapshot after baseline (2026-07-11) and treatment windows."
+  "notes": "PostHog baseline started 2026-06-28. Enrich module (Milestone E) shipped 2026-06-28 — re-run shadow with DIGEST_ENRICH_WEB=1 for side-by-side diffs; score with briefings/lab/shadow-rubric.md. Import snapshots via npm run experiment -- snapshot after baseline (2026-07-11) and treatment windows. After verdict: if keeping enrich, next digest enrich experiment is EXP-20260716-firecrawl-enrich-skills (ENRICH-2; baseline 2026-07-27) — leave DIGEST_ENRICH_WEB=1 so Firecrawl can A/B the web provider against Jina."
 }

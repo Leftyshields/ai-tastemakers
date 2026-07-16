@@ -39,6 +39,17 @@ function metricsHints(record: ExperimentRecord): MetricsHints {
       eventFilter: "edition = skills",
     };
   }
+  if (
+    flags.DIGEST_ENRICH_WEB_PROVIDER ||
+    flags.DIGEST_ENRICH_FIRECRAWL ||
+    record.id.includes("firecrawl")
+  ) {
+    return {
+      pageviews: "Skills briefing pages (/briefings/skills/YYYY-MM-DD.html)",
+      event: "outbound_repo_click",
+      eventFilter: "edition = skills",
+    };
+  }
   if (flags.SITE_LANDING_LAYOUT_V2 || record.id.includes("landing")) {
     return {
       pageviews: "Homepage index pages (/index.html and /skills/index.html)",
@@ -149,6 +160,15 @@ export function buildMilestoneInstructions(
           "Local shadow run (does not change production):",
           `EXPERIMENT_ID=${record.id} DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_SHADOW=1 npm run digest -- --edition skills`,
           "Score output with briefings/lab/shadow-rubric.md before enabling treatment tomorrow.",
+        );
+      }
+      if (record.id.includes("firecrawl")) {
+        lines.push(
+          "",
+          "OPTIONAL BEFORE TREATMENT (firecrawl quality check)",
+          "Requires Firecrawl adapter + FIRECRAWL_API_KEY. Local shadow (does not change production):",
+          `EXPERIMENT_ID=${record.id} DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_WEB_PROVIDER=firecrawl DIGEST_ENRICH_SHADOW=1 npm run digest -- --edition skills`,
+          "Score Jina vs Firecrawl with briefings/lab/shadow-rubric.md before enabling treatment tomorrow.",
         );
       }
       if (isValidWindow(tw)) {
