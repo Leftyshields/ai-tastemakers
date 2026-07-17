@@ -278,8 +278,15 @@ export async function runPipeline(
     const sendEmail = deps.sendEmail ?? sendDigestEmail;
     const recipients = await resolveDigestRecipients(config);
     console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
-    const sent = await sendEmail(config, digest, dateLabel, recipients);
-    console.error(`Email sent (id: ${sent.id})`);
+    try {
+      const sent = await sendEmail(config, digest, dateLabel, recipients);
+      console.error(`Email sent (id: ${sent.id})`);
+    } catch (err) {
+      console.warn(
+        "Warning: digest email failed; briefing was still written:",
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 
   return { briefingDir, markdownPath, jsonPath, digest };
