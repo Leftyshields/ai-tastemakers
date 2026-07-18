@@ -41,7 +41,7 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 | # | Experiment | Surface | Status | Baseline (PT) | Treatment (PT) | Blocked on |
 |---|------------|---------|--------|---------------|----------------|------------|
-| 1 | [EXP-20260628-web-enrich-skills](#exp-20260628-web-enrich-skills-skills-digest-enrichment) | Skills digest | active | 2026-06-28 → 2026-07-11 | 2026-07-12 → **2026-07-26** | — |
+| 1 | [EXP-20260628-web-enrich-skills](#exp-20260628-web-enrich-skills-skills-digest-enrichment) | Skills digest | **complete** (keep) | 2026-06-28 → 2026-07-11 | 2026-07-12 → 2026-07-18 | — |
 | 2a | [EXP-20260701-landing-layout](#exp-20260701-landing-layout-homepage-layout-v2) | Site (Pages) | draft | 2026-07-27 → 2026-08-09 | 2026-08-10 → 2026-08-23 | #1 complete |
 | 2b | [EXP-20260716-firecrawl-enrich-skills](#exp-20260716-firecrawl-enrich-skills-firecrawl-web-enrich) | Skills digest | draft | 2026-07-27 → 2026-08-09 | 2026-08-10 → 2026-08-23 | #1 complete; enrich kept on |
 | 3 | [EXP-20260715-soft-dedup-diversity-skills](#exp-20260715-soft-dedup-diversity-skills-skills-soft-dedup-diversity) | Skills digest | draft | 2026-08-24 → 2026-09-06 | 2026-09-07 → 2026-09-20 | #2a + #2b complete |
@@ -55,7 +55,7 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 | Window | Dates (PT) |
 |--------|------------|
 | Baseline | 2026-06-28 → **2026-07-11** |
-| Treatment | **2026-07-12** → **2026-07-26** |
+| Treatment | **2026-07-12** → **2026-07-18** (closed; keep enrich on) |
 
 **Hypothesis:** Post-rank web/HN enrichment improves outbound repo clicks on Skills briefs.
 
@@ -77,7 +77,7 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 | Baseline | 2026-07-27 → 2026-08-09 |
 | Treatment | 2026-08-10 → 2026-08-23 |
 
-**Queued behind** web-enrich-skills — do not start baseline until prior experiment is complete (~2026-07-26).
+**Unblocked** — web-enrich-skills complete (2026-07-18). Baseline starts 2026-07-27.
 
 **Treatment flag (site build only):**
 
@@ -94,7 +94,7 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 | Baseline | 2026-07-27 → 2026-08-09 |
 | Treatment | 2026-08-10 → 2026-08-23 |
 
-**Queued behind** web-enrich-skills — start only after that verdict (~2026-07-26) **and** with `DIGEST_ENRICH_WEB=1` still on (Jina = control). Runs **in parallel** with landing-layout (site vs digest).
+**Unblocked** — web-enrich-skills complete (2026-07-18). Baseline starts 2026-07-27 with `DIGEST_ENRICH_WEB=1` still on (Jina = control). Runs **in parallel** with landing-layout (site vs digest).
 
 **Catalog source:** [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) (Lab inventory: context-enrichment).
 

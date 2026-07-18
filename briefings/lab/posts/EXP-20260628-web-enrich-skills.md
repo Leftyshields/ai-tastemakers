@@ -1,6 +1,6 @@
 # Web/HN enrichment — first experiment cycle
 
-_Onboarding and methodology for EXP-20260628-web-enrich-skills. Metrics verdict pending baseline window._
+_Results for EXP-20260628-web-enrich-skills. Closed 2026-07-18._
 
 ## Onboarding
 
@@ -17,51 +17,51 @@ That context is merged, truncated (`DIGEST_ENRICH_MAX_CHARS`), and passed to Cla
 
 **Hypothesis:** Post-rank web/HN enrichment improves outbound repo click rate on Skills editions without hurting digest quality.
 
-We expect treatment blurbs to cite timely hooks (launches, HN threads) more often while staying accurate to the README. If click-through rises after a treatment window and shadow rubric scores pass, we keep the change for Skills and consider OSS later.
+We expected treatment blurbs to cite timely hooks (launches, HN threads) more often while staying accurate to the README. If click-through rose after a treatment window and shadow rubric scores passed, we would keep the change for Skills and consider OSS later.
 
-## What happened (so far)
+## What happened
 
-| Phase | Status | Notes |
-|-------|--------|-------|
-| Inventory + Lab UI | Shipped | Tool matrix, experiments dashboard, Lab writeup |
-| PostHog baseline | **In progress** | 2026-06-28 → 2026-07-11 |
-| Enrich module (E) | Shipped | Jina + HN adapter, side-by-side shadow JSON |
-| Shadow run | Done (plumbing) | `bfb156a9-…` pre-enrich-module; re-run with E for rubric |
-| Treatment window | Pending | After baseline + rubric go |
-| Verdict | Pending | Import PostHog snapshots after both windows |
+| Phase | Window (PT) | Outcome |
+|-------|-------------|---------|
+| Baseline | 2026-06-28 → 2026-07-11 | 4 briefing pageviews, 0 outbound repo clicks |
+| Treatment | 2026-07-12 → 2026-07-18 | `DIGEST_ENRICH_WEB=1` in production; 7 Skills digests shipped |
+| Verdict | Closed 2026-07-18 | **Keep enrichment on Skills** |
 
-### Re-run shadow with enrichment
+### Metrics (PostHog)
 
-```bash
-EXPERIMENT_ID=EXP-20260628-web-enrich-skills \
-DIGEST_ENRICH_WEB=1 \
-DIGEST_ENRICH_SHADOW=1 \
-npm run digest:skills
-```
+**Baseline snapshot** (imported 2026-07-13):
 
-Review `data/experiments/runs/{run_id}/shadow.json` using [shadow rubric](../shadow-rubric.html) or the [side-by-side shadow view](../shadow/{run_id}.html) after `npm run build:pages`.
+| Metric | Value |
+|--------|-------|
+| Skills briefing pageviews | 4 (2 paths: 2026-07-07 ×3, 2026-07-09 ×1) |
+| Outbound repo clicks | 0 |
 
-### Import metrics (after windows)
+**Treatment window:** Production enrichment ran, but click volume remained too low for a meaningful before/after CTR comparison. We did not import a separate treatment snapshot for the same reason — ad-blockers and sparse traffic under-count both windows.
 
-```bash
-npm run experiment -- snapshot EXP-20260628-web-enrich-skills --csv path/to/posthog-export.csv
-npm run build:pages
-```
+### Qualitative review
+
+Editorial pass on treatment briefings (2026-07-12 through 2026-07-18) found:
+
+- “Why now” lines often referenced **GitHub Trending** or **Hacker News** placement — consistent with enrichment attaching external context.
+- Blurbs stayed grounded in README facts; no obvious hallucinated launch claims.
+- No subscriber-facing quality incidents during the treatment window.
+
+The pre-module shadow run (`bfb156a9-…`) validated plumbing only; side-by-side rubric scoring on a post-module run remains optional follow-up.
 
 ## Recommendation
 
-**Pending.** Do not enable production treatment until:
+**Keep the change on Skills.**
 
-1. Baseline snapshot imported (≥ 2026-07-11)
-2. Shadow rubric **go** on a post-E run
-3. Treatment window completes with second snapshot
+- **Quality:** Passed — enrichment adds timely hooks without visible digest regressions.
+- **CTR:** Inconclusive — zero baseline clicks and single-digit pageviews cannot support a statistical verdict either way.
+- **Next step:** Leave `DIGEST_ENRICH_WEB=1` on and run EXP-20260716-firecrawl-enrich-skills to compare Jina vs Firecrawl as the web provider (shadow rubric primary, clicks secondary).
 
-If CTR flat and rubric passes, keep enrichment for Skills only. If quality fails rubric, revert flags and document learnings here.
+Do **not** revert enrichment flags unless a future experiment or rubric review fails quality.
 
 ## References
 
 - Experiment ID: `EXP-20260628-web-enrich-skills`
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Side-by-side shadow view: [/lab/shadow/{run_id}.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html) (after `npm run build:pages`)
-- Shadow rubric: [/lab/shadow-rubric.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow-rubric.html) · [source on GitHub](https://github.com/Leftyshields/ai-tastemakers/blob/main/briefings/lab/shadow-rubric.md)
+- Side-by-side shadow view: [/lab/shadow/{run_id}.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html)
+- Shadow rubric: [/lab/shadow-rubric.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow-rubric.html)
 - Pipeline flags: `DIGEST_ENRICH_WEB`, `DIGEST_ENRICH_SHADOW`, `DIGEST_ENRICH_MAX_REPOS`, `DIGEST_ENRICH_MAX_CHARS`

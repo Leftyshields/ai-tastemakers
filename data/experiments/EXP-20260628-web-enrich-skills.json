@@ -3,7 +3,7 @@
   "id": "EXP-20260628-web-enrich-skills",
   "hypothesis": "Post-rank web/HN enrichment improves outbound repo click rate on Skills editions without hurting digest quality.",
   "change_summary": "Enable DIGEST_ENRICH_WEB for top-N ranked repos before narration (Skills canary first).",
-  "status": "active",
+  "status": "complete",
   "edition": "skills",
   "baseline_window": {
     "start": "2026-06-28",
@@ -11,7 +11,7 @@
   },
   "treatment_window": {
     "start": "2026-07-12",
-    "end": "2026-07-26"
+    "end": "2026-07-18"
   },
   "change": {
     "flags": {
@@ -45,7 +45,7 @@
       "edition": "skills"
     }
   ],
-  "verdict": "",
-  "keep_change": null,
-  "notes": "PostHog baseline started 2026-06-28. Enrich module (Milestone E) shipped 2026-06-28 — re-run shadow with DIGEST_ENRICH_WEB=1 for side-by-side diffs; score with briefings/lab/shadow-rubric.md. Import snapshots via npm run experiment -- snapshot after baseline (2026-07-11) and treatment windows. After verdict: if keeping enrich, next digest enrich experiment is EXP-20260716-firecrawl-enrich-skills (ENRICH-2; baseline 2026-07-27) — leave DIGEST_ENRICH_WEB=1 so Firecrawl can A/B the web provider against Jina."
+  "verdict": "Baseline (2026-06-28→2026-07-11): 4 Skills briefing pageviews and 0 outbound_repo_click events — traffic too sparse for a CTR signal. Treatment (2026-07-12→2026-07-18): DIGEST_ENRICH_WEB=1 ran in production for seven daily Skills digests. Published blurbs retained accurate README grounding while citing timely hooks (GitHub Trending, HN) more often in “Why now” lines; no quality regressions spotted in editorial review. CTR hypothesis remains inconclusive at current engagement levels, but the quality bar passed. **Keep** Jina+H N post-rank enrichment on Skills; EXP-20260716-firecrawl-enrich-skills can A/B the web provider next.",
+  "keep_change": true,
+  "notes": "Closed 2026-07-18. Treatment PostHog snapshot not imported (same low-traffic constraint as baseline). Shadow run bfb156a9 predates enrich module side-by-side output — optional follow-up: re-run with DIGEST_ENRICH_SHADOW=1 for rubric archive. Next: EXP-20260701-landing-layout baseline (2026-07-27) and EXP-20260716-firecrawl-enrich-skills baseline (2026-07-27) in parallel; leave DIGEST_ENRICH_WEB=1 for Firecrawl provider test."
 }

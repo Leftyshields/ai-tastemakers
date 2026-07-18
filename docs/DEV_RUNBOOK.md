@@ -184,7 +184,7 @@ Manual run: Actions → **Experiment Reminders** → Run workflow (optional `dat
 |-----------|------------|-----------|
 | 2026-07-11 | EXP-20260628-web-enrich-skills | Baseline ends → import snapshot |
 | 2026-07-12 | EXP-20260628-web-enrich-skills | Treatment starts → enable enrich flags in GHA |
-| 2026-07-26 | EXP-20260628-web-enrich-skills | Treatment ends → snapshot + verdict |
+| 2026-07-18 | EXP-20260628-web-enrich-skills | Closed — verdict recorded; enrich kept on |
 | 2026-07-27 | EXP-20260701-landing-layout | Baseline starts (queued; draft) |
 | 2026-07-27 | EXP-20260716-firecrawl-enrich-skills | Baseline starts (queued behind web-enrich; parallel with landing; draft) |
 | 2026-08-10 | EXP-20260701-landing-layout | Treatment starts → `SITE_LANDING_LAYOUT_V2=1` at build |
