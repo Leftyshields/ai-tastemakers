@@ -1,6 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { AppConfig } from "../types.js";
 import {
+  filterDeliverableEmails,
+  isDeliverableEmail,
   mergeRecipientEmails,
   isValidEmail,
   normalizeEmail,
@@ -80,15 +82,46 @@ describe("normalizeEmail", () => {
   });
 });
 
+describe("isDeliverableEmail", () => {
+  it("accepts real domains", () => {
+    expect(isDeliverableEmail("you@epiphoric.com")).toBe(true);
+  });
+
+  it("rejects RFC 2606 placeholder domains", () => {
+    expect(isDeliverableEmail("you@example.com")).toBe(false);
+    expect(isDeliverableEmail("you@example.org")).toBe(false);
+  });
+});
+
+describe("filterDeliverableEmails", () => {
+  it("drops placeholder domains and keeps real addresses", () => {
+    expect(
+      filterDeliverableEmails(["real@epiphoric.com", "bad@example.com", "also@example.net"]),
+    ).toEqual(["real@epiphoric.com"]);
+  });
+});
+
 describe("resolveDigestRecipients", () => {
   it("uses Firestore only when Firebase Admin is configured", async () => {
     vi.mocked(isFirebaseAdminConfigured).mockReturnValue(true);
-    vi.mocked(readFirestoreSubscribers).mockResolvedValue(["sub@example.com"]);
+    vi.mocked(readFirestoreSubscribers).mockResolvedValue(["sub@epiphoric.com"]);
 
     const recipients = await resolveDigestRecipients(baseConfig);
 
-    expect(recipients).toEqual(["sub@example.com"]);
+    expect(recipients).toEqual(["sub@epiphoric.com"]);
     expect(readFirestoreSubscribers).toHaveBeenCalledWith(baseConfig);
+  });
+
+  it("filters non-deliverable Firestore subscribers", async () => {
+    vi.mocked(isFirebaseAdminConfigured).mockReturnValue(true);
+    vi.mocked(readFirestoreSubscribers).mockResolvedValue([
+      "good@epiphoric.com",
+      "test@example.com",
+    ]);
+
+    const recipients = await resolveDigestRecipients(baseConfig);
+
+    expect(recipients).toEqual(["good@epiphoric.com"]);
   });
 
   it("skips subscribers.json when Firebase Admin is configured", async () => {

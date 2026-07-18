@@ -82,9 +82,12 @@ jobs:
 
       - name: Alert on failure
         if: |
+          always() &&
           steps.check.outcome == 'failure' &&
-          (steps.digest_retrigger.outcome != 'success' || steps.digest_retrigger.outputs.recovered != 'true') &&
-          (steps.pages_redeploy.outcome != 'success' || steps.pages_redeploy.outputs.recovered != 'true')
+          (
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
+          )
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -98,7 +101,10 @@ jobs:
 
       - name: Fail job if verification failed
         if: |
+          always() &&
           steps.check.outcome == 'failure' &&
-          (steps.digest_retrigger.outcome != 'success' || steps.digest_retrigger.outputs.recovered != 'true') &&
-          (steps.pages_redeploy.outcome != 'success' || steps.pages_redeploy.outputs.recovered != 'true')
+          (
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
+          )
         run: exit 1

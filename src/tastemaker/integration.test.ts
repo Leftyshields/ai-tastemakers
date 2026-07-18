@@ -107,6 +107,36 @@ describe("runPipeline integration", () => {
     expect(snapshots).toContain("acme/one");
   });
 
+  it("still writes briefing when digest email fails", async () => {
+    config.resendApiKey = "re_test";
+    config.digestEmailFrom = "Digest <digest@epiphoric.com>";
+    await fs.mkdir(path.join(tmpDir, "data"), { recursive: true });
+    await fs.writeFile(
+      path.join(tmpDir, "data/subscribers.json"),
+      JSON.stringify(["you@epiphoric.com"]),
+    );
+
+    const result = await runPipeline(config, {
+      now: new Date("2026-06-06T14:00:00.000Z"),
+      search: vi.fn().mockResolvedValue({
+        candidates: mockCandidates,
+        succeededTopics: config.topics,
+        failedTopics: [],
+      }),
+      enrich: vi.fn(async (_c, candidates) => candidates),
+      narrate: vi.fn().mockResolvedValue(
+        new Map([
+          ["acme/one", structuredBrief],
+          ["acme/two", structuredBrief],
+        ]),
+      ),
+      sendEmail: vi.fn().mockRejectedValue(new Error("Resend API error: invalid bcc")),
+    });
+
+    await expect(fs.access(result.markdownPath)).resolves.toBeUndefined();
+    await expect(fs.access(result.jsonPath)).resolves.toBeUndefined();
+  });
+
   it("keeps discovery star counts in digest when enrich returns different values", async () => {
     const fixedNow = new Date("2026-06-06T14:00:00.000Z");
 

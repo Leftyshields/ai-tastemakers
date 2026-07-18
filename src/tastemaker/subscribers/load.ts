@@ -16,6 +16,39 @@ export function isValidEmail(email: string): boolean {
   return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
 }
 
+/** Domains Resend rejects (RFC 2606 placeholders and common test hosts). */
+const NON_DELIVERABLE_DOMAINS = new Set([
+  "example.com",
+  "example.org",
+  "example.net",
+  "test.com",
+  "localhost",
+]);
+
+export function emailDomain(email: string): string {
+  const at = email.lastIndexOf("@");
+  return at >= 0 ? email.slice(at + 1) : "";
+}
+
+export function isDeliverableEmail(email: string): boolean {
+  const normalized = normalizeEmail(email);
+  if (!isValidEmail(normalized)) return false;
+  return !NON_DELIVERABLE_DOMAINS.has(emailDomain(normalized));
+}
+
+export function filterDeliverableEmails(emails: string[]): string[] {
+  const deliverable: string[] = [];
+  for (const email of emails) {
+    const normalized = normalizeEmail(email);
+    if (isDeliverableEmail(normalized)) {
+      deliverable.push(normalized);
+    } else if (normalized) {
+      console.warn(`Skipping non-deliverable digest recipient: ${normalized}`);
+    }
+  }
+  return deliverable;
+}
+
 export function mergeRecipientEmails(...lists: string[][]): string[] {
   const seen = new Set<string>();
   const out: string[] = [];
@@ -58,7 +91,7 @@ export async function resolveDigestRecipients(config: AppConfig): Promise<string
   const fromFile = isFirebaseAdminConfigured(config)
     ? []
     : await readSubscribersFile(config.rootDir);
-  return mergeRecipientEmails(fromFirestore, fromFile);
+  return filterDeliverableEmails(mergeRecipientEmails(fromFirestore, fromFile));
 }
 
 export function subscribersFilePath(rootDir: string): string {
