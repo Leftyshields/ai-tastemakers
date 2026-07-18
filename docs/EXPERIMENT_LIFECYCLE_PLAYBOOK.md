@@ -42,9 +42,9 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 | # | Experiment | Surface | Status | Baseline (PT) | Treatment (PT) | Blocked on |
 |---|------------|---------|--------|---------------|----------------|------------|
 | 1 | [EXP-20260628-web-enrich-skills](#exp-20260628-web-enrich-skills-skills-digest-enrichment) | Skills digest | **complete** (keep) | 2026-06-28 → 2026-07-11 | 2026-07-12 → 2026-07-18 | — |
-| 2a | [EXP-20260701-landing-layout](#exp-20260701-landing-layout-homepage-layout-v2) | Site (Pages) | draft | 2026-07-27 → 2026-08-09 | 2026-08-10 → 2026-08-23 | #1 complete |
-| 2b | [EXP-20260716-firecrawl-enrich-skills](#exp-20260716-firecrawl-enrich-skills-firecrawl-web-enrich) | Skills digest | draft | 2026-07-27 → 2026-08-09 | 2026-08-10 → 2026-08-23 | #1 complete; enrich kept on |
-| 3 | [EXP-20260715-soft-dedup-diversity-skills](#exp-20260715-soft-dedup-diversity-skills-skills-soft-dedup-diversity) | Skills digest | draft | 2026-08-24 → 2026-09-06 | 2026-09-07 → 2026-09-20 | #2a + #2b complete |
+| 2a | [EXP-20260701-landing-layout](#exp-20260701-landing-layout-homepage-layout-v2) | Site (Pages) | **baseline** | 2026-07-18 → 2026-07-31 | 2026-08-01 → 2026-08-14 | — |
+| 2b | [EXP-20260716-firecrawl-enrich-skills](#exp-20260716-firecrawl-enrich-skills-firecrawl-web-enrich) | Skills digest | **baseline** | 2026-07-18 → 2026-07-31 | 2026-08-01 → 2026-08-14 | — |
+| 3 | [EXP-20260715-soft-dedup-diversity-skills](#exp-20260715-soft-dedup-diversity-skills-skills-soft-dedup-diversity) | Skills digest | draft | 2026-08-15 → 2026-08-28 | 2026-08-29 → 2026-09-11 | #2a + #2b complete |
 
 **Parallelism:** 2a (site) and 2b (digest enrich) share the same calendar window but different surfaces. Do **not** run two Skills digest treatments at once — soft-dedup waits until firecrawl ends.
 
@@ -74,10 +74,10 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 | Window | Dates (PT) |
 |--------|------------|
-| Baseline | 2026-07-27 → 2026-08-09 |
-| Treatment | 2026-08-10 → 2026-08-23 |
+| Baseline | 2026-07-18 → **2026-07-31** |
+| Treatment | **2026-08-01** → **2026-08-14** |
 
-**Unblocked** — web-enrich-skills complete (2026-07-18). Baseline starts 2026-07-27.
+**Baseline in progress** since 2026-07-18.
 
 **Treatment flag (site build only):**
 
@@ -91,10 +91,10 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 | Window | Dates (PT) |
 |--------|------------|
-| Baseline | 2026-07-27 → 2026-08-09 |
-| Treatment | 2026-08-10 → 2026-08-23 |
+| Baseline | 2026-07-18 → **2026-07-31** |
+| Treatment | **2026-08-01** → **2026-08-14** |
 
-**Unblocked** — web-enrich-skills complete (2026-07-18). Baseline starts 2026-07-27 with `DIGEST_ENRICH_WEB=1` still on (Jina = control). Runs **in parallel** with landing-layout (site vs digest).
+**Baseline in progress** since 2026-07-18. Jina Reader + HN (`DIGEST_ENRICH_WEB=1`) is control.
 
 **Catalog source:** [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) (Lab inventory: context-enrichment).
 
@@ -122,10 +122,10 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 | Window | Dates (PT) |
 |--------|------------|
-| Baseline | 2026-08-24 → 2026-09-06 |
-| Treatment | 2026-09-07 → 2026-09-20 |
+| Baseline | 2026-08-15 → 2026-08-28 |
+| Treatment | 2026-08-29 → 2026-09-11 |
 
-**Queued behind** landing-layout **and** firecrawl-enrich-skills — do not start baseline until both complete (~2026-08-23). Also requires web-enrich-skills to be complete (Skills pipeline should not run two treatments at once).
+**Queued behind** landing-layout **and** firecrawl-enrich-skills — do not start baseline until both complete (~2026-08-14).
 
 **Hypothesis:** Stronger soft-dedup (longer memory of recent picks + harsher score penalty) opens more list slots for less-repeated repos without abandoning 7-day momentum ranking.
 
