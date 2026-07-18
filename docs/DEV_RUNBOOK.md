@@ -194,7 +194,7 @@ Manual run: Actions → **Experiment Reminders** → Run workflow (optional `dat
 | 2026-08-14 | EXP-20260701-landing-layout | Treatment ends → snapshot + verdict |
 | 2026-08-14 | EXP-20260716-firecrawl-enrich-skills | Treatment ends → snapshot + verdict |
 | 2026-08-15 | EXP-20260715-soft-dedup-diversity-skills | Baseline starts (queued behind landing + firecrawl; draft) |
-| 2026-09-07 | EXP-20260715-soft-dedup-diversity-skills | Treatment starts → soft-dedup flags on Skills digest step |
+| 2026-08-29 | EXP-20260715-soft-dedup-diversity-skills | Treatment starts → soft-dedup flags on Skills digest step |
 | 2026-09-11 | EXP-20260715-soft-dedup-diversity-skills | Treatment ends → snapshot + verdict |
 
 **Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).

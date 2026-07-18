@@ -46,8 +46,8 @@
 
 | Item | Notes |
 |------|--------|
-| **Production v2 layout** | Keep flag off until EXP-20260628 completes and baseline window starts (~2026-07-27 – 2026-08-09) |
-| **Treatment deploy** | Set `SITE_LANDING_LAYOUT_V2=1` in Pages build ~2026-08-10 |
+| **Production v2 layout** | Baseline in progress since 2026-07-18; keep flag off through 2026-07-31 |
+| **Treatment deploy** | Set `SITE_LANDING_LAYOUT_V2=1` in Pages build 2026-08-01 |
 | **PostHog baseline snapshots** | After baseline window: `npm run experiment -- snapshot EXP-20260701-landing-layout --csv …` |
 | **`npm run build:digest`** | Pre-existing TS errors in inventory/firestore — unrelated |
 | **Year-strip heat-map** | Follow-up; month tiles sufficient for v1 |
@@ -82,7 +82,7 @@ EOF
 git push origin main
 
 # Production Pages deploy triggers on push when briefings/ or scripts/site/assets change.
-# v2 layout NOT active until SITE_LANDING_LAYOUT_V2=1 at treatment start (~2026-08-10).
+# v2 layout NOT active until SITE_LANDING_LAYOUT_V2=1 at treatment start (2026-08-01).
 ```
 
 ---
@@ -101,7 +101,7 @@ git push origin main
 | Experiment JSON describes reflow hypothesis | Yes |
 | Automated tests pass | Yes |
 | Manual QA (local v2 preview) | Yes — closed 2026-07-02 |
-| Live production v2 treatment | **Deferred** (~2026-08-10) |
+| Live production v2 treatment | **Deferred** (2026-08-01) |
 
 ---
 

@@ -97,7 +97,7 @@ gh secret set EXPERIMENT_REMINDER_TO --repo Leftyshields/ai-tastemakers --body "
 
 - Capture: `.ai/context/last_capture.md` (EPH-20260702-MAIL)
 - Postmortem: `.ai/context/postmortem_EPH-20260702-MAIL.md`
-- Active experiments: `EXP-20260628-web-enrich-skills`, `EXP-20260701-landing-layout`
+- Active experiments: `EXP-20260701-landing-layout` (baseline), `EXP-20260716-firecrawl-enrich-skills` (baseline)
 
 ---
 
@@ -105,9 +105,9 @@ gh secret set EXPERIMENT_REMINDER_TO --repo Leftyshields/ai-tastemakers --body "
 
 | Date (PT) | Milestone |
 |-----------|-----------|
-| 2026-07-12 | web-enrich treatment start |
-| 2026-07-26 | web-enrich treatment end |
-| 2026-07-27 | landing-layout baseline start |
+| 2026-07-31 | landing-layout + firecrawl baseline end |
+| 2026-08-01 | landing-layout + firecrawl treatment start |
+| 2026-08-14 | landing-layout + firecrawl treatment end |
 
 ---
 

@@ -73,11 +73,11 @@ describe("findMilestonesForDate", () => {
       sampleRecord({
         id: "EXP-20260701-landing-layout",
         status: "draft",
-        baseline_window: { start: "2026-07-27", end: "2026-08-09" },
-        treatment_window: { start: "2026-08-10", end: "2026-08-23" },
+        baseline_window: { start: "2026-07-18", end: "2026-07-31" },
+        treatment_window: { start: "2026-08-01", end: "2026-08-14" },
         change: { flags: {} },
       }),
-      "2026-07-27",
+      "2026-07-18",
     );
     expect(matches).toHaveLength(1);
     expect(matches[0].milestoneType).toBe("baseline_start");
@@ -117,25 +117,35 @@ describe("buildChecklist", () => {
 
 describe("renderReminderEmail", () => {
   it("batches two milestones into one subject", () => {
+    const landing = sampleRecord({
+      id: "EXP-20260701-landing-layout",
+      status: "baseline",
+      baseline_window: { start: "2026-07-18", end: "2026-07-31" },
+      treatment_window: { start: "2026-08-01", end: "2026-08-14" },
+      change: { flags: {} },
+    });
+    const firecrawl = sampleRecord({
+      id: "EXP-20260716-firecrawl-enrich-skills",
+      status: "baseline",
+      baseline_window: { start: "2026-07-18", end: "2026-07-31" },
+      treatment_window: { start: "2026-08-01", end: "2026-08-14" },
+      change: {
+        flags: {
+          DIGEST_ENRICH_WEB: "1",
+          DIGEST_ENRICH_WEB_PROVIDER: "firecrawl",
+          DIGEST_ENRICH_SHADOW: "0",
+        },
+      },
+    });
     const matches = [
-      ...findMilestonesForDate(sampleRecord(), "2026-07-11"),
-      ...findMilestonesForDate(
-        sampleRecord({
-          id: "EXP-20260701-landing-layout",
-          status: "draft",
-          baseline_window: { start: "2026-07-11", end: "2026-08-09" },
-          treatment_window: { start: "2026-08-10", end: "2026-08-23" },
-          change: { flags: {} },
-        }),
-        "2026-07-11",
-      ),
+      ...findMilestonesForDate(landing, "2026-07-18"),
+      ...findMilestonesForDate(firecrawl, "2026-07-18"),
     ];
-    const email = renderReminderEmail(matches, "2026-07-11", "https://example.com");
-    expect(email.subject).toBe("Lab reminder — 2 experiment milestones (2026-07-11 PT)");
-    expect(email.text).toContain("EXP-20260628-web-enrich-skills");
+    const email = renderReminderEmail(matches, "2026-07-18", "https://example.com");
+    expect(email.subject).toBe("Lab reminder — 2 experiment milestones (2026-07-18 PT)");
     expect(email.text).toContain("EXP-20260701-landing-layout");
-    expect(email.text).toContain("POSTHOG EXPORT");
-    expect(email.text).toContain("--period-start 2026-06-28");
+    expect(email.text).toContain("EXP-20260716-firecrawl-enrich-skills");
+    expect(email.text).toContain("Baseline window starts");
   });
 
   it("escapes HTML in experiment notes", () => {
