@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W29",
+  "week_start": "2026-07-13",
+  "week_end": "2026-07-19",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 26,
+      "skills": 22
+    },
+    "total_stars_gained": {
+      "oss": 97030,
+      "skills": 103912
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "claude",
+        "llm",
+        "ai-agents",
+        "codex"
+      ],
+      "skills": [
+        "claude-code",
+        "codex",
+        "claude",
+        "ai-agents",
+        "ai"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "firecrawl/firecrawl",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "HKUDS/Vibe-Trading",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "router-for-me/CLIProxyAPI",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "bojieli/ai-agent-book",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "iOfficeAI/OfficeCLI",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "router-for-me/CLIProxyAPI",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DeusData/codebase-memory-mcp",
+      "DietrichGebert/ponytail",
+      "JuliusBrussee/caveman",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "asgeirtj/system_prompts_leaks",
+      "calesthio/OpenMontage",
+      "coreyhaines31/marketingskills",
+      "diegosouzapw/OmniRoute",
+      "farion1231/cc-switch",
+      "mvanhorn/last30days-skill",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "router-for-me/CLIProxyAPI"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 44793,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that enforces YAGNI-style minimalism, steering the agent toward the simplest possible implementation—often a native browser feature or a single line—rather than over-engineered solutions."
+        },
+        {
+          "full_name": "HKUDS/Vibe-Trading",
+          "total_stars_gained": 31245,
+          "days_appeared": 6,
+          "excerpt": "Vibe-Trading is an open-source Python framework that gives LLM agents comprehensive trading capabilities—market analysis, backtesting with a sandboxed execution environment, portfolio management, and brokerage integration—deployable via a single pip install with a FastAPI backend and React frontend."
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 30545,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is a self-hostable TypeScript gateway that exposes a single OpenAI-compatible endpoint routing requests across 250+ AI providers, with 90+ free tiers, automatic fallback, and RTK+Caveman prompt compression that cuts token usage by up to 95%."
+        },
+        {
+          "full_name": "firecrawl/firecrawl",
+          "total_stars_gained": 30220,
+          "days_appeared": 7,
+          "excerpt": "Firecrawl is an API that scrapes, searches, and crawls the web at scale, converting any URL into clean Markdown, structured JSON, or screenshots that LLMs can consume directly without preprocessing."
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "total_stars_gained": 25446,
+          "days_appeared": 6,
+          "excerpt": "Hermes Agent is a self-improving AI agent framework from Nous Research that maintains a persistent learning loop across sessions — creating and refining skills from experience, modeling the user over time, and running across local, cloud, or serverless infrastructure with any LLM backend."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "total_stars_gained": 56549,
+          "days_appeared": 7,
+          "excerpt": "Graphify turns any codebase, schema, documentation, or mixed media folder into a queryable knowledge graph by parsing code deterministically with tree-sitter AST and using LLMs only for semantic passes on unstructured content like PDFs and images. Every graph edge is labeled as either directly extracted or inferred, so you can trust what the graph is telling you."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 44799,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that enforces YAGNI discipline—prompting the agent to reach for the simplest possible solution, like a native `<input type=\"date\">` instead of a full datepicker library, averaging 54% fewer lines of code written."
+        },
+        {
+          "full_name": "iOfficeAI/OfficeCLI",
+          "total_stars_gained": 44695,
+          "days_appeared": 7,
+          "excerpt": "OfficeCLI is a single open-source binary that lets AI agents read, write, and render Word, Excel, and PowerPoint files without any Office installation, exposing a CLI interface with a built-in HTML/PNG rendering engine so agents can visually verify what they produce."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 41756,
+          "days_appeared": 7,
+          "excerpt": "Orca is an open-source ADE (Agent Development Environment) that lets you run Codex, Claude Code, OpenCode, or Pi as parallel agents, each isolated in its own git worktree, managed from a single desktop or mobile interface."
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "total_stars_gained": 28371,
+          "days_appeared": 4,
+          "excerpt": "Agent Skills is a collection of 24 production-grade workflow instructions for AI coding agents, packaged as slash commands (`/spec`, `/plan`, `/build`, `/test`, `/review`, `/ship`) that enforce senior-engineer practices like test-driven development, atomic commits, and five-axis code review across tools like Claude Code, Cursor, and Codex."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "Week 29 was a volume week with teeth. The OSS lane pulled 97K stars across 26 repos while the Skills lane outpaced it with nearly 104K across 22 — meaning skills-per-repo productivity is running hot and the space is consolidating around fewer, denser projects. Fourteen topics appeared in both lane rankings simultaneously, which hasn't happened at this density before. The through-line: builders are less interested in new models and more interested in making agents cheaper, faster, and harder to break.",
+    "oss": "**Ponytail** (44.8K stars, all 7 days) was the week's loudest signal — a JavaScript plugin that does one thing, tells your coding agent to stop over-building, and apparently that's worth nearly half the lane's total star count on its own. Right behind it, **Vibe-Trading** (31.2K, 6 days) showed that vertical-specific agent frameworks are still a reliable star magnet, especially when they ship backtesting sandboxes and brokerage integrations out of the box rather than leaving integration as an exercise for the reader. **OmniRoute** (30.5K, 7 days) and **Firecrawl** (30.2K, 7 days) both held the top of the chart every single day — OmniRoute's 95% token compression claim via RTK+Caveman is the kind of number that earns sustained attention, not a spike. **Hermes Agent** from Nous Research (25.4K, 6 days) is the one to watch for architecture reasons: persistent skill creation across sessions is a different bet than stateless tool-calling, and the community is clearly taking it seriously.",
+    "skills": "**Graphify** led the lane with 56.5K stars across all 7 days, and it deserves the number — the decision to label every graph edge as either deterministically extracted or LLM-inferred is exactly the kind of epistemic honesty that makes a tool usable in production rather than a demo. **OfficeCLI** (44.7K, 7 days) is filling a gap that's obvious in retrospect: agents that need to work with Office documents currently have no clean path, and a single binary with built-in HTML/PNG rendering so the agent can verify its own output is a serious design choice. **Orca** (41.8K, 7 days) is betting on parallel isolated worktrees as the default development model, and with Claude Code, Codex, and OpenCode all supported, it's not a narrow bet. **Addy Osmani's agent-skills** (28.4K in just 4 days) is the week's best efficiency story — 24 slash commands packaged as workflow instructions, and it climbed faster per day than anything else in the lane.",
+    "cross_lane": "Fifteen repos appeared in both lanes this week, and the pattern is not accidental — **Ponytail**, **OmniRoute**, **Hermes Agent**, and **asgeirtj/system_prompts_leaks** all drew sustained attention from both OSS builders and skills practitioners, which means they're being used in two different ways simultaneously: as infrastructure and as reference material. The dominant topic cluster — `claude-code`, `codex`, `claude`, `ai-agents` — was identical across both lanes, confirming that the agent coding runtime wars (Claude Code vs. Codex vs. Cursor) are now the organizing gravity of the entire open-source AI ecosystem, not just one corner of it. The practical upshot for builders: anything that makes those runtimes cheaper to run (**OmniRoute**, **CLIProxyAPI**) or easier to govern (**Ponytail**, **agent-skills**) is getting traction in both lanes at once, which is where the compounding interest lives.",
+    "takeaway": "The week's meta-lesson is that constraint tooling is outperforming capability tooling. Ponytail tells your agent to do less. Graphify labels what it doesn't know. Agent-skills enforces code review discipline. These aren't features — they're guardrails, and the market is starring them at rates that should recalibrate what you build next. If you're shipping something new, ask whether it makes agents more controllable before asking whether it makes them more powerful."
+  },
+  "generated_at": "2026-07-19T14:37:40.469Z"
+}
