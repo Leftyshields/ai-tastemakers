@@ -6,12 +6,12 @@
   "status": "draft",
   "edition": "skills",
   "baseline_window": {
-    "start": "2026-08-24",
-    "end": "2026-09-06"
+    "start": "2026-08-15",
+    "end": "2026-08-28"
   },
   "treatment_window": {
-    "start": "2026-09-07",
-    "end": "2026-09-20"
+    "start": "2026-08-29",
+    "end": "2026-09-11"
   },
   "change": {
     "flags": {
@@ -23,5 +23,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued behind EXP-20260701-landing-layout and EXP-20260716-firecrawl-enrich-skills — do not start baseline until both complete (~2026-08-23). Also requires EXP-20260628-web-enrich-skills complete (Skills digest: one treatment at a time). Backlog: RANK-2. METRIC PRIORITY (low traffic): (1) PRIMARY — structural diversity from digest.json: mean consecutive-day overlap, unique repos / 7 days, share of is_new in top 10. Decide keep/revert mainly on these. Success bar (suggested): overlap down ≥15pp vs baseline. (2) SECONDARY — PostHog outbound_repo_click (edition=skills) and pageviews. Keep collecting for future signal; do not treat sparse clicks as a pass/fail gate while engagement is low. Note click/CTR trends in the verdict for later. If primary diversity under-delivers, plan Experiment B (discovery-slot quota) separately. Treatment: set DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on the Skills digest step in digest.yml; leave OSS at defaults. Import snapshots via npm run experiment -- snapshot after each window."
+  "notes": "Queued behind EXP-20260701-landing-layout and EXP-20260716-firecrawl-enrich-skills — do not start baseline until both complete (~2026-08-14). Also requires EXP-20260628-web-enrich-skills complete (Skills digest: one treatment at a time). Backlog: RANK-2. Baseline planned 2026-08-15. METRIC PRIORITY (low traffic): (1) PRIMARY — structural diversity from digest.json: mean consecutive-day overlap, unique repos / 7 days, share of is_new in top 10. Decide keep/revert mainly on these. Success bar (suggested): overlap down ≥15pp vs baseline. (2) SECONDARY — PostHog outbound_repo_click (edition=skills) and pageviews. Keep collecting for future signal; do not treat sparse clicks as a pass/fail gate while engagement is low. Note click/CTR trends in the verdict for later. If primary diversity under-delivers, plan Experiment B (discovery-slot quota) separately. Treatment: set DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on the Skills digest step in digest.yml; leave OSS at defaults. Import snapshots via npm run experiment -- snapshot after each window."
 }

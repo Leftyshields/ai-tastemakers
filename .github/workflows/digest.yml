@@ -96,7 +96,7 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-          # EXP-20260628-web-enrich-skills treatment (through 2026-07-26)
+          # EXP-20260716-firecrawl-enrich-skills baseline: Jina + HN (through 2026-07-31)
           DIGEST_ENRICH_WEB: "1"
           DIGEST_ENRICH_SHADOW: "0"
         run: |
