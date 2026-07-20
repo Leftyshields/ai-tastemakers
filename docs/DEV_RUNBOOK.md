@@ -185,17 +185,7 @@ Manual run: Actions → **Experiment Reminders** → Run workflow (optional `dat
 | 2026-07-11 | EXP-20260628-web-enrich-skills | Baseline ends → import snapshot |
 | 2026-07-12 | EXP-20260628-web-enrich-skills | Treatment starts → enable enrich flags in GHA |
 | 2026-07-18 | EXP-20260628-web-enrich-skills | Closed — verdict recorded; enrich kept on |
-| 2026-07-18 | EXP-20260701-landing-layout | Baseline starts (SITE_LANDING_LAYOUT_V2 off) |
-| 2026-07-18 | EXP-20260716-firecrawl-enrich-skills | Baseline starts (Jina + HN; parallel with landing) |
-| 2026-07-31 | EXP-20260701-landing-layout | Baseline ends → import snapshot |
-| 2026-07-31 | EXP-20260716-firecrawl-enrich-skills | Baseline ends → import snapshot |
-| 2026-08-01 | EXP-20260701-landing-layout | Treatment starts → `SITE_LANDING_LAYOUT_V2=1` at build |
-| 2026-08-01 | EXP-20260716-firecrawl-enrich-skills | Treatment starts → `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` (ship adapter first) |
-| 2026-08-14 | EXP-20260701-landing-layout | Treatment ends → snapshot + verdict |
-| 2026-08-14 | EXP-20260716-firecrawl-enrich-skills | Treatment ends → snapshot + verdict |
-| 2026-08-15 | EXP-20260715-soft-dedup-diversity-skills | Baseline starts (queued behind landing + firecrawl; draft) |
-| 2026-08-29 | EXP-20260715-soft-dedup-diversity-skills | Treatment starts → soft-dedup flags on Skills digest step |
-| 2026-09-11 | EXP-20260715-soft-dedup-diversity-skills | Treatment ends → snapshot + verdict |
+| 2026-07-20 | EXP-20260701-landing-layout + EXP-20260716-firecrawl-enrich-skills | Shipped to production; archived from Lab queue |
 
 **Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).
 
@@ -229,7 +219,7 @@ Workflow: `.github/workflows/pages.yml` (runs on push to `briefings/` or `script
 
 - **Live:** https://leftyshields.github.io/ai-tastemakers/
 - **Build locally:** `npm run build:pages` then `npx serve site`
-- **Landing layout v2 (experiment):** Preview with `SITE_LANDING_LAYOUT_V2=1 npm run build:pages` — OSS and Skills index pages only. Layout reflows How it works / About, month-tile archive heat-map, and weekly/monthly into the main column; sidebar is promo-only. Leave flag unset in production until EXP-20260701-landing-layout treatment window (2026-08-01). PostHog captures `homepage_index_click` on index CTAs when `POSTHOG_KEY` is set.
+- **Landing layout v2:** Production default (`SITE_LANDING_LAYOUT_V2=1` in Pages build). Preview locally with `SITE_LANDING_LAYOUT_V2=1 npm run build:pages`. PostHog captures `homepage_index_click` on index CTAs when `POSTHOG_KEY` is set.
 - **CSS:** Tailwind compiles `site/assets/input.css` → `site/assets/style.css` (generated, not committed)
 - **Paths:** Use relative asset URLs for project sites (`assets/style.css`, not `/assets/style.css`)
 

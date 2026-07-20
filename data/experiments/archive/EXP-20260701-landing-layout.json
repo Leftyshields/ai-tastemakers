@@ -3,7 +3,7 @@
   "id": "EXP-20260701-landing-layout",
   "hypothesis": "A reflow-first landing layout with a single primary hero CTA, main-column synthesis blocks, compact month-tile archive heat-map, and a promo-only sidebar increases clicks on today's brief and weekly/monthly rollups without reducing subscribe or cross-edition engagement.",
   "change_summary": "Refactor homepage (index) under SITE_LANDING_LAYOUT_V2=1: primary \"Read today's brief\" CTA, secondary hero actions, main column (How it works / About, month-grid Daily Archive, Weekly, Monthly), promo-only sidebar, and WCAG AA footer contrast.",
-  "status": "baseline",
+  "status": "complete",
   "edition": "both",
   "baseline_window": {
     "start": "2026-07-18",
@@ -18,7 +18,7 @@
   },
   "snapshots": [],
   "shadow_runs": [],
-  "verdict": "",
-  "keep_change": null,
-  "notes": "Baseline started 2026-07-18 (9 days early vs original 2026-07-27 plan). Runs in parallel with EXP-20260716-firecrawl-enrich-skills (site vs digest). Keep SITE_LANDING_LAYOUT_V2 unset/off during baseline; enable repo variable at treatment start (2026-08-01). Next Skills-ranking experiment after this + firecrawl complete: EXP-20260715-soft-dedup-diversity-skills (baseline planned 2026-08-15). Linked capture: EPH-20260701-LAND. PostHog event: homepage_index_click with props { edition, cta, target_path }. Import snapshots via npm run experiment -- snapshot EXP-20260701-landing-layout --csv path/to/posthog-export.csv after each window; rebuild with npm run build:pages."
+  "verdict": "Shipped to production 2026-07-20 without completing the formal experiment window — operator decision to prioritize engagement over sparse baseline/treatment metrics. SITE_LANDING_LAYOUT_V2=1 enabled in Pages build. Reversible via workflow env or repo variable.",
+  "keep_change": true,
+  "notes": "Archived from active experiment queue 2026-07-20. Record kept for Lab history; not listed on /lab/experiments.html. Linked capture: EPH-20260701-LAND."
 }

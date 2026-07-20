@@ -47,5 +47,5 @@
   ],
   "verdict": "Baseline (2026-06-28→2026-07-11): 4 Skills briefing pageviews and 0 outbound_repo_click events — traffic too sparse for a CTR signal. Treatment (2026-07-12→2026-07-18): DIGEST_ENRICH_WEB=1 ran in production for seven daily Skills digests. Published blurbs retained accurate README grounding while citing timely hooks (GitHub Trending, HN) more often in “Why now” lines; no quality regressions spotted in editorial review. CTR hypothesis remains inconclusive at current engagement levels, but the quality bar passed. **Keep** Jina+H N post-rank enrichment on Skills; EXP-20260716-firecrawl-enrich-skills can A/B the web provider next.",
   "keep_change": true,
-  "notes": "Closed 2026-07-18. Treatment PostHog snapshot not imported (same low-traffic constraint as baseline). Shadow run bfb156a9 predates enrich module side-by-side output — optional follow-up: re-run with DIGEST_ENRICH_SHADOW=1 for rubric archive. Next in flight: EXP-20260701-landing-layout + EXP-20260716-firecrawl-enrich-skills baselines started 2026-07-18; leave DIGEST_ENRICH_WEB=1 for Firecrawl provider test."
+  "notes": "Closed 2026-07-18. Landing layout v2 and Firecrawl enrich shipped 2026-07-20 (archived from active queue). Experiment platform paused until engagement grows."
 }
