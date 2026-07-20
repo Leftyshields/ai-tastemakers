@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260716-firecrawl-enrich-skills",
+  "hypothesis": "Replacing Jina Reader with Firecrawl for post-rank web context improves Skills brief quality (shadow rubric: specificity, accuracy, timely hooks) while keeping HN enrichment and 7-day momentum ranking unchanged.",
+  "change_summary": "Keep DIGEST_ENRICH_WEB=1 on Skills; swap web fetch provider from Jina Reader (default) to Firecrawl via DIGEST_ENRICH_WEB_PROVIDER=firecrawl (requires FIRECRAWL_API_KEY).",
+  "status": "complete",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-07-18",
+    "end": "2026-07-31"
+  },
+  "treatment_window": {
+    "start": "2026-08-01",
+    "end": "2026-08-14"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_ENRICH_WEB": "1",
+      "DIGEST_ENRICH_WEB_PROVIDER": "firecrawl",
+      "DIGEST_ENRICH_SHADOW": "0"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "Shipped to production 2026-07-20 without completing the formal experiment window — operator decision to prioritize engagement and brief quality iteration over sparse click metrics. Firecrawl adapter + DIGEST_ENRICH_WEB_PROVIDER=firecrawl enabled in digest.yml. Requires FIRECRAWL_API_KEY in GHA secrets.",
+  "keep_change": true,
+  "notes": "Archived from active experiment queue 2026-07-20. Record kept for Lab history; not listed on /lab/experiments.html. Backlog ENRICH-2 closed as shipped."
+}

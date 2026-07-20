@@ -171,6 +171,8 @@ export async function runPipeline(
     externalBundles = await externalEnrich(top, {
       maxRepos: config.enrichMaxRepos,
       maxChars: config.enrichMaxChars,
+      webProvider: config.enrichWebProvider,
+      firecrawlApiKey: config.firecrawlApiKey,
     });
   }
 

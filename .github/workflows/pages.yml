@@ -50,8 +50,8 @@ jobs:
           FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
           POSTHOG_KEY: ${{ secrets.POSTHOG_KEY }}
           POSTHOG_HOST: ${{ secrets.POSTHOG_HOST }}
-          # Set to "1" at EXP-20260701-landing-layout treatment start (2026-08-01)
-          SITE_LANDING_LAYOUT_V2: ${{ vars.SITE_LANDING_LAYOUT_V2 }}
+          # Landing layout v2 (production default)
+          SITE_LANDING_LAYOUT_V2: "1"
 
       - name: Verify CSS artifact
         run: test -s site/assets/style.css && test "$(wc -c < site/assets/style.css)" -gt 1000

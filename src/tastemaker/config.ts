@@ -31,6 +31,12 @@ function parseEnvBool(name: string, fallback = false): boolean {
   return raw === "1" || raw.toLowerCase() === "true";
 }
 
+function parseWebEnrichProvider(raw?: string): "jina" | "firecrawl" {
+  const value = raw?.trim().toLowerCase() || "jina";
+  if (value === "jina" || value === "firecrawl") return value;
+  throw new Error(`DIGEST_ENRICH_WEB_PROVIDER must be "jina" or "firecrawl" (got "${raw}")`);
+}
+
 function parseEnvFloat(name: string, fallback: string, min: number, max: number): number {
   const raw = process.env[name]?.trim() || fallback;
   const n = parseFloat(raw);
@@ -121,8 +127,10 @@ export function loadConfig(options?: {
     firebaseServiceAccount: parseServiceAccount(process.env.FIREBASE_SERVICE_ACCOUNT),
     enrichWeb: parseEnvBool("DIGEST_ENRICH_WEB"),
     enrichShadow: parseEnvBool("DIGEST_ENRICH_SHADOW"),
+    enrichWebProvider: parseWebEnrichProvider(process.env.DIGEST_ENRICH_WEB_PROVIDER),
     enrichMaxRepos: parseEnvInt("DIGEST_ENRICH_MAX_REPOS", "3"),
     enrichMaxChars: parseEnvInt("DIGEST_ENRICH_MAX_CHARS", "1500"),
+    firecrawlApiKey: process.env.FIRECRAWL_API_KEY?.trim() || undefined,
     experimentId: (() => {
       const id = process.env.EXPERIMENT_ID?.trim();
       if (!id) return undefined;

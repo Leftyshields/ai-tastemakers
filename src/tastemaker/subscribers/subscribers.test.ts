@@ -42,6 +42,7 @@ const baseConfig: AppConfig = {
   editionName: "OSS",
   enrichWeb: false,
   enrichShadow: false,
+  enrichWebProvider: "jina" as const,
   enrichMaxRepos: 3,
   enrichMaxChars: 1500,
 };

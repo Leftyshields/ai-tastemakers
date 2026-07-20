@@ -197,7 +197,9 @@ export interface AppConfig {
   firebaseServiceAccount?: Record<string, unknown>;
   enrichWeb: boolean;
   enrichShadow: boolean;
+  enrichWebProvider: "jina" | "firecrawl";
   enrichMaxRepos: number;
   enrichMaxChars: number;
+  firecrawlApiKey?: string;
   experimentId?: string;
 }

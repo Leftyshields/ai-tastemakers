@@ -35,18 +35,25 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
-## Registered experiments (as of 2026-07-16)
+## Registered experiments (as of 2026-07-20)
 
-### Queue & timelines (operator order)
+### Active Lab queue
 
-| # | Experiment | Surface | Status | Baseline (PT) | Treatment (PT) | Blocked on |
-|---|------------|---------|--------|---------------|----------------|------------|
-| 1 | [EXP-20260628-web-enrich-skills](#exp-20260628-web-enrich-skills-skills-digest-enrichment) | Skills digest | **complete** (keep) | 2026-06-28 → 2026-07-11 | 2026-07-12 → 2026-07-18 | — |
-| 2a | [EXP-20260701-landing-layout](#exp-20260701-landing-layout-homepage-layout-v2) | Site (Pages) | **baseline** | 2026-07-18 → 2026-07-31 | 2026-08-01 → 2026-08-14 | — |
-| 2b | [EXP-20260716-firecrawl-enrich-skills](#exp-20260716-firecrawl-enrich-skills-firecrawl-web-enrich) | Skills digest | **baseline** | 2026-07-18 → 2026-07-31 | 2026-08-01 → 2026-08-14 | — |
-| 3 | [EXP-20260715-soft-dedup-diversity-skills](#exp-20260715-soft-dedup-diversity-skills-skills-soft-dedup-diversity) | Skills digest | draft | 2026-08-15 → 2026-08-28 | 2026-08-29 → 2026-09-11 | #2a + #2b complete |
+Formal experiment windows are **paused** while growing site engagement. The dashboard lists only `data/experiments/EXP-*.json` (not `archive/`).
 
-**Parallelism:** 2a (site) and 2b (digest enrich) share the same calendar window but different surfaces. Do **not** run two Skills digest treatments at once — soft-dedup waits until firecrawl ends.
+| # | Experiment | Surface | Status |
+|---|------------|---------|--------|
+| 1 | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) — on dashboard |
+| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (paused; not scheduled) |
+
+### Shipped outside formal windows (archived)
+
+Moved to `data/experiments/archive/` — not on `/lab/experiments.html`:
+
+| Experiment | Shipped | Production config |
+|------------|---------|-------------------|
+| EXP-20260701-landing-layout | 2026-07-20 | `SITE_LANDING_LAYOUT_V2=1` in `pages.yml` |
+| EXP-20260716-firecrawl-enrich-skills | 2026-07-20 | `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` + `FIRECRAWL_API_KEY` in `digest.yml` |
 
 ---
 
@@ -70,62 +77,21 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
-### EXP-20260701-landing-layout (Homepage layout v2)
+### EXP-20260701-landing-layout (Homepage layout v2) — **shipped 2026-07-20**
 
-| Window | Dates (PT) |
-|--------|------------|
-| Baseline | 2026-07-18 → **2026-07-31** |
-| Treatment | **2026-08-01** → **2026-08-14** |
-
-**Baseline in progress** since 2026-07-18.
-
-**Treatment flag (site build only):**
-
-- `SITE_LANDING_LAYOUT_V2=1` — reflow homepage index pages (OSS + Skills)
-
-**Primary metric:** PostHog event `homepage_index_click` (props: `edition`, `cta`, `target_path`).
+Archived: [data/experiments/archive/EXP-20260701-landing-layout.json](../data/experiments/archive/EXP-20260701-landing-layout.json). Production: `SITE_LANDING_LAYOUT_V2=1` in Pages build.
 
 ---
 
-### EXP-20260716-firecrawl-enrich-skills (Firecrawl web enrich)
+### EXP-20260716-firecrawl-enrich-skills (Firecrawl web enrich) — **shipped 2026-07-20**
 
-| Window | Dates (PT) |
-|--------|------------|
-| Baseline | 2026-07-18 → **2026-07-31** |
-| Treatment | **2026-08-01** → **2026-08-14** |
-
-**Baseline in progress** since 2026-07-18. Jina Reader + HN (`DIGEST_ENRICH_WEB=1`) is control.
-
-**Catalog source:** [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) (Lab inventory: context-enrichment).
-
-**Hypothesis:** Firecrawl yields better web context than Jina Reader → higher brief quality on Skills pages (shadow rubric primary).
-
-**Treatment flags (Skills digest; implement adapter before treatment):**
-
-- `DIGEST_ENRICH_WEB=1` — enrichment stays on
-- `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` — swap Jina → Firecrawl for the web leg (HN unchanged)
-- `DIGEST_ENRICH_SHADOW=0` in production (`=1` for local shadow only)
-- Secret: `FIRECRAWL_API_KEY`
-
-**Primary metrics (decide keep/revert on these):**
-
-1. Shadow rubric: Jina (control) vs Firecrawl (treatment) side-by-side
-2. Qualitative brief quality on published Skills pages during treatment
-
-**Secondary metrics (collect, do not gate):** PostHog `outbound_repo_click` + Skills pageviews (traffic still low).
-
-**Backlog:** [ENRICH-2](./PRODUCT_BACKLOG.md)
+Archived: [data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json](../data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json). Production: `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` on Skills digest; requires `FIRECRAWL_API_KEY`.
 
 ---
 
-### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity)
+### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **draft / paused**
 
-| Window | Dates (PT) |
-|--------|------------|
-| Baseline | 2026-08-15 → 2026-08-28 |
-| Treatment | 2026-08-29 → 2026-09-11 |
-
-**Queued behind** landing-layout **and** firecrawl-enrich-skills — do not start baseline until both complete (~2026-08-14).
+Not scheduled. Re-register when resuming formal experiments.
 
 **Hypothesis:** Stronger soft-dedup (longer memory of recent picks + harsher score penalty) opens more list slots for less-repeated repos without abandoning 7-day momentum ranking.
 

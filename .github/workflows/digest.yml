@@ -96,9 +96,11 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-          # EXP-20260716-firecrawl-enrich-skills baseline: Jina + HN (through 2026-07-31)
+          # Skills post-rank web/HN enrichment (Firecrawl web provider)
           DIGEST_ENRICH_WEB: "1"
+          DIGEST_ENRICH_WEB_PROVIDER: firecrawl
           DIGEST_ENRICH_SHADOW: "0"
+          FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
           npm run digest -- --edition oss
           npm run digest -- --edition skills

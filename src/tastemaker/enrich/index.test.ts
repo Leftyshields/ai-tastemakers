@@ -41,6 +41,36 @@ describe("enrichExternalContext", () => {
     expect(bundle?.sources).toHaveLength(2);
   });
 
+  it("uses Firecrawl when webProvider is firecrawl", async () => {
+    const fetchFn = vi.fn(async (url: string, init?: RequestInit) => {
+      if (url.includes("firecrawl.dev")) {
+        return {
+          ok: true,
+          json: async () => ({ success: true, data: { markdown: "Firecrawl text" } }),
+        };
+      }
+      if (url.includes("hn.algolia.com")) {
+        return {
+          ok: true,
+          json: async () => ({ hits: [] }),
+        };
+      }
+      throw new Error(`unexpected url ${url}`);
+    });
+
+    const bundles = await enrichExternalContext([sampleRepo], {
+      maxRepos: 1,
+      maxChars: 1500,
+      webProvider: "firecrawl",
+      firecrawlApiKey: "fc-test",
+      fetchFn,
+    });
+
+    const bundle = bundles.get("acme/demo");
+    expect(bundle?.combined_text).toContain("Firecrawl text");
+    expect(bundle?.sources[0]?.label).toBe("Web (Firecrawl)");
+  });
+
   it("caps repos at maxRepos", async () => {
     const fetchFn = vi.fn().mockResolvedValue({ ok: true, text: async () => "x" });
     const repos = [

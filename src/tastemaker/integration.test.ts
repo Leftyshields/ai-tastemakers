@@ -60,6 +60,7 @@ describe("runPipeline integration", () => {
       editionName: "AI Tastemakers",
       enrichWeb: false,
       enrichShadow: false,
+      enrichWebProvider: "jina" as const,
       enrichMaxRepos: 3,
       enrichMaxChars: 1500,
     };

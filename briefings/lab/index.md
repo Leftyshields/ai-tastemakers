@@ -30,6 +30,8 @@ Each experiment states a **hypothesis** (what we expect to improve), a **change 
 
 We default to **before/after windows** rather than live A/B tests because the site is static HTML rebuilt daily. That is a deliberate trade-off: slower feedback, but reproducible and easy to audit.
 
+**Active queue (2026-07-20):** Formal experiments are paused while we grow readership. Completed runs stay on the dashboard; shipped-but-not-measured records live under `data/experiments/archive/` in git.
+
 ## Transparency boundaries
 
 Everything in `/lab/` is safe to publish: no API keys, no subscriber data, no unpublished digest drafts. Pipeline source lives on [GitHub](https://github.com/Leftyshields/ai-tastemakers); Lab is the human-readable layer on top.

@@ -10,8 +10,8 @@ Follow-on work for the digest app (`src/tastemaker/`). Ordered loosely by priori
 |----|--------|--------|-----------|
 | DIST-1 | Slack / Substack distribution | Backlog | Optional channels beyond Resend email |
 | RANK-1 | Ranking tuning | Backlog | Bootstrap quality after ~7 days of snapshots; tune `DIGEST_MAX_STARS_BOOTSTRAP`, blocklist |
-| ENRICH-2 | Firecrawl web enrich (Skills) | **Baseline** | Experiment [EXP-20260716-firecrawl-enrich-skills](../data/experiments/EXP-20260716-firecrawl-enrich-skills.json) in baseline since 2026-07-18 (Jina control). Parallel with [EXP-20260701-landing-layout](../data/experiments/EXP-20260701-landing-layout.json). Ship Firecrawl adapter before treatment (~2026-08-01). **Shadow rubric primary**, clicks secondary. Done when verdict + keep/revert recorded |
-| RANK-2 | Soft-dedup diversity (Skills) | **Queued** | Experiment [EXP-20260715-soft-dedup-diversity-skills](../data/experiments/EXP-20260715-soft-dedup-diversity-skills.json) registered as `draft`. **Blocked on** landing-layout + firecrawl completing (~2026-08-14). Baseline planned 2026-08-15. Verdict on **diversity first** (overlap / uniqueness / NEW share); PostHog clicks **secondary**. Done when verdict + keep/revert recorded |
+| ENRICH-2 | Firecrawl web enrich (Skills) | **Shipped** | Firecrawl adapter + `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` in production digest (2026-07-20). Requires `FIRECRAWL_API_KEY` in GHA. Archived record: `data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json` |
+| RANK-2 | Soft-dedup diversity (Skills) | **Paused** | Experiment [EXP-20260715-soft-dedup-diversity-skills](../data/experiments/EXP-20260715-soft-dedup-diversity-skills.json) remains `draft`; formal experiment queue paused until engagement grows |
 | UX-1 | Brief page repo cards + TOC | Backlog | Richer brief pages on GitHub Pages |
 | OPS-1 | Alert on digest/email failure | **Partial** | Verify workflow + `DIGEST_ALERT_TO` shipped; direct GHA failure alert + non-blocking email still open |
 | QA-1 | Manual `/qa_checklist` pass | **Done** | `.ai/context/qa_checklist_daily-digest-reliability.md`; production spot-check 2026-06-27 |
