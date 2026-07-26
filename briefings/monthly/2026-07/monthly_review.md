@@ -1,0 +1,30 @@
+# Tastemakers Monthly — 2026-07
+
+_2026-07-01 – 2026-07-31 · generated 2026-07-26T14:47:10.395Z_
+
+## Month at a glance
+
+- **AI Tastemakers:** +350,033 stars gained (summed across weekly rollups) · top topics: c, l, a, u, d
+- **Skill Tastemakers:** +365,888 stars gained (summed across weekly rollups) · top topics: c, l, a, u, d
+- **Weekly sources:** 2026-W27, 2026-W28, 2026-W29
+
+## Opening
+
+July 2026 was the month the GitHub AI ecosystem stopped asking "what can agents do?" and started asking "how do we make them stop doing so much?" Across three weeks and roughly 715,000 combined stars — 350K in OSS, 366K in Skills — the community voted with unprecedented consistency for constraint primitives, output compression, and persistent memory over raw capability additions. Star velocity tapered week-over-week (149K → 104K → 97K on the OSS side), but that decay tells a maturation story, not a cooling one: the repos that survived all three weeks did so through sustained builder adoption, not viral spikes. The topic fingerprint — `claude-code`, `claude`, `llm`, `mcp`, `ai-agents` — was essentially identical across both lanes every week, which means the agent coding runtime stack is now the organizing gravity of the entire open-source AI ecosystem.
+
+## AI Tastemakers
+
+**Ponytail** was July's defining OSS project, accumulating stars across all three weeks (111K → 55K → 45K) as its "laziest senior dev" philosophy became less a novelty and more a standard reference for anyone frustrated with over-generating agents — it appeared every single day of every tracked week, which is rarer than it sounds. **OpenMontage** and **codebase-memory-mcp** dominated W27 as a pair, establishing that agentic video production is now a systems-design problem and that structural codebase memory is table stakes, not a differentiator. **OmniRoute** entered in W28 and held the top of the OSS chart for two straight weeks, with its 95% token compression claim via stacked prompt techniques earning the kind of sustained attention that separates engineering credibility from marketing copy. The month's quiet late entrant, **Vibe-Trading**, proved that vertical-specific agent frameworks with real backtesting sandboxes and brokerage integration still command serious star counts when they ship complete rather than aspirational.
+
+## Skill Tastemakers
+
+The Skills lane outpaced OSS in both W28 and W29 on a per-repo basis, which is a structural signal: portable markdown instruction files with zero runtime dependency are proving easier to distribute and validate than full frameworks. **Taste-Skill** held the lane for two consecutive weeks as the canonical fix for generic-looking AI-generated UIs, while **Caveman** arrived in W28 to attack the same verbosity problem at the prose layer rather than the code layer — 65% output token reduction, deployable in one install script across 30+ agents. **Graphify** was the month's most technically credible Skills entry, winning W29 outright by labeling every knowledge graph edge as either deterministically extracted or LLM-inferred — that epistemic honesty is what separates a production tool from a demo. **Orca** and **OfficeCLI** both ran the full seven days in W29: parallel isolated git worktrees as a development model and Office document read/write without an Office installation are both gaps that, once filled cleanly, don't need to be filled again.
+
+## Cross-Lane Themes
+
+Three themes compounded across all three weeks. First, **memory and context compression**: codebase-memory-mcp attacks token waste at the graph level, Ponytail at the generation level, OmniRoute at the routing level, and Graphify at the knowledge-labeling level — four different attack surfaces, one underlying problem that the community clearly hasn't declared solved. Second, **agent governance**: Ponytail, Caveman, agent-skills, and the system_prompts_leaks repo all attracted builders who want mechanical, enforceable constraints on agent behavior rather than better prompting habits, and all four crossed both lanes simultaneously, confirming the demand isn't lane-specific. Third, **agent reach and continuity**: Agent-Reach (free access to the social web without OAuth gymnastics) and Hermes Agent (persistent skill graphs across sessions) represent the two halves of a problem that's coming into focus — once you've solved what an agent knows and how it builds, you need to solve what it can see and what it remembers between jobs. The cross-lane overlap stayed high all month (18 → 16 → 15 shared repos), reflecting how blurry the line between "a tool you install" and "a prompt you drop in" has become when the winning artifact is often both simultaneously.
+
+## Builder Takeaway
+
+July's data gives you a clear priority stack: first, give your agent structural memory of the codebase so it stops re-exploring what it already knows; second, constrain its output at the generation layer before it ships verbose, over-engineered code; third, extend its reach to live external data without requiring paid API keys. The Hermes Agent result is the month's longest-horizon signal — a self-improving, session-persistent agent running on commodity infrastructure suggests the next competitive moat isn't the model or even the tool, it's the skill graph the agent has accumulated over time, and that gap is still early enough to build into. If you're deciding what to ship next, the market is starring guardrails faster than features right now: ask whether your project makes agents more controllable before asking whether it makes them more powerful.
+
