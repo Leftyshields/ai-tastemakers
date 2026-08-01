@@ -11,9 +11,12 @@ import { writeExperimentsData } from "./lab/aggregate-experiments.js";
 import {
   articleJsonLd,
   briefMetaDescription,
+  briefOgTitle,
   buildSeoHeadHtml,
+  defaultOgImageUrl,
   type PageSeoOptions,
 } from "./seo-helpers.js";
+import { briefOgImagePath, writeBriefOgPng } from "./generate-brief-og.js";
 import {
   groupDatesByMonth,
   buildMonthCalendarCells,
@@ -1334,6 +1337,7 @@ export async function buildEditionSite(
       : `briefings/${date}.html`;
 
     let description: string | undefined = `${edition.name} daily brief for ${date} — curated AI repo picks with builder-focused summaries.`;
+    let pageTitle = `Daily Brief — ${date} · ${edition.name}`;
     let seo: PageSeoOptions | undefined;
     if (siteBaseUrl) {
       try {
@@ -1342,20 +1346,44 @@ export async function buildEditionSite(
           repos: Array<{ full_name: string; brief?: string | null }>;
         };
         description = briefMetaDescription(edition.name, date, digest.repos);
+        pageTitle = briefOgTitle(edition.name, date, digest.repos);
+        const ogImageRel = briefOgImagePath(edition.siteSegment, date);
+        const ogImageAbs = `${siteBaseUrl.replace(/\/+$/, "")}/${ogImageRel}`;
+        const ogOutPath = path.join(
+          siteRoot,
+          "assets",
+          "og",
+          "briefings",
+          `${date}.png`,
+        );
+        await writeBriefOgPng(ogOutPath, {
+          date,
+          editionName: edition.name,
+          repos: digest.repos.map((r) => r.full_name),
+        });
         seo = {
           siteBaseUrl,
           canonicalPath,
           ogType: "article",
+          ogTitle: pageTitle,
+          ogImageUrl: ogImageAbs,
+          ogImageAlt: `${edition.name} daily brief for ${date}`,
           jsonLd: articleJsonLd(
             siteBaseUrl,
             canonicalPath,
-            `Daily Brief — ${date} · ${edition.name}`,
+            pageTitle,
             description,
             `${date}T08:00:00-07:00`,
+            ogImageAbs,
           ),
         };
       } catch {
-        seo = { siteBaseUrl, canonicalPath, ogType: "article" };
+        seo = {
+          siteBaseUrl,
+          canonicalPath,
+          ogType: "article",
+          ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
+        };
       }
     }
 
@@ -1369,7 +1397,7 @@ export async function buildEditionSite(
       ${briefOutboundTrackingScript(edition.id, date)}`;
     await fs.writeFile(
       path.join(briefOutDir, `${date}.html`),
-      pageShell(`Daily Brief — ${date} · ${edition.name}`, body, paths, brand, description, escapeHtml, {
+      pageShell(pageTitle, body, paths, brand, description, escapeHtml, {
         seo,
       }),
     );
@@ -1405,7 +1433,13 @@ export async function buildEditionSite(
     pageShell(edition.name, indexBody, indexPaths, brand, indexDescription, escapeHtml, {
       wideIndex: useV2,
       seo: siteBaseUrl
-        ? { siteBaseUrl, canonicalPath: indexCanonical, ogType: "website" }
+        ? {
+            siteBaseUrl,
+            canonicalPath: indexCanonical,
+            ogType: "website",
+            ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
+            ogImageAlt: `${edition.name} — daily curated AI repos`,
+          }
         : undefined,
     }),
   );

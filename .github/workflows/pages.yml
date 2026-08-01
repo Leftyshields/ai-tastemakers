@@ -10,6 +10,8 @@ on:
       - "data/experiments/*.json"
       - "scripts/build-pages.ts"
       - "scripts/edition-pages.ts"
+      - "scripts/seo-helpers.ts"
+      - "scripts/generate-brief-og.ts"
       - "scripts/index-layout-helpers.ts"
       - "firebase/**"
       - "site/assets/**"
