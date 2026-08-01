@@ -13,6 +13,7 @@ import {
   verifyPosthogInBuiltSite,
 } from "./edition-pages.js";
 import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
+import { writeDefaultOgPng } from "./generate-brief-og.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
@@ -338,6 +339,7 @@ async function buildUnsubscribePage(): Promise<void> {
 async function main(): Promise<void> {
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(path.join(SITE_DIR, ".nojekyll"), "");
+  await writeDefaultOgPng(path.join(SITE_DIR, "assets", "og-card.png"));
 
   const siteBaseUrl =
     process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";

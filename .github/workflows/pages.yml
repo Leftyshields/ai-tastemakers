@@ -12,6 +12,7 @@ on:
       - "scripts/edition-pages.ts"
       - "scripts/seo-helpers.ts"
       - "scripts/generate-brief-og.ts"
+      - "scripts/og-theme.ts"
       - "scripts/index-layout-helpers.ts"
       - "firebase/**"
       - "site/assets/**"

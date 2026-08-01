@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { briefOgCardSvg, defaultOgCardSvg } from "./generate-brief-og.js";
+import { OG } from "./og-theme.js";
 import { briefMetaDescription, briefOgTitle, extractBriefSection } from "./seo-helpers.js";
-import { briefOgCardSvg } from "./generate-brief-og.js";
 
 describe("brief social metadata", () => {
   it("uses Why now for description hook", () => {
@@ -23,15 +24,24 @@ describe("brief social metadata", () => {
   });
 });
 
-describe("briefOgCardSvg", () => {
-  it("includes edition and repo picks", () => {
+describe("OG card SVG (site dark theme)", () => {
+  it("uses stone-950 shell matching the live site", () => {
     const svg = briefOgCardSvg({
       date: "2026-08-01",
       editionName: "AI Tastemakers",
       repos: ["acme/demo", "other/tool"],
     });
+    expect(svg).toContain(OG.bgOuter);
+    expect(svg).toContain(OG.bgShell);
+    expect(svg).toContain("Georgia");
     expect(svg).toContain("Daily Brief");
     expect(svg).toContain("demo");
+  });
+
+  it("default card includes brand header", () => {
+    const svg = defaultOgCardSvg();
+    expect(svg).toContain("AI Tastemakers");
+    expect(svg).toContain("Curated daily briefings");
   });
 });
 

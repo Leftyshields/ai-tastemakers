@@ -25,9 +25,8 @@ export function absoluteCanonicalUrl(siteBaseUrl: string, canonicalPath: string)
   return `${normalizeBaseUrl(siteBaseUrl)}/${normalizeCanonicalPath(canonicalPath)}`;
 }
 
-export function defaultOgImageUrl(siteBaseUrl: string, siteSegment = ""): string {
-  const prefix = siteSegment ? `${siteSegment}/` : "";
-  return absoluteCanonicalUrl(siteBaseUrl, `${prefix}assets/og-card.png`);
+export function defaultOgImageUrl(siteBaseUrl: string, _siteSegment = ""): string {
+  return absoluteCanonicalUrl(siteBaseUrl, "assets/og-card.png");
 }
 
 function formatBriefDateShort(isoDate: string): string {

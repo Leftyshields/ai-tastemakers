@@ -16,7 +16,7 @@ import {
   defaultOgImageUrl,
   type PageSeoOptions,
 } from "./seo-helpers.js";
-import { briefOgImagePath, writeBriefOgPng } from "./generate-brief-og.js";
+import { briefOgImagePath, EDITION_TAGLINES, writeBriefOgPng } from "./generate-brief-og.js";
 import {
   groupDatesByMonth,
   buildMonthCalendarCells,
@@ -1359,6 +1359,7 @@ export async function buildEditionSite(
         await writeBriefOgPng(ogOutPath, {
           date,
           editionName: edition.name,
+          editionTagline: EDITION_TAGLINES[edition.id],
           repos: digest.repos.map((r) => r.full_name),
         });
         seo = {
