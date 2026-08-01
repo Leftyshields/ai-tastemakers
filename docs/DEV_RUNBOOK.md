@@ -55,10 +55,15 @@ Optional Lab / experiments (EPH-20260628-SRCH):
 - `POSTHOG_KEY` — PostHog project token (`phc_…`); injects analytics at Pages build (Milestone B)
 - `POSTHOG_HOST` — PostHog API host (default `https://us.i.posthog.com`; use `https://eu.i.posthog.com` for EU)
 - `POSTHOG_PROJECT_ID` — optional; for future API export scripts (not needed for site snippet)
-- `DIGEST_ENRICH_WEB` — `1` enables post-rank web/HN fetch (default `0`; Milestone E)
+- `DIGEST_ENRICH_WEB` — `1` enables post-rank web/HN/Reddit fetch on Skills (default `0`)
+- `DIGEST_ENRICH_WEB_PROVIDER` — `jina` or `firecrawl` (production: `firecrawl`)
+- `DIGEST_ENRICH_WEB_DEEP` — `1` scrapes README + `/releases` + `/discussions` via Firecrawl (default `1`)
+- `DIGEST_ENRICH_REDDIT` — `1` adds Reddit recent-post search for "Why now" hooks (default `1` when enrich on)
 - `DIGEST_ENRICH_SHADOW` — `1` writes shadow output under `data/experiments/runs/` instead of `briefings/` (default `0`)
 - `DIGEST_ENRICH_MAX_REPOS` — cap enrichment API calls per run (default `3`)
-- `DIGEST_ENRICH_MAX_CHARS` — snippet budget per source (default `1500`)
+- `DIGEST_ENRICH_MAX_CHARS` — combined snippet budget (default `2400`)
+- `DIGEST_QUALITY_RUBRIC` — `1` scores rank-1 Skills brief after digest → `data/quality/rubric-scores.jsonl`
+- `FIRECRAWL_API_KEY` — required when `DIGEST_ENRICH_WEB_PROVIDER=firecrawl`
 - `EXPERIMENT_ID` — when set with shadow mode, appends run metadata to `data/experiments/{id}.json`
 
 Shadow run (side-by-side control vs treatment blurbs):
@@ -222,6 +227,7 @@ Workflow: `.github/workflows/pages.yml` (runs on push to `briefings/` or `script
 - **Landing layout v2:** Production default (`SITE_LANDING_LAYOUT_V2=1` in Pages build). Preview locally with `SITE_LANDING_LAYOUT_V2=1 npm run build:pages`. PostHog captures `homepage_index_click` on index CTAs when `POSTHOG_KEY` is set.
 - **CSS:** Tailwind compiles `site/assets/input.css` → `site/assets/style.css` (generated, not committed)
 - **Paths:** Use relative asset URLs for project sites (`assets/style.css`, not `/assets/style.css`)
+- **SEO:** `build:pages` emits `sitemap.xml`, `robots.txt`, per-page `<meta description>`, canonical URLs, Open Graph/Twitter tags, and JSON-LD `Article` on daily briefs (uses `DIGEST_SITE_URL`)
 
 ### Deployment verification (MVP checklist)
 

@@ -200,6 +200,10 @@ export interface AppConfig {
   enrichMaxRepos: number;
   enrichMaxChars: number;
   enrichWebProvider: "jina" | "firecrawl";
+  enrichWebDeep: boolean;
+  enrichReddit: boolean;
   firecrawlApiKey?: string;
   experimentId?: string;
+  /** When true, score rank-1 brief after Skills digest and append to quality log. */
+  qualityRubric: boolean;
 }

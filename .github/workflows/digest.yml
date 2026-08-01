@@ -99,7 +99,11 @@ jobs:
           # EXP-20260716-firecrawl-enrich-skills treatment (2026-08-01 → 2026-08-14; Skills only)
           DIGEST_ENRICH_WEB: "1"
           DIGEST_ENRICH_WEB_PROVIDER: "firecrawl"
+          DIGEST_ENRICH_WEB_DEEP: "1"
+          DIGEST_ENRICH_REDDIT: "1"
+          DIGEST_ENRICH_MAX_CHARS: "2400"
           DIGEST_ENRICH_SHADOW: "0"
+          DIGEST_QUALITY_RUBRIC: "1"
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
           npm run digest -- --edition oss
@@ -134,7 +138,7 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add briefings/ data/snapshots/ data/tool-inventory.json
+          git add briefings/ data/snapshots/ data/tool-inventory.json data/quality/
           if git diff --staged --quiet; then
             echo "committed=false" >> "$GITHUB_OUTPUT"
             echo "No briefing or inventory changes to commit"

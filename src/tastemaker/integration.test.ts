@@ -63,6 +63,9 @@ describe("runPipeline integration", () => {
       enrichMaxRepos: 3,
       enrichMaxChars: 1500,
       enrichWebProvider: "jina",
+      enrichWebDeep: true,
+      enrichReddit: true,
+      qualityRubric: false,
     };
   });
 

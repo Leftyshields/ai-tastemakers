@@ -9,6 +9,12 @@ import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
 import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
 import { writeExperimentsData } from "./lab/aggregate-experiments.js";
 import {
+  articleJsonLd,
+  briefMetaDescription,
+  buildSeoHeadHtml,
+  type PageSeoOptions,
+} from "./seo-helpers.js";
+import {
   groupDatesByMonth,
   buildMonthCalendarCells,
   landingLayoutV2Enabled,
@@ -483,12 +489,10 @@ export function pageShell(
   brand: { name: string; tagline: string },
   description?: string,
   escapeHtml: (t: string) => string = (t) => t,
-  options?: { labLayout?: boolean; wideIndex?: boolean },
+  options?: { labLayout?: boolean; wideIndex?: boolean; seo?: PageSeoOptions },
 ): string {
   const safeTitle = escapeHtml(title);
-  const meta = description
-    ? `<meta name="description" content="${escapeHtml(description)}">`
-    : "";
+  const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
   const nav = editionNavHtml(paths.editionNav, escapeHtml);
   const labLayout = options?.labLayout === true;
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
@@ -504,7 +508,7 @@ export function pageShell(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${safeTitle}</title>
-  ${meta}
+  ${headMeta}
   <link rel="stylesheet" href="${paths.css}">
   ${posthogScriptHtml()}
 </head>
@@ -1299,6 +1303,7 @@ export async function buildEditionSite(
   siteDir: string,
   edition: EditionDefinition,
   escapeHtml: (t: string) => string,
+  siteBaseUrl?: string,
 ): Promise<number> {
   const briefingsDir = briefingsDirForEdition(repoRoot, edition);
   const dates = await listBriefingDates(briefingsDir);
@@ -1324,6 +1329,36 @@ export async function buildEditionSite(
     const siblingHref =
       edition.id === "skills" ? paths.editionNav.ossHref : paths.editionNav.skillsHref;
     const siblingLabel = edition.id === "skills" ? "AI Tastemakers" : "Skill Tastemakers";
+    const canonicalPath = edition.siteSegment
+      ? `${edition.siteSegment}/briefings/${date}.html`
+      : `briefings/${date}.html`;
+
+    let description: string | undefined = `${edition.name} daily brief for ${date} — curated AI repo picks with builder-focused summaries.`;
+    let seo: PageSeoOptions | undefined;
+    if (siteBaseUrl) {
+      try {
+        const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
+        const digest = JSON.parse(digestRaw) as {
+          repos: Array<{ full_name: string; brief?: string | null }>;
+        };
+        description = briefMetaDescription(edition.name, date, digest.repos);
+        seo = {
+          siteBaseUrl,
+          canonicalPath,
+          ogType: "article",
+          jsonLd: articleJsonLd(
+            siteBaseUrl,
+            canonicalPath,
+            `Daily Brief — ${date} · ${edition.name}`,
+            description,
+            `${date}T08:00:00-07:00`,
+          ),
+        };
+      } catch {
+        seo = { siteBaseUrl, canonicalPath, ogType: "article" };
+      }
+    }
+
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; All briefings</a>
@@ -1334,7 +1369,9 @@ export async function buildEditionSite(
       ${briefOutboundTrackingScript(edition.id, date)}`;
     await fs.writeFile(
       path.join(briefOutDir, `${date}.html`),
-      pageShell(`Daily Brief — ${date} · ${edition.name}`, body, paths, brand, undefined, escapeHtml),
+      pageShell(`Daily Brief — ${date} · ${edition.name}`, body, paths, brand, description, escapeHtml, {
+        seo,
+      }),
     );
   }
 
@@ -1362,11 +1399,14 @@ export async function buildEditionSite(
     edition.id === "skills"
       ? "Daily top AI agent skills on GitHub — Claude Code plugins and research skills ranked by momentum."
       : "Daily curated briefings on trending AI-derivative open source on GitHub.";
-
+  const indexCanonical = edition.siteSegment ? `${edition.siteSegment}/index.html` : "index.html";
   await fs.writeFile(
     path.join(siteRoot, "index.html"),
     pageShell(edition.name, indexBody, indexPaths, brand, indexDescription, escapeHtml, {
       wideIndex: useV2,
+      seo: siteBaseUrl
+        ? { siteBaseUrl, canonicalPath: indexCanonical, ogType: "website" }
+        : undefined,
     }),
   );
 

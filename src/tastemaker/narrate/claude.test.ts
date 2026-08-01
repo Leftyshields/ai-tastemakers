@@ -30,7 +30,8 @@ describe("buildPrompt", () => {
       ...sampleRepo,
       external_context: "[Web]\nRecent launch thread on HN.",
     });
-    expect(prompt).toContain("External context (web/HN snippets");
+    expect(prompt).toContain("External context (web, Hacker News, Reddit");
     expect(prompt).toContain("Recent launch thread on HN.");
+    expect(prompt).toContain("Editorial rules");
   });
 });

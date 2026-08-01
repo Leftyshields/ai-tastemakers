@@ -12,10 +12,16 @@
 ### Sunday gate (`scripts/sunday-wrap-gate.mjs`)
 
 - Added `is_sunday` output (America/Los_Angeles), alongside `run_weekly` / `run_monthly`.
+- Optional `SUNDAY_GATE_DATE` env for tests only.
+
+### Tests
+
+- `scripts/sunday-wrap-gate.test.ts` — weekday vs Sunday, weekly vs fourth-Sunday monthly gate
+- `src/tastemaker/config.test.ts` — isolated from repo `.env` via temp `rootDir`
 
 ### Daily Digest workflow (`.github/workflows/digest.yml`)
 
-- **Refresh tool inventory (Sundays)** step: `npm run inventory:tools` when `is_sunday == true` (after weekly/monthly; not gated on wrap-up success).
+- **Refresh tool inventory (Sundays)** step: `npm run inventory:tools` when `is_sunday == true` (after weekly/monthly; not gated on wrap-up success). Uses `continue-on-error: true` so briefing commits are not blocked if inventory fails.
 - Expanded **setup-node**, **Install dependencies**, and **Commit** `if` conditions to include `is_sunday`.
 - Commit stages `data/tool-inventory.json` (+ `briefings/` for markdown).
 - Commit messages:

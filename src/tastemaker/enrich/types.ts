@@ -1,5 +1,5 @@
 export interface EnrichmentSource {
-  kind: "web" | "hn";
+  kind: "web" | "hn" | "reddit";
   label: string;
   text: string;
 }
@@ -21,4 +21,8 @@ export interface ExternalEnrichOptions {
   fetchFn?: typeof fetch;
   webProvider?: WebEnrichProvider;
   firecrawlApiKey?: string;
+  /** When true with Firecrawl, also scrape /releases and /discussions. */
+  webDeep?: boolean;
+  /** When true, search Reddit for recent posts mentioning the repo. */
+  enrichReddit?: boolean;
 }

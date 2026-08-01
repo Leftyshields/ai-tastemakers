@@ -566,8 +566,8 @@
       "appearance_count": 22,
       "first_seen": "2026-06-14",
       "last_seen": "2026-07-26",
-      "recommendation": "try",
-      "notes": "ENRICH-2 / EXP-20260716-firecrawl-enrich-skills: candidate to replace Jina Reader for post-rank web context on Skills digests. Primary success = shadow rubric quality; clicks secondary."
+      "recommendation": "adopted",
+      "notes": "Production web enrich provider (Skills digest) since 2026-08-01. Deep scrape: README + /releases + /discussions via DIGEST_ENRICH_WEB_DEEP=1."
     },
     {
       "full_name": "addyosmani/agent-skills",

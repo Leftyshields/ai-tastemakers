@@ -45,6 +45,9 @@ const baseConfig: AppConfig = {
   enrichMaxRepos: 3,
   enrichMaxChars: 1500,
   enrichWebProvider: "jina" as const,
+  enrichWebDeep: true,
+  enrichReddit: true,
+  qualityRubric: false,
 };
 
 beforeEach(() => {

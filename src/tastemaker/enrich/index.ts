@@ -2,15 +2,19 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import type { ScoredRepo } from "../types.js";
 import { compactEnrichment } from "./compact.js";
+import { fetchFirecrawlContext, fetchFirecrawlDeepContext } from "./firecrawl.js";
+import { githubEnrichUrls } from "./github-urls.js";
 import { fetchHnContext } from "./hn.js";
+import { fetchRedditContext } from "./reddit.js";
 import type { EnrichmentBundle, ExternalEnrichOptions } from "./types.js";
-import { fetchFirecrawlContext } from "./firecrawl.js";
 import { fetchWebContext } from "./web.js";
 
 export type { EnrichmentBundle, EnrichmentSource, ExternalEnrichOptions } from "./types.js";
 export { compactEnrichment } from "./compact.js";
-export { fetchFirecrawlContext } from "./firecrawl.js";
+export { fetchFirecrawlContext, fetchFirecrawlDeepContext } from "./firecrawl.js";
+export { githubEnrichUrls } from "./github-urls.js";
 export { fetchHnContext } from "./hn.js";
+export { fetchRedditContext } from "./reddit.js";
 export { fetchWebContext } from "./web.js";
 
 function bundleFileName(fullName: string): string {
@@ -21,9 +25,16 @@ export function enrichmentBundleRef(fullName: string): string {
   return bundleFileName(fullName);
 }
 
+function activeSourceCount(options: Pick<ExternalEnrichOptions, "enrichReddit">): number {
+  return 2 + (options.enrichReddit ? 1 : 0);
+}
+
 async function fetchWebSnippet(
   pageUrl: string,
-  options: Pick<ExternalEnrichOptions, "maxChars" | "timeoutMs" | "fetchFn" | "webProvider" | "firecrawlApiKey">,
+  options: Pick<
+    ExternalEnrichOptions,
+    "maxChars" | "timeoutMs" | "fetchFn" | "webProvider" | "firecrawlApiKey" | "webDeep"
+  >,
 ): Promise<{ text: string; error?: string; label: string }> {
   const fetchOpts = {
     timeoutMs: options.timeoutMs,
@@ -32,10 +43,15 @@ async function fetchWebSnippet(
   };
 
   if (options.webProvider === "firecrawl") {
-    const result = await fetchFirecrawlContext(pageUrl, {
-      ...fetchOpts,
-      apiKey: options.firecrawlApiKey ?? "",
-    });
+    const apiKey = options.firecrawlApiKey ?? "";
+    if (options.webDeep) {
+      const result = await fetchFirecrawlDeepContext(githubEnrichUrls(pageUrl), {
+        ...fetchOpts,
+        apiKey,
+      });
+      return { ...result, label: "Web (Firecrawl deep)" };
+    }
+    const result = await fetchFirecrawlContext(pageUrl, { ...fetchOpts, apiKey });
     return { ...result, label: "Web (Firecrawl)" };
   }
 
@@ -47,21 +63,34 @@ export async function enrichRepoExternal(
   repo: ScoredRepo,
   options: Pick<
     ExternalEnrichOptions,
-    "maxChars" | "timeoutMs" | "fetchFn" | "webProvider" | "firecrawlApiKey"
+    | "maxChars"
+    | "timeoutMs"
+    | "fetchFn"
+    | "webProvider"
+    | "firecrawlApiKey"
+    | "webDeep"
+    | "enrichReddit"
   >,
 ): Promise<EnrichmentBundle> {
-  const perSourceMax = Math.max(400, Math.floor(options.maxChars / 2));
+  const sourceCount = activeSourceCount(options);
+  const perSourceMax = Math.max(280, Math.floor(options.maxChars / sourceCount));
   const fetchOpts = {
     timeoutMs: options.timeoutMs,
     maxChars: perSourceMax,
     fetchFn: options.fetchFn,
     webProvider: options.webProvider,
     firecrawlApiKey: options.firecrawlApiKey,
+    webDeep: options.webDeep,
   };
 
-  const [web, hn] = await Promise.all([
+  const redditPromise = options.enrichReddit
+    ? fetchRedditContext(repo.full_name, fetchOpts)
+    : Promise.resolve({ text: "" as string, error: undefined as string | undefined });
+
+  const [web, hn, reddit] = await Promise.all([
     fetchWebSnippet(repo.html_url, fetchOpts),
     fetchHnContext(repo.full_name, fetchOpts),
+    redditPromise,
   ]);
 
   const sources = [];
@@ -77,6 +106,12 @@ export async function enrichRepoExternal(
     sources.push({ kind: "hn" as const, label: "Hacker News", text: hn.text });
   } else if (hn.error) {
     errors.push(`hn: ${hn.error}`);
+  }
+
+  if (reddit.text) {
+    sources.push({ kind: "reddit" as const, label: "Reddit (recent)", text: reddit.text });
+  } else if (reddit.error) {
+    errors.push(`reddit: ${reddit.error}`);
   }
 
   return {
@@ -102,6 +137,8 @@ export async function enrichExternalContext(
       fetchFn: options.fetchFn,
       webProvider: options.webProvider,
       firecrawlApiKey: options.firecrawlApiKey,
+      webDeep: options.webDeep,
+      enrichReddit: options.enrichReddit,
     });
     results.set(repo.full_name, bundle);
   }

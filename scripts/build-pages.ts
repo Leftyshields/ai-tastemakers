@@ -12,6 +12,7 @@ import {
   pageShell,
   verifyPosthogInBuiltSite,
 } from "./edition-pages.js";
+import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
@@ -338,9 +339,12 @@ async function main(): Promise<void> {
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(path.join(SITE_DIR, ".nojekyll"), "");
 
+  const siteBaseUrl =
+    process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+
   let total = 0;
   for (const edition of allEditions()) {
-    total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml);
+    total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml, siteBaseUrl);
   }
   const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml);
   total += weeklyCount;
@@ -350,11 +354,13 @@ async function main(): Promise<void> {
   await buildSubscribePage();
   await buildUnsubscribePage();
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml);
+  const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
+  await writeRobotsTxt(SITE_DIR, siteBaseUrl);
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);
   const posthogNote =
     posthogPages > 0 ? `; PostHog on ${posthogPages} HTML page(s)` : "";
   console.log(
-    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/${posthogNote}`,
+    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/; sitemap ${sitemapUrls} URL(s)${posthogNote}`,
   );
 }
 

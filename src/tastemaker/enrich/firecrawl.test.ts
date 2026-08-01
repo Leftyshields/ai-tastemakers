@@ -51,3 +51,31 @@ describe("fetchFirecrawlContext", () => {
     expect(result.error).toContain("Payment required");
   });
 });
+
+describe("fetchFirecrawlDeepContext", () => {
+  it("merges README and releases markdown", async () => {
+    const fetchFn = vi.fn(async (_url: string, init?: RequestInit) => {
+      const body = JSON.parse(String(init?.body)) as { url: string };
+      const label = body.url.includes("/releases") ? "Release notes v2" : "README body";
+      return {
+        ok: true,
+        json: async () => ({ success: true, data: { markdown: label } }),
+      };
+    });
+
+    const { fetchFirecrawlDeepContext } = await import("./firecrawl.js");
+    const result = await fetchFirecrawlDeepContext(
+      [
+        "https://github.com/acme/demo",
+        "https://github.com/acme/demo/releases",
+        "https://github.com/acme/demo/discussions",
+      ],
+      { apiKey: "fc-test", fetchFn, maxChars: 2000 },
+    );
+
+    expect(result.text).toContain("[README]");
+    expect(result.text).toContain("README body");
+    expect(result.text).toContain("[Releases]");
+    expect(result.text).toContain("Release notes v2");
+  });
+});

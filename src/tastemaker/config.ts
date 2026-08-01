@@ -122,13 +122,16 @@ export function loadConfig(options?: {
     enrichWeb: parseEnvBool("DIGEST_ENRICH_WEB"),
     enrichShadow: parseEnvBool("DIGEST_ENRICH_SHADOW"),
     enrichMaxRepos: parseEnvInt("DIGEST_ENRICH_MAX_REPOS", "3"),
-    enrichMaxChars: parseEnvInt("DIGEST_ENRICH_MAX_CHARS", "1500"),
+    enrichMaxChars: parseEnvInt("DIGEST_ENRICH_MAX_CHARS", "2400"),
     enrichWebProvider: (() => {
       const raw = process.env.DIGEST_ENRICH_WEB_PROVIDER?.trim().toLowerCase() || "jina";
       if (raw === "jina" || raw === "firecrawl") return raw;
       throw new Error(`DIGEST_ENRICH_WEB_PROVIDER must be "jina" or "firecrawl" (got "${raw}")`);
     })(),
+    enrichWebDeep: parseEnvBool("DIGEST_ENRICH_WEB_DEEP", true),
+    enrichReddit: parseEnvBool("DIGEST_ENRICH_REDDIT", true),
     firecrawlApiKey: process.env.FIRECRAWL_API_KEY?.trim() || undefined,
+    qualityRubric: parseEnvBool("DIGEST_QUALITY_RUBRIC"),
     experimentId: (() => {
       const id = process.env.EXPERIMENT_ID?.trim();
       if (!id) return undefined;

@@ -16,7 +16,7 @@ import {
   applySoftDedupPenalty,
   loadBriefingFeaturedSets,
 } from "./rank/score.js";
-import { narrateRepos } from "./narrate/claude.js";
+import { appendRubricLog, scoreDigestRank1 } from "./quality/log.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
 import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
@@ -173,6 +173,8 @@ export async function runPipeline(
       maxChars: config.enrichMaxChars,
       webProvider: config.enrichWebProvider,
       firecrawlApiKey: config.firecrawlApiKey,
+      webDeep: config.enrichWebDeep,
+      enrichReddit: config.enrichReddit,
     });
   }
 
@@ -287,6 +289,16 @@ export async function runPipeline(
       console.warn(
         "Warning: digest email failed; briefing was still written:",
         err instanceof Error ? err.message : err,
+      );
+    }
+  }
+
+  if (config.qualityRubric && config.editionId === "skills") {
+    const entry = await scoreDigestRank1(config.rootDir, config.editionId, dateLabel, digest);
+    if (entry) {
+      await appendRubricLog(config.rootDir, entry);
+      console.error(
+        `Quality rubric rank-1 ${entry.full_name}: pass=${entry.pass} why_now=${entry.scores.why_now}/5`,
       );
     }
   }

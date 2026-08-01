@@ -71,6 +71,45 @@ describe("enrichExternalContext", () => {
     expect(bundle?.sources[0]?.label).toBe("Web (Firecrawl)");
   });
 
+  it("includes Reddit when enrichReddit is enabled", async () => {
+    const fetchFn = vi.fn(async (url: string) => {
+      if (url.includes("reddit.com")) {
+        return {
+          ok: true,
+          json: async () => ({
+            data: {
+              children: [
+                {
+                  data: {
+                    title: "acme/demo is great",
+                    subreddit: "LocalLLaMA",
+                    score: 10,
+                    num_comments: 2,
+                  },
+                },
+              ],
+            },
+          }),
+        };
+      }
+      if (url.includes("jina.ai")) {
+        return { ok: true, text: async () => "Web page text" };
+      }
+      return { ok: true, json: async () => ({ hits: [] }) };
+    });
+
+    const bundles = await enrichExternalContext([sampleRepo], {
+      maxRepos: 1,
+      maxChars: 1500,
+      enrichReddit: true,
+      fetchFn,
+    });
+
+    const bundle = bundles.get("acme/demo");
+    expect(bundle?.sources.some((s) => s.kind === "reddit")).toBe(true);
+    expect(bundle?.combined_text).toContain("LocalLLaMA");
+  });
+
   it("caps repos at maxRepos", async () => {
     const fetchFn = vi.fn().mockResolvedValue({ ok: true, text: async () => "x" });
     const repos = [

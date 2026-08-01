@@ -74,7 +74,15 @@ function monthIdFromDateLabel(label) {
   return `${y}-${String(m).padStart(2, "0")}`;
 }
 
-const now = new Date();
+/** Optional YYYY-MM-DD override for tests (SUNDAY_GATE_DATE); not used in GHA. */
+function dateFromGateEnv() {
+  const override = process.env.SUNDAY_GATE_DATE?.trim();
+  if (!override) return new Date();
+  const { y, m, d } = parseDateLabel(override);
+  return new Date(Date.UTC(y, m - 1, d, 12));
+}
+
+const now = dateFromGateEnv();
 const today = dateLabelInTimezone(now, timezone);
 const isSunday = isSundayDateLabel(today);
 

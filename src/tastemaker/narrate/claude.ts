@@ -19,7 +19,7 @@ export function buildPrompt(repo: ScoredRepo): string {
 
   if (repo.external_context?.trim()) {
     parts.push(
-      "External context (web/HN snippets — may include noise; prefer README when they conflict):",
+      "External context (web, Hacker News, Reddit — may include noise; prefer README when they conflict):",
       repo.external_context.trim(),
     );
   }
@@ -32,7 +32,12 @@ export function buildPrompt(repo: ScoredRepo): string {
     "**Why now:** [why it is relevant this week]",
     "**Build with it:** [what a builder could do with it]",
     "",
-    "Use those exact bold labels. Be specific, punchy, and builder-focused. No hype or filler.",
+    "Editorial rules (YAGNI / taste-skill style):",
+    "- Use those exact bold labels. Be specific, punchy, and builder-focused.",
+    "- No hype, filler, or generic praise (avoid: revolutionary, game-changer, must-have).",
+    "- **Why now** must cite a concrete timely signal when external context provides one: HN thread, Reddit post, release, launch, demo, coverage, or trend — not star count alone.",
+    "- **Build with it** must name a concrete integration path (tool, config surface, or workflow step), not vague 'try this tool'.",
+    "- Prefer nouns and features from README/external context over inventing capabilities.",
   );
 
   return parts.join("\n");

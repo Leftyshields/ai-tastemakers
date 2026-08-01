@@ -16,9 +16,9 @@ interface FirecrawlScrapeResponse {
   error?: string;
 }
 
-export async function fetchFirecrawlContext(
+async function scrapeOneUrl(
   pageUrl: string,
-  options: FirecrawlFetchOptions = {},
+  options: FirecrawlFetchOptions,
 ): Promise<{ text: string; error?: string }> {
   const apiKey = options.apiKey?.trim();
   if (!apiKey) {
@@ -68,4 +68,43 @@ export async function fetchFirecrawlContext(
   } finally {
     clearTimeout(timer);
   }
+}
+
+export async function fetchFirecrawlContext(
+  pageUrl: string,
+  options: FirecrawlFetchOptions = {},
+): Promise<{ text: string; error?: string }> {
+  return scrapeOneUrl(pageUrl, options);
+}
+
+function urlSectionLabel(pageUrl: string): string {
+  if (pageUrl.includes("/releases")) return "Releases";
+  if (pageUrl.includes("/discussions")) return "Discussions";
+  return "README";
+}
+
+/** Scrape README + releases + discussions; skips empty/error pages silently. */
+export async function fetchFirecrawlDeepContext(
+  pageUrls: string[],
+  options: FirecrawlFetchOptions = {},
+): Promise<{ text: string; error?: string }> {
+  const maxChars = options.maxChars ?? 4000;
+  const perUrl = Math.max(280, Math.floor(maxChars / Math.max(1, pageUrls.length)));
+  const chunks: string[] = [];
+  const errors: string[] = [];
+
+  for (const url of pageUrls) {
+    const result = await scrapeOneUrl(url, { ...options, maxChars: perUrl });
+    if (result.text) {
+      chunks.push(`[${urlSectionLabel(url)}]\n${result.text}`);
+    } else if (result.error && !result.error.includes("empty markdown")) {
+      errors.push(`${urlSectionLabel(url)}: ${result.error}`);
+    }
+  }
+
+  if (chunks.length === 0) {
+    return { text: "", error: errors[0] ?? "Firecrawl returned no content" };
+  }
+
+  return { text: chunks.join("\n\n").slice(0, maxChars) };
 }
