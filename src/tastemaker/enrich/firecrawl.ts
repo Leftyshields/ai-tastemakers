@@ -1,24 +1,33 @@
-const FIRECRAWL_SCRAPE_URL = "https://api.firecrawl.dev/v1/scrape";
 const DEFAULT_TIMEOUT_MS = 8000;
+const FIRECRAWL_SCRAPE_URL = "https://api.firecrawl.dev/v2/scrape";
 
 export interface FirecrawlFetchOptions {
-  apiKey: string;
   timeoutMs?: number;
   maxChars?: number;
+  apiKey?: string;
   fetchFn?: typeof fetch;
+}
+
+interface FirecrawlScrapeResponse {
+  success?: boolean;
+  data?: {
+    markdown?: string;
+  };
+  error?: string;
 }
 
 export async function fetchFirecrawlContext(
   pageUrl: string,
-  options: FirecrawlFetchOptions,
+  options: FirecrawlFetchOptions = {},
 ): Promise<{ text: string; error?: string }> {
+  const apiKey = options.apiKey?.trim();
+  if (!apiKey) {
+    return { text: "", error: "FIRECRAWL_API_KEY is not set" };
+  }
+
   const fetchFn = options.fetchFn ?? fetch;
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const maxChars = options.maxChars ?? 4000;
-  const apiKey = options.apiKey.trim();
-  if (!apiKey) {
-    return { text: "", error: "FIRECRAWL_API_KEY is required when DIGEST_ENRICH_WEB_PROVIDER=firecrawl" };
-  }
 
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -38,26 +47,21 @@ export async function fetchFirecrawlContext(
       }),
     });
 
+    const body = (await res.json()) as FirecrawlScrapeResponse;
     if (!res.ok) {
-      return { text: "", error: `Firecrawl HTTP ${res.status}` };
+      const msg = body.error ?? `Firecrawl HTTP ${res.status}`;
+      return { text: "", error: msg };
+    }
+    if (!body.success) {
+      return { text: "", error: body.error ?? "Firecrawl scrape failed" };
     }
 
-    const payload = (await res.json()) as {
-      success?: boolean;
-      data?: { markdown?: string };
-      error?: string;
-    };
-
-    if (!payload.success) {
-      return { text: "", error: payload.error ?? "Firecrawl scrape failed" };
-    }
-
-    const text = (payload.data?.markdown ?? "").trim().slice(0, maxChars);
-    if (!text) {
+    const markdown = body.data?.markdown?.trim() ?? "";
+    if (!markdown) {
       return { text: "", error: "Firecrawl returned empty markdown" };
     }
 
-    return { text };
+    return { text: markdown.slice(0, maxChars) };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return { text: "", error: msg };

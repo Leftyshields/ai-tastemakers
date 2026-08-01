@@ -9,6 +9,7 @@ import { fetchWebContext } from "./web.js";
 
 export type { EnrichmentBundle, EnrichmentSource, ExternalEnrichOptions } from "./types.js";
 export { compactEnrichment } from "./compact.js";
+export { fetchFirecrawlContext } from "./firecrawl.js";
 export { fetchHnContext } from "./hn.js";
 export { fetchWebContext } from "./web.js";
 

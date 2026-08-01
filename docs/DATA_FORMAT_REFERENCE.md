@@ -241,6 +241,8 @@ Copy from `data/experiments/_template.json`.
 
 `status`: `draft` → `baseline` → `active` → `complete`.
 
+Shipped experiments removed from the dashboard are moved to `data/experiments/archive/EXP-*.json` (see [archive README](../data/experiments/archive/README.md)).
+
 ## Shadow run (`data/experiments/runs/{run_id}/shadow.json`)
 
 Written when `DIGEST_ENRICH_SHADOW=1`. Captures ranked repos and briefs for human review; does not write to `briefings/`.

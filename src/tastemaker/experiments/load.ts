@@ -8,6 +8,11 @@ export function experimentsDir(rootDir: string): string {
   return path.join(rootDir, "data", "experiments");
 }
 
+/** Completed/shipped records removed from the Lab dashboard queue. */
+export function experimentsArchiveDir(rootDir: string): string {
+  return path.join(experimentsDir(rootDir), "archive");
+}
+
 export function experimentFilePath(rootDir: string, id: string): string {
   if (!EXPERIMENT_ID.test(id)) {
     throw new Error(`Invalid experiment id: ${id} (expected EXP-YYYYMMDD-slug)`);
@@ -30,6 +35,20 @@ export async function saveExperiment(rootDir: string, record: ExperimentRecord):
 
 export async function listExperimentIds(rootDir: string): Promise<string[]> {
   const dir = experimentsDir(rootDir);
+  let entries: string[];
+  try {
+    entries = await fs.readdir(dir);
+  } catch {
+    return [];
+  }
+  return entries
+    .filter((name) => name.startsWith("EXP-") && name.endsWith(".json"))
+    .map((name) => name.replace(/\.json$/, ""))
+    .sort();
+}
+
+export async function listArchivedExperimentIds(rootDir: string): Promise<string[]> {
+  const dir = experimentsArchiveDir(rootDir);
   let entries: string[];
   try {
     entries = await fs.readdir(dir);
