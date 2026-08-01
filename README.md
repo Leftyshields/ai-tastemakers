@@ -22,7 +22,9 @@ Each daily run (both editions):
 4. Writes `briefings/<edition>/YYYY-MM-DD/daily_brief.md` + `digest.json`
 5. Optionally emails subscribers (Resend) and deploys to GitHub Pages
 
-**Sundays (1st–3rd):** After both daily digests, `npm run weekly` aggregates seven days of `digest.json` (OSS + Skills), calls Claude once for a combined editorial, and writes `briefings/weekly/YYYY-Www/weekly_review.{md,json}`.
+**Skills edition enrichment (production):** For the top 3 ranked repos, the pipeline fetches external context before narration — Firecrawl deep scrape (README + releases + discussions), Hacker News Algolia, and Reddit recent-post search — then applies editorial rules (concrete “Why now” hooks, no star-count-only blurbs). Rank-1 brief quality is logged to `data/quality/rubric-scores.jsonl` when `DIGEST_QUALITY_RUBRIC=1`.
+
+**Sundays (1st–3rd):** After both daily digests, `npm run weekly` aggregates seven days of `digest.json` (OSS + Skills), calls Claude once for a combined editorial, and writes `briefings/weekly/YYYY-Www/weekly_review.{md,json}`. The Daily Digest workflow also refreshes the Lab tool inventory (`npm run inventory:tools`).
 
 **Fourth Sunday each month:** `npm run monthly` runs instead of weekly — synthesizes prior weekly reviews in that calendar month into `briefings/monthly/YYYY-MM/monthly_review.{md,json}`.
 
@@ -39,9 +41,11 @@ A public **measure → experiment → report** loop for improving the digest pip
 
 **Site analytics:** PostHog pageviews + `outbound_repo_click` events on repo links (injected at Pages build when `POSTHOG_KEY` is set).
 
-**Experiments:** File-based registry in `data/experiments/`. Shadow runs (`DIGEST_ENRICH_SHADOW=1`) write side-by-side control vs treatment blurbs under `data/experiments/runs/` without touching published briefings. Post-rank web/HN enrichment (Jina Reader + HN Algolia) is env-gated and Skills-canary first.
+**SEO:** Pages build emits `sitemap.xml`, `robots.txt`, meta descriptions, canonical URLs, Open Graph/Twitter tags, and JSON-LD on daily brief pages.
 
-See [docs/CLOSURE_EPH-20260628-SRCH.md](docs/CLOSURE_EPH-20260628-SRCH.md) and [briefings/lab/shadow-rubric.md](briefings/lab/shadow-rubric.md).
+**Experiments:** File-based registry in `data/experiments/` (shipped records archived under `data/experiments/archive/`). Formal experiment windows are paused while growing readership; the dashboard lists active records only. Shadow runs (`DIGEST_ENRICH_SHADOW=1`) write side-by-side control vs treatment blurbs under `data/experiments/runs/` without touching published briefings.
+
+See [docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md](docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md) and [briefings/lab/shadow-rubric.md](briefings/lab/shadow-rubric.md).
 
 ### Editions
 
@@ -76,6 +80,12 @@ npm run build:pages       # includes /lab/ experiments dashboard
 EXPERIMENT_ID=EXP-20260628-web-enrich-skills \
   DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_SHADOW=1 \
   npm run digest:skills
+
+# Production-style Skills enrich (Firecrawl + Reddit + rubric log)
+DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_WEB_PROVIDER=firecrawl \
+  DIGEST_ENRICH_WEB_DEEP=1 DIGEST_ENRICH_REDDIT=1 \
+  DIGEST_QUALITY_RUBRIC=1 FIRECRAWL_API_KEY=... \
+  npm run digest:skills
 ```
 
 Open today's briefing under `briefings/`, or the public site after Pages deploy. Weekly reviews appear on the homepage once `briefings/weekly/` has content. Lab pages live at `/lab/` after `build:pages`.
@@ -96,7 +106,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 | `npm run experiment -- list` | List registered pipeline experiments |
 | `npm run experiment -- snapshot EXP-id --csv file.csv` | Import PostHog/analytics CSV into experiment record (`--dry-run` to preview) |
 | `npm run experiment:reminders` | Send batched lifecycle reminder email for today's PT milestones (`--dry-run`, `--date YYYY-MM-DD`) |
-| `npm run test:digest` | Unit + integration tests (136) |
+| `npm run test:digest` | Unit + integration tests (194) |
 | `npm run build:digest` | Compile TypeScript |
 | `npm run build:pages` | Build static site from `briefings/` → `site/` (Tailwind CSS) |
 | `npm test` | Genesis framework tests |
@@ -105,7 +115,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 
 ## Scheduling & deploy
 
-**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays** (except fourth Sunday), runs `npm run weekly` after daily digests. On **fourth Sunday**, runs `npm run monthly` instead (`continue-on-error` on wrap-up so synthesis failure does not block daily commit).
+**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays** (except fourth Sunday), runs `npm run weekly` after daily digests and refreshes the tool inventory. On **fourth Sunday**, runs `npm run monthly` instead (`continue-on-error` on wrap-up so synthesis failure does not block daily commit).
 
 Required repo secret: `ANTHROPIC_API_KEY`. `GITHUB_TOKEN` uses the default Actions token for public search.
 
@@ -115,9 +125,10 @@ Optional:
 - **Subscribers:** `FIREBASE_CLIENT_EMAIL`, `FIREBASE_PRIVATE_KEY` (Firestore list)
 - **Subscribe page:** `FIREBASE_API_KEY`, `FIREBASE_APP_ID` (Pages workflow)
 - **Analytics (Lab):** `POSTHOG_KEY`, `POSTHOG_HOST` (Pages build — pageviews + outbound repo clicks)
-- **Experiments:** `DIGEST_ENRICH_WEB`, `DIGEST_ENRICH_SHADOW`, `EXPERIMENT_ID` (see [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md))
+- **Skills enrich (production GHA):** `FIRECRAWL_API_KEY`, plus env flags `DIGEST_ENRICH_WEB`, `DIGEST_ENRICH_WEB_PROVIDER=firecrawl`, `DIGEST_ENRICH_WEB_DEEP`, `DIGEST_ENRICH_REDDIT`, `DIGEST_QUALITY_RUBRIC` (see [docs/DEV_RUNBOOK.md](docs/DEV_RUNBOOK.md))
+- **Landing layout v2:** `SITE_LANDING_LAYOUT_V2=1` in Pages workflow (production default)
 
-**Deploy GitHub Pages** (`.github/workflows/pages.yml`) builds the site on push to `briefings/`, `data/experiments/`, lab scripts, or manual dispatch.
+**Deploy GitHub Pages** (`.github/workflows/pages.yml`) builds the site on push to `briefings/`, `data/experiments/`, lab scripts, or manual dispatch. Homepage uses landing layout v2 (primary CTA, month-grid archive).
 
 **Daily Digest Verify** (`.github/workflows/digest-verify.yml`) runs at **8:00 and 9:00 Pacific**. If today's OSS + Skills briefings or Pages URL are missing, you get an **email** (`DIGEST_ALERT_TO`) and a **GitHub issue** (`digest-alert` label).
 
@@ -137,6 +148,10 @@ npm run verify:digest   # local check
 | Copy + brief format | [EPH-20260607-COPY](docs/CLOSURE_EPH-20260607-COPY.md) | Three-subhead briefs, homepage copy, email bold rendering |
 | Weekly wrap-up | EPH-20260607-WEEK | Sunday synthesis, `briefings/weekly/`, site archive |
 | Lab + experiments | [EPH-20260628-SRCH](docs/CLOSURE_EPH-20260628-SRCH.md) | PostHog analytics, tool inventory, shadow enrichment, `/lab/` UI |
+| Landing layout v2 | [EPH-20260701-LAND](docs/CLOSURE_EPH-20260701-LAND.md) | Production homepage reflow (`SITE_LANDING_LAYOUT_V2=1`) |
+| Firecrawl + deep enrich | ENRICH-2 | Firecrawl v2, Reddit recency, deep scrape, quality rubric (2026-08-01) |
+| Sunday tool inventory | [EPH-20260702-INV](docs/CLOSURE_EPH-20260702-INV.md) | Auto-refresh in Daily Digest GHA |
+| Site SEO | — | Sitemap, robots.txt, OG/JSON-LD on brief pages |
 
 **Repo:** https://github.com/Leftyshields/ai-tastemakers
 
