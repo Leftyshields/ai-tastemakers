@@ -51,19 +51,39 @@ export function extractBriefSection(brief: string, label: string): string {
   return (nextIdx !== undefined ? after.slice(0, nextIdx) : after).replace(/\*\*/g, "").trim();
 }
 
+export function briefSocialTitle(date: string): string {
+  return `Daily Brief · ${formatBriefDateShort(date)}`;
+}
+
+/** Hook-only description — image card already shows date, edition, and repo picks. */
+export function briefSocialDescription(
+  repos: Array<{ brief?: string | null }>,
+): string {
+  const topBrief = repos[0]?.brief ?? "";
+  const whyNow = extractBriefSection(topBrief, "**Why now:**");
+  const whatItDoes = extractBriefSection(topBrief, "**What it does:**");
+  const hook =
+    whyNow ||
+    whatItDoes ||
+    "Curated GitHub repos ranked by 7-day momentum — builder-focused summaries.";
+  return hook.slice(0, 200);
+}
+
+/** @deprecated Use briefSocialTitle + briefSocialDescription for share previews. */
 export function briefOgTitle(
   editionName: string,
   date: string,
   repos: Array<{ full_name: string }>,
 ): string {
-  const dateShort = formatBriefDateShort(date);
-  const names = repos
-    .slice(0, 2)
-    .map((r) => r.full_name.split("/").pop() ?? r.full_name)
-    .join(", ");
-  const extra = repos.length > 2 ? ` +${repos.length - 2} more` : "";
-  const picks = names || "today's picks";
-  return `${dateShort} · ${picks}${extra} | ${editionName}`;
+  return briefSocialTitle(date);
+}
+
+export function briefMetaDescription(
+  _editionName: string,
+  _date: string,
+  repos: Array<{ full_name: string; brief?: string | null }>,
+): string {
+  return briefSocialDescription(repos);
 }
 
 export function buildSeoHeadHtml(
@@ -125,24 +145,6 @@ export function buildSeoHeadHtml(
   }
 
   return parts.join("\n  ");
-}
-
-export function briefMetaDescription(
-  editionName: string,
-  date: string,
-  topRepos: Array<{ full_name: string; brief?: string | null }>,
-): string {
-  const names = topRepos
-    .slice(0, 3)
-    .map((r) => r.full_name.split("/")[1] ?? r.full_name)
-    .join(", ");
-  const topBrief = topRepos[0]?.brief ?? "";
-  const whyNow = extractBriefSection(topBrief, "**Why now:**");
-  const hook =
-    whyNow ||
-    extractBriefSection(topBrief, "**What it does:**") ||
-    `Top AI repos ranked by 7-day momentum for ${date}.`;
-  return `${editionName} · ${formatBriefDateShort(date)}: ${names}. ${hook}`.slice(0, 300);
 }
 
 export function articleJsonLd(

@@ -11,7 +11,8 @@ import { writeExperimentsData } from "./lab/aggregate-experiments.js";
 import {
   articleJsonLd,
   briefMetaDescription,
-  briefOgTitle,
+  briefSocialDescription,
+  briefSocialTitle,
   buildSeoHeadHtml,
   defaultOgImageUrl,
   type PageSeoOptions,
@@ -1345,8 +1346,9 @@ export async function buildEditionSite(
         const digest = JSON.parse(digestRaw) as {
           repos: Array<{ full_name: string; brief?: string | null }>;
         };
-        description = briefMetaDescription(edition.name, date, digest.repos);
-        pageTitle = briefOgTitle(edition.name, date, digest.repos);
+        description = briefSocialDescription(digest.repos);
+        const socialTitle = briefSocialTitle(date);
+        pageTitle = `Daily Brief — ${date} · ${edition.name}`;
         const ogImageRel = briefOgImagePath(edition.siteSegment, date);
         const ogImageAbs = `${siteBaseUrl.replace(/\/+$/, "")}/${ogImageRel}`;
         const ogOutPath = path.join(
@@ -1366,9 +1368,9 @@ export async function buildEditionSite(
           siteBaseUrl,
           canonicalPath,
           ogType: "article",
-          ogTitle: pageTitle,
+          ogTitle: socialTitle,
           ogImageUrl: ogImageAbs,
-          ogImageAlt: `${edition.name} daily brief for ${date}`,
+          ogImageAlt: `Top repo picks · ${date}`,
           jsonLd: articleJsonLd(
             siteBaseUrl,
             canonicalPath,

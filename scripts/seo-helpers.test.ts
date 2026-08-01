@@ -1,26 +1,35 @@
 import { describe, it, expect } from "vitest";
 import { briefOgCardSvg, defaultOgCardSvg } from "./generate-brief-og.js";
 import { OG } from "./og-theme.js";
-import { briefMetaDescription, briefOgTitle, extractBriefSection } from "./seo-helpers.js";
+import {
+  briefMetaDescription,
+  briefSocialDescription,
+  briefSocialTitle,
+  extractBriefSection,
+} from "./seo-helpers.js";
 
 describe("brief social metadata", () => {
-  it("uses Why now for description hook", () => {
-    const desc = briefMetaDescription("AI Tastemakers", "2026-08-01", [
+  it("uses Why now hook only — no repo list in description", () => {
+    const desc = briefSocialDescription([
       {
-        full_name: "acme/demo",
         brief:
           "**What it does:** A demo tool.\n\n**Why now:** Front page of HN after v2 launch drew 400 comments.\n\n**Build with it:** Wire into CI.",
       },
     ]);
     expect(desc).toContain("HN");
     expect(desc).not.toContain("What it does:");
+    expect(desc).not.toContain("ai-agent-book");
   });
 
-  it("formats og title with date and picks", () => {
-    const repos = Array.from({ length: 10 }, (_, i) => ({ full_name: `acme/repo${i}` }));
-    expect(briefOgTitle("AI Tastemakers", "2026-08-01", repos)).toBe(
-      "Aug 1 · repo0, repo1 +8 more | AI Tastemakers",
-    );
+  it("social title is date-only (picks live in og:image)", () => {
+    expect(briefSocialTitle("2026-08-01")).toBe("Daily Brief · Aug 1");
+  });
+
+  it("briefMetaDescription delegates to social description", () => {
+    const desc = briefMetaDescription("AI Tastemakers", "2026-08-01", [
+      { full_name: "acme/demo", brief: "**Why now:** Trending this week." },
+    ]);
+    expect(desc).toContain("Trending");
   });
 });
 
@@ -36,6 +45,7 @@ describe("OG card SVG (site dark theme)", () => {
     expect(svg).toContain("Georgia");
     expect(svg).toContain("Daily Brief");
     expect(svg).toContain("demo");
+    expect(svg).not.toContain("leftyshields.github.io");
   });
 
   it("default card includes brand header", () => {

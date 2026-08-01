@@ -51,17 +51,15 @@ function ogCardShell(inner: string): string {
 
 function siteHeaderBlock(editionName: string, tagline: string): string {
   return `
-  <text x="88" y="88" fill="${OG.text}" font-family="${OG.fontSans}" font-size="34" font-weight="700">AI Tastemakers</text>
+  <text x="88" y="88" fill="${OG.text}" font-family="${OG.fontSans}" font-size="34" font-weight="700">${escapeXml(editionName)}</text>
   <text x="88" y="124" fill="${OG.textMuted}" font-family="${OG.fontSans}" font-size="20">${escapeXml(tagline)}</text>
-  <line x1="88" y1="148" x2="1112" y2="148" stroke="${OG.border}" stroke-width="1"/>
-  <text x="88" y="188" fill="${OG.textMuted}" font-family="${OG.fontSans}" font-size="18" font-weight="600" letter-spacing="0.08em">${escapeXml(editionName.toUpperCase())}</text>`;
+  <line x1="88" y1="148" x2="1112" y2="148" stroke="${OG.border}" stroke-width="1"/>`;
 }
 
 function footerBlock(): string {
   return `
   <rect x="48" y="548" width="1104" height="46" fill="${OG.footerBg}" stroke="${OG.footerBorder}" stroke-width="1"/>
-  <text x="88" y="578" fill="${OG.textMuted}" font-family="${OG.fontSans}" font-size="18">What it does · Why now · Build with it</text>
-  <text x="1112" y="578" fill="${OG.accentLight}" font-family="${OG.fontSans}" font-size="17" text-anchor="end">leftyshields.github.io</text>`;
+  <text x="600" y="578" fill="${OG.textMuted}" font-family="${OG.fontSans}" font-size="18" text-anchor="middle">What it does · Why now · Build with it</text>`;
 }
 
 /** 1200×630 Open Graph card — dark theme matching GitHub Pages site. */
@@ -72,14 +70,13 @@ export function briefOgCardSvg(input: BriefOgCardInput): string {
     "Daily intelligence on AI-derivative open source — ranked by 7-day momentum.";
   const picks = input.repos.slice(0, 3).map((name) => name.split("/").pop() ?? name);
   const pickLines = picks.map((name, i) => {
-    const y = 348 + i * 58;
+    const y = 318 + i * 58;
     return `<text x="88" y="${y}" fill="${OG.text}" font-family="${OG.fontSans}" font-size="28" font-weight="600">${i + 1}. ${escapeXml(name)}</text>`;
   });
 
   const inner = `
   ${siteHeaderBlock(input.editionName, tagline)}
-  <text x="88" y="248" fill="${OG.text}" font-family="${OG.fontSerif}" font-size="44" font-weight="700">Daily Brief — ${escapeXml(dateLabel)}</text>
-  <text x="88" y="286" fill="${OG.textDim}" font-family="${OG.fontSans}" font-size="19">Top repos · builder-focused summaries</text>
+  <text x="88" y="208" fill="${OG.text}" font-family="${OG.fontSerif}" font-size="44" font-weight="700">Daily Brief — ${escapeXml(dateLabel)}</text>
   ${pickLines.join("\n  ")}
   ${footerBlock()}`;
 
