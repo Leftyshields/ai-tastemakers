@@ -31,6 +31,7 @@ const base: AppConfig = {
   enrichShadow: false,
   enrichMaxRepos: 3,
   enrichMaxChars: 1500,
+  enrichWebProvider: "jina" as const,
 };
 
 describe("subscriberDocId", () => {

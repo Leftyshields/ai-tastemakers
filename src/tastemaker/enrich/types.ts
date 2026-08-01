@@ -12,9 +12,13 @@ export interface EnrichmentBundle {
   errors: string[];
 }
 
+export type WebEnrichProvider = "jina" | "firecrawl";
+
 export interface ExternalEnrichOptions {
   maxRepos: number;
   maxChars: number;
   timeoutMs?: number;
   fetchFn?: typeof fetch;
+  webProvider?: WebEnrichProvider;
+  firecrawlApiKey?: string;
 }

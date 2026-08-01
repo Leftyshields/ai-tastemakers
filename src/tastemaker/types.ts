@@ -199,5 +199,7 @@ export interface AppConfig {
   enrichShadow: boolean;
   enrichMaxRepos: number;
   enrichMaxChars: number;
+  enrichWebProvider: "jina" | "firecrawl";
+  firecrawlApiKey?: string;
   experimentId?: string;
 }

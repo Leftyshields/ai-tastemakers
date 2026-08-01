@@ -211,6 +211,7 @@ describe("shouldSendDigestEmail", () => {
     enrichShadow: false,
     enrichMaxRepos: 3,
     enrichMaxChars: 1500,
+    enrichWebProvider: "jina" as const,
   };
 
   it("returns false when email env incomplete", async () => {

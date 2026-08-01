@@ -160,7 +160,7 @@ export async function runPipeline(
 
   console.error(`Narrating top ${top.length} repos…`);
 
-  const useExternalEnrich = config.enrichWeb;
+  const useExternalEnrich = config.enrichWeb && config.editionId === "skills";
   const sideBySideNarrate = useExternalEnrich && config.enrichShadow;
   let externalBundles = new Map<string, EnrichmentBundle>();
 
@@ -171,6 +171,8 @@ export async function runPipeline(
     externalBundles = await externalEnrich(top, {
       maxRepos: config.enrichMaxRepos,
       maxChars: config.enrichMaxChars,
+      webProvider: config.enrichWebProvider,
+      firecrawlApiKey: config.firecrawlApiKey,
     });
   }
 

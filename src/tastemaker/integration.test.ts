@@ -62,6 +62,7 @@ describe("runPipeline integration", () => {
       enrichShadow: false,
       enrichMaxRepos: 3,
       enrichMaxChars: 1500,
+      enrichWebProvider: "jina",
     };
   });
 
@@ -319,6 +320,7 @@ describe("runPipeline integration", () => {
 
     config.enrichShadow = true;
     config.enrichWeb = true;
+    config.editionId = "skills";
     config.experimentId = experimentId;
 
     const narrateMock = vi
@@ -416,6 +418,7 @@ describe("runPipeline integration", () => {
   it("narrates once when enrichWeb is on without shadow (production treatment)", async () => {
     config.enrichWeb = true;
     config.enrichShadow = false;
+    config.editionId = "skills";
 
     const narrateMock = vi.fn().mockResolvedValue(
       new Map([

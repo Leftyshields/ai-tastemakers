@@ -9,6 +9,7 @@ export interface ExperimentWindow {
 
 export interface ExperimentChangeFlags {
   DIGEST_ENRICH_WEB?: string;
+  DIGEST_ENRICH_WEB_PROVIDER?: string;
   DIGEST_ENRICH_SHADOW?: string;
   [key: string]: string | undefined;
 }

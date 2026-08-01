@@ -20,7 +20,7 @@ interface MetricsHints {
 
 function metricsHints(record: ExperimentRecord): MetricsHints {
   const flags = record.change.flags ?? {};
-  if (flags.DIGEST_ENRICH_WEB || record.id.includes("web-enrich")) {
+  if (flags.DIGEST_ENRICH_WEB || record.id.includes("web-enrich") || record.id.includes("firecrawl")) {
     return {
       pageviews: "Skills briefing pages (/briefings/skills/YYYY-MM-DD.html)",
       event: "outbound_repo_click",
