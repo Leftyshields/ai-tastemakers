@@ -16,6 +16,11 @@
     return Number(n).toLocaleString();
   }
 
+  function fmtUsd(n) {
+    if (n == null || Number.isNaN(n)) return "—";
+    return `$${Number(n).toFixed(4)}`;
+  }
+
   function pct(n) {
     if (n == null || Number.isNaN(n)) return "—";
     const sign = n > 0 ? "+" : "";
@@ -52,13 +57,14 @@
         `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
           <td class="px-3 py-2 font-mono text-xs">${esc(row.date)}</td>
           <td class="px-3 py-2">${esc(row.edition)}</td>
-          <td class="px-3 py-2">${fmt(row.runs)}</td>
-          <td class="px-3 py-2">${fmt(row.input_tokens)}</td>
           <td class="px-3 py-2">${fmt(row.output_tokens)}</td>
-          <td class="px-3 py-2 font-semibold">${fmt(row.total_tokens)}</td>
           <td class="px-3 py-2">${fmt(row.output_words)}</td>
-          <td class="px-3 py-2">${fmt(row.avg_output_tokens_per_repo)}</td>
-          <td class="px-3 py-2">${fmt(row.shadow_runs)}</td>
+          <td class="px-3 py-2">${fmt(row.prompt_chars)}</td>
+          <td class="px-3 py-2">${fmt(row.chars_per_input_token)}</td>
+          <td class="px-3 py-2">${fmt(row.enrich_chars)}</td>
+          <td class="px-3 py-2">${fmt(row.avg_latency_ms)}ms</td>
+          <td class="px-3 py-2">${fmtUsd(row.estimated_usd)}</td>
+          <td class="px-3 py-2">${row.rubric_runs ? `${row.rubric_pass_count}/${row.rubric_runs} pass` : "—"}</td>
         </tr>`,
     );
 
@@ -69,9 +75,11 @@
           <td class="px-3 py-2">${esc(row.window)}</td>
           <td class="px-3 py-2">${fmt(row.runs)}</td>
           <td class="px-3 py-2">${fmt(row.output_tokens)}</td>
-          <td class="px-3 py-2">${fmt(row.output_words)}</td>
-          <td class="px-3 py-2">${fmt(row.avg_output_tokens_per_repo)}</td>
-          <td class="px-3 py-2">${fmt(row.ponytail_runs)} / ${fmt(row.structured_context_runs)}</td>
+          <td class="px-3 py-2">${fmt(row.prompt_chars)}</td>
+          <td class="px-3 py-2">${fmt(row.enrich_chars)}</td>
+          <td class="px-3 py-2">${fmt(row.avg_latency_ms)}ms</td>
+          <td class="px-3 py-2">${fmtUsd(row.estimated_usd)}</td>
+          <td class="px-3 py-2">${row.rubric_pass_rate != null ? `${Math.round(row.rubric_pass_rate * 100)}%` : "—"}</td>
         </tr>`,
     );
 
@@ -80,26 +88,39 @@
       return `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
           <td class="px-3 py-2 font-mono text-xs"><a href="shadow/${esc(row.run_id)}.html" class="text-blue-800 hover:underline dark:text-blue-400">${esc(row.run_id.slice(0, 8))}…</a></td>
           <td class="px-3 py-2 font-mono text-xs">${esc(row.date)}</td>
-          <td class="px-3 py-2">${fmt(row.control_output_tokens)}</td>
-          <td class="px-3 py-2">${fmt(row.treatment_output_tokens)}</td>
-          <td class="px-3 py-2 ${deltaClass(deltaPct)}">${pct(deltaPct)}</td>
-          <td class="px-3 py-2">${fmt(row.control_output_words)} → ${fmt(row.treatment_output_words)} words</td>
+          <td class="px-3 py-2 ${deltaClass(deltaPct)}">${pct(deltaPct)} out</td>
+          <td class="px-3 py-2">${fmt(row.control_prompt_chars)} → ${fmt(row.treatment_prompt_chars)} prompt</td>
+          <td class="px-3 py-2">${fmt(row.control_latency_ms_avg)} → ${fmt(row.treatment_latency_ms_avg)} ms</td>
+          <td class="px-3 py-2">${fmtUsd(row.control_estimated_usd)} → ${fmtUsd(row.treatment_estimated_usd)}</td>
+        </tr>`;
+    });
+
+    const recentRows = (data.recent || []).slice(0, 15).map((row) => {
+      const rubric = row.rubric;
+      return `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
+          <td class="px-3 py-2 font-mono text-xs">${esc(row.date)}</td>
+          <td class="px-3 py-2">${esc(row.variant)}</td>
+          <td class="px-3 py-2">${fmt(row.output_tokens)}</td>
+          <td class="px-3 py-2">${fmt(row.chars_per_input_token)}</td>
+          <td class="px-3 py-2">${fmt(row.latency_ms_avg)}ms</td>
+          <td class="px-3 py-2">${fmtUsd(row.estimated_usd)}</td>
+          <td class="px-3 py-2">${rubric ? `why=${rubric.why_now} spec=${rubric.specificity} ${rubric.pass ? "pass" : "fail"}` : "—"}</td>
         </tr>`;
     });
 
     root.innerHTML = `
       <p class="mb-6 leading-relaxed text-stone-600 dark:text-stone-400">
-        Functional cost telemetry for Claude narration — logged on every digest run.
+        Functional cost telemetry for Claude narration — tokens, prompt size, latency, enrichment payload, rubric, and estimated USD.
         Generated ${esc(data.generated_at)} · ${fmt(data.entries)} log entries.
       </p>
 
       <section class="mb-10">
         <h2 class="mb-3 font-sans text-base font-semibold">Daily production runs</h2>
-        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Single-variant runs (what ships to briefings). Input + output tokens and brief word counts.</p>
+        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">What ships to briefings. Prompt chars vs input tokens catches structured-context overhead; enrich chars is Firecrawl/HN/Reddit payload size fed to Claude.</p>
         ${
           dailyRows.length
             ? table(
-                ["Date", "Edition", "Runs", "Input", "Output", "Total", "Words", "Out/repo", "Shadows"],
+                ["Date", "Edition", "Output tok", "Words", "Prompt chars", "Chars/in tok", "Enrich chars", "Latency/repo", "Est. USD", "Rubric"],
                 dailyRows,
               )
             : "<p class=\"text-sm text-stone-500\">No production runs logged yet.</p>"
@@ -108,11 +129,11 @@
 
       <section class="mb-10">
         <h2 class="mb-3 font-sans text-base font-semibold">Shadow A/B comparisons</h2>
-        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Control vs treatment output tokens on the same run — primary metric for ponytail / structured-context experiments.</p>
+        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Control vs treatment on the same run — output tokens, prompt size, latency, and cost.</p>
         ${
           shadowRows.length
             ? table(
-                ["Run", "Date", "Control out", "Treatment out", "Δ output %", "Words"],
+                ["Run", "Date", "Δ output %", "Prompt chars", "Latency avg", "Est. USD"],
                 shadowRows,
               )
             : "<p class=\"text-sm text-stone-500\">Run <code>DIGEST_ENRICH_SHADOW=1</code> with narration flags to populate comparisons.</p>"
@@ -121,14 +142,27 @@
 
       <section class="mb-10">
         <h2 class="mb-3 font-sans text-base font-semibold">Experiment windows</h2>
-        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Aggregated production tokens grouped by registered experiment baseline/treatment windows.</p>
+        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Baseline vs treatment aggregates for registered experiments (ponytail baseline active).</p>
         ${
           expRows.length
             ? table(
-                ["Experiment", "Window", "Runs", "Output tok", "Words", "Out/repo", "Ponytail / structured runs"],
+                ["Experiment", "Window", "Runs", "Output tok", "Prompt chars", "Enrich chars", "Latency/repo", "Est. USD", "Rubric pass"],
                 expRows,
               )
             : "<p class=\"text-sm text-stone-500\">No production runs fall inside registered experiment windows yet.</p>"
+        }
+      </section>
+
+      <section class="mb-10">
+        <h2 class="mb-3 font-sans text-base font-semibold">Recent runs</h2>
+        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Last 15 log entries including shadow variants.</p>
+        ${
+          recentRows.length
+            ? table(
+                ["Date", "Variant", "Output tok", "Chars/in tok", "Latency avg", "Est. USD", "Rubric rank-1"],
+                recentRows,
+              )
+            : "<p class=\"text-sm text-stone-500\">No runs yet.</p>"
         }
       </section>`;
   }

@@ -136,9 +136,10 @@
       <h3 class="mt-6 text-base font-semibold">Functional metrics</h3>
       <p class="text-sm text-stone-600 dark:text-stone-400">Primary signals for this experiment (not PostHog engagement):</p>
       <ul class="mt-2 list-disc pl-5 text-sm">
-        <li><a href="token-usage.html" class="text-blue-800 hover:underline dark:text-blue-400">Token dashboard</a> — daily input/output tokens, shadow A/B deltas, experiment-window aggregates</li>
+        <li><a href="token-usage.html" class="text-blue-800 hover:underline dark:text-blue-400">Token dashboard</a> — input/output tokens, prompt chars, chars/token ratio, latency, enrich payload size, est. USD</li>
+        <li>Shadow A/B — control vs treatment on same run (tokens, prompt size, latency, cost)</li>
         <li><code>data/quality/token-usage.jsonl</code> — raw per-run log (committed from GHA)</li>
-        <li><code>data/quality/rubric-scores.jsonl</code> — rank-1 heuristic rubric when <code>DIGEST_QUALITY_RUBRIC=1</code></li>
+        <li><code>data/quality/rubric-scores.jsonl</code> — rank-1 heuristic rubric joined on token rows</li>
       </ul>
       <p class="mt-2 text-sm"><a href="posts/${esc(labPostSlug)}.html" class="text-blue-800 hover:underline dark:text-blue-400">Experiment design doc →</a></p>`;
 

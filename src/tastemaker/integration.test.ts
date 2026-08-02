@@ -10,8 +10,15 @@ import { runPipeline } from "./pipeline.js";
 function narrationMap(
   entries: Record<string, string | null>,
   usage = { input_tokens: 1000, output_tokens: 200 },
+  prompt_chars = 3200,
+  latency_ms = 850,
 ): Map<string, NarrationResult> {
-  return new Map(Object.entries(entries).map(([name, brief]) => [name, { brief, usage }]));
+  return new Map(
+    Object.entries(entries).map(([name, brief]) => [
+      name,
+      { brief, usage, prompt_chars, latency_ms },
+    ]),
+  );
 }
 
 const mockCandidates: CandidateRepo[] = [
