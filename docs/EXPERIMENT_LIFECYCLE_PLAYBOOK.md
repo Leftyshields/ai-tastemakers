@@ -39,13 +39,13 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ### Active Lab queue
 
-Formal experiment windows are **paused** while growing site engagement. The dashboard lists only `data/experiments/EXP-*.json` (not `archive/`).
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration leads the queue.
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
-| 1 | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) — on dashboard |
-| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (paused; not scheduled) |
-| 3 | EXP-20260802-ponytail-narration-skills | Skills digest | **draft** (paused; not scheduled) |
+| 1 | EXP-20260802-ponytail-narration-skills | Skills digest | **baseline** (2026-08-02 → 2026-08-15) |
+| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued) |
+| — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
 ### Shipped outside formal windows (archived)
 
@@ -117,28 +117,27 @@ Leave OSS digest soft-dedup at defaults during this canary.
 
 ---
 
-### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **draft / paused**
+### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **baseline**
 
 Inspired by [W31 Builder Takeaway](../briefings/weekly/2026-W31/weekly_review.md#builder-takeaway): Graphify-style structured context + ponytail YAGNI constraints on Skills narration.
 
-**Hypothesis:** Tiered context presentation and strict one-step **Build with it** rules improve rubric specificity without losing timely **Why now** hooks.
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-08-02** → **2026-08-15** |
+| Treatment | **2026-08-16** → **2026-08-29** |
 
-**Treatment flags (Skills digest step in `digest.yml` only):**
+**Baseline config (digest.yml):** Firecrawl enrich + quality rubric + token logging ON; `DIGEST_NARRATE_*` flags **OFF**. `EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills` on Skills digest step only.
 
-- `DIGEST_NARRATE_STRUCTURED_CONTEXT=1` — README → metadata → timely-signals tiers in Claude prompt
-- `DIGEST_NARRATE_PONYTAIL=1` — YAGNI editorial constraints (one integration path, shorter blurbs)
+**Treatment start (2026-08-16):** Add to Skills digest env:
+```yaml
+DIGEST_NARRATE_STRUCTURED_CONTEXT: "1"
+DIGEST_NARRATE_PONYTAIL: "1"
+```
+Set experiment `"status": "active"` in JSON.
 
-Leave enrichment at production settings (`DIGEST_ENRICH_WEB=1`, Firecrawl provider).
+**Primary metrics:** `/lab/token-usage.html` — output tokens and words per repo; shadow A/B before treatment optional.
 
-**Primary metrics:**
-
-1. Shadow output-token delta on `/lab/token-usage.html` (treatment ≤ control)
-2. Shadow rubric on top-3 enriched repos (specificity + build_with_it median ≥ 4)
-3. `DIGEST_QUALITY_RUBRIC=1` rank-1 log in `data/quality/rubric-scores.jsonl`
-
-**Out of scope:** PostHog outbound clicks — functional metrics only.
-
-**Shadow run (before treatment):**
+**Shadow run (before treatment, local):**
 
 ```bash
 EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills \

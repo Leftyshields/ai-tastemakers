@@ -23,5 +23,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Experiment platform paused 2026-08-01 to focus on engagement growth. Not scheduled — re-register in data/experiments/ when resuming formal experiments. Backlog: RANK-2. METRIC PRIORITY (low traffic): (1) PRIMARY — structural diversity from digest.json: mean consecutive-day overlap, unique repos / 7 days, share of is_new in top 10. (2) SECONDARY — PostHog outbound_repo_click (edition=skills) and pageviews. Treatment flags: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on Skills digest step in digest.yml."
+  "notes": "Queued behind EXP-20260802-ponytail-narration-skills (#2 in Lab queue). Experiment platform resumed 2026-08-02 with ponytail baseline first. Not scheduled until ponytail completes or pauses. Backlog: RANK-2. METRIC PRIORITY: structural diversity from digest.json (overlap, unique repos/week, is_new share). Treatment flags: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on Skills digest step in digest.yml."
 }

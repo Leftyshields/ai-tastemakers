@@ -11,8 +11,8 @@ Follow-on work for the digest app (`src/tastemaker/`). Ordered loosely by priori
 | DIST-1 | Slack / Substack distribution | Backlog | Optional channels beyond Resend email |
 | RANK-1 | Ranking tuning | Backlog | Bootstrap quality after ~7 days of snapshots; tune `DIGEST_MAX_STARS_BOOTSTRAP`, blocklist |
 | ENRICH-2 | Firecrawl web enrich (Skills) | **Shipped** | Firecrawl v2 adapter + `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` in production digest (2026-08-01). Requires `FIRECRAWL_API_KEY` in GHA. Archived record: `data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json` |
-| RANK-2 | Soft-dedup diversity (Skills) | **Paused** | Experiment [EXP-20260715-soft-dedup-diversity-skills](../data/experiments/EXP-20260715-soft-dedup-diversity-skills.json) remains `draft`; formal experiment queue paused until engagement grows |
-| NARR-1 | Ponytail narration (Skills) | **Draft** | [EXP-20260802-ponytail-narration-skills](../data/experiments/EXP-20260802-ponytail-narration-skills.json) — structured context + YAGNI constraints; W31-inspired; not scheduled |
+| NARR-1 | Ponytail narration (Skills) | **Baseline** | [EXP-20260802-ponytail-narration-skills](../data/experiments/EXP-20260802-ponytail-narration-skills.json) — baseline 2026-08-02→2026-08-15; #1 in queue |
+| RANK-2 | Soft-dedup diversity (Skills) | **Queued (#2)** | Paused behind ponytail experiment |
 | UX-1 | Brief page repo cards + TOC | Backlog | Richer brief pages on GitHub Pages |
 | OPS-1 | Alert on digest/email failure | **Partial** | Verify workflow + `DIGEST_ALERT_TO` shipped; direct GHA failure alert + non-blocking email still open |
 | QA-1 | Manual `/qa_checklist` pass | **Done** | `.ai/context/qa_checklist_daily-digest-reliability.md`; production spot-check 2026-06-27 |

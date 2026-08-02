@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
-import { loadAllExperiments, writeExperimentsData } from "../../../scripts/lab/aggregate-experiments.js";
+import { loadAllExperiments, writeExperimentsData, sortExperimentsForDashboard, buildQueueSummary } from "../../../scripts/lab/aggregate-experiments.js";
 
 describe("aggregate-experiments", () => {
   let tmpDir: string;
@@ -50,5 +50,25 @@ describe("aggregate-experiments", () => {
     const raw = JSON.parse(await fs.readFile(path.join(labDir, "experiments-data.json"), "utf-8"));
     expect(raw.schema_version).toBe(1);
     expect(raw.experiments[0].hypothesis).toBe("test hypothesis");
+    expect(raw.queue_summary).toContain("EXP-20260628-test");
+  });
+
+  it("sortExperimentsForDashboard puts baseline ponytail first", async () => {
+    const sorted = sortExperimentsForDashboard([
+      {
+        id: "EXP-20260715-soft-dedup",
+        status: "draft",
+      } as never,
+      {
+        id: "EXP-20260802-ponytail-narration-skills",
+        status: "baseline",
+      } as never,
+      {
+        id: "EXP-20260628-web-enrich-skills",
+        status: "complete",
+      } as never,
+    ]);
+    expect(sorted[0].id).toBe("EXP-20260802-ponytail-narration-skills");
+    expect(buildQueueSummary(sorted)).toContain("baseline window");
   });
 });

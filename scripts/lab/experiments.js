@@ -37,12 +37,17 @@
     return map[status] || map.draft;
   }
 
-  function renderTable(experiments) {
+  function renderTable(data) {
+    const experiments = data.experiments || [];
     if (!experiments.length) {
       tableWrap.innerHTML =
         '<p class="leading-relaxed text-stone-600 dark:text-stone-400">No experiments yet. Add <code>data/experiments/EXP-*.json</code> and rebuild pages.</p>';
       return;
     }
+
+    const queueHtml = data.queue_summary
+      ? `<p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">${esc(data.queue_summary)} <a href="token-usage.html" class="font-semibold text-blue-800 hover:underline dark:text-blue-300">Token dashboard →</a></p>`
+      : "";
 
     const cards = experiments
       .map(
@@ -54,12 +59,12 @@
           <span class="text-xs text-stone-500 dark:text-stone-400">${esc(exp.edition)}</span>
         </div>
         <p class="leading-relaxed text-stone-700 dark:text-stone-300">${esc(exp.hypothesis)}</p>
-        <p class="mt-3 text-xs text-stone-500 dark:text-stone-400">Baseline ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))}</p>
+        <p class="mt-3 text-xs text-stone-500 dark:text-stone-400">Baseline ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))} · Treatment ${esc(windowLabel(exp.treatment_window?.start, exp.treatment_window?.end))}</p>
       </button>`,
       )
       .join("");
 
-    tableWrap.innerHTML = cards;
+    tableWrap.innerHTML = queueHtml + cards;
 
     tableWrap.querySelectorAll(".experiment-card").forEach((card) => {
       card.addEventListener("click", () => {
@@ -118,7 +123,24 @@
 
     const verdict =
       exp.verdict?.trim() ||
-      (exp.status === "complete" ? "" : "Pending — import PostHog snapshots after baseline/treatment windows.");
+      (exp.status === "complete"
+        ? ""
+        : exp.status === "baseline"
+          ? "Baseline in progress — compare functional metrics on the Token dashboard (output tokens / words per repo). Treatment flags stay OFF until the treatment window."
+          : exp.status === "active"
+            ? "Treatment in progress — compare baseline vs treatment token logs and shadow rubric."
+            : "Pending — start baseline or import metrics after windows complete.");
+
+    const labPostSlug = exp.id;
+    const functionalBlock = `
+      <h3 class="mt-6 text-base font-semibold">Functional metrics</h3>
+      <p class="text-sm text-stone-600 dark:text-stone-400">Primary signals for this experiment (not PostHog engagement):</p>
+      <ul class="mt-2 list-disc pl-5 text-sm">
+        <li><a href="token-usage.html" class="text-blue-800 hover:underline dark:text-blue-400">Token dashboard</a> — daily input/output tokens, shadow A/B deltas, experiment-window aggregates</li>
+        <li><code>data/quality/token-usage.jsonl</code> — raw per-run log (committed from GHA)</li>
+        <li><code>data/quality/rubric-scores.jsonl</code> — rank-1 heuristic rubric when <code>DIGEST_QUALITY_RUBRIC=1</code></li>
+      </ul>
+      <p class="mt-2 text-sm"><a href="posts/${esc(labPostSlug)}.html" class="text-blue-800 hover:underline dark:text-blue-400">Experiment design doc →</a></p>`;
 
     detailBody.innerHTML = `
       <p class="text-stone-600 dark:text-stone-400">${esc(exp.change_summary)}</p>
@@ -127,7 +149,8 @@
       <p class="mt-2 text-sm"><strong>Baseline:</strong> ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))}</p>
       <p class="text-sm"><strong>Treatment:</strong> ${esc(windowLabel(exp.treatment_window?.start, exp.treatment_window?.end))}</p>
       ${flags ? `<ul class="mt-2 list-disc pl-5 text-sm">${flags}</ul>` : ""}
-      <h3 class="mt-6 text-base font-semibold">Snapshots</h3>
+      ${functionalBlock}
+      <h3 class="mt-6 text-base font-semibold">Engagement snapshots (optional)</h3>
       ${snapshots || '<p class="text-stone-500">No snapshots imported yet.</p>'}
       <h3 class="mt-6 text-base font-semibold">Shadow runs</h3>
       <table class="w-full text-sm">
@@ -210,7 +233,7 @@
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     })
-    .then((data) => renderTable(data.experiments || []))
+    .then((data) => renderTable(data))
     .catch((err) => {
       tableWrap.innerHTML = `<p class="text-red-700 dark:text-red-400">Failed to load experiments: ${esc(err.message)}</p>`;
     });

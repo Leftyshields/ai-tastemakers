@@ -98,10 +98,10 @@ Token telemetry logs automatically to `data/quality/token-usage.jsonl` on every 
 
 | Phase | Dates (PT) |
 |-------|------------|
-| Baseline | 2026-09-01 → 2026-09-14 |
-| Treatment | 2026-09-15 → 2026-09-28 |
+| **Baseline (active)** | **2026-08-02 → 2026-08-15** |
+| Treatment | 2026-08-16 → 2026-08-29 |
 
-Baseline runs production narration (enrichment on, ponytail flags off). Treatment enables both flags in `.github/workflows/digest.yml` on the Skills digest step.
+Baseline runs production narration (enrichment on, ponytail flags off). Treatment enables both flags in `.github/workflows/digest.yml` on the Skills digest step starting **2026-08-16**.
 
 ## Recommendation (preliminary)
 
