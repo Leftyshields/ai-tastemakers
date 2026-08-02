@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W31",
+  "week_start": "2026-07-27",
+  "week_end": "2026-08-02",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 28,
+      "skills": 26
+    },
+    "total_stars_gained": {
+      "oss": 122339,
+      "skills": 95471
+    },
+    "top_topics": {
+      "oss": [
+        "mcp",
+        "claude-code",
+        "claude",
+        "codex",
+        "llm"
+      ],
+      "skills": [
+        "claude-code",
+        "ai-agents",
+        "claude",
+        "codex",
+        "mcp"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "bojieli/ai-agent-book",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "koala73/worldmonitor",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "citrolabs/ego-lite",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "ComposioHQ/awesome-claude-skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "ruvnet/RuView",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "1jehuang/jcode",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "every-app/open-seo",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "img2threejs/img2threejs",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "ComposioHQ/awesome-claude-skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "1jehuang/jcode",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "MadsLorentzen/ai-job-search",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "1jehuang/jcode",
+      "ComposioHQ/awesome-claude-skills",
+      "DeusData/codebase-memory-mcp",
+      "DietrichGebert/ponytail",
+      "Graphify-Labs/graphify",
+      "JuliusBrussee/caveman",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "calesthio/OpenMontage",
+      "citrolabs/ego-lite",
+      "diegosouzapw/OmniRoute",
+      "farion1231/cc-switch",
+      "lidge-jun/opencodex",
+      "mvanhorn/last30days-skill",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "op7418/guizang-ppt-skill",
+      "tirth8205/code-review-graph"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "bojieli/ai-agent-book",
+          "total_stars_gained": 71320,
+          "days_appeared": 7,
+          "excerpt": "An open-source Chinese-authored book on AI Agent engineering—covering LLM context design, tool use, RAG, multi-agent systems, MCP, and reinforcement learning—with 92 runnable code experiments across 10 chapters, available as PDF/EPUB in 8 languages."
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 62997,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is an open-source TypeScript gateway that routes requests across 290+ AI providers (90+ free tiers) through a single OpenAI-compatible endpoint, with quota-aware auto-fallback and RTK+Caveman prompt compression that cuts token usage by 15–95%."
+        },
+        {
+          "full_name": "koala73/worldmonitor",
+          "total_stars_gained": 54682,
+          "days_appeared": 7,
+          "excerpt": "World Monitor is an open-source TypeScript dashboard that aggregates real-time news, geopolitical events, and infrastructure data into a single situational awareness interface, with an MCP server for AI agent integration and SDKs across npm, PyPI, RubyGems, and Go."
+        },
+        {
+          "full_name": "citrolabs/ego-lite",
+          "total_stars_gained": 29314,
+          "days_appeared": 6,
+          "excerpt": "ego lite is a macOS browser that gives AI agents like Claude Code and Codex their own isolated \"Spaces\" to run browser automation tasks using your existing logins and cookies, without touching your personal tabs."
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "total_stars_gained": 28682,
+          "days_appeared": 6,
+          "excerpt": "Graphify turns any codebase—including docs, SQL schemas, configs, and PDFs—into a queryable knowledge graph using deterministic tree-sitter AST parsing locally, with every graph edge tagged as either explicitly extracted or LLM-inferred."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 61827,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is an open-source TypeScript gateway that routes requests across 290+ AI providers through a single OpenAI-compatible endpoint, with quota-aware auto-fallback and token compression that can cut usage by up to 95%."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 47728,
+          "days_appeared": 7,
+          "excerpt": "Orca is an open-source Agent Development Environment (ADE) that lets you run multiple coding agents (Codex, Claude Code, OpenCode, or Pi) in parallel, each isolated in its own git worktree, with a unified desktop/mobile interface and Ghostty-class terminal splits for monitoring and steering them."
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "total_stars_gained": 33117,
+          "days_appeared": 7,
+          "excerpt": "Graphify parses any codebase—plus its docs, SQL schemas, configs, and PDFs—into a queryable knowledge graph using deterministic tree-sitter AST parsing locally, with every graph edge tagged as either explicitly extracted or LLM-inferred."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 28077,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a plugin/skill for AI coding agents (Claude Code, Cursor, etc.) that enforces YAGNI-style minimalism, steering the agent toward the simplest possible implementation—like replacing a third-party date picker with a native `<input type=\"date\">`."
+        },
+        {
+          "full_name": "ComposioHQ/awesome-claude-skills",
+          "total_stars_gained": 23590,
+          "days_appeared": 4,
+          "excerpt": "Awesome Claude Skills is a curated collection of 1,000+ reusable instruction packages (\"skills\") that give Claude and other coding agents like Cursor, Codex, and Gemini CLI structured, repeatable behaviors for tasks ranging from document processing to app automation via Composio's MCP Gateway."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "W31 was a dense week for the open-source AI layer: 28 OSS repos and 26 skill repos moved the needle, pulling in **122K and 95K stars** respectively across seven days. The dominant topics — `mcp`, `claude-code`, `claude`, `codex`, `llm` — are essentially the same list in both lanes, which tells you the ecosystem is converging fast around a shared toolchain rather than fragmenting. Several repos held the trending chart every single day of the week, suggesting sustained developer interest rather than viral spikes. The infrastructure-versus-behavior split is getting sharper: one lane is building the pipes, the other is building the personalities that run through them.",
+    "oss": "The undisputed gravity well this week was **bojieli/ai-agent-book** (71K stars, 7/7 days) — a rigorous, multilingual engineering text with 92 runnable experiments that reads less like a tutorial and more like a field manual for production agent work. Right behind it, **diegosouzapw/OmniRoute** (63K stars) and **koala73/worldmonitor** (55K stars) held all seven days, together sketching a pattern: builders want a single normalized gateway into the model zoo *and* a normalized feed of real-world signal for agents to act on. **citrolabs/ego-lite** and **Graphify-Labs/graphify** rounded out the top five with strong six-day runs — ego-lite solving the \"agent browser isolation\" problem on macOS, Graphify solving the \"agent codebase comprehension\" problem with deterministic AST parsing. The OSS lane this week was overwhelmingly about *plumbing*: routing, monitoring, isolation, and graph-based memory.",
+    "skills": "**stablyai/orca** ran all seven days and 48K stars for a reason: a dedicated Agent Development Environment that parallelizes Codex, Claude Code, and friends into isolated git worktrees is the missing IDE layer most teams are hacking together themselves. **Graphify** also topped the skills chart (33K), reinforcing that knowledge-graph-backed context isn't just an OSS infrastructure play — it's becoming a first-class skill primitive. **DietrichGebert/ponytail** (28K, 7/7) is the week's most interesting philosophical entrant: a skill that explicitly fights agent over-engineering, nudging models toward the simplest viable implementation. **ComposioHQ/awesome-claude-skills** (24K, 4 days) reflects a real market dynamic — the skills ecosystem is still young enough that *curation* is itself a high-value product, and 1,000+ reusable instruction packages is a meaningful catalog to anchor around.",
+    "cross_lane": "Nineteen repos appeared in both the OSS and skills charts this week, which is an unusually high overlap and not accidental — it reflects that the most useful projects right now are simultaneously infrastructure *and* behavioral primitives. **OmniRoute**, **Graphify**, **ponytail**, **ECC**, and **awesome-claude-skills** all landed on both lists, meaning builders are treating them as composable layers rather than slotting them into a single category. The `claude-code` topic topping both topic charts is the clearest signal of the week: Claude Code has become the reference runtime that the rest of the ecosystem is tooling against, in the same way VS Code became the reference editor. Watch whether `codex` maintains parity here or begins to diverge in the skills lane specifically, where prompt-level behavior matters more than raw model routing.",
+    "takeaway": "If you're building agent tooling right now, the week's data argues for two immediate priorities: **context fidelity** (Graphify-style structured memory over raw embedding search) and **runtime isolation** (ego-lite/orca-style worktree or browser sandboxing). The ponytail signal is worth taking seriously too — as agents get more capable, the failure mode is over-engineering, not under-engineering, and skills that constrain rather than expand agent behavior will become load-bearing. The ai-agent-book's multilingual reach and runnable experiments format is a template worth stealing: comprehensive, executable, and language-accessible documentation is pulling massive community gravity right now."
+  },
+  "generated_at": "2026-08-02T16:28:25.957Z"
+}
