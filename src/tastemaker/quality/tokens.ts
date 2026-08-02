@@ -73,6 +73,8 @@ export interface TokenUsageLogEntry {
   estimated_usd: number;
   chars_per_input_token?: number;
   rubric?: TokenUsageRubricSummary;
+  /** api = live Anthropic telemetry; digest_estimate = backfilled from published digest.json */
+  metrics_source?: "api" | "digest_estimate";
   per_repo: PerRepoTokenUsage[];
 }
 

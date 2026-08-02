@@ -7,8 +7,11 @@ import {
 } from "../src/tastemaker/editions.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
 import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
-import { writeExperimentsData } from "./lab/aggregate-experiments.js";
-import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
+import { writeExperimentsData, buildQueueSummary, loadAllExperiments } from "./lab/aggregate-experiments.js";
+import {
+  writeTokenUsageData,
+  renderTokenUsageDashboardHtml,
+} from "./lab/aggregate-token-usage.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -1567,7 +1570,9 @@ export async function buildLabSite(
     pageShell("Experiments · Lab", experimentsBody, paths, brand, undefined, escapeHtml, labShell),
   );
 
-  await writeTokenUsageData(repoRoot, labSiteDir);
+  const experiments = await loadAllExperiments(repoRoot);
+  const queueSummary = buildQueueSummary(experiments);
+  const { payload: tokenPayload } = await writeTokenUsageData(repoRoot, labSiteDir);
   await fs.copyFile(
     path.join(repoRoot, "scripts", "lab", "token-usage.js"),
     path.join(labSiteDir, "token-usage.js"),
@@ -1581,7 +1586,9 @@ export async function buildLabSite(
   } catch {
     tokenBody += `<p class="mb-6 font-sans text-sm text-stone-600 dark:text-stone-400">Narration token telemetry for digest experiments.</p>`;
   }
-  tokenBody += `<div id="token-usage-root" class="font-sans text-sm"></div><script src="token-usage.js"></script>`;
+  tokenBody += renderTokenUsageDashboardHtml(tokenPayload, escapeHtml, { queueSummary });
+  tokenBody += `<script type="application/json" id="token-usage-data">${JSON.stringify(tokenPayload).replace(/</g, "\\u003c")}</script>`;
+  tokenBody += `<script src="token-usage.js"></script>`;
 
   await fs.writeFile(
     path.join(labSiteDir, "token-usage.html"),

@@ -1,9 +1,9 @@
 /**
- * Client-side token usage dashboard (loaded by site/lab/token-usage.html).
+ * Renders shadow A/B, experiment windows, and recent runs (daily stats are build-time HTML).
  */
 (function () {
-  const root = document.getElementById("token-usage-root");
-  if (!root) return;
+  const extra = document.getElementById("token-usage-extra");
+  if (!extra) return;
 
   function esc(text) {
     const el = document.createElement("span");
@@ -45,29 +45,23 @@
     </div>`;
   }
 
-  function render(data) {
-    if (!data.entries) {
-      root.innerHTML =
-        '<p class="leading-relaxed text-stone-600 dark:text-stone-400">No token logs yet. Run a digest — narration tokens append to <code>data/quality/token-usage.jsonl</code> automatically.</p>';
-      return;
+  function loadData() {
+    const embedded = document.getElementById("token-usage-data");
+    if (embedded?.textContent?.trim()) {
+      try {
+        return Promise.resolve(JSON.parse(embedded.textContent));
+      } catch {
+        /* fall through */
+      }
     }
+    return fetch("token-usage-data.json")
+      .then((r) => {
+        if (!r.ok) throw new Error(String(r.status));
+        return r.json();
+      });
+  }
 
-    const dailyRows = (data.daily || []).map(
-      (row) =>
-        `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
-          <td class="px-3 py-2 font-mono text-xs">${esc(row.date)}</td>
-          <td class="px-3 py-2">${esc(row.edition)}</td>
-          <td class="px-3 py-2">${fmt(row.output_tokens)}</td>
-          <td class="px-3 py-2">${fmt(row.output_words)}</td>
-          <td class="px-3 py-2">${fmt(row.prompt_chars)}</td>
-          <td class="px-3 py-2">${fmt(row.chars_per_input_token)}</td>
-          <td class="px-3 py-2">${fmt(row.enrich_chars)}</td>
-          <td class="px-3 py-2">${fmt(row.avg_latency_ms)}ms</td>
-          <td class="px-3 py-2">${fmtUsd(row.estimated_usd)}</td>
-          <td class="px-3 py-2">${row.rubric_runs ? `${row.rubric_pass_count}/${row.rubric_runs} pass` : "—"}</td>
-        </tr>`,
-    );
-
+  function renderExtra(data) {
     const expRows = (data.by_experiment || []).map(
       (row) =>
         `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
@@ -99,7 +93,7 @@
       const rubric = row.rubric;
       return `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
           <td class="px-3 py-2 font-mono text-xs">${esc(row.date)}</td>
-          <td class="px-3 py-2">${esc(row.variant)}</td>
+          <td class="px-3 py-2">${esc(row.variant)}${row.metrics_source === "digest_estimate" ? " (est.)" : ""}</td>
           <td class="px-3 py-2">${fmt(row.output_tokens)}</td>
           <td class="px-3 py-2">${fmt(row.chars_per_input_token)}</td>
           <td class="px-3 py-2">${fmt(row.latency_ms_avg)}ms</td>
@@ -108,25 +102,7 @@
         </tr>`;
     });
 
-    root.innerHTML = `
-      <p class="mb-6 leading-relaxed text-stone-600 dark:text-stone-400">
-        Functional cost telemetry for Claude narration — tokens, prompt size, latency, enrichment payload, rubric, and estimated USD.
-        Generated ${esc(data.generated_at)} · ${fmt(data.entries)} log entries.
-      </p>
-
-      <section class="mb-10">
-        <h2 class="mb-3 font-sans text-base font-semibold">Daily production runs</h2>
-        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">What ships to briefings. Prompt chars vs input tokens catches structured-context overhead; enrich chars is Firecrawl/HN/Reddit payload size fed to Claude.</p>
-        ${
-          dailyRows.length
-            ? table(
-                ["Date", "Edition", "Output tok", "Words", "Prompt chars", "Chars/in tok", "Enrich chars", "Latency/repo", "Est. USD", "Rubric"],
-                dailyRows,
-              )
-            : "<p class=\"text-sm text-stone-500\">No production runs logged yet.</p>"
-        }
-      </section>
-
+    extra.innerHTML = `
       <section class="mb-10">
         <h2 class="mb-3 font-sans text-base font-semibold">Shadow A/B comparisons</h2>
         <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Control vs treatment on the same run — output tokens, prompt size, latency, and cost.</p>
@@ -142,7 +118,7 @@
 
       <section class="mb-10">
         <h2 class="mb-3 font-sans text-base font-semibold">Experiment windows</h2>
-        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Baseline vs treatment aggregates for registered experiments (ponytail baseline active).</p>
+        <p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Baseline vs treatment aggregates for registered experiments.</p>
         ${
           expRows.length
             ? table(
@@ -167,14 +143,10 @@
       </section>`;
   }
 
-  fetch("token-usage-data.json")
-    .then((r) => {
-      if (!r.ok) throw new Error(String(r.status));
-      return r.json();
-    })
-    .then(render)
+  loadData()
+    .then(renderExtra)
     .catch(() => {
-      root.innerHTML =
-        '<p class="text-amber-800 dark:text-amber-200">Could not load token-usage-data.json — run <code>npm run build:pages</code> after digest runs.</p>';
+      extra.innerHTML =
+        '<p class="text-amber-800 dark:text-amber-200">Could not load extended token sections.</p>';
     });
 })();
