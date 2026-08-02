@@ -21,6 +21,7 @@ Shadow runs let us preview enriched blurbs side-by-side with production output b
 
 - **[Tool inventory](tools.html)** — repos that appeared in briefing history, tagged by pipeline role (search, compaction, eval, analytics). Candidates for adoption, not endorsements.
 - **[Experiments](experiments.html)** — active and completed tests with baseline/treatment windows, imported metrics, and plain-language verdicts.
+- **[Token usage](token-usage.html)** — daily Claude narration tokens (input/output), shadow A/B deltas, and experiment-window aggregates. Functional cost telemetry — not engagement analytics.
 - **[Posts](posts/)** — onboarding notes and outcome stories when we adopt a digest-featured tool in our own stack.
 - **[Shadow rubric](shadow-rubric.html)** — how we score control vs treatment blurbs before enabling enrichment in production.
 
@@ -30,7 +31,7 @@ Each experiment states a **hypothesis** (what we expect to improve), a **change 
 
 We default to **before/after windows** rather than live A/B tests because the site is static HTML rebuilt daily. That is a deliberate trade-off: slower feedback, but reproducible and easy to audit.
 
-**Active queue (2026-08-01):** Formal experiments are paused while we grow readership. Completed runs stay on the dashboard; shipped-but-not-measured records live under `data/experiments/archive/` in git.
+**Active queue (2026-08-02):** Formal experiments resumed. **#1 — [EXP-20260802-ponytail-narration-skills](posts/EXP-20260802-ponytail-narration-skills.html)** is in **baseline** (2026-08-02 → 2026-08-15): default Skills narration + Firecrawl enrich; ponytail flags off. Functional metrics live on the [Token dashboard](token-usage.html). **#2 — soft-dedup diversity** stays queued until ponytail completes. Completed runs stay on the dashboard; shipped records live under `data/experiments/archive/` in git.
 
 ## Transparency boundaries
 

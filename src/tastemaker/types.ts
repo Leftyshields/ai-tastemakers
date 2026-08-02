@@ -206,4 +206,8 @@ export interface AppConfig {
   experimentId?: string;
   /** When true, score rank-1 brief after Skills digest and append to quality log. */
   qualityRubric: boolean;
+  /** Graphify-style tiered context in Claude narration prompt. */
+  narrateStructuredContext: boolean;
+  /** Ponytail YAGNI constraints in Claude narration prompt. */
+  narratePonytail: boolean;
 }

@@ -39,12 +39,13 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ### Active Lab queue
 
-Formal experiment windows are **paused** while growing site engagement. The dashboard lists only `data/experiments/EXP-*.json` (not `archive/`).
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration leads the queue.
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
-| 1 | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) — on dashboard |
-| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (paused; not scheduled) |
+| 1 | EXP-20260802-ponytail-narration-skills | Skills digest | **baseline** (2026-08-02 → 2026-08-15) |
+| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued) |
+| — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
 ### Shipped outside formal windows (archived)
 
@@ -113,6 +114,41 @@ Leave OSS digest soft-dedup at defaults during this canary.
 - Site traffic is still low — expect sparse click counts; record trends for later growth, but do not fail the experiment solely on CTR
 
 **Backlog:** [RANK-2](./PRODUCT_BACKLOG.md)
+
+---
+
+### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **baseline**
+
+Inspired by [W31 Builder Takeaway](../briefings/weekly/2026-W31/weekly_review.md#builder-takeaway): Graphify-style structured context + ponytail YAGNI constraints on Skills narration.
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-08-02** → **2026-08-15** |
+| Treatment | **2026-08-16** → **2026-08-29** |
+
+**Baseline config (digest.yml):** Firecrawl enrich + quality rubric + token logging ON; `DIGEST_NARRATE_*` flags **OFF**. `EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills` on Skills digest step only.
+
+**Treatment start (2026-08-16):** Add to Skills digest env:
+```yaml
+DIGEST_NARRATE_STRUCTURED_CONTEXT: "1"
+DIGEST_NARRATE_PONYTAIL: "1"
+```
+Set experiment `"status": "active"` in JSON.
+
+**Primary metrics:** `/lab/token-usage.html` — output tokens and words per repo; shadow A/B before treatment optional.
+
+**Shadow run (before treatment, local):**
+
+```bash
+EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills \
+DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_SHADOW=1 \
+DIGEST_NARRATE_STRUCTURED_CONTEXT=1 DIGEST_NARRATE_PONYTAIL=1 \
+npm run digest -- --edition skills
+```
+
+**Lab writeup:** [briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md](../briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md)
+
+**Backlog:** [NARR-1](./PRODUCT_BACKLOG.md)
 
 ---
 

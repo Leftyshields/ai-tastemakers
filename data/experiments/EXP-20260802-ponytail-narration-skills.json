@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260802-ponytail-narration-skills",
+  "hypothesis": "Graphify-style structured context tiers plus ponytail YAGNI narration constraints improve shadow-rubric scores on specificity and build_with_it while reducing output tokens and brief word count — without losing why_now timeliness.",
+  "change_summary": "Enable DIGEST_NARRATE_STRUCTURED_CONTEXT and DIGEST_NARRATE_PONYTAIL on Skills narration (with enrichment on). Shadow mode compares default vs treatment prompts on the same enriched context.",
+  "status": "baseline",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-08-02",
+    "end": "2026-08-15"
+  },
+  "treatment_window": {
+    "start": "2026-08-16",
+    "end": "2026-08-29"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_NARRATE_STRUCTURED_CONTEXT": "1",
+      "DIGEST_NARRATE_PONYTAIL": "1",
+      "DIGEST_ENRICH_WEB": "1",
+      "DIGEST_ENRICH_SHADOW": "0",
+      "DIGEST_QUALITY_RUBRIC": "1"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "#1 in Lab queue (2026-08-02). Baseline started — production Skills narration uses default prompt + Firecrawl enrich (ponytail flags OFF). FUNCTIONAL METRICS (primary): (1) Token log baseline — data/quality/token-usage.jsonl + /lab/token-usage.html daily output_tokens and words per repo. (2) Shadow pre-treatment — run DIGEST_ENRICH_SHADOW=1 with ponytail flags before 2026-08-16 for control vs treatment token delta. (3) Shadow rubric — specificity + build_with_it ≥ 4. (4) Quality rubric rank-1 pass rate. PostHog out of scope. Treatment enables DIGEST_NARRATE_STRUCTURED_CONTEXT + DIGEST_NARRATE_PONYTAIL in digest.yml on 2026-08-16. Lab post: briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md."
+}

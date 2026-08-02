@@ -3,7 +3,16 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import type { AppConfig, CandidateRepo, Digest } from "./types.js";
+import type { NarrationResult } from "./narrate/claude.js";
+import { readTokenLog } from "./quality/tokens.js";
 import { runPipeline } from "./pipeline.js";
+
+function narrationMap(
+  entries: Record<string, string | null>,
+  usage = { input_tokens: 1000, output_tokens: 200 },
+): Map<string, NarrationResult> {
+  return new Map(Object.entries(entries).map(([name, brief]) => [name, { brief, usage }]));
+}
 
 const mockCandidates: CandidateRepo[] = [
   {
@@ -66,6 +75,8 @@ describe("runPipeline integration", () => {
       enrichWebDeep: true,
       enrichReddit: true,
       qualityRubric: false,
+      narrateStructuredContext: false,
+      narratePonytail: false,
     };
   });
 
@@ -88,10 +99,10 @@ describe("runPipeline integration", () => {
       }),
       enrich: vi.fn(async (_c, candidates) => candidates),
       narrate: vi.fn().mockResolvedValue(
-        new Map([
-          ["acme/one", structuredBrief],
-          ["acme/two", structuredBrief],
-        ]),
+        narrationMap({
+          "acme/one": structuredBrief,
+          "acme/two": structuredBrief,
+        }),
       ),
     });
 
@@ -129,10 +140,10 @@ describe("runPipeline integration", () => {
       }),
       enrich: vi.fn(async (_c, candidates) => candidates),
       narrate: vi.fn().mockResolvedValue(
-        new Map([
-          ["acme/one", structuredBrief],
-          ["acme/two", structuredBrief],
-        ]),
+        narrationMap({
+          "acme/one": structuredBrief,
+          "acme/two": structuredBrief,
+        }),
       ),
       sendEmail: vi.fn().mockRejectedValue(new Error("Resend API error: invalid bcc")),
     });
@@ -155,10 +166,10 @@ describe("runPipeline integration", () => {
         candidates.map((c) => ({ ...c, stars: c.stars + 1, readme_excerpt: "Fresh README" })),
       ),
       narrate: vi.fn().mockResolvedValue(
-        new Map([
-          ["acme/one", structuredBrief],
-          ["acme/two", structuredBrief],
-        ]),
+        narrationMap({
+          "acme/one": structuredBrief,
+          "acme/two": structuredBrief,
+        }),
       ),
     });
 
@@ -211,10 +222,10 @@ describe("runPipeline integration", () => {
       }),
       enrich: vi.fn(async (_c, candidates) => candidates),
       narrate: vi.fn().mockResolvedValue(
-        new Map([
-          ["acme/one", structuredBrief],
-          ["acme/two", structuredBrief],
-        ]),
+        narrationMap({
+          "acme/one": structuredBrief,
+          "acme/two": structuredBrief,
+        }),
       ),
     });
 
@@ -262,10 +273,10 @@ describe("runPipeline integration", () => {
       }),
       enrich: vi.fn(async (_c, candidates) => candidates),
       narrate: vi.fn().mockResolvedValue(
-        new Map([
-          ["acme/one", structuredBrief],
-          ["acme/two", structuredBrief],
-        ]),
+        narrationMap({
+          "acme/one": structuredBrief,
+          "acme/two": structuredBrief,
+        }),
       ),
     });
 
@@ -329,16 +340,16 @@ describe("runPipeline integration", () => {
     const narrateMock = vi
       .fn()
       .mockResolvedValueOnce(
-        new Map([
-          ["acme/one", "control one"],
-          ["acme/two", "control two"],
-        ]),
+        narrationMap(
+          { "acme/one": "control one", "acme/two": "control two" },
+          { input_tokens: 1100, output_tokens: 220 },
+        ),
       )
       .mockResolvedValueOnce(
-        new Map([
-          ["acme/one", "treatment one"],
-          ["acme/two", "treatment two"],
-        ]),
+        narrationMap(
+          { "acme/one": "treatment one", "acme/two": "treatment two" },
+          { input_tokens: 1050, output_tokens: 180 },
+        ),
       );
 
     const result = await runPipeline(config, {
@@ -379,6 +390,12 @@ describe("runPipeline integration", () => {
     expect(shadow.repos[0].brief_control).toBe("control one");
     expect(shadow.repos[0].brief_treatment).toBe("treatment one");
     expect(shadow.repos[0].enrichment_bundle_ref).toBe("acme-one.json");
+    expect(shadow.usage_summary?.control?.output_tokens).toBe(440);
+    expect(shadow.usage_summary?.treatment?.output_tokens).toBe(360);
+
+    const tokenRows = await readTokenLog(tmpDir);
+    expect(tokenRows).toHaveLength(2);
+    expect(tokenRows.map((r) => r.variant).sort()).toEqual(["control", "treatment"]);
 
     await expect(
       fs.access(path.join(path.dirname(result.jsonPath), "acme-one.json")),
@@ -407,10 +424,10 @@ describe("runPipeline integration", () => {
       }),
       enrich: vi.fn(async (_c, candidates) => candidates),
       narrate: vi.fn().mockResolvedValue(
-        new Map([
-          ["acme/one", structuredBrief],
-          ["acme/two", structuredBrief],
-        ]),
+        narrationMap({
+          "acme/one": structuredBrief,
+          "acme/two": structuredBrief,
+        }),
       ),
     });
 
@@ -424,10 +441,10 @@ describe("runPipeline integration", () => {
     config.editionId = "skills";
 
     const narrateMock = vi.fn().mockResolvedValue(
-      new Map([
-        ["acme/one", structuredBrief],
-        ["acme/two", structuredBrief],
-      ]),
+      narrationMap({
+        "acme/one": structuredBrief,
+        "acme/two": structuredBrief,
+      }),
     );
 
     await runPipeline(config, {
@@ -458,5 +475,10 @@ describe("runPipeline integration", () => {
     expect(narrateMock).toHaveBeenCalledTimes(1);
     const enrichedArg = narrateMock.mock.calls[0][2] as Array<{ external_context?: string }>;
     expect(enrichedArg[0].external_context).toBe("HN snippet");
+
+    const tokenRows = await readTokenLog(tmpDir);
+    expect(tokenRows).toHaveLength(1);
+    expect(tokenRows[0].variant).toBe("single");
+    expect(tokenRows[0].output_tokens).toBe(400);
   });
 });

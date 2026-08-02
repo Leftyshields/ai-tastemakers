@@ -42,8 +42,12 @@ Record scores in experiment `notes` or commit `data/experiments/runs/{run_id}/ru
 
 When `enrich_web_requested` is true, each repo entry includes:
 
-- `brief_control` — README-only narration
-- `brief_treatment` — README + web/HN snippets
+- `brief_control` — README-only narration (enrichment shadow), **or** default prompt with enrichment (narration shadow when `narrate_ponytail_requested` is true)
+- `brief_treatment` — README + web/HN snippets (enrichment shadow), **or** structured + ponytail prompt with enrichment (narration shadow)
 - `enrichment_bundle_ref` — `{owner-repo}.json` in the same run directory
+
+### Narration shadow (EXP-20260802)
+
+When `narrate_ponytail_requested` is true, both control and treatment received the same enriched context. Control uses the default narration prompt; treatment uses `DIGEST_NARRATE_STRUCTURED_CONTEXT` + `DIGEST_NARRATE_PONYTAIL` flags. Score treatment against control — not against README-only baselines.
 
 Compare control vs treatment before scoring treatment-only repos.
