@@ -66,6 +66,8 @@ describe("runPipeline integration", () => {
       enrichWebDeep: true,
       enrichReddit: true,
       qualityRubric: false,
+    narrateStructuredContext: false,
+    narratePonytail: false,
     };
   });
 

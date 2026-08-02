@@ -132,6 +132,8 @@ export function loadConfig(options?: {
     enrichReddit: parseEnvBool("DIGEST_ENRICH_REDDIT", true),
     firecrawlApiKey: process.env.FIRECRAWL_API_KEY?.trim() || undefined,
     qualityRubric: parseEnvBool("DIGEST_QUALITY_RUBRIC"),
+    narrateStructuredContext: parseEnvBool("DIGEST_NARRATE_STRUCTURED_CONTEXT"),
+    narratePonytail: parseEnvBool("DIGEST_NARRATE_PONYTAIL"),
     experimentId: (() => {
       const id = process.env.EXPERIMENT_ID?.trim();
       if (!id) return undefined;

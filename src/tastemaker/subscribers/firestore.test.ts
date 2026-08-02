@@ -35,6 +35,8 @@ const base: AppConfig = {
   enrichWebDeep: true,
   enrichReddit: true,
   qualityRubric: false,
+  narrateStructuredContext: false,
+  narratePonytail: false,
 };
 
 describe("subscriberDocId", () => {

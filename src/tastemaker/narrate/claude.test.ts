@@ -34,4 +34,37 @@ describe("buildPrompt", () => {
     expect(prompt).toContain("Recent launch thread on HN.");
     expect(prompt).toContain("Editorial rules");
   });
+
+  it("uses structured context tiers when enabled", () => {
+    const prompt = buildPrompt(
+      {
+        ...sampleRepo,
+        external_context: "[Hacker News]\nShow HN thread.",
+      },
+      { structuredContext: true },
+    );
+    expect(prompt).toContain("## Context graph");
+    expect(prompt).toContain("### Ground truth — README");
+    expect(prompt).toContain("### Repo metadata");
+    expect(prompt).toContain("### Timely signals");
+    expect(prompt).toContain("Show HN thread.");
+    expect(prompt).not.toContain("External context (web, Hacker News, Reddit");
+  });
+
+  it("adds ponytail constraints when enabled", () => {
+    const prompt = buildPrompt(sampleRepo, { ponytail: true });
+    expect(prompt).toContain("Ponytail constraints (strict):");
+    expect(prompt).toContain("ONE integration step");
+    expect(prompt).toContain("no multi-tool stacks");
+  });
+
+  it("combines structured context and ponytail rules", () => {
+    const prompt = buildPrompt(sampleRepo, {
+      structuredContext: true,
+      ponytail: true,
+    });
+    expect(prompt).toContain("## Context graph");
+    expect(prompt).toContain("Ponytail constraints (strict):");
+    expect(prompt).toContain("Treat README as ground truth");
+  });
 });

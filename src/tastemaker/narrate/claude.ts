@@ -1,7 +1,43 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ScoredRepo } from "../types.js";
 
-export function buildPrompt(repo: ScoredRepo): string {
+export interface NarrationOptions {
+  /** Graphify-style tiered context: README ground truth → metadata → timely signals. */
+  structuredContext?: boolean;
+  /** Ponytail YAGNI constraints: one integration path, no architecture sprawl. */
+  ponytail?: boolean;
+}
+
+function formatStructuredContext(repo: ScoredRepo): string[] {
+  const parts: string[] = ["## Context graph (use in this priority order)", ""];
+
+  parts.push("### Ground truth — README");
+  if (repo.readme_excerpt) {
+    parts.push(repo.readme_excerpt);
+  } else {
+    parts.push("Unavailable — use description and topics only.");
+  }
+
+  parts.push("", "### Repo metadata");
+  parts.push(`- Repository: ${repo.full_name}`);
+  parts.push(`- URL: ${repo.html_url}`);
+  parts.push(`- Stars: ${repo.stars} (+${repo.stars_gained_7d} this week)`);
+  parts.push(`- Topics: ${repo.topics.join(", ") || "none"}`);
+  parts.push(`- Language: ${repo.language || "unknown"}`);
+  parts.push(`- Description: ${repo.description || "none"}`);
+
+  if (repo.external_context?.trim()) {
+    parts.push(
+      "",
+      "### Timely signals (Why now only — do not infer capabilities from these)",
+      repo.external_context.trim(),
+    );
+  }
+
+  return parts;
+}
+
+function formatFlatContext(repo: ScoredRepo): string[] {
   const parts = [
     `Repository: ${repo.full_name}`,
     `URL: ${repo.html_url}`,
@@ -24,7 +60,46 @@ export function buildPrompt(repo: ScoredRepo): string {
     );
   }
 
-  parts.push(
+  return parts;
+}
+
+function editorialRules(options?: NarrationOptions): string[] {
+  const rules = [
+    "Editorial rules (YAGNI / taste-skill style):",
+    "- Use those exact bold labels. Be specific, punchy, and builder-focused.",
+    "- No hype, filler, or generic praise (avoid: revolutionary, game-changer, must-have).",
+    "- **Why now** must cite a concrete timely signal when external context provides one: HN thread, Reddit post, release, launch, demo, coverage, or trend — not star count alone.",
+    "- **Build with it** must name a concrete integration path (tool, config surface, or workflow step), not vague 'try this tool'.",
+    "- Prefer nouns and features from README/external context over inventing capabilities.",
+  ];
+
+  if (options?.structuredContext) {
+    rules.push(
+      "- Treat README as ground truth for capabilities; use timely signals only for **Why now**.",
+    );
+  }
+
+  if (options?.ponytail) {
+    rules.push(
+      "",
+      "Ponytail constraints (strict):",
+      "- Each section: one sentence when possible; two only if a concrete noun would be lost.",
+      "- **Build with it**: ONE integration step — no multi-tool stacks, no 'you could also', no future roadmap.",
+      "- Do not propose architectures, refactors, or 'production-ready' setups the README does not mention.",
+      "- Prefer the simplest builder action that validates the repo's core value.",
+    );
+  }
+
+  return rules;
+}
+
+export function buildPrompt(repo: ScoredRepo, options?: NarrationOptions): string {
+  const contextParts = options?.structuredContext
+    ? formatStructuredContext(repo)
+    : formatFlatContext(repo);
+
+  const parts = [
+    ...contextParts,
     "",
     "Write a brief in English using exactly three labeled sections in this order, each with one to two sentences:",
     "",
@@ -32,13 +107,8 @@ export function buildPrompt(repo: ScoredRepo): string {
     "**Why now:** [why it is relevant this week]",
     "**Build with it:** [what a builder could do with it]",
     "",
-    "Editorial rules (YAGNI / taste-skill style):",
-    "- Use those exact bold labels. Be specific, punchy, and builder-focused.",
-    "- No hype, filler, or generic praise (avoid: revolutionary, game-changer, must-have).",
-    "- **Why now** must cite a concrete timely signal when external context provides one: HN thread, Reddit post, release, launch, demo, coverage, or trend — not star count alone.",
-    "- **Build with it** must name a concrete integration path (tool, config surface, or workflow step), not vague 'try this tool'.",
-    "- Prefer nouns and features from README/external context over inventing capabilities.",
-  );
+    ...editorialRules(options),
+  ];
 
   return parts.join("\n");
 }
@@ -47,12 +117,13 @@ export async function narrateRepo(
   client: Anthropic,
   model: string,
   repo: ScoredRepo,
+  options?: NarrationOptions,
 ): Promise<string | null> {
   try {
     const message = await client.messages.create({
       model,
-      max_tokens: 450,
-      messages: [{ role: "user", content: buildPrompt(repo) }],
+      max_tokens: options?.ponytail ? 350 : 450,
+      messages: [{ role: "user", content: buildPrompt(repo, options) }],
     });
 
     const block = message.content.find((b) => b.type === "text");
@@ -72,12 +143,13 @@ export async function narrateRepos(
   apiKey: string,
   model: string,
   repos: ScoredRepo[],
+  options?: NarrationOptions,
 ): Promise<Map<string, string | null>> {
   const client = new Anthropic({ apiKey });
   const results = new Map<string, string | null>();
 
   for (const repo of repos) {
-    results.set(repo.full_name, await narrateRepo(client, model, repo));
+    results.set(repo.full_name, await narrateRepo(client, model, repo, options));
   }
 
   return results;

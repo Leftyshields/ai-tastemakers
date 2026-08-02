@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260802-ponytail-narration-skills",
+  "hypothesis": "Graphify-style structured context tiers plus ponytail YAGNI narration constraints improve shadow-rubric scores on specificity and build_with_it without losing why_now timeliness — blurbs stay accurate but become shorter and more actionable.",
+  "change_summary": "Enable DIGEST_NARRATE_STRUCTURED_CONTEXT and DIGEST_NARRATE_PONYTAIL on Skills narration (with enrichment on). Shadow mode compares default vs treatment prompts on the same enriched context.",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-09-01",
+    "end": "2026-09-14"
+  },
+  "treatment_window": {
+    "start": "2026-09-15",
+    "end": "2026-09-28"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_NARRATE_STRUCTURED_CONTEXT": "1",
+      "DIGEST_NARRATE_PONYTAIL": "1",
+      "DIGEST_ENRICH_WEB": "1",
+      "DIGEST_ENRICH_SHADOW": "0",
+      "DIGEST_QUALITY_RUBRIC": "1"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Inspired by W31 Builder Takeaway (2026-W31): context fidelity (Graphify), ponytail anti-over-engineering signal, ai-agent-book runnable-experiment format. Experiment platform paused 2026-08-01 — not scheduled. Backlog: NARR-1. METRIC PRIORITY (low traffic): (1) PRIMARY — shadow rubric on top-3 enriched repos: median specificity + build_with_it ≥ 4, no accuracy ≤ 2; optional brevity (word count per brief). (2) SECONDARY — DIGEST_QUALITY_RUBRIC rank-1 heuristic log in data/quality/rubric-scores.jsonl. (3) TERTIARY — PostHog outbound_repo_click (edition=skills). Shadow command (pre-treatment): EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_SHADOW=1 DIGEST_NARRATE_STRUCTURED_CONTEXT=1 DIGEST_NARRATE_PONYTAIL=1 npm run digest -- --edition skills. Treatment flags in digest.yml: DIGEST_NARRATE_STRUCTURED_CONTEXT=1 and DIGEST_NARRATE_PONYTAIL=1 on Skills digest step only."
+}

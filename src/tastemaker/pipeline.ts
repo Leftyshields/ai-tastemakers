@@ -33,7 +33,7 @@ import {
   writeEnrichmentBundles,
   enrichmentBundleRef,
 } from "./enrich/index.js";
-import { narrateRepos } from "./narrate/claude.js";
+import { narrateRepos, type NarrationOptions } from "./narrate/claude.js";
 
 export interface PipelineResult {
   briefingDir: string;
@@ -162,7 +162,15 @@ export async function runPipeline(
   console.error(`Narrating top ${top.length} repos…`);
 
   const useExternalEnrich = config.enrichWeb && config.editionId === "skills";
-  const sideBySideNarrate = useExternalEnrich && config.enrichShadow;
+  const narrateTreatmentOpts: NarrationOptions = {
+    structuredContext: config.narrateStructuredContext,
+    ponytail: config.narratePonytail,
+  };
+  const hasNarrateTreatment =
+    config.narrateStructuredContext || config.narratePonytail;
+  const narrateShadow = config.enrichShadow && hasNarrateTreatment && useExternalEnrich;
+  const enrichShadow = config.enrichShadow && !hasNarrateTreatment;
+  const sideBySideNarrate = useExternalEnrich && enrichShadow;
   let externalBundles = new Map<string, EnrichmentBundle>();
 
   if (useExternalEnrich) {
@@ -182,13 +190,34 @@ export async function runPipeline(
   let controlBriefs = new Map<string, string | null>();
   let treatmentBriefs: Map<string, string | null>;
 
-  if (sideBySideNarrate) {
+  if (narrateShadow) {
+    const enrichedTop = applyExternalContext(top, externalBundles);
+    controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+    treatmentBriefs = await narrate(
+      config.anthropicApiKey,
+      config.anthropicModel,
+      enrichedTop,
+      narrateTreatmentOpts,
+    );
+  } else if (sideBySideNarrate) {
     controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
     const enrichedTop = applyExternalContext(top, externalBundles);
     treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
   } else if (useExternalEnrich) {
     const enrichedTop = applyExternalContext(top, externalBundles);
-    treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+    treatmentBriefs = await narrate(
+      config.anthropicApiKey,
+      config.anthropicModel,
+      enrichedTop,
+      hasNarrateTreatment ? narrateTreatmentOpts : undefined,
+    );
+  } else if (hasNarrateTreatment) {
+    treatmentBriefs = await narrate(
+      config.anthropicApiKey,
+      config.anthropicModel,
+      top,
+      narrateTreatmentOpts,
+    );
   } else {
     treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
   }
@@ -231,7 +260,7 @@ export async function runPipeline(
     const shadowRepos = shadowReposFromDigest(
       digestRepos,
       useExternalEnrich,
-      sideBySideNarrate ? controlBriefs : treatmentBriefs,
+      narrateShadow || sideBySideNarrate ? controlBriefs : treatmentBriefs,
       treatmentBriefs,
       bundleRefs,
     );
@@ -243,6 +272,7 @@ export async function runPipeline(
         generated_at: digest.generated_at,
         ranking_mode: rankingMode,
         enrich_web_requested: useExternalEnrich,
+        narrate_ponytail_requested: narrateShadow,
         repos: shadowRepos,
       },
       dateLabel,

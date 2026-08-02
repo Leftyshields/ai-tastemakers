@@ -48,6 +48,8 @@ const baseConfig: AppConfig = {
   enrichWebDeep: true,
   enrichReddit: true,
   qualityRubric: false,
+  narrateStructuredContext: false,
+  narratePonytail: false,
 };
 
 beforeEach(() => {

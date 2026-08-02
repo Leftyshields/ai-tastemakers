@@ -22,6 +22,8 @@ export interface ShadowDigestPayload {
   date: string;
   edition: string;
   enrich_web_requested: boolean;
+  /** When true, brief_control uses default narration and brief_treatment uses ponytail/structured flags. */
+  narrate_ponytail_requested?: boolean;
   generated_at: string;
   ranking_mode: string;
   repos: ShadowRepoEntry[];
@@ -36,6 +38,7 @@ export interface WriteShadowDigestInput {
   generated_at: string;
   ranking_mode: string;
   enrich_web_requested: boolean;
+  narrate_ponytail_requested?: boolean;
   repos: ShadowRepoEntry[];
 }
 
@@ -53,6 +56,7 @@ export async function writeShadowDigest(
     date: dateLabel,
     edition: editionId,
     enrich_web_requested: input.enrich_web_requested,
+    narrate_ponytail_requested: input.narrate_ponytail_requested,
     generated_at: input.generated_at,
     ranking_mode: input.ranking_mode,
     repos: input.repos,

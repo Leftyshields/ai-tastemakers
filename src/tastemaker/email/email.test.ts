@@ -215,6 +215,8 @@ describe("shouldSendDigestEmail", () => {
   enrichWebDeep: true,
   enrichReddit: true,
   qualityRubric: false,
+  narrateStructuredContext: false,
+  narratePonytail: false,
   };
 
   it("returns false when email env incomplete", async () => {
