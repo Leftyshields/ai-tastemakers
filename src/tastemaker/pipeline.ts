@@ -33,6 +33,7 @@ import {
   writeEnrichmentBundles,
   enrichmentBundleRef,
 } from "./enrich/index.js";
+import { narrateRepos } from "./narrate/claude.js";
 
 export interface PipelineResult {
   briefingDir: string;
