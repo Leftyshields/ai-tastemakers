@@ -25,6 +25,7 @@ import { appendShadowRun } from "./experiments/load.js";
 import {
   writeShadowDigest,
   shadowReposFromDigest,
+  shadowUsageSummary,
 } from "./experiments/shadow.js";
 import type { EnrichmentBundle } from "./enrich/types.js";
 import {
@@ -33,7 +34,9 @@ import {
   writeEnrichmentBundles,
   enrichmentBundleRef,
 } from "./enrich/index.js";
-import { narrateRepos, type NarrationOptions } from "./narrate/claude.js";
+import { narrateRepos, briefsFromNarration, type NarrationOptions } from "./narrate/claude.js";
+import type { NarrationResult } from "./narrate/claude.js";
+import { appendTokenLog, buildTokenLogEntry } from "./quality/tokens.js";
 
 export interface PipelineResult {
   briefingDir: string;
@@ -161,6 +164,8 @@ export async function runPipeline(
 
   console.error(`Narrating top ${top.length} repos…`);
 
+  const runId = randomUUID();
+
   const useExternalEnrich = config.enrichWeb && config.editionId === "skills";
   const narrateTreatmentOpts: NarrationOptions = {
     structuredContext: config.narrateStructuredContext,
@@ -187,40 +192,70 @@ export async function runPipeline(
     });
   }
 
-  let controlBriefs = new Map<string, string | null>();
-  let treatmentBriefs: Map<string, string | null>;
+  let controlResults = new Map<string, NarrationResult>();
+  let treatmentResults = new Map<string, NarrationResult>();
+
+  const tokenFlags = {
+    enrich_web: useExternalEnrich,
+    structured_context: config.narrateStructuredContext,
+    ponytail: config.narratePonytail,
+  };
+
+  async function logNarrationVariant(
+    results: Map<string, NarrationResult>,
+    variant: "control" | "treatment" | "single",
+  ): Promise<void> {
+    const entry = buildTokenLogEntry({
+      run_id: runId,
+      edition: config.editionId,
+      date: dateLabel,
+      model: config.anthropicModel,
+      variant,
+      shadow: config.enrichShadow,
+      experiment_id: config.experimentId,
+      flags: tokenFlags,
+      results,
+    });
+    await appendTokenLog(config.rootDir, entry);
+    console.error(
+      `Token usage (${variant}): in=${entry.input_tokens} out=${entry.output_tokens} words=${entry.output_words}`,
+    );
+  }
 
   if (narrateShadow) {
     const enrichedTop = applyExternalContext(top, externalBundles);
-    controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
-    treatmentBriefs = await narrate(
+    controlResults = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+    treatmentResults = await narrate(
       config.anthropicApiKey,
       config.anthropicModel,
       enrichedTop,
       narrateTreatmentOpts,
     );
   } else if (sideBySideNarrate) {
-    controlBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
+    controlResults = await narrate(config.anthropicApiKey, config.anthropicModel, top);
     const enrichedTop = applyExternalContext(top, externalBundles);
-    treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
+    treatmentResults = await narrate(config.anthropicApiKey, config.anthropicModel, enrichedTop);
   } else if (useExternalEnrich) {
     const enrichedTop = applyExternalContext(top, externalBundles);
-    treatmentBriefs = await narrate(
+    treatmentResults = await narrate(
       config.anthropicApiKey,
       config.anthropicModel,
       enrichedTop,
       hasNarrateTreatment ? narrateTreatmentOpts : undefined,
     );
   } else if (hasNarrateTreatment) {
-    treatmentBriefs = await narrate(
+    treatmentResults = await narrate(
       config.anthropicApiKey,
       config.anthropicModel,
       top,
       narrateTreatmentOpts,
     );
   } else {
-    treatmentBriefs = await narrate(config.anthropicApiKey, config.anthropicModel, top);
+    treatmentResults = await narrate(config.anthropicApiKey, config.anthropicModel, top);
   }
+
+  const controlBriefs = briefsFromNarration(controlResults);
+  const treatmentBriefs = briefsFromNarration(treatmentResults);
 
   const digestRepos: DigestRepo[] = top.map((repo, i) => ({
     rank: i + 1,
@@ -237,12 +272,22 @@ export async function runPipeline(
 
   const digest: Digest = {
     schema_version: 1,
-    run_id: randomUUID(),
+    run_id: runId,
     generated_at: now.toISOString(),
     ranking_mode: rankingMode,
     topic_queries: config.topics,
     repos: digestRepos,
   };
+
+  if (narrateShadow) {
+    await logNarrationVariant(controlResults, "control");
+    await logNarrationVariant(treatmentResults, "treatment");
+  } else if (sideBySideNarrate) {
+    await logNarrationVariant(controlResults, "control");
+    await logNarrationVariant(treatmentResults, "treatment");
+  } else {
+    await logNarrationVariant(treatmentResults, "single");
+  }
 
   if (config.enrichShadow) {
     const bundleRefs = new Map<string, string>();
@@ -257,12 +302,15 @@ export async function runPipeline(
       await writeEnrichmentBundles(runDir, externalBundles);
     }
 
+    const hasControlVariant = narrateShadow || sideBySideNarrate;
     const shadowRepos = shadowReposFromDigest(
       digestRepos,
       useExternalEnrich,
-      narrateShadow || sideBySideNarrate ? controlBriefs : treatmentBriefs,
+      hasControlVariant ? controlBriefs : treatmentBriefs,
       treatmentBriefs,
       bundleRefs,
+      hasControlVariant ? controlResults : undefined,
+      treatmentResults,
     );
 
     const shadowPath = await writeShadowDigest(
@@ -273,6 +321,11 @@ export async function runPipeline(
         ranking_mode: rankingMode,
         enrich_web_requested: useExternalEnrich,
         narrate_ponytail_requested: narrateShadow,
+        usage_summary: shadowUsageSummary(
+          controlResults,
+          treatmentResults,
+          hasControlVariant,
+        ),
         repos: shadowRepos,
       },
       dateLabel,

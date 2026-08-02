@@ -8,6 +8,7 @@ import {
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
 import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
 import { writeExperimentsData } from "./lab/aggregate-experiments.js";
+import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -267,7 +268,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
 }
 
 export function labNavHtml(
-  active: "home" | "tools" | "experiments" | "posts",
+  active: "home" | "tools" | "experiments" | "tokens" | "posts",
   escapeHtml: (t: string) => string,
   depth: 0 | 1 = 0,
 ): string {
@@ -288,6 +289,7 @@ export function labNavHtml(
       ${pill(`${prefix}${depth === 0 ? "./" : ""}`, "Lab home", active === "home")}
       ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
+      ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
       ${pill(postsHref, "Posts", active === "posts")}
     </nav>`;
 }
@@ -311,6 +313,8 @@ interface ShadowRepoEntry {
   html_url: string;
   brief_control?: string | null;
   brief_treatment?: string | null;
+  usage_control?: { input_tokens: number; output_tokens: number };
+  usage_treatment?: { input_tokens: number; output_tokens: number };
   enrichment_bundle_ref?: string;
   brief?: string | null;
   is_new?: boolean;
@@ -321,9 +325,20 @@ interface ShadowDigestPayload {
   date: string;
   edition: string;
   enrich_web_requested: boolean;
+  narrate_ponytail_requested?: boolean;
   generated_at: string;
   ranking_mode: string;
+  usage_summary?: {
+    control?: { input_tokens: number; output_tokens: number; output_words: number };
+    treatment?: { input_tokens: number; output_tokens: number; output_words: number };
+  };
   repos: ShadowRepoEntry[];
+}
+
+function formatTokenUsage(usage?: { input_tokens: number; output_tokens: number }): string {
+  if (!usage) return "";
+  const total = usage.input_tokens + usage.output_tokens;
+  return ` · ${total.toLocaleString()} tok (${usage.output_tokens.toLocaleString()} out)`;
 }
 
 function renderBriefMarkdown(brief: string | null | undefined): string {
@@ -336,6 +351,7 @@ function renderBriefMarkdown(brief: string | null | undefined): string {
 function renderShadowRepoSection(
   repo: ShadowRepoEntry,
   escapeHtml: (t: string) => string,
+  narratePonytailRequested?: boolean,
 ): string {
   const title = `<h3 class="mb-1 font-sans text-base font-semibold"><a href="${escapeHtml(repo.html_url)}" class="text-blue-800 no-underline hover:underline dark:text-blue-400">${escapeHtml(repo.full_name)}</a> <span class="font-normal text-stone-500">#${repo.rank}</span></h3>`;
   const prose =
@@ -347,15 +363,21 @@ function renderShadowRepoSection(
     Boolean(repo.enrichment_bundle_ref);
 
   if (hasSideBySide) {
+    const controlLabel = narratePonytailRequested
+      ? "Control (default prompt)"
+      : "Control (README only)";
+    const treatmentLabel = narratePonytailRequested
+      ? "Treatment (structured + ponytail)"
+      : "Treatment (README + web/HN)";
     return `<section class="mb-10 border-b border-stone-200 pb-8 last:border-b-0 dark:border-stone-700">
       ${title}
       <div class="mt-4 grid gap-4 md:grid-cols-2">
         <div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
-          <h4 class="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-stone-500">Control (README only)</h4>
+          <h4 class="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-stone-500">${escapeHtml(controlLabel)}<span class="font-normal normal-case">${escapeHtml(formatTokenUsage(repo.usage_control))}</span></h4>
           <article class="brief-content ${prose}">${renderBriefMarkdown(repo.brief_control)}</article>
         </div>
         <div class="rounded-lg border border-blue-200 bg-blue-50/30 p-4 dark:border-blue-800 dark:bg-blue-950/20">
-          <h4 class="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-blue-800 dark:text-blue-300">Treatment (README + web/HN)</h4>
+          <h4 class="mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-blue-800 dark:text-blue-300">${escapeHtml(treatmentLabel)}<span class="font-normal normal-case">${escapeHtml(formatTokenUsage(repo.usage_treatment))}</span></h4>
           <article class="brief-content ${prose}">${renderBriefMarkdown(repo.brief_treatment)}</article>
         </div>
       </div>
@@ -386,13 +408,33 @@ export function renderShadowCompareBody(
       ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output — repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
       : "";
 
-  const repos = shadow.repos.map((repo) => renderShadowRepoSection(repo, escapeHtml)).join("");
+  const usageBanner =
+    shadow.usage_summary?.control || shadow.usage_summary?.treatment
+      ? `<p class="mb-6 rounded-lg border border-stone-200 bg-stone-50 p-3 text-sm dark:border-stone-700 dark:bg-stone-900/60">
+          <strong>Token usage:</strong>
+          ${
+            shadow.usage_summary.control
+              ? ` control ${shadow.usage_summary.control.output_tokens.toLocaleString()} out / ${shadow.usage_summary.control.output_words.toLocaleString()} words`
+              : ""
+          }${
+            shadow.usage_summary.treatment
+              ? ` · treatment ${shadow.usage_summary.treatment.output_tokens.toLocaleString()} out / ${shadow.usage_summary.treatment.output_words.toLocaleString()} words`
+              : ""
+          }
+          · <a href="../token-usage.html" class="text-blue-800 hover:underline dark:text-blue-400">Lab token dashboard</a>
+        </p>`
+      : "";
+
+  const repos = shadow.repos
+    .map((repo) => renderShadowRepoSection(repo, escapeHtml, shadow.narrate_ponytail_requested))
+    .join("");
 
   return `${labNavHtml("experiments", escapeHtml, 1)}
     <p class="mb-2"><a href="../experiments.html" class="text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; Experiments</a></p>
     <h2 class="font-mono text-lg font-bold">${escapeHtml(shadow.run_id)}</h2>
     <p class="text-sm text-stone-500 dark:text-stone-400">${escapeHtml(shadow.date)} · ${escapeHtml(shadow.edition)} · ${escapeHtml(shadow.ranking_mode)}</p>
-    <p class="mt-2 text-sm"><a href="../shadow-rubric.html" class="text-blue-800 hover:underline dark:text-blue-400">Shadow rubric</a></p>
+    <p class="mt-2 text-sm"><a href="../shadow-rubric.html" class="text-blue-800 hover:underline dark:text-blue-400">Shadow rubric</a> · <a href="../token-usage.html" class="text-blue-800 hover:underline dark:text-blue-400">Token dashboard</a></p>
+    ${usageBanner}
     ${notice}
     ${repos}`;
 }
@@ -406,7 +448,7 @@ async function buildLabMarkdownPage(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
-  navActive: "home" | "tools" | "experiments" | "posts" = "home",
+  navActive: "home" | "tools" | "experiments" | "tokens" | "posts" = "home",
 ): Promise<boolean> {
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
@@ -1523,6 +1565,27 @@ export async function buildLabSite(
   await fs.writeFile(
     path.join(labSiteDir, "experiments.html"),
     pageShell("Experiments · Lab", experimentsBody, paths, brand, undefined, escapeHtml, labShell),
+  );
+
+  await writeTokenUsageData(repoRoot, labSiteDir);
+  await fs.copyFile(
+    path.join(repoRoot, "scripts", "lab", "token-usage.js"),
+    path.join(labSiteDir, "token-usage.js"),
+  );
+
+  let tokenBody = `${labNavHtml("tokens", escapeHtml)}`;
+  try {
+    const markdown = await fs.readFile(path.join(repoRoot, "briefings", "lab", "token-usage.md"), "utf8");
+    const html = marked.parse(markdown) as string;
+    tokenBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-table:text-sm mb-8">${html}</article>`;
+  } catch {
+    tokenBody += `<p class="mb-6 font-sans text-sm text-stone-600 dark:text-stone-400">Narration token telemetry for digest experiments.</p>`;
+  }
+  tokenBody += `<div id="token-usage-root" class="font-sans text-sm"></div><script src="token-usage.js"></script>`;
+
+  await fs.writeFile(
+    path.join(labSiteDir, "token-usage.html"),
+    pageShell("Token usage · Lab", tokenBody, paths, brand, undefined, escapeHtml, labShell),
   );
 
   await buildLabMarkdownPage(

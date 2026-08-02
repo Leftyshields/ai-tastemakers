@@ -1,11 +1,17 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ScoredRepo } from "../types.js";
+import type { TokenUsage } from "../quality/tokens.js";
 
 export interface NarrationOptions {
   /** Graphify-style tiered context: README ground truth → metadata → timely signals. */
   structuredContext?: boolean;
   /** Ponytail YAGNI constraints: one integration path, no architecture sprawl. */
   ponytail?: boolean;
+}
+
+export interface NarrationResult {
+  brief: string | null;
+  usage?: TokenUsage;
 }
 
 function formatStructuredContext(repo: ScoredRepo): string[] {
@@ -113,12 +119,20 @@ export function buildPrompt(repo: ScoredRepo, options?: NarrationOptions): strin
   return parts.join("\n");
 }
 
+export function extractUsage(message: { usage?: { input_tokens: number; output_tokens: number } }): TokenUsage | undefined {
+  if (!message.usage) return undefined;
+  return {
+    input_tokens: message.usage.input_tokens,
+    output_tokens: message.usage.output_tokens,
+  };
+}
+
 export async function narrateRepo(
   client: Anthropic,
   model: string,
   repo: ScoredRepo,
   options?: NarrationOptions,
-): Promise<string | null> {
+): Promise<NarrationResult> {
   try {
     const message = await client.messages.create({
       model,
@@ -128,14 +142,15 @@ export async function narrateRepo(
 
     const block = message.content.find((b) => b.type === "text");
     if (!block || block.type !== "text") {
-      return null;
+      return { brief: null, usage: extractUsage(message) };
     }
 
-    return block.text.trim().replace(/^```[\s\S]*?```$/gm, "").trim();
+    const brief = block.text.trim().replace(/^```[\s\S]*?```$/gm, "").trim();
+    return { brief, usage: extractUsage(message) };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`Claude narration failed for ${repo.full_name}: ${msg}`);
-    return null;
+    return { brief: null };
   }
 }
 
@@ -144,13 +159,23 @@ export async function narrateRepos(
   model: string,
   repos: ScoredRepo[],
   options?: NarrationOptions,
-): Promise<Map<string, string | null>> {
+): Promise<Map<string, NarrationResult>> {
   const client = new Anthropic({ apiKey });
-  const results = new Map<string, string | null>();
+  const results = new Map<string, NarrationResult>();
 
   for (const repo of repos) {
     results.set(repo.full_name, await narrateRepo(client, model, repo, options));
   }
 
   return results;
+}
+
+export function briefsFromNarration(
+  results: Map<string, NarrationResult>,
+): Map<string, string | null> {
+  const briefs = new Map<string, string | null>();
+  for (const [name, result] of results) {
+    briefs.set(name, result.brief);
+  }
+  return briefs;
 }

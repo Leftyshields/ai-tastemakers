@@ -132,10 +132,11 @@ Leave enrichment at production settings (`DIGEST_ENRICH_WEB=1`, Firecrawl provid
 
 **Primary metrics:**
 
-1. Shadow rubric on top-3 enriched repos (specificity + build_with_it median ≥ 4)
-2. `DIGEST_QUALITY_RUBRIC=1` rank-1 log in `data/quality/rubric-scores.jsonl`
+1. Shadow output-token delta on `/lab/token-usage.html` (treatment ≤ control)
+2. Shadow rubric on top-3 enriched repos (specificity + build_with_it median ≥ 4)
+3. `DIGEST_QUALITY_RUBRIC=1` rank-1 log in `data/quality/rubric-scores.jsonl`
 
-**Secondary:** PostHog outbound clicks — collect, do not gate.
+**Out of scope:** PostHog outbound clicks — functional metrics only.
 
 **Shadow run (before treatment):**
 

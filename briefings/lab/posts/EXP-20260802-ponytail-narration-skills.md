@@ -84,10 +84,15 @@ Appends to `data/quality/rubric-scores.jsonl`.
 
 | Priority | Metric | Success bar |
 |----------|--------|-------------|
-| 1 | Shadow rubric (top-3 enriched repos) | Median specificity + build_with_it ≥ 4; no accuracy ≤ 2 |
-| 2 | Brevity | Treatment mean word count ≤ control (informational, not gating) |
-| 3 | Quality rubric log | Rank-1 pass rate stable or up vs baseline window |
-| 4 | PostHog clicks | Collect only — do not gate on sparse traffic |
+| 1 | **Output tokens / repo** (shadow) | Treatment ≤ control (−10% or better) — see [Token dashboard](../token-usage.html) |
+| 2 | **Output words / repo** (shadow) | Treatment shorter; no rubric accuracy drop |
+| 3 | Shadow rubric (top-3 enriched repos) | Median specificity + build_with_it ≥ 4; no accuracy ≤ 2 |
+| 4 | Quality rubric log | Rank-1 pass rate stable or up vs baseline window |
+| 5 | Narration failures | `repos_failed` unchanged in token log |
+
+Engagement analytics (PostHog clicks, pageviews) are **out of scope** for this experiment — functional cost + quality only.
+
+Token telemetry logs automatically to `data/quality/token-usage.jsonl` on every digest run and surfaces on the public [Token usage](/lab/token-usage.html) page after `npm run build:pages`.
 
 ### Windows (when formal experiments resume)
 
