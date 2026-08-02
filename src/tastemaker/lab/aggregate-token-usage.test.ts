@@ -1,6 +1,14 @@
 import { describe, it, expect } from "vitest";
-import { aggregateTokenUsage, joinRubricToEntries } from "../../../scripts/lab/aggregate-token-usage.js";
+import {
+  aggregateTokenUsage,
+  joinRubricToEntries,
+  dedupeTokenEntries,
+  renderTokenUsageDashboardHtml,
+} from "../../../scripts/lab/aggregate-token-usage.js";
 import type { TokenUsageLogEntry } from "../../src/tastemaker/quality/tokens.js";
+
+const escapeHtml = (t: string) =>
+  t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
 
 describe("aggregate-token-usage", () => {
   it("aggregates extended daily and shadow comparisons", () => {
@@ -132,5 +140,73 @@ describe("aggregate-token-usage", () => {
       ],
     );
     expect(joined[0].rubric?.why_now).toBe(5);
+  });
+
+  it("dedupeTokenEntries prefers api logs over digest estimates", () => {
+    const api: TokenUsageLogEntry = {
+      logged_at: "2026-08-03T12:00:00.000Z",
+      run_id: "live",
+      edition: "skills",
+      date: "2026-08-02",
+      model: "claude-sonnet-4-6",
+      variant: "single",
+      shadow: false,
+      metrics_source: "api",
+      flags: { enrich_web: true, structured_context: false, ponytail: false },
+      repos_narrated: 10,
+      repos_failed: 0,
+      input_tokens: 9000,
+      output_tokens: 1800,
+      output_words: 700,
+      prompt_chars: 38000,
+      latency_ms_total: 8000,
+      latency_ms_avg: 800,
+      enrich_chars_total: 7200,
+      estimated_usd: 0.05,
+      per_repo: [],
+    };
+    const estimate: TokenUsageLogEntry = {
+      ...api,
+      logged_at: "2026-08-02T12:00:00.000Z",
+      run_id: "backfill",
+      metrics_source: "digest_estimate",
+      output_tokens: 1500,
+    };
+    const deduped = dedupeTokenEntries([estimate, api]);
+    expect(deduped.filter((e) => e.variant === "single")).toHaveLength(1);
+    expect(deduped.find((e) => e.variant === "single")?.output_tokens).toBe(1800);
+  });
+
+  it("renderTokenUsageDashboardHtml includes daily table rows", () => {
+    const data = aggregateTokenUsage([
+      {
+        logged_at: "2026-08-02T12:00:00.000Z",
+        run_id: "run-a",
+        edition: "skills",
+        date: "2026-08-02",
+        model: "claude-sonnet-4-6",
+        variant: "single",
+        shadow: false,
+        flags: { enrich_web: true, structured_context: false, ponytail: false },
+        repos_narrated: 10,
+        repos_failed: 0,
+        input_tokens: 10000,
+        output_tokens: 2000,
+        output_words: 800,
+        prompt_chars: 42000,
+        latency_ms_total: 9000,
+        latency_ms_avg: 900,
+        enrich_chars_total: 7200,
+        estimated_usd: 0.06,
+        per_repo: [],
+      },
+    ]);
+    const html = renderTokenUsageDashboardHtml(
+      { schema_version: 1, generated_at: "2026-08-02T20:00:00.000Z", ...data },
+      escapeHtml,
+    );
+    expect(html).toContain("Daily statistics");
+    expect(html).toContain("2026-08-02");
+    expect(html).toContain("2,000");
   });
 });

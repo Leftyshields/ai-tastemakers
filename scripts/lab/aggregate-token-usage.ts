@@ -67,10 +67,31 @@ export interface TokenUsageDataFile {
   schema_version: 1;
   generated_at: string;
   entries: number;
+  estimated_entries: number;
   daily: TokenUsageDailyRow[];
   by_experiment: TokenUsageExperimentRow[];
   shadow_comparisons: TokenUsageShadowRow[];
   recent: TokenUsageLogEntry[];
+}
+
+function entryPriority(entry: TokenUsageLogEntry): number {
+  if (entry.metrics_source === "digest_estimate") return 1;
+  return 2;
+}
+
+/** One production row per date+edition; prefer live API logs over digest backfill. */
+export function dedupeTokenEntries(entries: TokenUsageLogEntry[]): TokenUsageLogEntry[] {
+  const shadow = entries.filter((e) => e.variant !== "single" || e.shadow);
+  const singles = entries.filter((e) => e.variant === "single" && !e.shadow);
+  const singleByDay = new Map<string, TokenUsageLogEntry>();
+  for (const entry of singles) {
+    const key = `${entry.date}|${entry.edition}`;
+    const existing = singleByDay.get(key);
+    if (!existing || entryPriority(entry) > entryPriority(existing)) {
+      singleByDay.set(key, entry);
+    }
+  }
+  return [...singleByDay.values(), ...shadow];
 }
 
 function totalTokens(entry: Pick<TokenUsageLogEntry, "input_tokens" | "output_tokens">): number {
@@ -220,8 +241,11 @@ export function aggregateTokenUsage(entries: TokenUsageLogEntry[]): Omit<TokenUs
   }
   shadow_comparisons.sort((a, b) => b.date.localeCompare(a.date));
 
+  const estimated_entries = production.filter((e) => e.metrics_source === "digest_estimate").length;
+
   return {
     entries: entries.length,
+    estimated_entries,
     daily,
     by_experiment: [],
     shadow_comparisons,
@@ -284,8 +308,11 @@ export async function buildExperimentTokenRows(
   return rows.sort((a, b) => a.experiment_id.localeCompare(b.experiment_id) || a.window.localeCompare(b.window));
 }
 
-export async function writeTokenUsageData(repoRoot: string, siteLabDir: string): Promise<number> {
-  const rawEntries = await readTokenLog(repoRoot);
+export async function buildTokenUsagePayload(repoRoot: string): Promise<{
+  entries: TokenUsageLogEntry[];
+  payload: TokenUsageDataFile;
+}> {
+  const rawEntries = dedupeTokenEntries(await readTokenLog(repoRoot));
   const rubricRows = await readRubricLog(repoRoot);
   const entries = joinRubricToEntries(rawEntries, rubricRows);
   const aggregated = aggregateTokenUsage(entries);
@@ -297,11 +324,122 @@ export async function writeTokenUsageData(repoRoot: string, siteLabDir: string):
     ...aggregated,
   };
 
+  return { entries, payload };
+}
+
+function fmtNum(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
+  return Number(n).toLocaleString("en-US");
+}
+
+function fmtUsd(n: number | null | undefined): string {
+  if (n == null || Number.isNaN(n)) return "—";
+  return `$${Number(n).toFixed(4)}`;
+}
+
+export function renderTokenUsageDashboardHtml(
+  data: TokenUsageDataFile,
+  escapeHtml: (text: string) => string,
+  options?: { queueSummary?: string },
+): string {
+  const esc = escapeHtml;
+  const latest = data.daily[0];
+  const totalUsd = data.daily.reduce((n, row) => n + row.estimated_usd, 0);
+  const hasEstimate = data.estimated_entries > 0;
+
+  const summaryCards = `
+    <div class="mb-8 grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Days logged</p>
+        <p class="mt-1 font-mono text-2xl font-bold text-stone-900 dark:text-stone-100">${fmtNum(data.daily.length)}</p>
+      </div>
+      <div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Latest output tokens</p>
+        <p class="mt-1 font-mono text-2xl font-bold text-stone-900 dark:text-stone-100">${latest ? fmtNum(latest.output_tokens) : "—"}</p>
+        ${latest ? `<p class="mt-1 text-xs text-stone-500 dark:text-stone-400">${esc(latest.date)} · ${esc(latest.edition)}</p>` : ""}
+      </div>
+      <div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Avg out tok / repo</p>
+        <p class="mt-1 font-mono text-2xl font-bold text-stone-900 dark:text-stone-100">${latest ? fmtNum(latest.avg_output_tokens_per_repo) : "—"}</p>
+      </div>
+      <div class="rounded-lg border border-stone-200 bg-white p-4 dark:border-stone-700 dark:bg-stone-900">
+        <p class="text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">Est. USD (all days)</p>
+        <p class="mt-1 font-mono text-2xl font-bold text-stone-900 dark:text-stone-100">${fmtUsd(totalUsd)}</p>
+      </div>
+    </div>`;
+
+  const queueBanner = options?.queueSummary
+    ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">${esc(options.queueSummary)}</p>`
+    : "";
+
+  const estimateNote = hasEstimate
+    ? `<p class="mb-6 rounded-lg border border-blue-200 bg-blue-50 p-3 text-sm leading-relaxed text-blue-950 dark:border-blue-800 dark:bg-blue-950/40 dark:text-blue-100">Some rows are <strong>estimated from published digests</strong> (brief word counts) until the next live narration run writes API telemetry. Live runs replace estimates automatically.</p>`
+    : "";
+
+  if (!data.daily.length) {
+    return `${queueBanner}
+      <p class="leading-relaxed text-stone-600 dark:text-stone-400">No token logs yet. The next Skills digest appends rows to <code>data/quality/token-usage.jsonl</code> automatically — then this page rebuilds with daily stats.</p>`;
+  }
+
+  const dailyRows = data.daily
+    .map(
+      (row) => `<tr class="hover:bg-stone-50 dark:hover:bg-stone-900/40">
+        <td class="px-3 py-2 font-mono text-xs">${esc(row.date)}</td>
+        <td class="px-3 py-2">${esc(row.edition)}</td>
+        <td class="px-3 py-2 font-mono">${fmtNum(row.output_tokens)}</td>
+        <td class="px-3 py-2 font-mono">${fmtNum(row.output_words)}</td>
+        <td class="px-3 py-2 font-mono">${fmtNum(row.avg_output_tokens_per_repo)}</td>
+        <td class="px-3 py-2 font-mono">${fmtNum(row.prompt_chars)}</td>
+        <td class="px-3 py-2 font-mono">${row.chars_per_input_token != null ? fmtNum(row.chars_per_input_token) : "—"}</td>
+        <td class="px-3 py-2 font-mono">${fmtNum(row.enrich_chars)}</td>
+        <td class="px-3 py-2 font-mono">${row.avg_latency_ms ? `${fmtNum(row.avg_latency_ms)}ms` : "—"}</td>
+        <td class="px-3 py-2 font-mono">${fmtUsd(row.estimated_usd)}</td>
+        <td class="px-3 py-2">${row.rubric_runs ? `${row.rubric_pass_count}/${row.rubric_runs} pass` : "—"}</td>
+      </tr>`,
+    )
+    .join("");
+
+  const meta = `<p class="mb-6 text-sm text-stone-500 dark:text-stone-400">Updated ${esc(data.generated_at)} · ${fmtNum(data.entries)} log entries${hasEstimate ? ` (${fmtNum(data.estimated_entries)} estimated)` : ""}.</p>`;
+
+  return `${queueBanner}${estimateNote}${summaryCards}${meta}
+    <section class="mb-10">
+      <h2 class="mb-3 font-sans text-lg font-semibold">Daily statistics</h2>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Production narration runs that ship to briefings. Output tokens and words per digest day; prompt and enrich sizes track context overhead for the ponytail baseline.</p>
+      <div class="overflow-x-auto rounded-lg border border-stone-200 dark:border-stone-700">
+        <table class="min-w-full text-left text-sm">
+          <thead class="bg-stone-50 text-xs uppercase tracking-wide text-stone-500 dark:bg-stone-900 dark:text-stone-400">
+            <tr>
+              <th class="px-3 py-2 font-semibold">Date</th>
+              <th class="px-3 py-2 font-semibold">Edition</th>
+              <th class="px-3 py-2 font-semibold">Output tok</th>
+              <th class="px-3 py-2 font-semibold">Words</th>
+              <th class="px-3 py-2 font-semibold">Out tok/repo</th>
+              <th class="px-3 py-2 font-semibold">Prompt chars</th>
+              <th class="px-3 py-2 font-semibold">Chars/in tok</th>
+              <th class="px-3 py-2 font-semibold">Enrich chars</th>
+              <th class="px-3 py-2 font-semibold">Latency/repo</th>
+              <th class="px-3 py-2 font-semibold">Est. USD</th>
+              <th class="px-3 py-2 font-semibold">Rubric</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">${dailyRows}</tbody>
+        </table>
+      </div>
+    </section>
+    <div id="token-usage-extra" class="font-sans text-sm"></div>`;
+}
+
+export async function writeTokenUsageData(
+  repoRoot: string,
+  siteLabDir: string,
+): Promise<{ entries: number; payload: TokenUsageDataFile }> {
+  const { entries, payload } = await buildTokenUsagePayload(repoRoot);
+
   await fs.mkdir(siteLabDir, { recursive: true });
   await fs.writeFile(
     path.join(siteLabDir, "token-usage-data.json"),
     `${JSON.stringify(payload, null, 2)}\n`,
     "utf8",
   );
-  return entries.length;
+  return { entries: entries.length, payload };
 }
