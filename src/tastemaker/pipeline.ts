@@ -38,6 +38,8 @@ import { narrateRepos, briefsFromNarration, type NarrationOptions } from "./narr
 import type { NarrationResult } from "./narrate/claude.js";
 import { appendTokenLog, buildTokenLogEntry } from "./quality/tokens.js";
 
+import type { RubricLogEntry } from "./quality/rubric.js";
+
 export interface PipelineResult {
   briefingDir: string;
   markdownPath: string;
@@ -201,9 +203,13 @@ export async function runPipeline(
     ponytail: config.narratePonytail,
   };
 
+  const enrichCharsMap = enrichCharMaps(top, externalBundles);
+  const readmeCharsMap = readmeCharMaps(top);
+
   async function logNarrationVariant(
     results: Map<string, NarrationResult>,
     variant: "control" | "treatment" | "single",
+    rubric?: RubricLogEntry | null,
   ): Promise<void> {
     const entry = buildTokenLogEntry({
       run_id: runId,
@@ -215,10 +221,13 @@ export async function runPipeline(
       experiment_id: config.experimentId,
       flags: tokenFlags,
       results,
+      enrich_chars: enrichCharsMap,
+      readme_chars: readmeCharsMap,
+      rubric,
     });
     await appendTokenLog(config.rootDir, entry);
     console.error(
-      `Token usage (${variant}): in=${entry.input_tokens} out=${entry.output_tokens} words=${entry.output_words}`,
+      `Token usage (${variant}): in=${entry.input_tokens} out=${entry.output_tokens} words=${entry.output_words} usd≈${entry.estimated_usd} latency_avg=${entry.latency_ms_avg}ms enrich=${entry.enrich_chars_total}chars`,
     );
   }
 
@@ -279,16 +288,6 @@ export async function runPipeline(
     repos: digestRepos,
   };
 
-  if (narrateShadow) {
-    await logNarrationVariant(controlResults, "control");
-    await logNarrationVariant(treatmentResults, "treatment");
-  } else if (sideBySideNarrate) {
-    await logNarrationVariant(controlResults, "control");
-    await logNarrationVariant(treatmentResults, "treatment");
-  } else {
-    await logNarrationVariant(treatmentResults, "single");
-  }
-
   if (config.enrichShadow) {
     const bundleRefs = new Map<string, string>();
     for (const repo of top.slice(0, config.enrichMaxRepos)) {
@@ -348,6 +347,16 @@ export async function runPipeline(
       }
     }
 
+    if (narrateShadow) {
+      await logNarrationVariant(controlResults, "control");
+      await logNarrationVariant(treatmentResults, "treatment");
+    } else if (sideBySideNarrate) {
+      await logNarrationVariant(controlResults, "control");
+      await logNarrationVariant(treatmentResults, "treatment");
+    } else {
+      await logNarrationVariant(treatmentResults, "single");
+    }
+
     return {
       briefingDir: path.dirname(shadowPath),
       markdownPath: "",
@@ -378,14 +387,36 @@ export async function runPipeline(
   }
 
   if (config.qualityRubric && config.editionId === "skills") {
-    const entry = await scoreDigestRank1(config.rootDir, config.editionId, dateLabel, digest);
-    if (entry) {
-      await appendRubricLog(config.rootDir, entry);
+    const rubricEntry = await scoreDigestRank1(config.rootDir, config.editionId, dateLabel, digest);
+    if (rubricEntry) {
+      await appendRubricLog(config.rootDir, rubricEntry);
       console.error(
-        `Quality rubric rank-1 ${entry.full_name}: pass=${entry.pass} why_now=${entry.scores.why_now}/5`,
+        `Quality rubric rank-1 ${rubricEntry.full_name}: pass=${rubricEntry.pass} why_now=${rubricEntry.scores.why_now}/5`,
       );
     }
+    await logNarrationVariant(treatmentResults, "single", rubricEntry);
+  } else {
+    await logNarrationVariant(treatmentResults, "single");
   }
 
   return { briefingDir, markdownPath, jsonPath, digest };
+}
+
+function enrichCharMaps(
+  repos: ScoredRepo[],
+  bundles: Map<string, EnrichmentBundle>,
+): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const repo of repos) {
+    map.set(repo.full_name, bundles.get(repo.full_name)?.combined_text?.length ?? 0);
+  }
+  return map;
+}
+
+function readmeCharMaps(repos: ScoredRepo[]): Map<string, number> {
+  const map = new Map<string, number>();
+  for (const repo of repos) {
+    map.set(repo.full_name, repo.readme_excerpt?.length ?? 0);
+  }
+  return map;
 }

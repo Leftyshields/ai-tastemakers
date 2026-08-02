@@ -12,6 +12,8 @@ export interface NarrationOptions {
 export interface NarrationResult {
   brief: string | null;
   usage?: TokenUsage;
+  prompt_chars: number;
+  latency_ms: number;
 }
 
 function formatStructuredContext(repo: ScoredRepo): string[] {
@@ -133,24 +135,28 @@ export async function narrateRepo(
   repo: ScoredRepo,
   options?: NarrationOptions,
 ): Promise<NarrationResult> {
+  const prompt = buildPrompt(repo, options);
+  const prompt_chars = prompt.length;
+  const started = Date.now();
   try {
     const message = await client.messages.create({
       model,
       max_tokens: options?.ponytail ? 350 : 450,
-      messages: [{ role: "user", content: buildPrompt(repo, options) }],
+      messages: [{ role: "user", content: prompt }],
     });
+    const latency_ms = Date.now() - started;
 
     const block = message.content.find((b) => b.type === "text");
     if (!block || block.type !== "text") {
-      return { brief: null, usage: extractUsage(message) };
+      return { brief: null, usage: extractUsage(message), prompt_chars, latency_ms };
     }
 
     const brief = block.text.trim().replace(/^```[\s\S]*?```$/gm, "").trim();
-    return { brief, usage: extractUsage(message) };
+    return { brief, usage: extractUsage(message), prompt_chars, latency_ms };
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     console.warn(`Claude narration failed for ${repo.full_name}: ${msg}`);
-    return { brief: null };
+    return { brief: null, prompt_chars, latency_ms: Date.now() - started };
   }
 }
 

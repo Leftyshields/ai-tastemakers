@@ -1,7 +1,8 @@
 import fs from "node:fs/promises";
 import path from "node:path";
 import type { TokenUsageLogEntry } from "../../src/tastemaker/quality/tokens.js";
-import { readTokenLog } from "../../src/tastemaker/quality/tokens.js";
+import { readTokenLog, rubricSummaryFromEntry } from "../../src/tastemaker/quality/tokens.js";
+import { readRubricLog } from "../../src/tastemaker/quality/log.js";
 import { loadAllExperiments } from "./aggregate-experiments.js";
 
 export interface TokenUsageDailyRow {
@@ -13,6 +14,13 @@ export interface TokenUsageDailyRow {
   total_tokens: number;
   output_words: number;
   avg_output_tokens_per_repo: number;
+  prompt_chars: number;
+  avg_latency_ms: number;
+  enrich_chars: number;
+  estimated_usd: number;
+  chars_per_input_token?: number;
+  rubric_pass_count: number;
+  rubric_runs: number;
   shadow_runs: number;
 }
 
@@ -26,8 +34,13 @@ export interface TokenUsageExperimentRow {
   total_tokens: number;
   output_words: number;
   avg_output_tokens_per_repo: number;
+  prompt_chars: number;
+  avg_latency_ms: number;
+  enrich_chars: number;
+  estimated_usd: number;
   ponytail_runs: number;
   structured_context_runs: number;
+  rubric_pass_rate?: number;
 }
 
 export interface TokenUsageShadowRow {
@@ -41,6 +54,12 @@ export interface TokenUsageShadowRow {
   output_token_delta_pct?: number;
   control_output_words?: number;
   treatment_output_words?: number;
+  control_prompt_chars?: number;
+  treatment_prompt_chars?: number;
+  control_latency_ms_avg?: number;
+  treatment_latency_ms_avg?: number;
+  control_estimated_usd?: number;
+  treatment_estimated_usd?: number;
   narrate_ponytail?: boolean;
 }
 
@@ -58,19 +77,46 @@ function totalTokens(entry: Pick<TokenUsageLogEntry, "input_tokens" | "output_to
   return entry.input_tokens + entry.output_tokens;
 }
 
-function avgOutputPerRepo(entry: TokenUsageLogEntry): number {
-  if (entry.repos_narrated === 0) return 0;
-  return Math.round((entry.output_tokens / entry.repos_narrated) * 10) / 10;
-}
-
 function dateInWindow(date: string, start?: string, end?: string): boolean {
   if (!start || !end) return false;
   return date >= start && date <= end;
 }
 
+function enrichEntry(entry: TokenUsageLogEntry): TokenUsageLogEntry {
+  if (entry.rubric || entry.prompt_chars != null) return entry;
+  return {
+    ...entry,
+    prompt_chars: entry.per_repo?.reduce((n, r) => n + (r.prompt_chars ?? 0), 0) ?? 0,
+    latency_ms_total: entry.per_repo?.reduce((n, r) => n + (r.latency_ms ?? 0), 0) ?? 0,
+    latency_ms_avg: 0,
+    enrich_chars_total: entry.per_repo?.reduce((n, r) => n + (r.enrich_chars ?? 0), 0) ?? 0,
+    estimated_usd: 0,
+  };
+}
+
+export function joinRubricToEntries(
+  entries: TokenUsageLogEntry[],
+  rubricRows: Awaited<ReturnType<typeof readRubricLog>>,
+): TokenUsageLogEntry[] {
+  const rubricByKey = new Map<string, (typeof rubricRows)[number]>();
+  for (const row of rubricRows) {
+    rubricByKey.set(`${row.date}|${row.edition}`, row);
+  }
+  return entries.map((entry) => {
+    const normalized = enrichEntry(entry);
+    if (normalized.rubric || normalized.variant !== "single") return normalized;
+    const rubric = rubricByKey.get(`${normalized.date}|${normalized.edition}`);
+    if (!rubric) return normalized;
+    return { ...normalized, rubric: rubricSummaryFromEntry(rubric) };
+  });
+}
+
 export function aggregateTokenUsage(entries: TokenUsageLogEntry[]): Omit<TokenUsageDataFile, "schema_version" | "generated_at"> {
   const production = entries.filter((e) => e.variant === "single");
-  const dailyMap = new Map<string, TokenUsageDailyRow & { repos_total: number }>();
+  const dailyMap = new Map<
+    string,
+    TokenUsageDailyRow & { repos_total: number; latency_total: number; prompt_chars: number }
+  >();
 
   for (const entry of production) {
     const key = `${entry.date}|${entry.edition}`;
@@ -85,15 +131,31 @@ export function aggregateTokenUsage(entries: TokenUsageLogEntry[]): Omit<TokenUs
         total_tokens: 0,
         output_words: 0,
         avg_output_tokens_per_repo: 0,
+        prompt_chars: 0,
+        avg_latency_ms: 0,
+        enrich_chars: 0,
+        estimated_usd: 0,
+        chars_per_input_token: undefined,
+        rubric_pass_count: 0,
+        rubric_runs: 0,
         shadow_runs: 0,
         repos_total: 0,
-      });
+        latency_total: 0,
+      } as TokenUsageDailyRow & { repos_total: number; latency_total: number; prompt_chars: number });
     row.runs += 1;
     row.repos_total += entry.repos_narrated;
     row.input_tokens += entry.input_tokens;
     row.output_tokens += entry.output_tokens;
     row.total_tokens += totalTokens(entry);
     row.output_words += entry.output_words;
+    row.prompt_chars += entry.prompt_chars ?? 0;
+    row.latency_total += entry.latency_ms_total ?? 0;
+    row.enrich_chars += entry.enrich_chars_total ?? 0;
+    row.estimated_usd = Math.round((row.estimated_usd + (entry.estimated_usd ?? 0)) * 1_000_000) / 1_000_000;
+    if (entry.rubric) {
+      row.rubric_runs += 1;
+      if (entry.rubric.pass) row.rubric_pass_count += 1;
+    }
     dailyMap.set(key, row);
   }
 
@@ -104,11 +166,20 @@ export function aggregateTokenUsage(entries: TokenUsageLogEntry[]): Omit<TokenUs
   }
 
   const daily = [...dailyMap.values()]
-    .map(({ repos_total, ...row }) => ({
-      ...row,
-      avg_output_tokens_per_repo:
-        repos_total > 0 ? Math.round((row.output_tokens / repos_total) * 10) / 10 : 0,
-    }))
+    .map(({ repos_total, latency_total, prompt_chars, ...row }) => {
+      const chars_per_input_token =
+        row.input_tokens > 0 && prompt_chars > 0
+          ? Math.round((prompt_chars / row.input_tokens) * 100) / 100
+          : undefined;
+      return {
+        ...row,
+        prompt_chars,
+        avg_latency_ms: row.runs > 0 ? Math.round(latency_total / repos_total) : 0,
+        chars_per_input_token,
+        avg_output_tokens_per_repo:
+          repos_total > 0 ? Math.round((row.output_tokens / repos_total) * 10) / 10 : 0,
+      };
+    })
     .sort((a, b) => b.date.localeCompare(a.date) || a.edition.localeCompare(b.edition));
 
   const shadowRuns = new Map<string, { control?: TokenUsageLogEntry; treatment?: TokenUsageLogEntry }>();
@@ -138,6 +209,12 @@ export function aggregateTokenUsage(entries: TokenUsageLogEntry[]): Omit<TokenUs
       output_token_delta_pct: pct,
       control_output_words: pair.control.output_words,
       treatment_output_words: pair.treatment.output_words,
+      control_prompt_chars: pair.control.prompt_chars,
+      treatment_prompt_chars: pair.treatment.prompt_chars,
+      control_latency_ms_avg: pair.control.latency_ms_avg,
+      treatment_latency_ms_avg: pair.treatment.latency_ms_avg,
+      control_estimated_usd: pair.control.estimated_usd,
+      treatment_estimated_usd: pair.treatment.estimated_usd,
       narrate_ponytail: pair.treatment.flags.ponytail,
     });
   }
@@ -146,7 +223,7 @@ export function aggregateTokenUsage(entries: TokenUsageLogEntry[]): Omit<TokenUs
   return {
     entries: entries.length,
     daily,
-    by_experiment: [], // filled async in writeTokenUsageData
+    by_experiment: [],
     shadow_comparisons,
     recent: [...entries].sort((a, b) => b.logged_at.localeCompare(a.logged_at)).slice(0, 50),
   };
@@ -174,6 +251,8 @@ export async function buildExperimentTokenRows(
       const output_tokens = matched.reduce((n, e) => n + e.output_tokens, 0);
       const output_words = matched.reduce((n, e) => n + e.output_words, 0);
       const repos = matched.reduce((n, e) => n + e.repos_narrated, 0);
+      const rubricRuns = matched.filter((e) => e.rubric);
+      const rubricPass = rubricRuns.filter((e) => e.rubric?.pass).length;
       rows.push({
         experiment_id: exp.id,
         edition: exp.edition,
@@ -184,8 +263,20 @@ export async function buildExperimentTokenRows(
         total_tokens: input_tokens + output_tokens,
         output_words,
         avg_output_tokens_per_repo: repos > 0 ? Math.round((output_tokens / repos) * 10) / 10 : 0,
+        prompt_chars: matched.reduce((n, e) => n + (e.prompt_chars ?? 0), 0),
+        avg_latency_ms:
+          repos > 0
+            ? Math.round(
+                matched.reduce((n, e) => n + (e.latency_ms_total ?? 0), 0) / repos,
+              )
+            : 0,
+        enrich_chars: matched.reduce((n, e) => n + (e.enrich_chars_total ?? 0), 0),
+        estimated_usd:
+          Math.round(matched.reduce((n, e) => n + (e.estimated_usd ?? 0), 0) * 1_000_000) / 1_000_000,
         ponytail_runs: matched.filter((e) => e.flags.ponytail).length,
         structured_context_runs: matched.filter((e) => e.flags.structured_context).length,
+        rubric_pass_rate:
+          rubricRuns.length > 0 ? Math.round((rubricPass / rubricRuns.length) * 100) / 100 : undefined,
       });
     }
   }
@@ -194,7 +285,9 @@ export async function buildExperimentTokenRows(
 }
 
 export async function writeTokenUsageData(repoRoot: string, siteLabDir: string): Promise<number> {
-  const entries = await readTokenLog(repoRoot);
+  const rawEntries = await readTokenLog(repoRoot);
+  const rubricRows = await readRubricLog(repoRoot);
+  const entries = joinRubricToEntries(rawEntries, rubricRows);
   const aggregated = aggregateTokenUsage(entries);
   aggregated.by_experiment = await buildExperimentTokenRows(repoRoot, entries);
 

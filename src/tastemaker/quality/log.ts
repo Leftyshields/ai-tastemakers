@@ -31,6 +31,20 @@ export async function scoreDigestRank1(
   };
 }
 
+export async function readRubricLog(rootDir: string): Promise<RubricLogEntry[]> {
+  const logPath = qualityLogPath(rootDir);
+  try {
+    const raw = await fs.readFile(logPath, "utf8");
+    return raw
+      .split("\n")
+      .filter((line) => line.trim())
+      .map((line) => JSON.parse(line) as RubricLogEntry);
+  } catch (err) {
+    if ((err as NodeJS.ErrnoException).code === "ENOENT") return [];
+    throw err;
+  }
+}
+
 export async function appendRubricLog(rootDir: string, entry: RubricLogEntry): Promise<void> {
   const logPath = qualityLogPath(rootDir);
   await fs.mkdir(path.dirname(logPath), { recursive: true });
