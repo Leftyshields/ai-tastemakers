@@ -7,8 +7,9 @@ import {
 } from "../src/tastemaker/editions.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
 import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
-import { writeExperimentsData } from "./lab/aggregate-experiments.js";
+import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experiments.js";
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
+import { renderTokenUsagePage } from "./lab/render-token-usage.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -1568,24 +1569,22 @@ export async function buildLabSite(
   );
 
   await writeTokenUsageData(repoRoot, labSiteDir);
-  await fs.copyFile(
-    path.join(repoRoot, "scripts", "lab", "token-usage.js"),
-    path.join(labSiteDir, "token-usage.js"),
-  );
-
-  let tokenBody = `${labNavHtml("tokens", escapeHtml)}`;
-  try {
-    const markdown = await fs.readFile(path.join(repoRoot, "briefings", "lab", "token-usage.md"), "utf8");
-    const html = marked.parse(markdown) as string;
-    tokenBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-table:text-sm mb-8">${html}</article>`;
-  } catch {
-    tokenBody += `<p class="mb-6 font-sans text-sm text-stone-600 dark:text-stone-400">Narration token telemetry for digest experiments.</p>`;
-  }
-  tokenBody += `<div id="token-usage-root" class="font-sans text-sm"></div><script src="token-usage.js"></script>`;
+  const tokenDataRaw = await fs.readFile(path.join(labSiteDir, "token-usage-data.json"), "utf8");
+  const tokenData = JSON.parse(tokenDataRaw) as import("./lab/aggregate-token-usage.js").TokenUsageDataFile;
+  const experiments = await loadAllExperiments(repoRoot);
+  const tokenBody = `${labNavHtml("tokens", escapeHtml)}${renderTokenUsagePage(tokenData, experiments, escapeHtml)}`;
 
   await fs.writeFile(
     path.join(labSiteDir, "token-usage.html"),
-    pageShell("Token usage · Lab", tokenBody, paths, brand, undefined, escapeHtml, labShell),
+    pageShell(
+      "Narration cost & quality · Lab",
+      tokenBody,
+      paths,
+      brand,
+      "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
+      escapeHtml,
+      labShell,
+    ),
   );
 
   await buildLabMarkdownPage(
