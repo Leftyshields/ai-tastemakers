@@ -2,15 +2,12 @@ name: Daily Digest
 
 on:
   schedule:
-    # Primary + backup slots (America/Los_Angeles). GitHub cron is best-effort and
-    # often drops :00 UTC jobs; off-minute + timezone + retries improve reliability.
+    # Two slots (America/Los_Angeles). GitHub cron is best-effort; a backup helps when
+    # the primary is dropped. More than two scheduled runs per morning queue competing
+    # jobs and triggers "runner not acquired" failures when hosted capacity is tight.
     - cron: "17 6 * * *"
       timezone: "America/Los_Angeles"
-    - cron: "45 6 * * *"
-      timezone: "America/Los_Angeles"
     - cron: "30 7 * * *"
-      timezone: "America/Los_Angeles"
-    - cron: "0 8 * * *"
       timezone: "America/Los_Angeles"
   workflow_dispatch:
     inputs:
@@ -25,11 +22,12 @@ permissions:
 
 concurrency:
   group: daily-digest
-  cancel-in-progress: false
+  cancel-in-progress: true
 
 jobs:
   digest:
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     env:
       TZ: America/Los_Angeles
     steps:
@@ -62,6 +60,9 @@ jobs:
 
           if [ "$(grep '^run_weekly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ "$(grep '^run_monthly=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ "$(grep '^is_sunday=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)" = "false" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ -f "briefings/skills/${TODAY}/digest.json" ]; then
             echo "Nothing to do — daily and wrap-up (if applicable) already published"
+            echo "nothing_to_do=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "nothing_to_do=false" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/setup-node@v4
