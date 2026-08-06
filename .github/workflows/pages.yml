@@ -10,6 +10,8 @@ on:
       - "data/experiments/*.json"
       - "scripts/build-pages.ts"
       - "scripts/edition-pages.ts"
+      - "scripts/lab/render-token-usage.ts"
+      - "scripts/lab/aggregate-token-usage.ts"
       - "scripts/seo-helpers.ts"
       - "scripts/generate-brief-og.ts"
       - "scripts/og-theme.ts"
@@ -23,6 +25,7 @@ permissions:
   contents: read
   pages: write
   id-token: write
+  actions: read
 
 concurrency:
   group: pages
@@ -31,6 +34,7 @@ concurrency:
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    timeout-minutes: 45
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
@@ -65,17 +69,57 @@ jobs:
         with:
           path: site
 
+      - name: Cancel stuck Pages deployments
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set +e
+          ids=$(gh api "repos/${GITHUB_REPOSITORY}/pages/deployments" --paginate -q '.[] | select(.status=="queued" or .status=="in_progress" or .status=="deployment_queued") | .id')
+          if [ -z "$ids" ]; then
+            echo "No stuck Pages deployments found."
+            exit 0
+          fi
+          for id in $ids; do
+            echo "Cancelling Pages deployment ${id}..."
+            gh api "repos/${GITHUB_REPOSITORY}/pages/deployments/${id}/cancel" -X POST || true
+          done
+          echo "Waiting 60s for cancellation to propagate..."
+          sleep 60
+
       - id: deployment
         uses: actions/deploy-pages@v4
         continue-on-error: true
+        with:
+          timeout: 900000
 
-      - name: Retry Pages deployment (transient GitHub 500s)
+      - name: Wait before Pages retry
+        if: steps.deployment.outcome == 'failure'
+        run: sleep 90
+
+      - name: Retry Pages deployment (attempt 2)
         if: steps.deployment.outcome == 'failure'
         id: deployment_retry
         uses: actions/deploy-pages@v4
+        continue-on-error: true
+        with:
+          timeout: 900000
+
+      - name: Wait before Pages retry
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        run: sleep 90
+
+      - name: Retry Pages deployment (attempt 3)
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        id: deployment_retry_2
+        uses: actions/deploy-pages@v4
+        continue-on-error: true
+        with:
+          timeout: 900000
 
       - name: Fail if Pages deployment did not succeed
-        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
+        if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure' && steps.deployment_retry_2.outcome == 'failure'
         run: |
-          echo "GitHub Pages deployment failed after retry. Re-run this workflow manually."
+          echo "GitHub Pages deployment failed after three attempts."
+          echo "If a deployment is still stuck, cancel it under Settings → Pages → Deployments, then re-run."
           exit 1
