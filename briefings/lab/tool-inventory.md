@@ -1,6 +1,6 @@
 # Tool inventory — digest-featured candidates
 
-_Generated 2026-08-09T14:00:54.927Z from 137 briefing artifact(s)._
+_Generated 2026-08-09T15:02:06.563Z from 137 briefing artifact(s)._
 
 Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by capability and mapped to pipeline roles.
 
