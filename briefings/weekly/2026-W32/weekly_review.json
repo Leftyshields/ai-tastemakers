@@ -1,0 +1,224 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W32",
+  "week_start": "2026-08-03",
+  "week_end": "2026-08-09",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 21,
+      "skills": 25
+    },
+    "total_stars_gained": {
+      "oss": 90671,
+      "skills": 83294
+    },
+    "top_topics": {
+      "oss": [
+        "llm",
+        "claude-code",
+        "mcp",
+        "ai-agent",
+        "ai-agents"
+      ],
+      "skills": [
+        "claude-code",
+        "codex",
+        "ai-agents",
+        "claude",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "bojieli/ai-agent-book",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "lyogavin/airllm",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "TencentCloud/TencentDB-Agent-Memory",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "esengine/DeepSeek-Reasonix",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "firecrawl/firecrawl",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "microsoft/generative-ai-for-beginners",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "calesthio/OpenMontage",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "lidge-jun/opencodex",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "1jehuang/jcode",
+      "DietrichGebert/ponytail",
+      "Graphify-Labs/graphify",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "calesthio/OpenMontage",
+      "citrolabs/ego-lite",
+      "diegosouzapw/OmniRoute",
+      "farion1231/cc-switch",
+      "lidge-jun/opencodex",
+      "microsoft/generative-ai-for-beginners",
+      "mvanhorn/last30days-skill",
+      "nextlevelbuilder/ui-ux-pro-max-skill"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 49194,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is a self-hosted TypeScript gateway that exposes 290+ AI providers through a single OpenAI-compatible endpoint, with quota-aware auto-fallback and RTK+Caveman prompt compression that cuts token usage by 15–95%."
+        },
+        {
+          "full_name": "bojieli/ai-agent-book",
+          "total_stars_gained": 49133,
+          "days_appeared": 7,
+          "excerpt": "An open-source Chinese-authored book (with 13 language translations) covering AI Agent design and engineering across 10 chapters, paired with 95 runnable experiments spanning RAG, MCP, multi-agent systems, and context engineering."
+        },
+        {
+          "full_name": "TencentCloud/TencentDB-Agent-Memory",
+          "total_stars_gained": 42635,
+          "days_appeared": 7,
+          "excerpt": "TencentDB Agent Memory is a self-hosted memory layer for AI agent teams that extracts four structured asset types — Chat Memory, Skills, LLM-Wiki, and Code-Graph — from conversations, documents, and code, then makes them queryable and shareable across agents and sessions."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 37353,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a Claude Code / cursor-rules plugin that injects a YAGNI-first prompt skill into AI coding agents, nudging them to reach for the simplest existing primitive (a native `<input type=\"date\">`) before scaffolding new abstractions."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 35177,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI that routes AI agents to read and search Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu without paid APIs, handling authentication, anti-scraping workarounds, and platform-specific data cleaning behind a single interface."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 49003,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is a self-hosted TypeScript gateway that routes requests across 290+ AI providers (90+ free tiers) through a single OpenAI-compatible endpoint, with quota-aware auto-fallback and RTK+Caveman token compression that cuts usage by 15–95%."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 40075,
+          "days_appeared": 7,
+          "excerpt": "Orca is a desktop/mobile/VPS app that orchestrates parallel AI coding agents (Codex, Claude Code, OpenCode, Pi) across isolated git worktrees, with Ghostty-class terminal splits and a browser Design Mode that pipes live HTML/CSS into agent prompts."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 37277,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a Claude Code / cursor-rules skill that injects a YAGNI constraint into AI agents, nudging them to reach for `<input type=\"date\">` instead of flatpickr and a timezone discussion — measured at ~54% fewer lines of code across 12 real feature tasks on a FastAPI + React codebase."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 35056,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI that routes AI agents to Twitter, Reddit, YouTube, Bilibili, XiaoHongShu, GitHub, and more without paid API keys, handling auth, cookie management, and HTML cleaning so agents receive readable output."
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "total_stars_gained": 33055,
+          "days_appeared": 7,
+          "excerpt": "Graphify parses any codebase (plus SQL schemas, configs, PDFs, and docs) into a queryable knowledge graph using tree-sitter AST locally, exposing it as a `/graphify` skill inside Claude Code, Cursor, Codex, and Gemini CLI via MCP."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "opening": "Week 32 was the busiest routing week of the summer: 21 OSS repos and 25 skill repos cleared Tastemakers thresholds, generating ~90.7K and ~83.3K new stars respectively across the two lanes. The dominant topics — `claude-code`, `mcp`, `ai-agents`, `codex` — aren't shifting; they're consolidating, which means the crowded ideas are getting crowded fast. Seven repos held the full seven-day chart in at least one lane, a signal that builder attention is less scattered than it was in Q2. If you're still building point solutions, the field is telling you something.",
+    "oss": "The headline number is OmniRoute's 49K stars in seven days — nearly half the lane's total weekly gain from a single repo — built on a straightforward premise: one OpenAI-compatible endpoint in front of 290+ providers with quota-aware fallback and aggressive token compression. That's a bet that model fragmentation is a permanent infrastructure problem, not a temporary inconvenience. Close behind it, `bojieli/ai-agent-book` pulled an essentially identical 49K, which is a reminder that high-quality educational material still converts at the same rate as production tooling when the timing is right. TencentCloud's `TencentDB-Agent-Memory` at 42K is the week's most structurally interesting entry: it extracts four distinct asset types from agent conversations and makes them queryable across sessions, pointing toward memory as a first-class infrastructure layer rather than a prompt engineering afterthought.",
+    "skills": "Orca from stablyai was the lane's second-biggest mover at 40K stars, and it's worth reading carefully — parallel coding agents across isolated git worktrees with a browser Design Mode that pipes live HTML/CSS into prompts is not a thin wrapper, it's a rethought developer surface. Graphify's 33K finish is quieter but arguably more durable: parsing codebases into a queryable knowledge graph via tree-sitter and exposing it as a `/graphify` MCP skill means agents stop hallucinating your project structure, which is a real and recurring failure mode. Ponytail's 37K on both charts for a YAGNI-first prompt rule — measured at ~54% fewer lines of code across 12 real tasks — is the week's clearest proof that a single, well-scoped behavioral constraint beats a sprawling system prompt.",
+    "cross_lane": "Fifteen repos appeared in both the OSS and skills charts this week, the highest overlap count since W18, and the pattern is intentional: tools like OmniRoute, Ponytail, Agent-Reach, and Graphify are being built to function simultaneously as infrastructure and as drop-in agent skills. That dual-mode design — useful as a standalone CLI or library, but also callable inside Claude Code or Codex via MCP — is becoming the expected surface area for anything serious. The `claude-code` and `codex` topics are converging in the standings rather than competing, which suggests builders are targeting agent runtimes plurally from day one rather than picking a side.",
+    "takeaway": "The structural bet that paid off this week: solve a problem agents hit on every project (token cost, provider lock-in, memory loss, codebase blindness), expose it through MCP, and make it measurable. Vague \"AI-powered\" framing is losing chart share to repos that quote a number — 290 providers, 54% fewer lines, 15–95% token reduction. If you're scoping something for W33, the gap that's still undercrowded is cross-session agent memory outside the database context; TencentDB's entry shows demand, but no general-purpose equivalent landed this week."
+  },
+  "generated_at": "2026-08-09T14:00:32.772Z"
+}
