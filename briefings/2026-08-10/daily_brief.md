@@ -1,0 +1,104 @@
+# AI Tastemakers — Daily Brief — 2026-08-10
+
+_Ranking: delta_7d · 10 repos · generated 2026-08-10T14:31:53.857Z_
+
+
+## 1. TencentCloud/TencentDB-Agent-Memory
+
+https://github.com/TencentCloud/TencentDB-Agent-Memory · ★ 19238 (+8524 this week) · agent, ai-agent, embedding, llm, local-first, long-term-memory, memory, openclaw-plugin, vector-search
+
+**What it does:** TencentDB Agent Memory is a self-hosted memory hub that extracts four structured asset types — Chat Memory, Skills, LLM-Wiki, and Code-Graph — from agent conversations, documents, and code, then shares them across agents and sessions via vector search.
+
+**Why now:** The repo gained 8,524 stars this week, surfacing at the top of GitHub Trending as teams actively look for persistent, team-scoped memory layers to pair with Claude Code and similar agentic coding tools.
+
+**Build with it:** Wire it into Claude Code via the included proxy and `start-all.sh` stack, then point your `EDITOR .env` config at your existing LLM endpoints — agents running against the same Memory Hub will automatically pull shared Skills and Wiki entries without re-prompting context each session.
+
+## 2. diegosouzapw/OmniRoute
+
+https://github.com/diegosouzapw/OmniRoute · ★ 44871 (+7265 this week) · a2a, ai-agents, ai-gateway, anthropic, claude, claude-code, cline, codex, copilot, cursor, deepseek, free-ai, gemini, kimi, llm-gateway, mcp, openai, openai-proxy, qwen, token-saver
+
+**What it does:** OmniRoute is a self-hosted TypeScript gateway that routes requests across 290+ AI providers through a single OpenAI-compatible endpoint, with quota-aware fallback and RTK+Caveman prompt compression that cuts token usage by 15–95%.
+
+**Why now:** The repo gained 7,265 stars this week, likely surfacing alongside the Claude Code and OpenAI Codex CLI wave — both tools it directly supports via drop-in endpoint substitution, making free-tier arbitrage suddenly practical for everyday coding workflows.
+
+**Build with it:** Point Cursor, Cline, or Claude Code at OmniRoute's local endpoint by swapping the `OPENAI_BASE_URL` config, then enable the quota-aware fallback chain across Gemini 2.5 Flash, GPT-4o mini, and DeepSeek to stay unblocked without touching provider credentials mid-session.
+
+## 3. DietrichGebert/ponytail
+
+https://github.com/DietrichGebert/ponytail · ★ 99935 (+6098 this week) · agent-skills, ai-agents, claude, claude-code, claude-code-plugin, cursor-rules, developer-tools, llm, prompt-engineering, yagni
+
+**What it does:** Ponytail is a Claude Code / cursor-rules skill that steers AI agents toward minimal solutions — reaching for `<input type="date">` instead of installing flatpickr, cutting generated LOC by ~54% on average across real agentic sessions on a FastAPI + React codebase.
+
+**Why now:** The repo spiked 6,098 stars this week, landing it on Trendshift's daily and weekly trending charts — a signal that agent-output bloat is a felt pain point as Claude Code adoption widens.
+
+**Build with it:** Drop the skill into an existing Claude Code project via `@dietrichgebert/ponytail` on npm, then measure the before/after `git diff` on your next feature ticket using the included benchmark harness against your own repo.
+
+## 4. bojieli/ai-agent-book
+
+https://github.com/bojieli/ai-agent-book · ★ 35653 (+5851 this week) · agent, agent-memory, ai-agent, book, coding-agent, context-engineering, large-language-models, llm, mcp, multi-agent, multimodal, rag, reinforcement-learning
+
+**What it does:** An open-source Chinese-authored book (with 13 language translations) covering AI Agent design and engineering across 10 chapters, paired with 95 runnable lab experiments covering LLM tooling, RAG, MCP, multi-agent systems, and context engineering.
+
+**Why now:** The repo hit GitHub's trending list this week with 5,851 new stars, coinciding with surging practitioner interest in context engineering as a discipline distinct from prompt engineering — a framing this book explicitly structures its content around.
+
+**Build with it:** Clone the repo, run the per-chapter Python labs (e.g., the MCP or multi-agent chapters) against your own LLM backend, and use the context-engineering patterns as a structured checklist when designing agent memory and tool-routing layers in production systems.
+
+## 5. Panniantong/Agent-Reach
+
+https://github.com/Panniantong/Agent-Reach · ★ 70138 (+5660 this week) · agent-infrastructure, ai-agent, ai-search, automation, bilibili, claude-code, cli, cursor, free-api, llm-tools, mcp, python, reddit-scraper, twitter-scraper, web-scraper, xiaohongshu, youtube-transcript
+
+**What it does:** Agent Reach is a Python CLI that gives AI agents free, scraper-based access to Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu — returning clean, readable output instead of raw HTML or API errors.
+
+**Why now:** The repo hit GitHub Trending #1 this week with 5,660 stars, coinciding with a surge in Claude Code and Cursor usage where developers are actively wiring external data sources into agent workflows and hitting exactly the paywalls and 403 blocks this tool routes around.
+
+**Build with it:** Drop the one-liner install URL into Claude Code or Cursor's chat, then pipe the resulting MCP tools directly into your agent's tool-use loop — no API keys or scraper configuration required.
+
+## 6. microsoft/generative-ai-for-beginners
+
+https://github.com/microsoft/generative-ai-for-beginners · ★ 117277 (+2682 this week) · ai, azure, chatgpt, dall-e, generative-ai, generativeai, gpt, language-model, llms, microsoft-for-beginners, openai, prompt-engineering, semantic-search, transformers
+
+**What it does:** Microsoft's open curriculum of 21 Jupyter Notebook lessons walks developers through building Generative AI applications, covering prompt engineering, LLMs, embeddings, semantic search, DALL-E image generation, and RAG patterns using OpenAI and Azure APIs.
+
+**Why now:** The repo gained 2,682 stars this week, a spike consistent with renewed interest following Microsoft Build 2025 announcements around Azure AI Foundry and updated model access, making the Azure-integrated lessons immediately actionable against current tooling.
+
+**Build with it:** Clone the repo, set your `OPENAI_API_KEY` or Azure OpenAI credentials in the provided `.env` template, and work through Lesson 15's retrieval-augmented generation notebook to wire a vector store into a chat endpoint you can drop into an existing Python service.
+
+## 7. firecrawl/firecrawl
+
+https://github.com/firecrawl/firecrawl · ★ 164704 (+5292 this week) · ai, ai-agents, ai-crawler, ai-scraping, ai-search, crawler, data-extraction, html-to-markdown, llm, markdown, scraper, scraping, web-crawler, web-data, web-data-extraction, web-scraper, web-scraping, web-search, webscraping
+
+**What it does:** Firecrawl is an API that scrapes, searches, and crawls websites—handling JS rendering, proxy rotation, and rate limits—then returns clean Markdown, structured JSON, or screenshots ready for LLM consumption.
+
+**Why now:** Firecrawl gained 5,292 stars this week, coinciding with growing MCP (Model Context Protocol) adoption; the README explicitly calls out single-command MCP client integration, making it a direct plug-in for the agent tooling wave currently shipping across teams.
+
+**Build with it:** Point your LangChain or LlamaIndex RAG pipeline at Firecrawl's `/scrape` endpoint to replace brittle BeautifulSoup parsers—use the `formats: ["markdown"]` parameter to get token-efficient input, and add `actions` (click, scroll, wait) to reach content behind JS gates before extraction.
+
+## 8. farion1231/cc-switch
+
+https://github.com/farion1231/cc-switch · ★ 126156 (+2620 this week) · ai-tools, claude-code, codex, desktop-app, grok, grokbuild, hermes, hermes-agent, mcp, open-source, openclaw, openclaw-ui, opencode, provider-management, rust, skills, skills-management, tauri, typescript, wsl-support
+
+**What it does:** CC Switch is a Tauri-built desktop app that manages configuration, provider switching, and API key handling across Claude Code, Codex, Gemini CLI, Grok Build, OpenCode, OpenClaw, and Hermes Agent from a single UI.
+
+**Why now:** The project is trending at +2,620 stars this week, coinciding with the rapid proliferation of competing agentic CLI tools (Codex, Gemini CLI, Grok Build) that each demand separate config files and API credentials, making unified management an immediate friction point.
+
+**Build with it:** Use CC Switch's provider management surface to wire a relay API (e.g., PackyCode or ZetaAPI) into Claude Code and Codex simultaneously, letting you benchmark model responses across providers without manually editing multiple config files or rotating keys by hand.
+
+## 9. lyogavin/airllm
+
+https://github.com/lyogavin/airllm · ★ 30511 (+5108 this week) · chinese-llm, chinese-nlp, finetune, generative-ai, instruct-gpt, instruction-set, llama, llm, lora, open-models, open-source, open-source-models, qlora
+
+**What it does:** AirLLM runs large language models—up to 671B parameters—on a single consumer GPU with as little as 4GB VRAM by streaming model layers or individual MoE experts from disk rather than loading the full model into memory, with no quantization required.
+
+**Why now:** This week's +5,108 stars coincides with the library adding support for Kimi K3, a 2.8-trillion-parameter sparse MoE model and the largest open-source model released to date, measured running end-to-end in 3.72GB of VRAM on a single RTX 6000 Ada.
+
+**Build with it:** Drop in `AutoModel` from `airllm` as a direct replacement for a Hugging Face `AutoModelForCausalLM` call—point it at any supported model checkpoint, set `compression='4bit'` or `'8bit'` for quantized variants, and run inference inside an existing `transformers` pipeline without changing downstream tokenizer or generation code.
+
+## 10. esengine/DeepSeek-Reasonix
+
+https://github.com/esengine/DeepSeek-Reasonix · ★ 33656 (+4759 this week) · agent, agent-framework, ai-agent, ai-coding, cli, coding-agent, deepseek, developer-tools, ink, llm, prompt-caching, r1, terminal, tool-use, tui, typescript
+
+**What it does:** DeepSeek-Reasonix is a terminal-based coding agent written in Go that wraps DeepSeek's R1 model, engineered specifically around prefix-cache stability so long autonomous sessions stay coherent and cheap across plan mode, sandboxed workspaces, and per-turn checkpoints.
+
+**Why now:** The repo gained 4,759 stars this week, placing it on GitHub's trending leaderboard, coinciding with sustained developer interest in DeepSeek R1 as a cost-effective alternative to OpenAI for agentic coding workflows.
+
+**Build with it:** Drop it into an existing editor setup via the ACP (Agent Communication Protocol) interface, configure tool-use permissions and workspace sandbox rules in the spec file, and wire it into a CI loop where the agent runs autonomously against a task queue without blowing prefix-cache state between turns.
