@@ -6,12 +6,12 @@
   "status": "draft",
   "edition": "skills",
   "baseline_window": {
-    "start": "2026-08-15",
-    "end": "2026-08-28"
+    "start": "2026-08-30",
+    "end": "2026-09-12"
   },
   "treatment_window": {
-    "start": "2026-08-29",
-    "end": "2026-09-11"
+    "start": "2026-09-13",
+    "end": "2026-09-26"
   },
   "change": {
     "flags": {
@@ -23,5 +23,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued behind EXP-20260802-ponytail-narration-skills (#2 in Lab queue). Experiment platform resumed 2026-08-02 with ponytail baseline first. Not scheduled until ponytail completes or pauses. Backlog: RANK-2. METRIC PRIORITY: structural diversity from digest.json (overlap, unique repos/week, is_new share). Treatment flags: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on Skills digest step in digest.yml."
+  "notes": "Queued #2 behind EXP-20260802-ponytail-narration-skills. Windows slipped to start after ponytail treatment ends (2026-08-29). Baseline planned 2026-08-30→2026-09-12; treatment 2026-09-13→2026-09-26. Keep status draft until ponytail verdict. Backlog: RANK-2. METRIC PRIORITY: structural diversity from digest.json (consecutive-day overlap, unique repos / 7 days, is_new share in top 10). Treatment flags on Skills digest command only: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15."
 }

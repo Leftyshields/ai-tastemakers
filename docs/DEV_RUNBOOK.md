@@ -191,6 +191,9 @@ Manual run: Actions → **Experiment Reminders** → Run workflow (optional `dat
 | 2026-07-12 | EXP-20260628-web-enrich-skills | Treatment starts → enable enrich flags in GHA |
 | 2026-07-18 | EXP-20260628-web-enrich-skills | Closed — verdict recorded; enrich kept on |
 | 2026-08-01 | EXP-20260701-landing-layout + EXP-20260716-firecrawl-enrich-skills | Shipped to production; archived from Lab queue |
+| 2026-08-16 | EXP-20260802-ponytail-narration-skills | Treatment start — flags on for next Skills digest (2026-08-16 published as control) |
+| 2026-08-29 | EXP-20260802-ponytail-narration-skills | Treatment ends → token compare + verdict |
+| 2026-08-30 | EXP-20260715-soft-dedup-diversity-skills | Queued baseline start (still draft until ponytail verdict) |
 
 **Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).
 

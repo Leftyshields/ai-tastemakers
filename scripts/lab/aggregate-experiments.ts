@@ -37,7 +37,7 @@ export function buildQueueSummary(experiments: ExperimentRecord[]): string {
   }
   if (active?.status === "active") {
     const w = windowLabel(active.treatment_window?.start, active.treatment_window?.end);
-    return `#1 in queue: ${active.id} — treatment window ${w}.`;
+    return `#1 in queue: ${active.id} — treatment window ${w} (change is on; functional metrics on Token dashboard).`;
   }
   const draft = experiments.find((e) => e.status === "draft");
   if (draft) {

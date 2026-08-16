@@ -31,7 +31,7 @@ Each experiment states a **hypothesis** (what we expect to improve), a **change 
 
 We default to **before/after windows** rather than live A/B tests because the site is static HTML rebuilt daily. That is a deliberate trade-off: slower feedback, but reproducible and easy to audit.
 
-**Active queue (2026-08-02):** Formal experiments resumed. **#1 — [EXP-20260802-ponytail-narration-skills](posts/EXP-20260802-ponytail-narration-skills.html)** is in **baseline** (2026-08-02 → 2026-08-15): default Skills narration + Firecrawl enrich; ponytail flags off. Functional metrics live on the [Token dashboard](token-usage.html). **#2 — soft-dedup diversity** stays queued until ponytail completes. Completed runs stay on the dashboard; shipped records live under `data/experiments/archive/` in git.
+**Active queue (2026-08-16):** **#1 — [Ponytail narration](posts/EXP-20260802-ponytail-narration-skills.html)** is in **treatment** (first treatment digest 2026-08-17 → 2026-08-29). Skills briefs now use structured context + ponytail constraints; OSS is unchanged. Functional metrics live on the [Token dashboard](token-usage.html). **#2 — soft-dedup diversity** is queued to start baseline on 2026-08-30 after ponytail ends. Completed runs stay on the dashboard; shipped records live under `data/experiments/archive/` in git.
 
 ## Transparency boundaries
 

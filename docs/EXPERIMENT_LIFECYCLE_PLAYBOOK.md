@@ -35,16 +35,16 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
-## Registered experiments (as of 2026-08-01)
+## Registered experiments (as of 2026-08-16)
 
 ### Active Lab queue
 
-Formal experiment windows **resumed 2026-08-02**. Ponytail narration leads the queue.
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration is in treatment.
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
-| 1 | EXP-20260802-ponytail-narration-skills | Skills digest | **baseline** (2026-08-02 → 2026-08-15) |
-| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued) |
+| 1 | EXP-20260802-ponytail-narration-skills | Skills digest | **active** (first treatment digest 2026-08-17 → 2026-08-29) |
+| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued; baseline 2026-08-30) |
 | — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
 ### Shipped outside formal windows (archived)
@@ -90,9 +90,14 @@ Archived: [data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json](.
 
 ---
 
-### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **draft / paused**
+### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **draft / queued #2**
 
-Not scheduled. Re-register when resuming formal experiments.
+Queued behind ponytail. Do **not** start until ponytail treatment ends (2026-08-29). Windows slipped so reminders fire on the new dates:
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-08-30** → **2026-09-12** |
+| Treatment | **2026-09-13** → **2026-09-26** |
 
 **Hypothesis:** Stronger soft-dedup (longer memory of recent picks + harsher score penalty) opens more list slots for less-repeated repos without abandoning 7-day momentum ranking.
 
@@ -117,34 +122,29 @@ Leave OSS digest soft-dedup at defaults during this canary.
 
 ---
 
-### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **baseline**
+### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **active**
 
 Inspired by [W31 Builder Takeaway](../briefings/weekly/2026-W31/weekly_review.md#builder-takeaway): Graphify-style structured context + ponytail YAGNI constraints on Skills narration.
 
 | Window | Dates (PT) |
 |--------|------------|
-| Baseline | **2026-08-02** → **2026-08-15** |
-| Treatment | **2026-08-16** → **2026-08-29** |
+| Baseline | **2026-08-02** → **2026-08-16** (includes 2026-08-16 digest, published before flags flipped) |
+| Treatment | **2026-08-17** → **2026-08-29** |
 
-**Baseline config (digest.yml):** Firecrawl enrich + quality rubric + token logging ON; `DIGEST_NARRATE_*` flags **OFF**. `EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills` on Skills digest step only.
+**Treatment config (digest.yml):** Firecrawl enrich + quality rubric + token logging ON. Ponytail flags on the **Skills command only** (not the shared OSS `env:` block):
 
-**Treatment start (2026-08-16):** Add to Skills digest env:
 ```yaml
-DIGEST_NARRATE_STRUCTURED_CONTEXT: "1"
-DIGEST_NARRATE_PONYTAIL: "1"
-```
-Set experiment `"status": "active"` in JSON.
-
-**Primary metrics:** `/lab/token-usage.html` — output tokens and words per repo; shadow A/B before treatment optional.
-
-**Shadow run (before treatment, local):**
-
-```bash
 EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills \
-DIGEST_ENRICH_WEB=1 DIGEST_ENRICH_SHADOW=1 \
-DIGEST_NARRATE_STRUCTURED_CONTEXT=1 DIGEST_NARRATE_PONYTAIL=1 \
+DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
+DIGEST_NARRATE_PONYTAIL=1 \
 npm run digest -- --edition skills
 ```
+
+**Baseline outcome (token log, 14 Skills runs 2026-08-03→2026-08-16):** ~2005 output tokens and ~1239 words per run; rank-1 rubric 14/14 pass; flags off. No pre-treatment shadow run was stored.
+
+**Primary metrics:** `/lab/token-usage.html` — output tokens and words per repo vs baseline; rank-1 rubric pass rate; editorial check that **Why now** still cites timely hooks.
+
+**Keep/revert (2026-08-29):** Keep both flags if treatment tokens/words drop without rubric or Why-now regressions. If Why now loses timely hooks, revert ponytail first and keep structured context alone.
 
 **Lab writeup:** [briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md](../briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md)
 

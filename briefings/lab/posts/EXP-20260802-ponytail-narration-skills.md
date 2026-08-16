@@ -1,6 +1,6 @@
-# Ponytail narration — W31-inspired experiment design
+# Ponytail narration — W31-inspired experiment
 
-_Design doc for EXP-20260802-ponytail-narration-skills. Registered 2026-08-02; formal windows not scheduled._
+_EXP-20260802-ponytail-narration-skills. Treatment started 2026-08-16 PT; first treatment digest 2026-08-17._
 
 ## Why this experiment
 
@@ -94,18 +94,32 @@ Engagement analytics (PostHog clicks, pageviews) are **out of scope** for this e
 
 Token telemetry logs automatically to `data/quality/token-usage.jsonl` on every digest run and surfaces on the public [Token usage](/lab/token-usage.html) page after `npm run build:pages`.
 
-### Windows (when formal experiments resume)
+### Windows
 
 | Phase | Dates (PT) |
 |-------|------------|
-| **Baseline (active)** | **2026-08-02 → 2026-08-15** |
-| Treatment | 2026-08-16 → 2026-08-29 |
+| **Baseline** | **2026-08-02 → 2026-08-16** (2026-08-16 digest published as control) |
+| **Treatment (active)** | **2026-08-17 → 2026-08-29** |
 
-Baseline runs production narration (enrichment on, ponytail flags off). Treatment enables both flags in `.github/workflows/digest.yml` on the Skills digest step starting **2026-08-16**.
+Baseline ran production narration (enrichment on, ponytail flags off). Treatment enables both flags on the Skills digest command only, starting with the **2026-08-17** run.
 
-## Recommendation (preliminary)
+## Baseline outcome
 
-Pending shadow runs. If rubric passes and blurbs read tighter in editorial review, **keep both flags on Skills** and consider OSS later. If **Why now** loses timely hooks, revert ponytail first and keep structured context alone.
+Fourteen Skills production runs (2026-08-03 through 2026-08-16) in `data/quality/token-usage.jsonl`:
+
+| Metric | Result |
+|--------|--------|
+| Mean output tokens / run | ~2005 |
+| Mean output words / run | ~1239 |
+| Rank-1 quality rubric | 14 / 14 pass |
+| `structured_context` / `ponytail` flags | Off every run |
+| Pre-treatment shadow run | Not stored |
+
+That is the control picture. Treatment success is a drop in output tokens and words **without** a rubric or Why-now regression. Compare on the [Token dashboard](../token-usage.html) after each daily Skills digest.
+
+## Recommendation (in progress)
+
+Treatment is live on Skills. At window end (2026-08-29): **keep both flags** if tokens/words drop and rank-1 still passes with timely Why-now hooks. If Why now loses HN/Reddit hooks, revert ponytail first and keep structured context alone. OSS stays on the default prompt until Skills earns a keep.
 
 ## References
 

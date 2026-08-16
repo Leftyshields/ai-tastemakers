@@ -43,7 +43,7 @@ A public **measure → experiment → report** loop for improving the digest pip
 
 **SEO:** Pages build emits `sitemap.xml`, `robots.txt`, meta descriptions, canonical URLs, Open Graph/Twitter tags, and JSON-LD on daily brief pages.
 
-**Experiments:** File-based registry in `data/experiments/` (shipped records archived under `data/experiments/archive/`). Formal experiment windows are paused while growing readership; the dashboard lists active records only. Shadow runs (`DIGEST_ENRICH_SHADOW=1`) write side-by-side control vs treatment blurbs under `data/experiments/runs/` without touching published briefings.
+**Experiments:** File-based registry in `data/experiments/` (shipped records archived under `data/experiments/archive/`). Formal windows resumed 2026-08-02. **EXP-20260802-ponytail-narration-skills** is in treatment on Skills (structured context + ponytail flags). Shadow runs (`DIGEST_ENRICH_SHADOW=1`) write side-by-side control vs treatment blurbs under `data/experiments/runs/` without touching published briefings.
 
 See [docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md](docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md) and [briefings/lab/shadow-rubric.md](briefings/lab/shadow-rubric.md).
 

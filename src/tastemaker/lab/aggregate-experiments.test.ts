@@ -71,4 +71,15 @@ describe("aggregate-experiments", () => {
     expect(sorted[0].id).toBe("EXP-20260802-ponytail-narration-skills");
     expect(buildQueueSummary(sorted)).toContain("baseline window");
   });
+
+  it("buildQueueSummary describes an active treatment window", () => {
+    const summary = buildQueueSummary([
+      {
+        id: "EXP-20260802-ponytail-narration-skills",
+        status: "active",
+        treatment_window: { start: "2026-08-17", end: "2026-08-29" },
+      } as never,
+    ]);
+    expect(summary).toContain("treatment window 2026-08-17 → 2026-08-29");
+  });
 });

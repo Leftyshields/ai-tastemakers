@@ -97,7 +97,7 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-          # EXP-20260802-ponytail-narration-skills — baseline 2026-08-02 → 2026-08-15 (Skills; ponytail flags OFF)
+          # EXP-20260802-ponytail-narration-skills — treatment 2026-08-17 → 2026-08-29 (Skills only)
           DIGEST_ENRICH_WEB: "1"
           DIGEST_ENRICH_WEB_PROVIDER: "firecrawl"
           DIGEST_ENRICH_WEB_DEEP: "1"
@@ -108,7 +108,10 @@ jobs:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
           npm run digest -- --edition oss
-          EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills npm run digest -- --edition skills
+          EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills \
+          DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
+          DIGEST_NARRATE_PONYTAIL=1 \
+          npm run digest -- --edition skills
 
       - name: Run monthly rollup (fourth Sunday)
         if: steps.gate.outputs.run_monthly == 'true'
