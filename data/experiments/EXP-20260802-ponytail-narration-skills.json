@@ -1,8 +1,26 @@
 {
   "schema_version": 1,
   "id": "EXP-20260802-ponytail-narration-skills",
-  "hypothesis": "Graphify-style structured context tiers plus ponytail YAGNI narration constraints improve shadow-rubric scores on specificity and build_with_it while reducing output tokens and brief word count — without losing why_now timeliness.",
-  "change_summary": "Enable DIGEST_NARRATE_STRUCTURED_CONTEXT and DIGEST_NARRATE_PONYTAIL on Skills narration (with enrichment on). Shadow mode compares default vs treatment prompts on the same enriched context.",
+  "title": "Shorter Skills briefs",
+  "reader_summary": "Write Skills blurbs with stricter rules: one sentence per section when we can, and exactly one “try this” step — no invented architecture.",
+  "outcome_line": "After-window is on. First treated digest is Aug 17. We're checking whether briefs get about 10% cheaper without getting worse.",
+  "how_we_measure": "We compare how long the blurbs are (cost) and whether they still name real features, give one useful next step, and cite a timely hook. Clicks are not part of this test.",
+  "reader_glossary": [
+    {
+      "term": "Graphify",
+      "meaning": "A GitHub tool that turns a codebase into a knowledge graph so an AI can look up facts in order, instead of getting one dump. We did not install it. We copied the habit: README first (what the repo does), news last, and only for the “why now” line."
+    },
+    {
+      "term": "Ponytail",
+      "meaning": "A skill for coding agents that fights overbuilding — use the built-in date field, not a date-picker library. We did not install it, and this is not a test of the Ponytail skill that often appears on the Skills list. We copied the habit: one thing to try, no invented architecture."
+    },
+    {
+      "term": "YAGNI",
+      "meaning": "An old proverb: You Aren't Gonna Need It. Don't add extra layers “just in case.” Ponytail is YAGNI for agents. For this digest it means: don't recommend a three-tool stack the README never mentioned."
+    }
+  ],
+  "hypothesis": "If we give Claude the README first and the news last, and we tell it to keep each Skills blurb short with exactly one thing to try, the write-ups should get more specific and more useful — and about 10% cheaper — without losing a real reason the repo is timely.",
+  "change_summary": "On Skills only: ordered prompt (README, then metadata, then web/HN) plus tighter writing rules (short sections, one try-this step, no invented architecture).",
   "status": "active",
   "edition": "skills",
   "baseline_window": {

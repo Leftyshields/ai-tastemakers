@@ -2,7 +2,7 @@
 
 JSON files here are **complete** experiment records removed from the active Lab queue (`data/experiments/EXP-*.json`).
 
-They are not loaded by `/lab/experiments.html` but remain in git for audit history. To register a new experiment, copy `_template.json` into the parent `data/experiments/` directory.
+The Lab experiments page lists them as shipped history. To register a new experiment, copy `_template.json` into the parent `data/experiments/` directory.
 
 ## Archived
 

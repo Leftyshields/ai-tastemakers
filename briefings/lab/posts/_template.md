@@ -1,6 +1,10 @@
-# Experiment write-up — EXP-YYYYMMDD-slug
+# Short public name
 
-_One-page dogfood report after an experiment completes._
+_One sentence a reader can understand without knowing flag names._
+
+## In plain English
+
+What changed for someone who reads the digest, in a few bullets. Operator detail belongs below.
 
 ## Onboarding
 

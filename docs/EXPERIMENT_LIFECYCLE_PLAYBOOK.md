@@ -49,7 +49,7 @@ Formal experiment windows **resumed 2026-08-02**. Ponytail narration is in treat
 
 ### Shipped outside formal windows (archived)
 
-Moved to `data/experiments/archive/` — not on `/lab/experiments.html`:
+Moved to `data/experiments/archive/`. The Lab dashboard lists them under **On the site today** / **What we tried** as shipped history:
 
 | Experiment | Shipped | Production config |
 |------------|---------|-------------------|
@@ -124,7 +124,7 @@ Leave OSS digest soft-dedup at defaults during this canary.
 
 ### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **active**
 
-Inspired by [W31 Builder Takeaway](../briefings/weekly/2026-W31/weekly_review.md#builder-takeaway): Graphify-style structured context + ponytail YAGNI constraints on Skills narration.
+Inspired by [W31 Builder Takeaway](../briefings/weekly/2026-W31/weekly_review.md#builder-takeaway): ordered facts (README first, news last) plus “keep it small” writing rules on Skills narration. Graphify / Ponytail / YAGNI are the source ideas — explained on the Lab write-up.
 
 | Window | Dates (PT) |
 |--------|------------|

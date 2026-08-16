@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "id": "EXP-20260715-soft-dedup-diversity-skills",
+  "title": "Less-repeated Skills picks",
+  "reader_summary": "Remember more of the recent Skills list and penalize repeats harder, so more unique repos show up week to week.",
+  "outcome_line": "On hold until the shorter-briefs test finishes (after Aug 29).",
   "hypothesis": "Stronger soft-dedup (14-day window, 0.15 penalty) reduces consecutive-day list overlap and raises weekly unique / NEW share on Skills digests, while still ranking by 7-day momentum so the list stays about discovery of real activity.",
   "change_summary": "Tighten soft-dedup for Skills digests only: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 (defaults today: 5 and 0.5).",
   "status": "draft",

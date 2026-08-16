@@ -26,6 +26,11 @@ export interface ExperimentSnapshot {
   source?: string;
 }
 
+export interface ExperimentExplainer {
+  term: string;
+  meaning: string;
+}
+
 export interface ExperimentShadowRun {
   run_id: string;
   date: string;
@@ -35,6 +40,16 @@ export interface ExperimentShadowRun {
 export interface ExperimentRecord {
   schema_version: 1;
   id: string;
+  /** Short public name. Falls back to a title-cased slug from the id. */
+  title?: string;
+  /** One sentence for the Lab dashboard card (avoid flag names). */
+  reader_summary?: string;
+  /** One-line public outcome for the card footer. */
+  outcome_line?: string;
+  /** Terms a reader will hit on this experiment; rendered on the dashboard detail. */
+  reader_glossary?: ExperimentExplainer[];
+  /** How we judge success, in plain language. */
+  how_we_measure?: string;
   hypothesis: string;
   change_summary: string;
   status: ExperimentStatus;

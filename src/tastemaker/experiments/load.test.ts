@@ -5,6 +5,8 @@ import os from "node:os";
 import {
   appendShadowRun,
   experimentFilePath,
+  listArchivedExperimentIds,
+  loadArchivedExperiment,
   loadExperiment,
   registerExperiment,
 } from "./load.js";
@@ -63,6 +65,37 @@ describe("experiments/load", () => {
     const record = await loadExperiment(tmpDir, id);
     expect(record.shadow_runs).toHaveLength(1);
     expect(record.shadow_runs[0]).toEqual(run);
+  });
+
+  it("loadArchivedExperiment reads from archive/", async () => {
+    const id = "EXP-20260701-archived";
+    const archiveDir = path.join(tmpDir, "data/experiments/archive");
+    await fs.mkdir(archiveDir, { recursive: true });
+    await fs.writeFile(
+      path.join(archiveDir, `${id}.json`),
+      JSON.stringify({
+        schema_version: 1,
+        id,
+        hypothesis: "archived",
+        change_summary: "shipped",
+        status: "complete",
+        edition: "both",
+        baseline_window: { start: "", end: "" },
+        treatment_window: { start: "", end: "" },
+        change: { flags: {} },
+        snapshots: [],
+        shadow_runs: [],
+        verdict: "shipped",
+        keep_change: true,
+        notes: "",
+      }),
+      "utf-8",
+    );
+
+    expect(await listArchivedExperimentIds(tmpDir)).toEqual([id]);
+    const record = await loadArchivedExperiment(tmpDir, id);
+    expect(record.status).toBe("complete");
+    expect(record.keep_change).toBe(true);
   });
 
   it("rejects invalid experiment ids", () => {

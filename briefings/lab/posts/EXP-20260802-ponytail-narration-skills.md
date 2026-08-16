@@ -1,59 +1,96 @@
-# Ponytail narration — W31-inspired experiment
+# Shorter Skills briefs
 
-_EXP-20260802-ponytail-narration-skills. Treatment started 2026-08-16 PT; first treatment digest 2026-08-17._
+_We're testing whether Skills write-ups can be shorter and more useful without losing a real “why this, today” hook. First treated digest: 2026-08-17._
 
-## Why this experiment
+## The question, in English
 
-The [W31 weekly takeaway](../../weekly/2026-W31/weekly_review.md#builder-takeaway) distilled four signals from July's agent-tooling momentum:
+Skills blurbs have three parts: **what it does**, **why now**, and **try this**.
 
-| Signal | Repo exemplar | Pipeline translation |
-|--------|---------------|----------------------|
-| Context fidelity | Graphify-Labs/graphify | Tiered context graph in Claude prompt — README ground truth before web/HN signals |
-| Runtime isolation | citrolabs/ego-lite, stablyai/orca | Not directly applicable to digest narration (future Lab topic) |
-| Ponytail discipline | DietrichGebert/ponytail | YAGNI constraints — one integration path, no architecture sprawl |
-| Runnable docs | bojieli/ai-agent-book | This post: copy-paste commands you can run locally |
+We changed two things about how those get written:
 
-We already enrich Skills briefs with Firecrawl + HN/Reddit (`DIGEST_ENRICH_WEB=1`). The open question is whether **how we present context to Claude** and **how tightly we constrain the model** improves brief quality without losing timely hooks.
+1. **Feed Claude the facts in order.** The README first (what the repo actually does), then stars and topics, then news last — and only for the “why now” line.
+2. **Tell Claude to stay small.** One sentence per section when we can. Exactly one thing to try. No invented architecture.
 
-## Onboarding
+If that works, blurbs should name real features, give one concrete next step, and cost about 10% less to generate — without turning “why now” into “it has a lot of stars.”
 
-Two opt-in flags change narration only — ranking, discovery, and enrichment are unchanged:
+That is the whole test. The names Graphify, Ponytail, and YAGNI are *where the ideas came from*, not tools we installed.
 
-### `DIGEST_NARRATE_STRUCTURED_CONTEXT=1`
+## What those three names mean
 
-Replaces the flat repo blob with a **priority-ordered context graph**:
+In late July our [weekly takeaway](../../weekly/2026-W31/weekly_review.md#builder-takeaway) kept pointing at two GitHub projects. We borrowed their *habits*, not their code.
 
-1. **Ground truth — README** (capabilities)
-2. **Repo metadata** (stars, topics, language)
-3. **Timely signals** (web/HN/Reddit — **Why now only**)
+### Graphify
 
-This mirrors Graphify's structured-memory idea: separate durable facts from ephemeral signals instead of dumping a single external-context paragraph.
+[Graphify](https://github.com/Graphify-Labs/graphify) is a tool that turns a codebase into a knowledge graph. Instead of stuffing every file into one pile for an AI to rummage through, it lets the model look up facts in a structured way — and it labels whether a fact was extracted or guessed.
 
-### `DIGEST_NARRATE_PONYTAIL=1`
+We are **not** running Graphify on the digest.
 
-Adds **ponytail constraints** to the editorial rules:
+We copied the habit: **don't dump everything into one blob.** Durable facts (the README) sit above timely noise (Hacker News, Reddit, a trending spike). News can inform “why now.” It should not rewrite “what it does.”
 
-- One sentence per section when possible
-- **Build with it**: exactly one integration step — no multi-tool stacks
-- No architectures or "production-ready" setups the README doesn't mention
-- Shorter `max_tokens` (350 vs 450)
+### Ponytail
 
-## Expected outcome
+[Ponytail](https://github.com/DietrichGebert/ponytail) is a skill for coding agents (Claude Code, Cursor, and similar). Its job is to stop the agent from overbuilding. A typical nudge: use the browser's built-in date field instead of pulling in a third-party date-picker library.
 
-**Hypothesis:** Structured context tiers + ponytail YAGNI constraints improve shadow-rubric scores on **specificity** and **build_with_it** without losing **why_now** timeliness — blurbs stay accurate but become shorter and more actionable.
+This experiment is **not** a test of that GitHub skill, even though Ponytail often appears *on* the Skills list. We did not install it.
 
-We expect treatment blurbs to:
+We copied the habit: **one path, the smallest one.** “Try this” should be a single step a builder can do today, not a three-tool stack and a production architecture the README never mentioned.
 
-- Cite HN/Reddit hooks in **Why now** as often as control
-- Name a single concrete integration in **Build with it** (not a three-tool workflow)
-- Drop vague architecture advice ("build a production pipeline around…")
+### YAGNI
 
-## Runnable pre-treatment shadow run
+YAGNI is an old software proverb: **You Aren't Gonna Need It.** Don't add extra layers “just in case.”
 
-Requires `GITHUB_TOKEN`, `ANTHROPIC_API_KEY`, and optionally `FIRECRAWL_API_KEY` for enrichment.
+Ponytail is YAGNI aimed at coding agents. For this digest, YAGNI means: if the README doesn't describe a pipeline, a platform, or a multi-service setup, the blurb shouldn't recommend one.
+
+## What a reader should notice (starting Aug 17)
+
+On Skills briefs only — OSS is unchanged:
+
+- Sections stay short
+- **Try this** names one integration, not a stack
+- No “build a production-ready pipeline around…” unless the repo actually says that
+- **Why now** still needs a timely hook (HN, Reddit, a release) — star count alone is not enough
+
+Today's Skills brief (Aug 16) is still the old style. We decide on **Aug 29** whether to keep the tighter rules.
+
+## How we'll know
+
+We compare the old writing (Aug 2–16) with the new writing (Aug 17–29) on the [Token dashboard](../token-usage.html).
+
+| We want | What “good” looks like |
+|---------|------------------------|
+| Cheaper / shorter | About 10% fewer words and output tokens, without the writing falling apart |
+| More specific | Names real features, not generic hype |
+| More useful | One step a builder could actually take |
+| Still timely | “Why now” still cites a real hook |
+
+Click and pageview stats are out of scope here. This test is about writing quality and cost.
+
+### Before we had the new rules (Aug 3–16)
+
+Fourteen Skills runs: about **2005** output tokens and **1239** words per run. Automated quality checks passed 14 of 14. That is the before picture.
+
+## If it doesn't work
+
+On Aug 29: keep both changes if briefs get shorter and still pass the quality check with timely hooks.
+
+If “why now” goes mushy, turn off the shortness rules first and keep the ordered-facts prompt. OSS stays on the old prompt until Skills earns a keep.
+
+---
+
+## Operator notes
+
+Two flags. Ranking, discovery, and web enrichment are unchanged.
+
+| Flag | What it does |
+|------|----------------|
+| `DIGEST_NARRATE_STRUCTURED_CONTEXT=1` | Prompt order: README → metadata → web/HN/Reddit (Why now only) |
+| `DIGEST_NARRATE_PONYTAIL=1` | Short sections; one Build-with-it step; no invented architecture; `max_tokens` 350 vs 450 |
+
+Flags are on the **Skills digest command only**, not the shared OSS env block.
+
+### Optional side-by-side preview
 
 ```bash
-# Side-by-side: control = default prompt + enrich; treatment = structured + ponytail + enrich
 EXPERIMENT_ID=EXP-20260802-ponytail-narration-skills \
 DIGEST_ENRICH_WEB=1 \
 DIGEST_ENRICH_SHADOW=1 \
@@ -62,69 +99,18 @@ DIGEST_NARRATE_PONYTAIL=1 \
 npm run digest -- --edition skills
 ```
 
-Output lands in `data/experiments/runs/{run_id}/`:
-
-- `shadow.json` — `brief_control` vs `brief_treatment` per repo (`narrate_ponytail_requested: true`)
-- `{owner-repo}.json` — enrichment bundles for audit
-
-Score with the [shadow rubric](../shadow-rubric.md). Record results in `{run_id}/rubric.json` and append the run to the experiment JSON via git.
-
-### Optional: rank-1 rubric log during treatment
-
-```bash
-DIGEST_QUALITY_RUBRIC=1 \
-DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
-DIGEST_NARRATE_PONYTAIL=1 \
-npm run digest -- --edition skills
-```
-
-Appends to `data/quality/rubric-scores.jsonl`.
-
-## Measurement plan
-
-| Priority | Metric | Success bar |
-|----------|--------|-------------|
-| 1 | **Output tokens / repo** (shadow) | Treatment ≤ control (−10% or better) — see [Token dashboard](../token-usage.html) |
-| 2 | **Output words / repo** (shadow) | Treatment shorter; no rubric accuracy drop |
-| 3 | Shadow rubric (top-3 enriched repos) | Median specificity + build_with_it ≥ 4; no accuracy ≤ 2 |
-| 4 | Quality rubric log | Rank-1 pass rate stable or up vs baseline window |
-| 5 | Narration failures | `repos_failed` unchanged in token log |
-
-Engagement analytics (PostHog clicks, pageviews) are **out of scope** for this experiment — functional cost + quality only.
-
-Token telemetry logs automatically to `data/quality/token-usage.jsonl` on every digest run and surfaces on the public [Token usage](/lab/token-usage.html) page after `npm run build:pages`.
+Output: `data/experiments/runs/{run_id}/`. Score with the [shadow rubric](../shadow-rubric.md) (specificity, build-with-it, why-now, accuracy).
 
 ### Windows
 
 | Phase | Dates (PT) |
 |-------|------------|
-| **Baseline** | **2026-08-02 → 2026-08-16** (2026-08-16 digest published as control) |
-| **Treatment (active)** | **2026-08-17 → 2026-08-29** |
-
-Baseline ran production narration (enrichment on, ponytail flags off). Treatment enables both flags on the Skills digest command only, starting with the **2026-08-17** run.
-
-## Baseline outcome
-
-Fourteen Skills production runs (2026-08-03 through 2026-08-16) in `data/quality/token-usage.jsonl`:
-
-| Metric | Result |
-|--------|--------|
-| Mean output tokens / run | ~2005 |
-| Mean output words / run | ~1239 |
-| Rank-1 quality rubric | 14 / 14 pass |
-| `structured_context` / `ponytail` flags | Off every run |
-| Pre-treatment shadow run | Not stored |
-
-That is the control picture. Treatment success is a drop in output tokens and words **without** a rubric or Why-now regression. Compare on the [Token dashboard](../token-usage.html) after each daily Skills digest.
-
-## Recommendation (in progress)
-
-Treatment is live on Skills. At window end (2026-08-29): **keep both flags** if tokens/words drop and rank-1 still passes with timely Why-now hooks. If Why now loses HN/Reddit hooks, revert ponytail first and keep structured context alone. OSS stays on the default prompt until Skills earns a keep.
+| Before (change off) | 2026-08-02 → 2026-08-16 |
+| After (change on) | 2026-08-17 → 2026-08-29 |
 
 ## References
 
 - Experiment ID: `EXP-20260802-ponytail-narration-skills`
 - W31 takeaway: [weekly/2026-W31](../../weekly/2026-W31/weekly_review.md)
-- Pipeline flags: `DIGEST_NARRATE_STRUCTURED_CONTEXT`, `DIGEST_NARRATE_PONYTAIL`
-- Prior art: [EXP-20260628-web-enrich-skills](./EXP-20260628-web-enrich-skills.md) (enrichment layer this experiment builds on)
+- Prior experiment: [Richer Skills briefs](./EXP-20260628-web-enrich-skills.md) (the enrichment layer this sits on)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

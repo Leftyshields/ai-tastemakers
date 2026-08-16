@@ -36,8 +36,8 @@ A public **measure → experiment → report** loop for improving the digest pip
 |----------|------------|
 | [/lab/](https://leftyshields.github.io/ai-tastemakers/lab/) | How we pick repos, run experiments, and publish results |
 | [/lab/tools.html](https://leftyshields.github.io/ai-tastemakers/lab/tools.html) | Tool inventory mined from past briefings (search, compaction, eval candidates) |
-| [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) | Experiment registry with baseline/treatment windows and imported metrics |
-| [/lab/posts/](https://leftyshields.github.io/ai-tastemakers/lab/posts/) | Dogfood write-ups when we adopt digest-featured tools |
+| [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) | Public experiment record: what we changed, whether we kept it, and what is live today |
+| [/lab/posts/](https://leftyshields.github.io/ai-tastemakers/lab/posts/) | Short write-ups when we try a digest-featured tool, or finish an experiment |
 
 **Site analytics:** PostHog pageviews + `outbound_repo_click` events on repo links (injected at Pages build when `POSTHOG_KEY` is set).
 

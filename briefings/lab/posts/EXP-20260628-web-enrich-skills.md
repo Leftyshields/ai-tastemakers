@@ -1,6 +1,16 @@
-# Web/HN enrichment — first experiment cycle
+# Richer Skills briefs
 
-_Results for EXP-20260628-web-enrich-skills. Closed 2026-07-18._
+_We kept extra web and Hacker News context on Skills write-ups. Closed 2026-07-18._
+
+## In plain English
+
+Before Claude writes a Skills blurb, it can now read a bit more than the README: a cleaned web page plus recent Hacker News mentions. The list of repos is unchanged — only the write-up gets richer.
+
+We hoped that would raise clicks out to GitHub. Traffic was too low to tell. What we could see: “Why now” lines cited timely hooks more often, and the blurbs stayed accurate. So we kept the extra context.
+
+The rest of this page is the operator record.
+
+---
 
 ## Onboarding
 
@@ -54,7 +64,7 @@ The pre-module shadow run (`bfb156a9-…`) validated plumbing only; side-by-side
 
 - **Quality:** Passed — enrichment adds timely hooks without visible digest regressions.
 - **CTR:** Inconclusive — zero baseline clicks and single-digit pageviews cannot support a statistical verdict either way.
-- **Next step:** Leave `DIGEST_ENRICH_WEB=1` on and run EXP-20260716-firecrawl-enrich-skills to compare Jina vs Firecrawl as the web provider (shadow rubric primary, clicks secondary).
+- **Next step:** Firecrawl replaced Jina as the Skills web provider on 2026-08-01. Formal follow-up is the shorter-briefs narration test (EXP-20260802), not another enrich-provider A/B.
 
 Do **not** revert enrichment flags unless a future experiment or rubric review fails quality.
 

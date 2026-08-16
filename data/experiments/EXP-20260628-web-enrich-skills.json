@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "id": "EXP-20260628-web-enrich-skills",
+  "title": "Richer Skills briefs",
+  "reader_summary": "Give Skills write-ups extra context from the web and Hacker News before Claude writes the blurb.",
+  "outcome_line": "Kept. Briefs cited timely hooks more often; click data was too sparse to judge.",
   "hypothesis": "Post-rank web/HN enrichment improves outbound repo click rate on Skills editions without hurting digest quality.",
   "change_summary": "Enable DIGEST_ENRICH_WEB for top-N ranked repos before narration (Skills canary first).",
   "status": "complete",

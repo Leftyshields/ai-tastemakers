@@ -1,6 +1,9 @@
 {
   "schema_version": 1,
   "id": "EXP-20260701-landing-layout",
+  "title": "Homepage layout",
+  "reader_summary": "Make today's brief the main action, put How it works and the archive in the main column, and keep the sidebar as a promo only.",
+  "outcome_line": "Shipped Aug 1. Still on the live site; we skipped the formal before/after measurement.",
   "hypothesis": "A reflow-first landing layout with a single primary hero CTA, main-column synthesis blocks, compact month-tile archive heat-map, and a promo-only sidebar increases clicks on today's brief and weekly/monthly rollups without reducing subscribe or cross-edition engagement.",
   "change_summary": "Refactor homepage (index) under SITE_LANDING_LAYOUT_V2=1: primary \"Read today's brief\" CTA, secondary hero actions, main column (How it works / About, month-grid Daily Archive, Weekly, Monthly), promo-only sidebar, and WCAG AA footer contrast.",
   "status": "complete",
@@ -20,5 +23,5 @@
   "shadow_runs": [],
   "verdict": "Shipped to production 2026-08-01 without completing the formal experiment window — operator decision to prioritize engagement over sparse baseline/treatment metrics. SITE_LANDING_LAYOUT_V2=1 enabled in Pages build. Reversible via workflow env or repo variable.",
   "keep_change": true,
-  "notes": "Archived from active experiment queue 2026-08-01. Record kept for Lab history; not listed on /lab/experiments.html. Linked capture: EPH-20260701-LAND."
+  "notes": "Archived from the active experiment queue 2026-08-01. Listed on /lab/experiments.html as shipped history. Linked capture: EPH-20260701-LAND."
 }

@@ -1493,6 +1493,11 @@ export async function buildEditionSite(
   return dates.length;
 }
 
+function markdownH1(markdown: string, fallback: string): string {
+  const match = markdown.match(/^#\s+(.+)$/m);
+  return match ? match[1].trim() : fallback;
+}
+
 export async function buildLabSite(
   repoRoot: string,
   siteDir: string,
@@ -1546,15 +1551,21 @@ export async function buildLabSite(
 
   const experimentsBody = `
     ${labNavHtml("experiments", escapeHtml)}
+    <header class="lab-lede">
+      <h2>What we're testing</h2>
+      <p>We change one thing at a time — how daily briefs are written, how the homepage is laid out, or which repos show up in the list — then we say whether we kept it. This page is the public record, not a live A/B dashboard.</p>
+      <p><strong>Before</strong> is the site as it was. <strong>After</strong> is the site with the change turned on. Pages rebuild once a day, so these are calendar windows, not coin-flip tests.</p>
+    </header>
     <div id="experiments-root" class="font-sans text-sm">
       <div id="experiments-table-wrap" class="space-y-3"></div>
       <div id="experiment-detail" class="hidden">
         <button type="button" id="detail-back" class="mb-6 text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; All experiments</button>
-        <h2 id="detail-title" class="mb-4 font-mono text-lg font-bold"></h2>
+        <h2 id="detail-title" class="mb-4 font-sans text-lg font-bold tracking-tight"></h2>
         <div id="detail-body" class="prose prose-stone max-w-none dark:prose-invert prose-sm prose-headings:font-sans"></div>
-        <button type="button" id="export-markdown" class="mt-6 rounded-full border border-blue-800 px-4 py-2 text-sm font-semibold text-blue-900 hover:bg-blue-50 dark:border-blue-500 dark:text-blue-200 dark:hover:bg-blue-950/40">Export markdown</button>
+        <button type="button" id="export-markdown">Download this write-up</button>
       </div>
     </div>
+    <noscript><p class="experiment-muted">Turn on JavaScript to browse the experiment cards. Records also live in the GitHub repo under <code>data/experiments/</code>.</p></noscript>
     <script src="experiments.js"></script>`;
 
   await writeExperimentsData(repoRoot, labSiteDir);
@@ -1565,7 +1576,15 @@ export async function buildLabSite(
 
   await fs.writeFile(
     path.join(labSiteDir, "experiments.html"),
-    pageShell("Experiments · Lab", experimentsBody, paths, brand, undefined, escapeHtml, labShell),
+    pageShell(
+      "Experiments · Lab",
+      experimentsBody,
+      paths,
+      brand,
+      "Public record of digest and homepage experiments: what we changed, whether we kept it, and what is live today.",
+      escapeHtml,
+      labShell,
+    ),
   );
 
   await writeTokenUsageData(repoRoot, labSiteDir);
@@ -1609,23 +1628,27 @@ export async function buildLabSite(
       .filter((f) => f.endsWith(".md") && !f.startsWith("_"))
       .sort();
     if (postFiles.length === 0) {
-      postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Dogfood write-ups will appear here after the first experiment cycle.</p>`;
+      postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Write-ups appear here after we finish an experiment or try a tool from the digest.</p>`;
     } else {
-      postsBody += `<ul class="font-sans text-sm">${postFiles.map((f) => `<li><a href="${f.replace(/\.md$/, ".html")}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(f.replace(/\.md$/, ""))}</a></li>`).join("")}</ul>`;
-
+      const listings: string[] = [];
       for (const file of postFiles) {
         const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
         const html = marked.parse(markdown) as string;
         const slug = file.replace(/\.md$/, "");
+        const title = markdownH1(markdown, slug);
+        listings.push(
+          `<li class="mb-2"><a href="${slug}.html" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(title)}</a></li>`,
+        );
         const postBody = `${labNavHtml("posts", escapeHtml, 1)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
-          pageShell(`${slug} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
+          pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
         );
       }
+      postsBody += `<ul class="font-sans text-sm leading-relaxed">${listings.join("")}</ul>`;
     }
   } catch {
-    postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Dogfood write-ups will appear here after the first experiment cycle.</p>`;
+    postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Write-ups appear here after we finish an experiment or try a tool from the digest.</p>`;
   }
   await fs.writeFile(
     path.join(labSiteDir, "posts", "index.html"),

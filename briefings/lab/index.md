@@ -20,18 +20,18 @@ Shadow runs let us preview enriched blurbs side-by-side with production output b
 ## What you'll find here
 
 - **[Tool inventory](tools.html)** — repos that appeared in briefing history, tagged by pipeline role (search, compaction, eval, analytics). Candidates for adoption, not endorsements.
-- **[Experiments](experiments.html)** — active and completed tests with baseline/treatment windows, imported metrics, and plain-language verdicts.
-- **[Token usage](token-usage.html)** — daily Claude narration tokens (input/output), shadow A/B deltas, and experiment-window aggregates. Functional cost telemetry — not engagement analytics.
-- **[Posts](posts/)** — onboarding notes and outcome stories when we adopt a digest-featured tool in our own stack.
-- **[Shadow rubric](shadow-rubric.html)** — how we score control vs treatment blurbs before enabling enrichment in production.
+- **[Experiments](experiments.html)** — what we tested, what is live on the site today, and what is on hold. Written for readers first.
+- **[Token usage](token-usage.html)** — how much it costs to write each digest, and whether the writing still passes a quality check.
+- **[Posts](posts/)** — short stories when we try a digest-featured tool in our own stack.
+- **[Shadow rubric](shadow-rubric.html)** — how we score “before” vs “after” blurbs before a change stays on.
 
 ## How to read an experiment
 
-Each experiment states a **hypothesis** (what we expect to improve), a **change summary** (what we toggled), and two time windows: **baseline** (before) and **treatment** (after). Snapshots are imported from site analytics; nothing live-updates — the dashboard reflects what we committed at the last site build.
+Each experiment states a **question** (what we expect to improve), **what we changed**, and two time windows: **before** (change off) and **after** (change on). Numbers come from analytics we import after each window — this page only updates when we rebuild the site.
 
-We default to **before/after windows** rather than live A/B tests because the site is static HTML rebuilt daily. That is a deliberate trade-off: slower feedback, but reproducible and easy to audit.
+We use **before/after calendar windows** rather than live A/B tests because the site is static HTML rebuilt daily. Slower feedback, but easy to audit.
 
-**Active queue (2026-08-16):** **#1 — [Ponytail narration](posts/EXP-20260802-ponytail-narration-skills.html)** is in **treatment** (first treatment digest 2026-08-17 → 2026-08-29). Skills briefs now use structured context + ponytail constraints; OSS is unchanged. Functional metrics live on the [Token dashboard](token-usage.html). **#2 — soft-dedup diversity** is queued to start baseline on 2026-08-30 after ponytail ends. Completed runs stay on the dashboard; shipped records live under `data/experiments/archive/` in git.
+**Right now (2026-08-16):** We are testing **[shorter Skills briefs](posts/EXP-20260802-ponytail-narration-skills.html)**. Today's Skills digest still uses the old writing style. Starting **Aug 17** through **Aug 29**, new Skills briefs use tighter rules (one “try this” step). OSS is unchanged. Cost and quality live on the [Token dashboard](token-usage.html). Next in line: less-repeated Skills picks, after this window ends.
 
 ## Transparency boundaries
 

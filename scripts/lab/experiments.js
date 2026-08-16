@@ -12,8 +12,12 @@
   const exportBtn = document.getElementById("export-markdown");
   const backBtn = document.getElementById("detail-back");
 
+  /** @type {object[]} */
+  let allExperiments = [];
   /** @type {object | null} */
   let selected = null;
+  /** @type {string} */
+  let queueSummary = "";
 
   function esc(text) {
     const el = document.createElement("span");
@@ -27,76 +31,138 @@
     return start || end || "—";
   }
 
-  function statusClass(status) {
+  function statusModifier(label) {
     const map = {
-      draft: "bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300",
-      baseline: "bg-amber-50 text-amber-900 dark:bg-amber-950/40 dark:text-amber-200",
-      active: "bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-200",
-      complete: "bg-emerald-50 text-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-200",
+      Kept: "kept",
+      Shipped: "shipped",
+      Reverted: "reverted",
+      Finished: "finished",
+      "On hold": "hold",
+      "Measuring before": "running",
+      "Measuring after": "running",
     };
-    return map[status] || map.draft;
+    return map[label] || "finished";
   }
 
-  function renderTable(data) {
-    const experiments = data.experiments || [];
-    if (!experiments.length) {
+  function statusBadge(exp) {
+    const label = exp.status_label || exp.status;
+    return `<span class="experiment-status experiment-status--${statusModifier(label)}">${esc(label)}</span>`;
+  }
+
+  function cardHtml(exp) {
+    return `
+      <button type="button" class="experiment-card" data-id="${esc(exp.id)}" aria-label="${esc(exp.title)}">
+        <div class="experiment-card__meta">
+          ${statusBadge(exp)}
+          <span class="experiment-card__edition">${esc(exp.edition_label || exp.edition)}</span>
+        </div>
+        <h3 class="experiment-card__title">${esc(exp.title)}</h3>
+        <p class="experiment-card__summary">${esc(exp.reader_summary || exp.change_summary)}</p>
+        ${exp.outcome_line ? `<p class="experiment-card__outcome">${esc(exp.outcome_line)}</p>` : ""}
+      </button>`;
+  }
+
+  function liveRowHtml(exp) {
+    return `<li>
+      <button type="button" class="experiment-live" data-id="${esc(exp.id)}" aria-label="${esc(exp.title)}">
+        <span class="experiment-live__title">${esc(exp.title)}</span>
+        <span class="experiment-live__note">${esc(exp.outcome_line || exp.reader_summary)}</span>
+      </button>
+    </li>`;
+  }
+
+  function queueCalloutHtml() {
+    if (!queueSummary) return "";
+    const running = allExperiments.some((e) => e.status === "baseline" || e.status === "active");
+    const cls = running ? "lab-callout lab-callout--running" : "lab-callout";
+    return `<aside class="${cls}" aria-label="Current status">
+      <p>${esc(queueSummary)} <a href="token-usage.html">Token dashboard</a></p>
+    </aside>`;
+  }
+
+  function sectionHtml(title, intro, inner) {
+    if (!inner) return "";
+    return `<section class="experiment-section">
+      <h3 class="experiment-section__title">${esc(title)}</h3>
+      ${intro ? `<p class="experiment-section__intro">${intro}</p>` : ""}
+      ${inner}
+    </section>`;
+  }
+
+  function renderList() {
+    if (!allExperiments.length) {
       tableWrap.innerHTML =
-        '<p class="leading-relaxed text-stone-600 dark:text-stone-400">No experiments yet. Add <code>data/experiments/EXP-*.json</code> and rebuild pages.</p>';
+        '<p class="experiment-empty">No experiments yet. We publish them here when we try a change.</p>';
       return;
     }
 
-    const queueHtml = data.queue_summary
-      ? `<p class="mb-4 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-950 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-100">${esc(data.queue_summary)} <a href="token-usage.html" class="font-semibold text-blue-800 hover:underline dark:text-blue-300">Token dashboard →</a></p>`
-      : "";
+    const running = allExperiments.filter((e) => e.status === "baseline" || e.status === "active");
+    const held = allExperiments.filter((e) => e.status === "draft" && !e.archived);
+    const live = allExperiments.filter((e) => e.keep_change === true);
+    const tried = allExperiments.filter((e) => e.status === "complete" || e.archived);
 
-    const cards = experiments
-      .map(
-        (exp) => `
-      <button type="button" class="experiment-card w-full rounded-lg border border-stone-200 bg-white p-4 text-left transition hover:border-blue-300 hover:bg-blue-50/40 dark:border-stone-700 dark:bg-stone-900 dark:hover:border-blue-600 dark:hover:bg-blue-950/20" data-id="${esc(exp.id)}">
-        <div class="mb-2 flex flex-wrap items-center gap-2">
-          <span class="font-mono text-xs font-semibold text-stone-800 dark:text-stone-200">${esc(exp.id)}</span>
-          <span class="rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(exp.status)}">${esc(exp.status)}</span>
-          <span class="text-xs text-stone-500 dark:text-stone-400">${esc(exp.edition)}</span>
-        </div>
-        <p class="leading-relaxed text-stone-700 dark:text-stone-300">${esc(exp.hypothesis)}</p>
-        <p class="mt-3 text-xs text-stone-500 dark:text-stone-400">Baseline ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))} · Treatment ${esc(windowLabel(exp.treatment_window?.start, exp.treatment_window?.end))}</p>
-      </button>`,
-      )
-      .join("");
+    tableWrap.innerHTML = `
+      ${queueCalloutHtml()}
+      ${sectionHtml(
+        "In progress",
+        "Before = change off. After = change on. Pages rebuild once a day, so this is a calendar window, not a coin-flip A/B test.",
+        running.length ? `<div class="experiment-card-list">${running.map(cardHtml).join("")}</div>` : "",
+      )}
+      ${sectionHtml(
+        "On the site today",
+        "Changes we kept. They are live for readers even if we skipped a full measured window.",
+        live.length ? `<ul class="experiment-live-list">${live.map(liveRowHtml).join("")}</ul>` : "",
+      )}
+      ${sectionHtml(
+        "On hold",
+        "Ideas we still want to test after the current window ends.",
+        held.length ? `<div class="experiment-card-list">${held.map(cardHtml).join("")}</div>` : "",
+      )}
+      ${sectionHtml(
+        "What we tried",
+        "Open a card for the question we asked and what we learned.",
+        tried.length ? `<div class="experiment-card-list">${tried.map(cardHtml).join("")}</div>` : "",
+      )}`;
 
-    tableWrap.innerHTML = queueHtml + cards;
-
-    tableWrap.querySelectorAll(".experiment-card").forEach((card) => {
+    tableWrap.querySelectorAll("[data-id]").forEach((card) => {
       card.addEventListener("click", () => {
         const id = card.getAttribute("data-id");
-        const exp = experiments.find((e) => e.id === id);
+        const exp = allExperiments.find((e) => e.id === id);
         if (exp) showDetail(exp);
       });
     });
   }
 
   function metricsTable(metrics) {
-    if (!metrics) return "<p class=\"text-stone-500\">No metrics.</p>";
+    if (!metrics) return '<p class="experiment-muted">No numbers imported for this window.</p>';
     const pv = metrics.pageviews_by_path || {};
     const oc = metrics.outbound_clicks || {};
     const pvRows = Object.entries(pv)
-      .map(([k, v]) => `<tr><td class="py-1 pr-2 font-mono text-xs">${esc(k)}</td><td class="py-1">${esc(v)}</td></tr>`)
+      .map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`)
       .join("");
     const ocRows = Object.entries(oc)
-      .map(([k, v]) => `<tr><td class="py-1 pr-2 font-mono text-xs">${esc(k)}</td><td class="py-1">${esc(v)}</td></tr>`)
+      .map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`)
       .join("");
     return `
-      <h4 class="mt-4 font-semibold">Pageviews</h4>
-      <table class="w-full text-sm">${pvRows || "<tr><td class=\"text-stone-500\">—</td></tr>"}</table>
-      <h4 class="mt-4 font-semibold">Outbound repo clicks</h4>
-      <table class="w-full text-sm">${ocRows || "<tr><td class=\"text-stone-500\">—</td></tr>"}</table>`;
+      <h4 class="experiment-subhead">Pageviews</h4>
+      <table class="experiment-metrics">${pvRows || '<tr><td class="experiment-muted">None recorded</td></tr>'}</table>
+      <h4 class="experiment-subhead">Clicks out to GitHub repos</h4>
+      <table class="experiment-metrics">${ocRows || '<tr><td class="experiment-muted">None recorded</td></tr>'}</table>`;
   }
 
-  function showDetail(exp) {
+  function setHash(id) {
+    const next = id ? `#${id}` : "";
+    if (location.hash !== next) {
+      history.replaceState(null, "", next || location.pathname + location.search);
+    }
+  }
+
+  function showDetail(exp, opts) {
     selected = exp;
     tableWrap.classList.add("hidden");
     detail.classList.remove("hidden");
-    detailTitle.textContent = exp.id;
+    detailTitle.textContent = exp.title || exp.id;
+    if (!opts?.skipHash) setHash(exp.id);
 
     const flags = exp.change?.flags
       ? Object.entries(exp.change.flags)
@@ -107,8 +173,8 @@
     const snapshots = (exp.snapshots || [])
       .map(
         (snap, i) => `
-        <section class="mt-4 rounded border border-stone-200 p-3 dark:border-stone-700">
-          <p class="text-xs text-stone-500">Snapshot ${i + 1} · ${esc(snap.period?.start)} → ${esc(snap.period?.end)} · imported ${esc(snap.imported_at?.slice(0, 10))}</p>
+        <section class="experiment-snapshot">
+          <p class="experiment-muted">Window ${i + 1} · ${esc(snap.period?.start)} → ${esc(snap.period?.end)}</p>
           ${metricsTable(snap.metrics)}
         </section>`,
       )
@@ -117,92 +183,111 @@
     const shadows = (exp.shadow_runs || [])
       .map(
         (run) =>
-          `<tr><td class="py-1 font-mono text-xs"><a href="shadow/${esc(run.run_id)}.html" class="text-blue-800 hover:underline dark:text-blue-400">${esc(run.run_id)}</a></td><td class="py-1">${esc(run.date)}</td><td class="py-1">${esc(run.edition)}</td></tr>`,
+          `<li><a href="shadow/${esc(run.run_id)}.html">${esc(run.date)} · ${esc(run.edition)}</a></li>`,
       )
       .join("");
 
-    const verdict =
-      exp.verdict?.trim() ||
-      (exp.status === "complete"
-        ? ""
-        : exp.status === "baseline"
-          ? "Baseline in progress — compare functional metrics on the Token dashboard (output tokens / words per repo). Treatment flags stay OFF until the treatment window."
-          : exp.status === "active"
-            ? "Treatment in progress — compare baseline vs treatment token logs and shadow rubric."
-            : "Pending — start baseline or import metrics after windows complete.");
+    const showTokens =
+      exp.status === "active" || exp.status === "baseline" || String(exp.id).includes("ponytail");
 
-    const labPostSlug = exp.id;
-    const functionalBlock = `
-      <h3 class="mt-6 text-base font-semibold">Functional metrics</h3>
-      <p class="text-sm text-stone-600 dark:text-stone-400">Primary signals for this experiment (not PostHog engagement):</p>
-      <ul class="mt-2 list-disc pl-5 text-sm">
-        <li><a href="token-usage.html" class="text-blue-800 hover:underline dark:text-blue-400">Token dashboard</a> — input/output tokens, prompt chars, chars/token ratio, latency, enrich payload size, est. USD</li>
-        <li>Shadow A/B — control vs treatment on same run (tokens, prompt size, latency, cost)</li>
-        <li><code>data/quality/token-usage.jsonl</code> — raw per-run log (committed from GHA)</li>
-        <li><code>data/quality/rubric-scores.jsonl</code> — rank-1 heuristic rubric joined on token rows</li>
-      </ul>
-      <p class="mt-2 text-sm"><a href="posts/${esc(labPostSlug)}.html" class="text-blue-800 hover:underline dark:text-blue-400">Experiment design doc →</a></p>`;
+    const glossary = (exp.reader_glossary || []).filter((item) => item?.term && item?.meaning);
+    const glossaryHtml = glossary.length
+      ? `<h3>Where the names come from</h3>
+      <p>These are source ideas, not tools we installed.</p>
+      <dl class="experiment-glossary">${glossary
+        .map(
+          (item) =>
+            `<div class="experiment-glossary__item"><dt>${esc(item.term)}</dt><dd>${esc(item.meaning)}</dd></div>`,
+        )
+        .join("")}</dl>`
+      : "";
+
+    const measure = exp.how_we_measure?.trim()
+      ? `<h3>How we'll know</h3>
+      <p>${esc(exp.how_we_measure)}</p>
+      ${showTokens ? `<p><a href="token-usage.html">See writing cost and quality</a></p>` : ""}`
+      : showTokens
+        ? `<p><a href="token-usage.html">See writing cost and quality</a></p>`
+        : "";
+
+    const defaultVerdict =
+      exp.status === "active"
+        ? "The new writing style is on. After each Skills digest, check whether briefs got shorter without getting worse."
+        : exp.status === "baseline"
+          ? "We are still collecting the before picture. The change is off."
+          : exp.status === "complete"
+            ? "No written verdict yet."
+            : "Not started — we write a verdict after the after-window ends.";
+
+    const verdict = exp.verdict?.trim() || defaultVerdict;
+    const writeup = exp.writeup_href
+      ? `<p class="experiment-writeup"><a href="${esc(exp.writeup_href)}">Longer write-up, with commands</a></p>`
+      : "";
+    const keep =
+      exp.keep_change == null
+        ? "Not decided yet."
+        : exp.keep_change
+          ? "Yes — it is still on."
+          : "No — we turned it off.";
 
     detailBody.innerHTML = `
-      <p class="text-stone-600 dark:text-stone-400">${esc(exp.change_summary)}</p>
-      <p class="mt-2"><strong>Hypothesis:</strong> ${esc(exp.hypothesis)}</p>
-      <p class="mt-2"><strong>Status:</strong> <span class="rounded-full px-2 py-0.5 text-xs font-semibold ${statusClass(exp.status)}">${esc(exp.status)}</span></p>
-      <p class="mt-2 text-sm"><strong>Baseline:</strong> ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))}</p>
-      <p class="text-sm"><strong>Treatment:</strong> ${esc(windowLabel(exp.treatment_window?.start, exp.treatment_window?.end))}</p>
-      ${flags ? `<ul class="mt-2 list-disc pl-5 text-sm">${flags}</ul>` : ""}
-      ${functionalBlock}
-      <h3 class="mt-6 text-base font-semibold">Engagement snapshots (optional)</h3>
-      ${snapshots || '<p class="text-stone-500">No snapshots imported yet.</p>'}
-      <h3 class="mt-6 text-base font-semibold">Shadow runs</h3>
-      <table class="w-full text-sm">
-        <thead><tr class="text-xs text-stone-500"><th class="pb-1 text-left">Run ID</th><th class="pb-1 text-left">Date</th><th class="pb-1 text-left">Edition</th></tr></thead>
-        <tbody>${shadows || '<tr><td colspan="3" class="text-stone-500">None</td></tr>'}</tbody>
-      </table>
-      <p class="mt-1 text-xs text-stone-500">Side-by-side blurbs: <code>lab/shadow/{run_id}.html</code> (rebuilt with <code>npm run build:pages</code>). Raw JSON: <code>data/experiments/runs/{run_id}/</code>.</p>
-      <h3 class="mt-6 text-base font-semibold">Verdict</h3>
+      <p class="experiment-detail__lede">${esc(exp.reader_summary || exp.change_summary)}</p>
+      <p class="experiment-detail__meta">${statusBadge(exp)} <span>${esc(exp.edition_label || exp.edition)}</span></p>
+      ${writeup}
+      <h3>What we're trying</h3>
+      <p>${esc(exp.hypothesis)}</p>
+      ${glossaryHtml}
+      <h3>When</h3>
+      <p><strong>Before</strong> (old writing): ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))}<br>
+      <strong>After</strong> (new writing): ${esc(windowLabel(exp.treatment_window?.start, exp.treatment_window?.end))}</p>
+      ${measure}
+      <h3>What we learned</h3>
       <p>${esc(verdict)}</p>
-      <p class="mt-2 text-sm"><strong>Keep change:</strong> ${exp.keep_change == null ? "—" : exp.keep_change ? "Yes" : "No"}</p>
-      ${exp.notes ? `<p class="mt-2 text-sm text-stone-600 dark:text-stone-400">${esc(exp.notes)}</p>` : ""}`;
+      <p><strong>Still on the live site?</strong> ${esc(keep)}</p>
+      <details class="experiment-ops">
+        <summary>Numbers and operator notes</summary>
+        <p class="experiment-muted">Internal id: <code>${esc(exp.id)}</code></p>
+        ${flags ? `<h4 class="experiment-subhead">Flags</h4><ul>${flags}</ul>` : ""}
+        <h4 class="experiment-subhead">Imported analytics</h4>
+        ${snapshots || '<p class="experiment-muted">No click analytics imported. For this test we use writing cost and quality, not pageviews.</p>'}
+        <h4 class="experiment-subhead">Preview runs</h4>
+        ${shadows ? `<ul>${shadows}</ul>` : '<p class="experiment-muted">No side-by-side preview stored for this experiment.</p>'}
+        ${exp.notes ? `<p class="experiment-muted">${esc(exp.notes)}</p>` : ""}
+      </details>`;
+  }
+
+  function hideDetail() {
+    selected = null;
+    detail.classList.add("hidden");
+    tableWrap.classList.remove("hidden");
+    setHash("");
   }
 
   function exportMarkdown(exp) {
     const lines = [
-      `# Experiment ${exp.id}`,
+      `# ${exp.title || exp.id}`,
       "",
-      `_${exp.change_summary}_`,
+      `_${exp.reader_summary || exp.change_summary}_`,
       "",
-      "## Hypothesis",
+      `Experiment ID: ${exp.id}`,
+      "",
+      "## What we're trying",
       exp.hypothesis,
       "",
+      ...(exp.reader_glossary || []).flatMap((item) =>
+        item?.term ? [`### ${item.term}`, item.meaning || "", ""] : [],
+      ),
       "## Setup",
-      `- **Status:** ${exp.status}`,
-      `- **Edition:** ${exp.edition}`,
-      `- **Baseline window:** ${windowLabel(exp.baseline_window?.start, exp.baseline_window?.end)}`,
-      `- **Treatment window:** ${windowLabel(exp.treatment_window?.start, exp.treatment_window?.end)}`,
+      `- **Status:** ${exp.status_label || exp.status}`,
+      `- **Edition:** ${exp.edition_label || exp.edition}`,
+      `- **Before window:** ${windowLabel(exp.baseline_window?.start, exp.baseline_window?.end)}`,
+      `- **After window:** ${windowLabel(exp.treatment_window?.start, exp.treatment_window?.end)}`,
       "",
-      "## What we expected",
-      exp.hypothesis,
+      "## What we learned",
+      exp.verdict?.trim() || "_Fill in after the after-window._",
       "",
-      "## What happened",
-      exp.verdict?.trim() || "_Fill in after treatment window and snapshot import._",
-      "",
-      "## Metrics",
-      ...(exp.snapshots || []).flatMap((snap, i) => [
-        `### Snapshot ${i + 1} (${snap.period?.start || "?"} → ${snap.period?.end || "?"})`,
-        "",
-        "**Pageviews:**",
-        ...Object.entries(snap.metrics?.pageviews_by_path || {}).map(([k, v]) => `- ${k}: ${v}`),
-        "",
-        "**Outbound clicks:**",
-        ...Object.entries(snap.metrics?.outbound_clicks || {}).map(([k, v]) => `- ${k}: ${v}`),
-        "",
-      ]),
-      "## Recommendation",
-      exp.keep_change == null
-        ? "_TBD — set keep_change in experiment JSON when complete._"
-        : exp.keep_change
-          ? "Keep the change."
-          : "Do not keep the change.",
+      "## Still on the live site?",
+      exp.keep_change == null ? "_Not decided yet._" : exp.keep_change ? "Yes." : "No.",
       "",
       "## Notes",
       exp.notes || "",
@@ -221,21 +306,32 @@
     URL.revokeObjectURL(a.href);
   }
 
-  backBtn?.addEventListener("click", () => {
-    selected = null;
-    detail.classList.add("hidden");
-    tableWrap.classList.remove("hidden");
-  });
+  function showFromHash() {
+    const id = decodeURIComponent(location.hash.replace(/^#/, ""));
+    if (!id) {
+      if (selected) hideDetail();
+      return;
+    }
+    const exp = allExperiments.find((e) => e.id === id);
+    if (exp) showDetail(exp, { skipHash: true });
+  }
 
+  backBtn?.addEventListener("click", hideDetail);
   exportBtn?.addEventListener("click", downloadMarkdown);
+  window.addEventListener("hashchange", showFromHash);
 
   fetch("experiments-data.json")
     .then((r) => {
       if (!r.ok) throw new Error(`HTTP ${r.status}`);
       return r.json();
     })
-    .then((data) => renderTable(data))
+    .then((data) => {
+      queueSummary = data.queue_summary || "";
+      allExperiments = data.experiments || [];
+      renderList();
+      showFromHash();
+    })
     .catch((err) => {
-      tableWrap.innerHTML = `<p class="text-red-700 dark:text-red-400">Failed to load experiments: ${esc(err.message)}</p>`;
+      tableWrap.innerHTML = `<p class="experiment-error">Could not load experiments: ${esc(err.message)}</p>`;
     });
 })();

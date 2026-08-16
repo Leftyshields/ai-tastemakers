@@ -1,6 +1,11 @@
 {
   "schema_version": 1,
   "id": "EXP-YYYYMMDD-slug",
+  "title": "Short public name",
+  "reader_summary": "One sentence for readers, without flag names.",
+  "outcome_line": "",
+  "how_we_measure": "",
+  "reader_glossary": [],
   "hypothesis": "What we expect to improve if this change works.",
   "change_summary": "One sentence describing the pipeline or site change.",
   "status": "draft",
