@@ -4,6 +4,7 @@ import {
   weekContaining,
   isoWeekIdFromDateLabel,
   dateLabelInTimezone,
+  isSundayDateLabel,
 } from "./week.js";
 
 describe("weekly week window", () => {
@@ -26,6 +27,11 @@ describe("weekly week window", () => {
 
   it("computes ISO week from date label", () => {
     expect(isoWeekIdFromDateLabel("2026-06-08")).toMatch(/^2026-W\d{2}$/);
+  });
+
+  it("isSundayDateLabel is true only on Sundays", () => {
+    expect(isSundayDateLabel("2026-08-16")).toBe(true);
+    expect(isSundayDateLabel("2026-08-15")).toBe(false);
   });
 
   it("rejects invalid week id", () => {

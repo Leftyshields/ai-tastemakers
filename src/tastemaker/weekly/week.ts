@@ -26,9 +26,13 @@ function parseDateLabel(label: string): { y: number; m: number; d: number } {
 }
 
 /** Day of week for civil date (0=Sun … 6=Sat), independent of host timezone. */
-function dayOfWeekForLabel(label: string): number {
+export function dayOfWeekForLabel(label: string): number {
   const { y, m, d } = parseDateLabel(label);
   return new Date(Date.UTC(y, m - 1, d, 12)).getUTCDay();
+}
+
+export function isSundayDateLabel(label: string): boolean {
+  return dayOfWeekForLabel(label) === 0;
 }
 
 function addDaysToLabel(label: string, days: number): string {

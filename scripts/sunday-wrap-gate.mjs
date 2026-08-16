@@ -93,16 +93,15 @@ let monthId = "";
 
 if (isSunday) {
   weekId = isoWeekIdFromDateLabel(today);
+  const weeklyPath = `briefings/weekly/${weekId}/weekly_review.json`;
+  if (!fs.existsSync(weeklyPath)) {
+    runWeekly = true;
+  }
   if (isFourthSunday(now, timezone)) {
     monthId = monthIdFromDateLabel(today);
     const monthlyPath = `briefings/monthly/${monthId}/monthly_review.json`;
     if (!fs.existsSync(monthlyPath)) {
       runMonthly = true;
-    }
-  } else {
-    const weeklyPath = `briefings/weekly/${weekId}/weekly_review.json`;
-    if (!fs.existsSync(weeklyPath)) {
-      runWeekly = true;
     }
   }
 }

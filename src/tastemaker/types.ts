@@ -85,11 +85,18 @@ export interface WeeklyStats {
 }
 
 export interface WeeklyNarrative {
-  opening: string;
-  oss: string;
-  skills: string;
-  cross_lane: string;
-  takeaway: string;
+  /** Strategic: what a non-technical leader should remember. */
+  executive: string;
+  /** Tactical-but-plain: what changed in the builder stack. */
+  generalist: string;
+  /** Optional prose above the computed stats block. */
+  statistician: string;
+}
+
+/** Sunday email: one story, one take. Not the layered site page. */
+export interface WeeklyEmailCopy {
+  verdict: string;
+  body: string;
 }
 
 export interface WeeklyReview {
@@ -100,6 +107,7 @@ export interface WeeklyReview {
   days_covered: { oss: number; skills: number };
   stats: WeeklyStats;
   narrative: WeeklyNarrative;
+  email?: WeeklyEmailCopy;
   generated_at: string;
 }
 

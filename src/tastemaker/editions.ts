@@ -30,6 +30,12 @@ const SHARED_BLOCKLIST = [
   "Snailclimb/JavaGuide",
 ];
 
+/**
+ * Topic queries are per-edition and mostly disjoint. Both lists then rank by the same
+ * 7-day star metric. They share one search tag (`claude`). A name on both lists was
+ * dual-tagged by the author, or it only hit `claude`. Raw overlap counts mix construction
+ * with labeling; they are not automatic proof that the tool/skill line disappeared.
+ */
 export const EDITIONS: Record<EditionId, EditionDefinition> = {
   oss: {
     id: "oss",

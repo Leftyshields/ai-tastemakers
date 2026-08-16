@@ -17,11 +17,9 @@ const sampleReview: MonthlyReview = {
     source_week_ids: ["2026-W23", "2026-W24"],
   },
   narrative: {
-    opening: "Month opening.",
-    oss: "OSS month.",
-    skills: "Skills month.",
-    cross_lane: "Cross.",
-    takeaway: "Takeaway.",
+    executive: "Month opening.",
+    generalist: "Stack month.",
+    statistician: "How to read the month.",
   },
   generated_at: "2026-06-22T12:00:00.000Z",
 };
@@ -40,8 +38,9 @@ describe("monthly writers", () => {
   it("renderMonthlyMarkdown includes stats and narrative", () => {
     const md = renderMonthlyMarkdown(sampleReview);
     expect(md).toContain("# Tastemakers Monthly — 2026-06");
-    expect(md).toContain("Month at a glance");
+    expect(md).toContain("The numbers");
     expect(md).toContain("2026-W23");
+    expect(md).toContain("For executives");
     expect(md).toContain("Month opening.");
   });
 

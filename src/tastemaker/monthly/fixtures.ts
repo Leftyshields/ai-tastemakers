@@ -31,11 +31,9 @@ function weeklyReview(
       total_stars_gained: { oss: ossStars, skills: 300 },
     },
     narrative: {
-      opening: `Opening for ${weekId}.`,
-      oss: `OSS ${weekId}.`,
-      skills: `Skills ${weekId}.`,
-      cross_lane: "Cross.",
-      takeaway: "Build.",
+      executive: `Opening for ${weekId}.`,
+      generalist: `Stack ${weekId}.`,
+      statistician: "Counts.",
     },
     generated_at: `${week_end}T12:00:00.000Z`,
   };

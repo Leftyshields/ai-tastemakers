@@ -4,7 +4,7 @@
 
 **Skill Tastemakers** is a companion edition focused on agent skills, Claude Code extensions, and reusable instruction artifacts.
 
-**Tastemakers Weekly** — every Sunday, Claude synthesizes the past week's OSS + Skills digests into a combined editorial wrap-up with momentum stats and builder takeaways.
+**Tastemakers Weekly** — every Sunday, the site keeps a three-part wrap-up (executives, then AI generalists, then the numbers). The Sunday email is a short single-voice read for builders: verdict, the tell, evidence, watch, plus receipts and links to that day's ranked lists.
 
 Instantiated from [Project Genesis](https://github.com/Leftyshields/project-genesis) for structured AI-assisted development.
 
@@ -20,13 +20,13 @@ Each daily run (both editions):
 2. Ranks by stars gained in the last 7 days (bootstrap fallback during the first week)
 3. Sends top 10 to Claude for scannable briefs with three sections: **What it does:** / **Why now:** / **Build with it:**
 4. Writes `briefings/<edition>/YYYY-MM-DD/daily_brief.md` + `digest.json`
-5. Optionally emails subscribers (Resend) and deploys to GitHub Pages
+5. Optionally emails subscribers (Resend) and deploys to GitHub Pages. **Weekdays** send the daily top 10. **Sundays** skip that email and send the weekly builder email instead (verdict + ranked-list links).
 
 **Skills edition enrichment (production):** For the top 3 ranked repos, the pipeline fetches external context before narration — Firecrawl deep scrape (README + releases + discussions), Hacker News Algolia, and Reddit recent-post search — then applies editorial rules (concrete “Why now” hooks, no star-count-only blurbs). Rank-1 brief quality is logged to `data/quality/rubric-scores.jsonl` when `DIGEST_QUALITY_RUBRIC=1`.
 
-**Sundays (1st–3rd):** After both daily digests, `npm run weekly` aggregates seven days of `digest.json` (OSS + Skills), calls Claude once for a combined editorial, and writes `briefings/weekly/YYYY-Www/weekly_review.{md,json}`. The Daily Digest workflow also refreshes the Lab tool inventory (`npm run inventory:tools`).
+**Sundays:** After both daily digests, `npm run weekly` writes the three-audience site wrap-up and a separate one-voice Sunday email (with links to that day's top 10). The Daily Digest workflow also refreshes the Lab tool inventory (`npm run inventory:tools`).
 
-**Fourth Sunday each month:** `npm run monthly` runs instead of weekly — synthesizes prior weekly reviews in that calendar month into `briefings/monthly/YYYY-MM/monthly_review.{md,json}`.
+**Fourth Sunday each month:** `npm run monthly` also runs — synthesizes prior weekly reviews into `briefings/monthly/YYYY-MM/monthly_review.{md,json}`. The Sunday email is still the weekly wrap-up.
 
 ### Tastemakers Lab
 
@@ -115,7 +115,7 @@ Open today's briefing under `briefings/`, or the public site after Pages deploy.
 
 ## Scheduling & deploy
 
-**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays** (except fourth Sunday), runs `npm run weekly` after daily digests and refreshes the tool inventory. On **fourth Sunday**, runs `npm run monthly` instead (`continue-on-error` on wrap-up so synthesis failure does not block daily commit).
+**Daily Digest** (`.github/workflows/digest.yml`) runs both editions at ~06:00 Pacific (cron + manual `workflow_dispatch`). On **Sundays**, runs `npm run weekly` after daily digests, emails the week-in-review (not the top 10), and refreshes the tool inventory. On **fourth Sunday**, also runs `npm run monthly` (`continue-on-error` on wrap-up so synthesis failure does not block daily commit).
 
 Required repo secret: `ANTHROPIC_API_KEY`. `GITHUB_TOKEN` uses the default Actions token for public search.
 

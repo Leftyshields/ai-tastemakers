@@ -20,6 +20,7 @@ import { appendRubricLog, scoreDigestRank1 } from "./quality/log.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
 import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
+import { isSundayDateLabel } from "./weekly/week.js";
 import { resolveDigestRecipients } from "./subscribers/load.js";
 import { appendShadowRun } from "./experiments/load.js";
 import {
@@ -372,17 +373,23 @@ export async function runPipeline(
   const markdownPath = await writeDailyBrief(briefingDir, digest, dateLabel, config.editionName);
 
   if (config.editionId === "oss" && (await shouldSendDigestEmail(config))) {
-    const sendEmail = deps.sendEmail ?? sendDigestEmail;
-    const recipients = await resolveDigestRecipients(config);
-    console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
-    try {
-      const sent = await sendEmail(config, digest, dateLabel, recipients);
-      console.error(`Email sent (id: ${sent.id})`);
-    } catch (err) {
-      console.warn(
-        "Warning: digest email failed; briefing was still written:",
-        err instanceof Error ? err.message : err,
+    if (isSundayDateLabel(dateLabel)) {
+      console.error(
+        "Sunday: skipping daily top-10 email; weekly wrap-up sends the week-in-review instead.",
       );
+    } else {
+      const sendEmail = deps.sendEmail ?? sendDigestEmail;
+      const recipients = await resolveDigestRecipients(config);
+      console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
+      try {
+        const sent = await sendEmail(config, digest, dateLabel, recipients);
+        console.error(`Email sent (id: ${sent.id})`);
+      } catch (err) {
+        console.warn(
+          "Warning: digest email failed; briefing was still written:",
+          err instanceof Error ? err.message : err,
+        );
+      }
     }
   }
 

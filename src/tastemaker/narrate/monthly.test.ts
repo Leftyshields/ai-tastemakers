@@ -24,11 +24,9 @@ const sources: MonthlySourceWeek[] = [
         standouts: { oss: [], skills: [] },
       },
       narrative: {
-        opening: "Week one opening.",
-        oss: "Week one oss.",
-        skills: "Week one skills.",
-        cross_lane: "Cross.",
-        takeaway: "Takeaway.",
+        executive: "Week one strategy.",
+        generalist: "Week one stack.",
+        statistician: "Week one counts.",
       },
       generated_at: "2026-06-07T12:00:00.000Z",
     },
@@ -40,7 +38,7 @@ describe("monthly narrate", () => {
     const aggregate = aggregateMonth("2026-06", sources);
     const prompt = buildMonthlyPrompt(aggregate);
     expect(prompt).toContain("monthly rollup");
-    expect(prompt).toContain("Week one opening.");
+    expect(prompt).toContain("Week one strategy.");
     expect(prompt).toContain("month_stats");
     expect(prompt).toContain("do NOT concatenate");
   });

@@ -26,11 +26,9 @@ describe("runWeeklyPipeline", () => {
   });
 
   const mockNarrative = {
-    opening: "Week opened.",
-    oss: "OSS lane.",
-    skills: "Skills lane.",
-    cross_lane: "Overlap themes.",
-    takeaway: "Build more.",
+    executive: "Week opened.",
+    generalist: "Stack moved.",
+    statistician: "Counts held.",
   };
 
   it("skips when week is incomplete", async () => {
@@ -59,6 +57,10 @@ describe("runWeeklyPipeline", () => {
       { weekId: "2026-W23" },
       {
         narrate: vi.fn().mockResolvedValue(mockNarrative),
+        narrateEmail: vi.fn().mockResolvedValue({
+          verdict: "A quiet week on both lists.",
+          body: "Overlap held.",
+        }),
         now: new Date("2026-06-07T12:00:00.000Z"),
       },
     );
@@ -70,7 +72,8 @@ describe("runWeeklyPipeline", () => {
 
     const json = JSON.parse(await fs.readFile(result.jsonPath!, "utf8"));
     expect(json.stats.unique_repos.oss).toBeGreaterThan(0);
-    expect(json.narrative.skills).toBe("Skills lane.");
+    expect(json.narrative.generalist).toBe("Stack moved.");
+    expect(json.email.verdict).toBe("A quiet week on both lists.");
 
     const md = await fs.readFile(result.markdownPath!, "utf8");
     expect(md).toContain("Tastemakers Weekly");

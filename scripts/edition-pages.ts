@@ -1307,7 +1307,7 @@ export async function buildWeeklySite(
 
   const brand = {
     name: "Tastemakers Weekly",
-    tagline: "Weekly synthesis of AI Tastemakers and Skill Tastemakers",
+    tagline: "Strategy, then the stack, then the numbers — one week of AI open source.",
   };
   const paths = weeklyPagePaths();
 
@@ -1336,7 +1336,7 @@ export async function buildWeeklySite(
         body,
         paths,
         brand,
-        "Weekly editorial synthesis across AI and Skills tastemaker digests.",
+        "One week of AI open source, written for executives first, then builders, then the numbers.",
         escapeHtml,
       ),
     );

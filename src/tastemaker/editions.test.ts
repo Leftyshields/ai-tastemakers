@@ -30,3 +30,10 @@ describe("skills edition paths", () => {
     );
   });
 });
+
+describe("edition topic queries", () => {
+  it("share only claude, so dual-list overlap is not one pool ranked twice", () => {
+    const shared = EDITIONS.oss.topics.filter((t) => EDITIONS.skills.topics.includes(t));
+    expect(shared).toEqual(["claude"]);
+  });
+});

@@ -25,11 +25,9 @@ describe("runMonthlyPipeline", () => {
   });
 
   const mockNarrative = {
-    opening: "Month opened.",
-    oss: "OSS month.",
-    skills: "Skills month.",
-    cross_lane: "Cross themes.",
-    takeaway: "Build more.",
+    executive: "Month opened.",
+    generalist: "Stack month.",
+    statistician: "Counts.",
   };
 
   it("skips when month is incomplete", async () => {
@@ -63,7 +61,7 @@ describe("runMonthlyPipeline", () => {
 
     const json = JSON.parse(await fs.readFile(result.jsonPath!, "utf8"));
     expect(json.source_week_ids).toEqual(["2026-W23", "2026-W24", "2026-W25"]);
-    expect(json.narrative.opening).toBe("Month opened.");
+    expect(json.narrative.executive).toBe("Month opened.");
 
     const md = await fs.readFile(result.markdownPath!, "utf8");
     expect(md).toContain("Tastemakers Monthly");

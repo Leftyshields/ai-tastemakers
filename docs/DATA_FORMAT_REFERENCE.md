@@ -89,17 +89,15 @@ Older briefings may use a single dense paragraph (legacy format).
     "standouts": { "oss": [], "skills": [] }
   },
   "narrative": {
-    "opening": "…",
-    "oss": "…",
-    "skills": "…",
-    "cross_lane": "…",
-    "takeaway": "…"
+    "executive": "…",
+    "generalist": "…",
+    "statistician": "…"
   },
   "generated_at": "2026-06-07T14:00:00.000Z"
 }
 ```
 
-Stats are computed from daily `digest.json` files. `total_stars_gained` sums each unique repo's **max** `stars_gained_7d` seen that week (avoids double-counting repeat appearances). Narrative is Claude-generated from aggregated stats + standouts (not full daily brief text). If synthesis fails, a stats-only fallback opening is written.
+Stats are computed from daily `digest.json` files. `total_stars_gained` sums each unique repo's **max** `stars_gained_7d` seen that week (avoids double-counting repeat appearances). Narrative is Claude-generated in three audience layers (executives → AI generalists → how to read the numbers). Computed stats are always appended under **The numbers**. If synthesis fails, a stats-only fallback executive note is written.
 
 ## Weekly markdown (`briefings/weekly/YYYY-Www/weekly_review.md`)
 
@@ -108,15 +106,17 @@ Stats are computed from daily `digest.json` files. `total_stars_gained` sums eac
 
 _2026-06-01 – 2026-06-07 · generated …_
 
-## Week at a glance
-- **AI Tastemakers:** …
-- **Skill Tastemakers:** …
+Three reads of the same week, in order: **strategy**, then **the stack**, then **the counts**.
 
-## Opening
+## For executives
 …
 
-## AI Tastemakers
+## For AI generalists
 …
+
+## The numbers
+…
+Today's ranked lists: [AI Tastemakers](../briefings/YYYY-MM-DD.html) · [Skill Tastemakers](../skills/briefings/YYYY-MM-DD.html)
 ```
 
 Published as `site/weekly/YYYY-Www.html` via `npm run build:pages`.
@@ -136,17 +136,15 @@ Published as `site/weekly/YYYY-Www.html` via `npm run build:pages`.
     "source_week_ids": ["2026-W23", "2026-W24", "2026-W25"]
   },
   "narrative": {
-    "opening": "…",
-    "oss": "…",
-    "skills": "…",
-    "cross_lane": "…",
-    "takeaway": "…"
+    "executive": "…",
+    "generalist": "…",
+    "statistician": "…"
   },
   "generated_at": "2026-06-22T14:00:00.000Z"
 }
 ```
 
-Stats sum weekly `total_stars_gained` per edition (no cross-week repo dedupe). Narrative is Claude-generated from weekly `narrative` text + `month_stats` (not concatenation). Runs on the **fourth Sunday** of each month; replaces that week's weekly artifact.
+Stats sum weekly `total_stars_gained` per edition (no cross-week repo dedupe). Narrative is Claude-generated from weekly `narrative` text + `month_stats` (not concatenation). Runs on the **fourth Sunday** of each month in addition to that week's weekly wrap-up.
 
 ## Monthly markdown (`briefings/monthly/YYYY-MM/monthly_review.md`)
 
@@ -155,11 +153,15 @@ Stats sum weekly `total_stars_gained` per edition (no cross-week repo dedupe). N
 
 _2026-06-01 – 2026-06-30 · generated …_
 
-## Month at a glance
-- **AI Tastemakers:** …
-- **Skill Tastemakers:** …
+Three reads of the same month, in order: **strategy**, then **the stack**, then **the counts**.
 
-## Opening
+## For executives
+…
+
+## For AI generalists
+…
+
+## The numbers
 …
 ```
 

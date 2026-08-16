@@ -21,11 +21,9 @@ const sampleReview: WeeklyReview = {
     standouts: { oss: [], skills: [] },
   },
   narrative: {
-    opening: "Opening text.",
-    oss: "OSS week.",
-    skills: "Skills week.",
-    cross_lane: "Cross lane.",
-    takeaway: "Takeaway.",
+    executive: "Opening text.",
+    generalist: "Stack text.",
+    statistician: "How to read the counts.",
   },
   generated_at: "2026-06-07T12:00:00.000Z",
 };
@@ -44,11 +42,13 @@ describe("weekly writers", () => {
   it("renderWeeklyMarkdown includes stats and narrative sections", () => {
     const md = renderWeeklyMarkdown(sampleReview);
     expect(md).toContain("# Tastemakers Weekly — 2026-W23");
-    expect(md).toContain("Week at a glance");
+    expect(md).toContain("The numbers");
     expect(md).toContain("acme/alpha");
-    expect(md).toContain("## Opening");
+    expect(md).toContain("For executives");
     expect(md).toContain("Opening text.");
-    expect(md).toContain("## Skill Tastemakers");
+    expect(md).toContain("For AI generalists");
+    expect(md).toContain("The numbers");
+    expect(md).toContain("Today's ranked lists");
   });
 
   it("writeWeeklyReview writes json and markdown", async () => {

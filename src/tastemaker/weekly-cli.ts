@@ -15,7 +15,7 @@ async function main(): Promise<void> {
     };
 
     const weekId = parseWeekArg(process.argv);
-    const result = await runWeeklyPipeline(config, { weekId });
+    const result = await runWeeklyPipeline(config, { weekId }, { emailConfig: base });
 
     if (result.skipped) {
       console.log(`Weekly skipped (${result.week_id ?? "unknown"}): ${result.reason}`);

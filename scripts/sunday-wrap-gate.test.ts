@@ -53,11 +53,11 @@ describe("sunday-wrap-gate.mjs", () => {
     expect(out.run_monthly).toBe("false");
   });
 
-  it("sets run_monthly on fourth Sunday when monthly review is missing", () => {
+  it("sets run_monthly on fourth Sunday and still runs weekly when missing", () => {
     tempDir = fs.mkdtempSync(path.join(os.tmpdir(), "sunday-gate-"));
     const out = runGate(tempDir, "2026-06-28");
     expect(out.is_sunday).toBe("true");
-    expect(out.run_weekly).toBe("false");
+    expect(out.run_weekly).toBe("true");
     expect(out.run_monthly).toBe("true");
     expect(out.month_id).toBe("2026-06");
   });
