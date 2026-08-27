@@ -79,8 +79,29 @@ jobs:
           echo "recovered=false" >> "$GITHUB_OUTPUT"
           exit 1
 
+      - name: Redeploy Pages after digest recovery
+        id: pages_after_digest
+        if: steps.digest_retrigger.outputs.recovered == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Digest recovered — ensuring Pages is live for today."
+          gh workflow run "Deploy GitHub Pages" --ref main
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            echo "Waiting for Pages deploy (attempt ${attempt}/12)..."
+            sleep 30
+            if node scripts/verify-daily-digest.mjs --pages-only; then
+              echo "pages_ok=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "pages_ok=false" >> "$GITHUB_OUTPUT"
+          exit 1
+
       - name: Re-verify after recovery
-        if: steps.digest_retrigger.outcome == 'success' || steps.pages_redeploy.outcome == 'success'
+        if: |
+          steps.pages_redeploy.outcome == 'success' ||
+          (steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok == 'true')
         run: node scripts/verify-daily-digest.mjs
 
       - name: Alert on failure
@@ -89,6 +110,7 @@ jobs:
           steps.check.outcome == 'failure' &&
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
             (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
           )
         env:
