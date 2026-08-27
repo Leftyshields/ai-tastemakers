@@ -2,12 +2,14 @@ name: Daily Digest
 
 on:
   schedule:
-    # Two slots (America/Los_Angeles). GitHub cron is best-effort; a backup helps when
-    # the primary is dropped. More than two scheduled runs per morning queue competing
-    # jobs and triggers "runner not acquired" failures when hosted capacity is tight.
+    # Three morning slots (America/Los_Angeles). GitHub cron is best-effort; backups help when
+    # the primary is dropped. cancel-in-progress cancels redundant skip runs quickly (~30s).
+    # Avoid adding a fourth slot here — that reintroduces runner pile-ups (see e2ecb98).
     - cron: "17 6 * * *"
       timezone: "America/Los_Angeles"
     - cron: "30 7 * * *"
+      timezone: "America/Los_Angeles"
+    - cron: "0 8 * * *"
       timezone: "America/Los_Angeles"
   workflow_dispatch:
     inputs:

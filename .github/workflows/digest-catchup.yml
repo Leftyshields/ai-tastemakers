@@ -1,36 +1,30 @@
-name: Daily Digest Verify
+name: Digest Catch-up
 
+# Safety net when GitHub drops morning cron schedules entirely (see incident 2026-08-27).
+# Separate workflow/concurrency from Daily Digest so a missed morning does not block catch-up.
 on:
   schedule:
-    # After digest crons (6:17, 7:30, 8:00 PT). Extra slots catch GitHub schedule drift and
-    # total morning cron drops (incident 2026-08-27: zero scheduled runs before 11:00 PT).
-    - cron: "0 8 * * *"
-      timezone: America/Los_Angeles
-    - cron: "0 9 * * *"
-      timezone: America/Los_Angeles
-    - cron: "0 10 * * *"
-      timezone: America/Los_Angeles
     - cron: "0 11 * * *"
-      timezone: America/Los_Angeles
-    - cron: "0 12 * * *"
-      timezone: America/Los_Angeles
-    - cron: "0 13 * * *"
       timezone: America/Los_Angeles
     - cron: "0 14 * * *"
       timezone: America/Los_Angeles
+  push:
+    branches: [main]
+    paths:
+      - ".github/triggers/run-digest"
   workflow_dispatch:
 
 permissions:
   contents: read
-  issues: write
   actions: write
+  issues: write
 
 concurrency:
-  group: digest-verify
+  group: digest-catchup
   cancel-in-progress: false
 
 jobs:
-  verify:
+  catchup:
     runs-on: ubuntu-latest
     env:
       TZ: America/Los_Angeles
@@ -40,18 +34,18 @@ jobs:
         with:
           ref: main
 
-      - name: Verify today's briefings and Pages
+      - name: Check whether today's briefings exist
         id: check
-        run: node scripts/verify-daily-digest.mjs
+        run: node scripts/verify-daily-digest.mjs --skip-pages
         continue-on-error: true
 
-      - name: Trigger digest when today's briefings missing
+      - name: Trigger Daily Digest when briefings missing
         id: digest_retrigger
         if: steps.check.outcome == 'failure' && steps.check.outputs.briefings_missing == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Today's briefings missing on main — dispatching Daily Digest (GitHub cron may have dropped)."
+          echo "Today's briefings missing on main — dispatching Daily Digest."
           gh workflow run "Daily Digest" --ref main
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
             echo "Waiting for digest commit (attempt ${attempt}/20)..."
@@ -72,7 +66,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          echo "Briefings OK on main — triggering Pages redeploy (prior deploy may have hit a transient GitHub 500)."
+          echo "Briefings OK on main — triggering Pages redeploy."
           gh workflow run "Deploy GitHub Pages" --ref main
           for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
             echo "Waiting for Pages deploy (attempt ${attempt}/12)..."
@@ -108,7 +102,7 @@ jobs:
           VERIFY_DIGEST_PAGES_OK: ${{ steps.check.outputs.pages_ok }}
         run: node scripts/send-digest-alert.mjs
 
-      - name: Fail job if verification failed
+      - name: Fail job if catch-up failed
         if: |
           always() &&
           steps.check.outcome == 'failure' &&
