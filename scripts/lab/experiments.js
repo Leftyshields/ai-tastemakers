@@ -133,10 +133,42 @@
     });
   }
 
+  const TOKEN_METRIC_LABELS = {
+    _runs: "Digest runs",
+    _avg_output_tokens: "Avg output tokens / run",
+    _avg_output_words: "Avg output words / run",
+    _rubric_pass: "Rank-1 rubric pass",
+    _rubric_runs: "Rank-1 rubric runs",
+    _why_now_avg: "Why-now avg (1–5)",
+    _specificity_avg: "Specificity avg (1–5)",
+  };
+
+  function tokenMetricsTable(raw) {
+    const entries = Object.entries(raw || {}).filter(([k]) => k.startsWith("_"));
+    if (!entries.length) return "";
+    const pass = raw._rubric_pass;
+    const runs = raw._rubric_runs;
+    const rows = entries
+      .map(([k, v]) => {
+        let display = v;
+        if (k === "_rubric_pass" && pass != null && runs != null) {
+          display = `${pass}/${runs}`;
+        }
+        const label = TOKEN_METRIC_LABELS[k] || k;
+        return `<tr><th scope="row">${esc(label)}</th><td>${esc(display)}</td></tr>`;
+      })
+      .join("");
+    return `
+      <h4 class="experiment-subhead">Writing cost &amp; quality (token log)</h4>
+      <table class="experiment-metrics">${rows}</table>`;
+  }
+
   function metricsTable(metrics) {
     if (!metrics) return '<p class="experiment-muted">No numbers imported for this window.</p>';
     const pv = metrics.pageviews_by_path || {};
     const oc = metrics.outbound_clicks || {};
+    const tokenBlock = tokenMetricsTable(oc);
+    if (tokenBlock) return tokenBlock;
     const pvRows = Object.entries(pv)
       .map(([k, v]) => `<tr><th scope="row">${esc(k)}</th><td>${esc(v)}</td></tr>`)
       .join("");

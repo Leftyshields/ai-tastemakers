@@ -1,0 +1,9 @@
+type,key,count
+metric,runs,13
+metric,avg_output_tokens,1649
+metric,avg_output_words,1026
+metric,rubric_pass,13
+metric,rubric_runs,13
+metric,why_now_avg,4.1
+metric,specificity_avg,4.5
+metric,estimated_usd_total,1.094922

@@ -35,16 +35,16 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
-## Registered experiments (as of 2026-08-16)
+## Registered experiments (as of 2026-08-29)
 
 ### Active Lab queue
 
-Formal experiment windows **resumed 2026-08-02**. Ponytail narration is in treatment.
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep).
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
-| 1 | EXP-20260802-ponytail-narration-skills | Skills digest | **active** (first treatment digest 2026-08-17 → 2026-08-29) |
-| 2 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued; baseline 2026-08-30) |
+| 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued; baseline 2026-08-30) |
+| — | EXP-20260802-ponytail-narration-skills | Skills digest | **complete** (keep) |
 | — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
 ### Shipped outside formal windows (archived)
@@ -122,14 +122,14 @@ Leave OSS digest soft-dedup at defaults during this canary.
 
 ---
 
-### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **active**
+### EXP-20260802-ponytail-narration-skills (Ponytail narration) — **complete (keep)**
 
 Inspired by [W31 Builder Takeaway](../briefings/weekly/2026-W31/weekly_review.md#builder-takeaway): ordered facts (README first, news last) plus “keep it small” writing rules on Skills narration. Graphify / Ponytail / YAGNI are the source ideas — explained on the Lab write-up.
 
 | Window | Dates (PT) |
 |--------|------------|
 | Baseline | **2026-08-02** → **2026-08-16** (includes 2026-08-16 digest, published before flags flipped) |
-| Treatment | **2026-08-17** → **2026-08-29** |
+| Treatment | **2026-08-17** → **2026-08-29** (closed; keep both flags) |
 
 **Treatment config (digest.yml):** Firecrawl enrich + quality rubric + token logging ON. Ponytail flags on the **Skills command only** (not the shared OSS `env:` block):
 
@@ -140,11 +140,9 @@ DIGEST_NARRATE_PONYTAIL=1 \
 npm run digest -- --edition skills
 ```
 
-**Baseline outcome (token log, 14 Skills runs 2026-08-03→2026-08-16):** ~2005 output tokens and ~1239 words per run; rank-1 rubric 14/14 pass; flags off. No pre-treatment shadow run was stored.
+**Outcome (token log):** Baseline 14 runs — ~2005 output tokens / ~1239 words per run; rubric 14/14 pass. Treatment 13 runs — ~1649 tokens (−17.8%) / ~1026 words (−17.2%); rubric 13/13 pass; why_now avg 4.1 vs baseline 3.4. **Kept** both flags on Skills digest.
 
 **Primary metrics:** `/lab/token-usage.html` — output tokens and words per repo vs baseline; rank-1 rubric pass rate; editorial check that **Why now** still cites timely hooks.
-
-**Keep/revert (2026-08-29):** Keep both flags if treatment tokens/words drop without rubric or Why-now regressions. If Why now loses timely hooks, revert ponytail first and keep structured context alone.
 
 **Lab writeup:** [briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md](../briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md)
 

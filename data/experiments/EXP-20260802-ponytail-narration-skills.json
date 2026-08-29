@@ -3,7 +3,7 @@
   "id": "EXP-20260802-ponytail-narration-skills",
   "title": "Shorter Skills briefs",
   "reader_summary": "Write Skills blurbs with stricter rules: one sentence per section when we can, and exactly one “try this” step — no invented architecture.",
-  "outcome_line": "After-window is on. First treated digest is Aug 17. We're checking whether briefs get about 10% cheaper without getting worse.",
+  "outcome_line": "Kept. Treatment cut output ~18% with 13/13 rubric pass and stronger Why-now scores on average.",
   "how_we_measure": "We compare how long the blurbs are (cost) and whether they still name real features, give one useful next step, and cite a timely hook. Clicks are not part of this test.",
   "reader_glossary": [
     {
@@ -21,7 +21,7 @@
   ],
   "hypothesis": "If we give Claude the README first and the news last, and we tell it to keep each Skills blurb short with exactly one thing to try, the write-ups should get more specific and more useful — and about 10% cheaper — without losing a real reason the repo is timely.",
   "change_summary": "On Skills only: ordered prompt (README, then metadata, then web/HN) plus tighter writing rules (short sections, one try-this step, no invented architecture).",
-  "status": "active",
+  "status": "complete",
   "edition": "skills",
   "baseline_window": {
     "start": "2026-08-02",
@@ -40,9 +40,48 @@
       "DIGEST_QUALITY_RUBRIC": "1"
     }
   },
-  "snapshots": [],
+  "snapshots": [
+    {
+      "imported_at": "2026-08-29T19:00:00.000Z",
+      "period": {
+        "start": "2026-08-03",
+        "end": "2026-08-16"
+      },
+      "metrics": {
+        "outbound_clicks": {
+          "_runs": 14,
+          "_avg_output_tokens": 2005,
+          "_avg_output_words": 1239,
+          "_rubric_pass": 14,
+          "_rubric_runs": 14,
+          "_why_now_avg": 3.4,
+          "_specificity_avg": 5.0
+        }
+      },
+      "source": "data/experiments/exports/EXP-20260802-ponytail-baseline-token.csv"
+    },
+    {
+      "imported_at": "2026-08-29T19:00:00.000Z",
+      "period": {
+        "start": "2026-08-17",
+        "end": "2026-08-29"
+      },
+      "metrics": {
+        "outbound_clicks": {
+          "_runs": 13,
+          "_avg_output_tokens": 1649,
+          "_avg_output_words": 1026,
+          "_rubric_pass": 13,
+          "_rubric_runs": 13,
+          "_why_now_avg": 4.1,
+          "_specificity_avg": 4.5
+        }
+      },
+      "source": "data/experiments/exports/EXP-20260802-ponytail-treatment-token.csv"
+    }
+  ],
   "shadow_runs": [],
-  "verdict": "",
-  "keep_change": null,
-  "notes": "Treatment started 2026-08-16 PT. 2026-08-16 Skills digest already published as control (flags off); first treatment digest is 2026-08-17. Baseline outcome (14 Skills runs, 2026-08-03→2026-08-16): mean ~2005 output tokens / ~1239 words per run; rank-1 rubric 14/14 pass; ponytail and structured_context flags off. No pre-treatment shadow run stored. Flags are on the Skills digest command only — not the shared OSS env block. Primary metrics: token-usage.jsonl + /lab/token-usage.html (output tokens and words per repo), rank-1 rubric pass rate, editorial Why-now hooks. PostHog out of scope. Lab post: briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md."
+  "verdict": "Baseline (14 Skills runs, 2026-08-03→2026-08-16, flags off): mean 2005 output tokens and 1239 words per run; rank-1 rubric 14/14 pass (100%); why_now avg 3.4/5; specificity avg 5.0/5. Treatment (13 Skills runs, 2026-08-17→2026-08-29, DIGEST_NARRATE_STRUCTURED_CONTEXT=1 + DIGEST_NARRATE_PONYTAIL=1): mean 1649 output tokens (−17.8%) and 1026 words (−17.2%) per run; rank-1 rubric 13/13 pass (100%); why_now avg 4.1/5 (+0.7); specificity avg 4.5/5 (−0.5, still passes). Editorial spot-check: Why-now lines still cite timely hooks (HN, GitHub Trending, v2.0 releases) on treatment briefs; four late-window rank-1 picks scored why_now=2 on star-velocity phrasing but passed rubric and retained real hooks elsewhere in the digest. PostHog out of scope per experiment notes. **Keep** both structured-context and ponytail flags on the Skills digest command.",
+  "keep_change": true,
+  "notes": "Closed 2026-08-29 PT. Token metrics from data/quality/token-usage.jsonl (PostHog out of scope). Frozen exports: data/experiments/exports/EXP-20260802-ponytail-{baseline,treatment}-token.csv. Treatment started 2026-08-16 PT; first treated digest 2026-08-17. Flags remain on Skills digest command only — not the shared OSS env block. Lab post: briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md."
 }
