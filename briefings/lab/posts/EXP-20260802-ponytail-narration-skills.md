@@ -77,6 +77,18 @@ Thirteen Skills runs: about **1649** output tokens (−17.8%) and **1026** words
 
 We **kept** both `DIGEST_NARRATE_STRUCTURED_CONTEXT=1` and `DIGEST_NARRATE_PONYTAIL=1` on the Skills digest command. The ~10% cost target was exceeded without rubric or Why-now regressions. OSS narration is unchanged.
 
+## Published briefs (samples)
+
+Links go to the live Skills digest pages — the reader-facing output from each window.
+
+**After (treatment, Aug 17–29):**
+
+- [2026-08-17](../../skills/briefings/2026-08-17.html) · [2026-08-18](../../skills/briefings/2026-08-18.html) · [2026-08-19](../../skills/briefings/2026-08-19.html) · [2026-08-20](../../skills/briefings/2026-08-20.html) · [2026-08-21](../../skills/briefings/2026-08-21.html) · [2026-08-22](../../skills/briefings/2026-08-22.html) · [2026-08-23](../../skills/briefings/2026-08-23.html) · [2026-08-24](../../skills/briefings/2026-08-24.html) · [2026-08-25](../../skills/briefings/2026-08-25.html) · [2026-08-26](../../skills/briefings/2026-08-26.html) · [2026-08-27](../../skills/briefings/2026-08-27.html) · [2026-08-28](../../skills/briefings/2026-08-28.html) · [2026-08-29](../../skills/briefings/2026-08-29.html)
+
+**Before (baseline samples):**
+
+- [2026-08-03](../../skills/briefings/2026-08-03.html) (first logged run) · [2026-08-10](../../skills/briefings/2026-08-10.html) · [2026-08-16](../../skills/briefings/2026-08-16.html) (last run before flags flipped)
+
 ---
 
 ## Operator notes
