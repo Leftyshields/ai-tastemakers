@@ -30,6 +30,15 @@ describe("weekly narrate", () => {
     expect(prompt).toContain("## The numbers");
   });
 
+  it("buildWeeklyPrompt enforces ponytail brevity rules", () => {
+    const prompt = buildWeeklyPrompt(aggregate);
+    expect(prompt).toContain("Ponytail rules");
+    expect(prompt).toContain("do NOT restate those lists");
+    expect(prompt).toContain("120–180 words");
+    expect(prompt).toContain("three is the hard ceiling");
+    expect(prompt).toContain("Do not name repos");
+  });
+
   it("parseWeeklyNarrative splits the three audience sections", () => {
     const text = `## For executives
 Strategy here.
