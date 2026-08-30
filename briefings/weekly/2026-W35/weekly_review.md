@@ -1,0 +1,28 @@
+# Tastemakers Weekly — 2026-W35
+
+_2026-08-24 – 2026-08-30 · generated 2026-08-30T17:31:35.589Z_
+
+Three reads of the same week, in order: **strategy**, then **the stack**, then **the counts**.
+
+## For executives
+
+The week's clearest signal is that **privacy-first tooling is graduating from niche to mainstream**: Meetily, a desktop app that transcribes and summarizes meetings entirely on-device with no data leaving the machine, pulled the largest single-project star surge of the week — a meaningful indicator of enterprise appetite for AI productivity tools that don't touch a cloud. Equally notable, **OmniRoute** (a self-hosted gateway that routes requests across 350 AI providers with automatic fallback) and **Hermes Agent** (a self-improving agent from Nous Research that builds reusable skills across sessions) both held the top of trending charts every day of the week, suggesting sustained practitioner interest rather than a one-day spike. On the tooling side, **Ponytail** — a coding-agent plugin that enforces minimal diffs and zero unnecessary dependencies — charted simultaneously in both open-source and agent-skills categories, which is unusual and signals that teams are actively searching for ways to rein in AI-generated code bloat. The watch item for Q3: multi-agent orchestration layers (Orca, OmniRoute, Hermes) are converging fast — whichever team standardizes its internal AI gateway and skill-memory layer first will have a compounding advantage as model costs continue to fall.
+
+## For AI generalists
+
+The builder stack shifted noticeably toward **infrastructure and discipline** this week, rather than new model capabilities. OmniRoute gives you a single OpenAI-compatible endpoint that quietly reroutes across 350 providers — including 90-plus free tiers — and compresses prompts by 15 to 95 percent using RTK and Caveman compression. Pair that with Hermes Agent, which stores everything it learns from past sessions in a full-text-searchable memory and can execute tasks across seven backends (local shell, Docker, SSH, Modal, Vercel Sandbox, and more), and you have the skeleton of a persistent, cost-aware agent loop that doesn't require rebuilding context from scratch every run.
+
+The skills side of the ledger had two standouts worth bookmarking. **Ponytail** is a Claude Code plugin with a sharp thesis: coding agents default to over-engineering, so it injects a YAGNI (You Aren't Gonna Need It) heuristic that measurably cut generated code by 54 percent on FastAPI and React tasks — useful if you're tired of agents reaching for a full date-picker library when `<input type="date">` exists. **Orca** takes a different approach to the same sprawl problem: it fans a single prompt across Codex, Claude Code, or other agents running in parallel git worktrees, so you can compare outputs and merge the best one rather than committing to a single agent's first attempt. Together these projects suggest the community is past the "agents can write code" moment and actively working on the "agents should write *less* code, *better*" problem.
+
+## The numbers
+
+All rankings this week used a seven-day delta only, which favors repos that were already seeded with momentum before the window opened — Meetily's headline star count reflects five days of trending rather than seven, so its per-day rate was actually higher than its total implies relative to full-week entrants. The five repos that charted every single day (OmniRoute, Ponytail, MoneyPrinterTurbo, Hermes Agent, and the Orca/awesome-gpt-image-2 pair on the skills side) represent genuine week-long holds, not viral spikes, which is the more durable signal to track. Cross-edition overlap — fifteen repos appearing in both the OSS and skills lists — is the highest we've recorded, suggesting the line between "open source project" and "agent skill" is collapsing into a single artifact category.
+
+- **AI Tastemakers:** 29 unique repos · +109,626 stars gained (max 7d delta per repo) · top topics: llm, claude, ai-agents, claude-code, ai
+- **Skill Tastemakers:** 27 unique repos · +97,933 stars gained (max 7d delta per repo) · top topics: claude-code, ai-agents, claude, codex, ai
+- **Both lists:** 15 repo(s) appeared in OSS and Skills (DietrichGebert/ponytail, Graphify-Labs/graphify, K-Dense-AI/scientific-agent-skills, Leonxlnx/taste-skill, NousResearch/hermes-agent, Panniantong/Agent-Reach, affaan-m/ECC, calesthio/OpenMontage, can1357/oh-my-pi, citrolabs/ego-lite, diegosouzapw/OmniRoute, guillaumemeyer/watermarks-remover, mukul975/Anthropic-Cybersecurity-Skills, nextlevelbuilder/ui-ux-pro-max-skill, santifer/career-ops)
+- **How we ranked this week:** delta_7d
+- **Held the OSS list:** diegosouzapw/OmniRoute (7d), DietrichGebert/ponytail (7d), harry0703/MoneyPrinterTurbo (7d), NousResearch/hermes-agent (7d), Zackriya-Solutions/meetily (5d), calesthio/OpenMontage (4d), firecrawl/firecrawl (4d), guillaumemeyer/watermarks-remover (3d), K-Dense-AI/scientific-agent-skills (3d), nextlevelbuilder/ui-ux-pro-max-skill (2d), rohitg00/ai-engineering-from-scratch (2d), virgiliojr94/book-to-skill (2d)
+- **Held the Skills list:** diegosouzapw/OmniRoute (7d), DietrichGebert/ponytail (7d), freestylefly/awesome-gpt-image-2 (7d), NousResearch/hermes-agent (7d), stablyai/orca (7d), MadsLorentzen/ai-job-search (6d), calesthio/OpenMontage (4d), K-Dense-AI/scientific-agent-skills (3d), can1357/oh-my-pi (2d), cathrynlavery/diagram-design (2d), guillaumemeyer/watermarks-remover (2d)
+
+Today's ranked lists: [AI Tastemakers](../briefings/2026-08-30.html) · [Skill Tastemakers](../skills/briefings/2026-08-30.html)
