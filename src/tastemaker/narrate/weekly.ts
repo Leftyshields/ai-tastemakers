@@ -62,16 +62,27 @@ export function buildWeeklyPrompt(aggregate: WeeklyAggregate): string {
     "",
     `Write a weekly wrap-up for ${aggregate.week_start} through ${aggregate.week_end} (${aggregate.week_id}).`,
     "",
-    "Write for three audiences in order, general → specific. Do NOT dump every repo. Do NOT invent numbers that are not in DATA.",
+    "This is editorial synthesis, not a changelog. The page below your prose will list every repo, star total, and streak — do NOT restate those lists in paragraph form.",
+    "",
+    "Ponytail rules (strict, all sections):",
+    "- YAGNI: one sharp takeaway per audience. Short sections. Interesting, not exhaustive.",
+    "- Each section: one sentence when possible; two only if a concrete noun would be lost; three is the hard ceiling.",
+    "- Name at most two projects per section. If you name one, say what it does in a short clause — not a feature list.",
+    "- Do not invent numbers, percentages, file names, or architecture the DATA does not support.",
+    "- Do not propose multi-tool stacks or integration paths the repos do not describe.",
+    "- Open with a hook (the week's headline theme). No dry recaps.",
+    "- No em dashes. Plain, direct prose.",
     "",
     "Audience rules:",
-    "- For executives: 3–5 sentences. Strategic. What to remember if you run a team. No ranking jargon, no unexplained acronyms. If you name a project, say what it does in the same sentence. End with the bet or watch-item for the quarter.",
-    "- For AI generalists: 1–2 short paragraphs. What changed in the builder stack. Explain the notable projects in plain language. You may name repos. Skip star counts and day-streak lists.",
-    "- The numbers: 1–3 sentences on how to read the stats (what is skewed, what is a real streak). Do not repeat the JSON tables; we will append those.",
+    "- For executives: strategic. What to remember if you run a team. One watch-item for the quarter. No ranking jargon.",
+    "- For AI generalists: what changed in the builder stack this week — one theme, not a tour of the top 10.",
+    "- The numbers: how to read the stats (skew, streaks, ranking mode caveats). Do not name repos or repeat overlap counts; bullet stats are appended below.",
     "",
     aggregate.stats.ranking_modes.some((m) => m !== "delta_7d")
       ? "Note: some daily digests used bootstrap ranking while 7-day star history was maturing — caveat momentum stats accordingly."
       : "",
+    "",
+    "Target length: about 120–180 words total across all three prose sections (bullets are separate).",
     "",
     "DATA (JSON):",
     JSON.stringify(payload, null, 2),
@@ -129,7 +140,7 @@ export async function narrateWeekly(
     const client = new Anthropic({ apiKey });
     const message = await client.messages.create({
       model,
-      max_tokens: 2500,
+      max_tokens: 900,
       messages: [{ role: "user", content: buildWeeklyPrompt(aggregate) }],
     });
 
