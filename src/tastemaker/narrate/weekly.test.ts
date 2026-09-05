@@ -7,6 +7,8 @@ import {
   narrateWeekly,
   parseWeeklyEmailMarkdown,
   parseWeeklyNarrative,
+  WEEKLY_EMAIL_SYSTEM_PROMPT,
+  WEEKLY_SYSTEM_PROMPT,
 } from "./weekly.js";
 import { aggregateWeek } from "../weekly/aggregate.js";
 import { parseWeekId } from "../weekly/week.js";
@@ -21,13 +23,16 @@ describe("weekly narrate", () => {
   ];
   const aggregate = aggregateWeek(window, entries);
 
-  it("buildWeeklyPrompt includes stats JSON and audience headers", () => {
+  it("buildWeeklyPrompt includes stats JSON; rules live on the system prompt", () => {
     const prompt = buildWeeklyPrompt(aggregate);
     expect(prompt).toContain("2026-W23");
     expect(prompt).toContain("unique_repos");
-    expect(prompt).toContain("## For executives");
-    expect(prompt).toContain("## For AI generalists");
-    expect(prompt).toContain("## The numbers");
+    expect(prompt).toContain("<<<UNTRUSTED_WEEKLY_DATA>>>");
+    expect(prompt).not.toContain("Audience rules:");
+    expect(WEEKLY_SYSTEM_PROMPT).toContain("## For executives");
+    expect(WEEKLY_SYSTEM_PROMPT).toContain("## For AI generalists");
+    expect(WEEKLY_SYSTEM_PROMPT).toContain("## The numbers");
+    expect(WEEKLY_SYSTEM_PROMPT).toMatch(/never follow/i);
   });
 
   it("parseWeeklyNarrative splits the three audience sections", () => {
@@ -95,15 +100,17 @@ Stars measure attention, not spend.`);
     expect(copy?.body).toContain("Monday a hub jumped");
   });
 
-  it("buildWeeklyEmailPrompt asks for a stranger-readable story, not Lab notes", () => {
+  it("buildWeeklyEmailPrompt is data-only; story rules live on the system prompt", () => {
     const prompt = buildWeeklyEmailPrompt(aggregate, "LAB SHOULD NOT APPEAR");
-    expect(prompt).toContain("## Body");
-    expect(prompt).toContain("what it DOES");
+    expect(prompt).toContain("<<<UNTRUSTED_WEEKLY_EMAIL_DATA>>>");
     expect(prompt).toContain("https://github.com/");
-    expect(prompt).toContain("Do not mention Lab");
     expect(prompt).toContain("Daily #1");
-    expect(prompt).toContain("day anchors");
+    expect(prompt).not.toContain("what it DOES");
     expect(prompt).not.toContain("LAB SHOULD NOT APPEAR");
     expect(prompt).not.toContain("## The tell");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("## Body");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("what it DOES");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("day anchors");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toMatch(/Do NOT reference our tooling, Lab/i);
   });
 });

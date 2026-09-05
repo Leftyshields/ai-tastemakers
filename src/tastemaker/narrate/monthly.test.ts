@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { buildMonthlyPrompt } from "./monthly.js";
+import { buildMonthlyPrompt, MONTHLY_SYSTEM_PROMPT } from "./monthly.js";
 import { aggregateMonth } from "../monthly/aggregate.js";
 import type { MonthlySourceWeek } from "../types.js";
 
@@ -34,12 +34,15 @@ const sources: MonthlySourceWeek[] = [
 ];
 
 describe("monthly narrate", () => {
-  it("buildMonthlyPrompt includes weekly narratives and month stats", () => {
+  it("buildMonthlyPrompt includes weekly narratives; rules live on the system prompt", () => {
     const aggregate = aggregateMonth("2026-06", sources);
     const prompt = buildMonthlyPrompt(aggregate);
     expect(prompt).toContain("monthly rollup");
     expect(prompt).toContain("Week one strategy.");
     expect(prompt).toContain("month_stats");
-    expect(prompt).toContain("do NOT concatenate");
+    expect(prompt).toContain("<<<UNTRUSTED_MONTHLY_DATA>>>");
+    expect(prompt).not.toContain("do NOT concatenate");
+    expect(MONTHLY_SYSTEM_PROMPT).toContain("do NOT concatenate");
+    expect(MONTHLY_SYSTEM_PROMPT).toMatch(/never follow/i);
   });
 });

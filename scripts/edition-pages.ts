@@ -1,11 +1,11 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { marked } from "marked";
 import {
   EDITIONS,
   OSS_DISCOVER_TOPIC_CHIPS,
   type EditionDefinition,
 } from "../src/tastemaker/editions.js";
+import { renderSafeMarkdown } from "./safe-markdown.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
 import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.js";
 import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experiments.js";
@@ -29,8 +29,6 @@ import {
 } from "./index-layout-helpers.js";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
-
-marked.setOptions({ gfm: true, breaks: false });
 
 function escapeScriptString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
@@ -347,7 +345,7 @@ function renderBriefMarkdown(brief: string | null | undefined): string {
   if (!brief?.trim()) {
     return '<p class="text-stone-500">—</p>';
   }
-  return marked.parse(brief) as string;
+  return renderSafeMarkdown(brief);
 }
 
 function renderShadowRepoSection(
@@ -455,7 +453,7 @@ async function buildLabMarkdownPage(
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
-    const html = marked.parse(markdown) as string;
+    const html = renderSafeMarkdown(markdown);
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
@@ -1272,7 +1270,7 @@ export async function buildMonthlySite(
     } catch {
       continue;
     }
-    const html = marked.parse(markdown) as string;
+    const html = renderSafeMarkdown(markdown);
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
@@ -1331,7 +1329,7 @@ export async function buildWeeklySite(
     } catch {
       continue;
     }
-    const html = marked.parse(markdown) as string;
+    const html = renderSafeMarkdown(markdown);
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
@@ -1384,7 +1382,7 @@ export async function buildEditionSite(
     }
     markdown = normalizeLegacyNewMarkdown(markdown);
     const paths = editionSitePaths(edition.siteSegment, 1);
-    const html = marked.parse(markdown) as string;
+    const html = renderSafeMarkdown(markdown);
     const siblingHref =
       edition.id === "skills" ? paths.editionNav.ossHref : paths.editionNav.skillsHref;
     const siblingLabel = edition.id === "skills" ? "AI Tastemakers" : "Skill Tastemakers";
@@ -1530,7 +1528,7 @@ export async function buildLabSite(
   let indexBody = `${labNavHtml("home", escapeHtml)}`;
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = marked.parse(markdown) as string;
+    const html = renderSafeMarkdown(markdown);
     indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
   } catch {
     indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans">
@@ -1550,7 +1548,7 @@ export async function buildLabSite(
   let toolsBody = `${labNavHtml("tools", escapeHtml)}`;
   try {
     const markdown = await fs.readFile(inventoryMd, "utf8");
-    const html = marked.parse(markdown) as string;
+    const html = renderSafeMarkdown(markdown);
     toolsBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-table:text-sm">${html}</article>`;
   } catch {
     toolsBody += `<p class="font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run inventory:tools</code> to generate the inventory.</p>`;
@@ -1645,7 +1643,7 @@ export async function buildLabSite(
       const listings: string[] = [];
       for (const file of postFiles) {
         const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
-        const html = marked.parse(markdown) as string;
+        const html = renderSafeMarkdown(markdown);
         const slug = file.replace(/\.md$/, "");
         const title = markdownH1(markdown, slug);
         listings.push(
