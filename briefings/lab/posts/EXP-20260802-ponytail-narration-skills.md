@@ -1,6 +1,6 @@
 # Shorter Skills briefs
 
-_We're testing whether Skills write-ups can be shorter and more useful without losing a real “why this, today” hook. First treated digest: 2026-08-17._
+_**Kept (2026-08-29).** Treatment cut output ~18% with 13/13 rubric pass and stronger Why-now scores on average. Both narration flags stay on Skills digests._
 
 ## The question, in English
 
@@ -50,7 +50,7 @@ On Skills briefs only — OSS is unchanged:
 - No “build a production-ready pipeline around…” unless the repo actually says that
 - **Why now** still needs a timely hook (HN, Reddit, a release) — star count alone is not enough
 
-Today's Skills brief (Aug 16) is still the old style. We decide on **Aug 29** whether to keep the tighter rules.
+The first treated digest shipped **2026-08-17**. We closed the window on **2026-08-29** and kept the tighter rules.
 
 ## How we'll know
 
@@ -69,11 +69,25 @@ Click and pageview stats are out of scope here. This test is about writing quali
 
 Fourteen Skills runs: about **2005** output tokens and **1239** words per run. Automated quality checks passed 14 of 14. That is the before picture.
 
-## If it doesn't work
+### After the new rules (Aug 17–29)
 
-On Aug 29: keep both changes if briefs get shorter and still pass the quality check with timely hooks.
+Thirteen Skills runs: about **1649** output tokens (−17.8%) and **1026** words (−17.2%) per run. Rank-1 rubric passed **13 of 13**. Why-now heuristic averaged **4.1/5** (baseline 3.4); specificity averaged **4.5/5** (baseline 5.0) — still above the pass bar. Editorial review: timely hooks (HN, GitHub Trending, release notes) remain on treatment briefs; a few late-window rank-1 picks leaned on star velocity but passed rubric.
 
-If “why now” goes mushy, turn off the shortness rules first and keep the ordered-facts prompt. OSS stays on the old prompt until Skills earns a keep.
+## Outcome
+
+We **kept** both `DIGEST_NARRATE_STRUCTURED_CONTEXT=1` and `DIGEST_NARRATE_PONYTAIL=1` on the Skills digest command. The ~10% cost target was exceeded without rubric or Why-now regressions. OSS narration is unchanged.
+
+## Published briefs (samples)
+
+Links go to the live Skills digest pages — the reader-facing output from each window.
+
+**After (treatment, Aug 17–29):**
+
+- [2026-08-17](../../skills/briefings/2026-08-17.html) · [2026-08-18](../../skills/briefings/2026-08-18.html) · [2026-08-19](../../skills/briefings/2026-08-19.html) · [2026-08-20](../../skills/briefings/2026-08-20.html) · [2026-08-21](../../skills/briefings/2026-08-21.html) · [2026-08-22](../../skills/briefings/2026-08-22.html) · [2026-08-23](../../skills/briefings/2026-08-23.html) · [2026-08-24](../../skills/briefings/2026-08-24.html) · [2026-08-25](../../skills/briefings/2026-08-25.html) · [2026-08-26](../../skills/briefings/2026-08-26.html) · [2026-08-27](../../skills/briefings/2026-08-27.html) · [2026-08-28](../../skills/briefings/2026-08-28.html) · [2026-08-29](../../skills/briefings/2026-08-29.html)
+
+**Before (baseline samples):**
+
+- [2026-08-03](../../skills/briefings/2026-08-03.html) (first logged run) · [2026-08-10](../../skills/briefings/2026-08-10.html) · [2026-08-16](../../skills/briefings/2026-08-16.html) (last run before flags flipped)
 
 ---
 

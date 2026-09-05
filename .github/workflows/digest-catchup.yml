@@ -1,0 +1,135 @@
+name: Digest Catch-up
+
+# Safety net when GitHub drops morning cron schedules entirely (see incident 2026-08-27).
+# Separate workflow/concurrency from Daily Digest so a missed morning does not block catch-up.
+on:
+  schedule:
+    - cron: "0 11 * * *"
+      timezone: America/Los_Angeles
+    - cron: "0 14 * * *"
+      timezone: America/Los_Angeles
+  push:
+    branches: [main]
+    paths:
+      - ".github/triggers/run-digest"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  actions: write
+  issues: write
+
+concurrency:
+  group: digest-catchup
+  cancel-in-progress: false
+
+jobs:
+  catchup:
+    runs-on: ubuntu-latest
+    env:
+      TZ: America/Los_Angeles
+      DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+
+      - name: Check whether today's briefings exist
+        id: check
+        run: node scripts/verify-daily-digest.mjs --skip-pages
+        continue-on-error: true
+
+      - name: Trigger Daily Digest when briefings missing
+        id: digest_retrigger
+        if: steps.check.outcome == 'failure' && steps.check.outputs.briefings_missing == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Today's briefings missing on main — dispatching Daily Digest."
+          gh workflow run "Daily Digest" --ref main
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20; do
+            echo "Waiting for digest commit (attempt ${attempt}/20)..."
+            sleep 30
+            git fetch origin main
+            git checkout --force origin/main
+            if node scripts/verify-daily-digest.mjs --skip-pages; then
+              echo "recovered=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "recovered=false" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Redeploy Pages when briefings exist but site is stale
+        id: pages_redeploy
+        if: steps.check.outcome == 'failure' && steps.check.outputs.pages_stale == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Briefings OK on main — triggering Pages redeploy."
+          gh workflow run "Deploy GitHub Pages" --ref main
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            echo "Waiting for Pages deploy (attempt ${attempt}/12)..."
+            sleep 30
+            if node scripts/verify-daily-digest.mjs --pages-only; then
+              echo "recovered=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "recovered=false" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Redeploy Pages after digest recovery
+        id: pages_after_digest
+        if: steps.digest_retrigger.outputs.recovered == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Digest recovered — ensuring Pages is live for today."
+          gh workflow run "Deploy GitHub Pages" --ref main
+          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
+            echo "Waiting for Pages deploy (attempt ${attempt}/12)..."
+            sleep 30
+            if node scripts/verify-daily-digest.mjs --pages-only; then
+              echo "pages_ok=true" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          done
+          echo "pages_ok=false" >> "$GITHUB_OUTPUT"
+          exit 1
+
+      - name: Re-verify after recovery
+        if: |
+          steps.pages_redeploy.outcome == 'success' ||
+          (steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok == 'true')
+        run: node scripts/verify-daily-digest.mjs
+
+      - name: Alert on failure
+        if: |
+          always() &&
+          steps.check.outcome == 'failure' &&
+          (
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
+            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
+          )
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ steps.check.outputs.date }}
+          VERIFY_DIGEST_ERRORS: ${{ steps.check.outputs.errors }}
+          VERIFY_DIGEST_BRIEFINGS_OK: ${{ steps.check.outputs.briefings_ok }}
+          VERIFY_DIGEST_PAGES_OK: ${{ steps.check.outputs.pages_ok }}
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Fail job if catch-up failed
+        if: |
+          always() &&
+          steps.check.outcome == 'failure' &&
+          (
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
+          )
+        run: exit 1

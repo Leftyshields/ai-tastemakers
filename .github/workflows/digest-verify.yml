@@ -2,12 +2,21 @@ name: Daily Digest Verify
 
 on:
   schedule:
-    # After digest crons (6:17, 6:45, 7:30, 8:00 PT). Extra slots catch GitHub schedule drift.
+    # After digest crons (6:17, 7:30, 8:00 PT). Extra slots catch GitHub schedule drift and
+    # total morning cron drops (incident 2026-08-27: zero scheduled runs before 11:00 PT).
     - cron: "0 8 * * *"
       timezone: America/Los_Angeles
     - cron: "0 9 * * *"
       timezone: America/Los_Angeles
     - cron: "0 10 * * *"
+      timezone: America/Los_Angeles
+    - cron: "0 11 * * *"
+      timezone: America/Los_Angeles
+    - cron: "0 12 * * *"
+      timezone: America/Los_Angeles
+    - cron: "0 13 * * *"
+      timezone: America/Los_Angeles
+    - cron: "0 14 * * *"
       timezone: America/Los_Angeles
   workflow_dispatch:
 

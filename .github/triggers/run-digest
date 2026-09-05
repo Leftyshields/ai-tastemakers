@@ -1,0 +1,2 @@
+# Bump this file (commit to main) to trigger Digest Catch-up when morning crons were dropped.
+# Last triggered: 2026-08-27 — recover missed daily digest

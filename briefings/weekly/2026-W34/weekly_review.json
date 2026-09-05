@@ -1,0 +1,232 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W34",
+  "week_start": "2026-08-17",
+  "week_end": "2026-08-23",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 32,
+      "skills": 26
+    },
+    "total_stars_gained": {
+      "oss": 108413,
+      "skills": 82125
+    },
+    "top_topics": {
+      "oss": [
+        "llm",
+        "claude-code",
+        "claude",
+        "ai",
+        "ai-agents"
+      ],
+      "skills": [
+        "claude-code",
+        "codex",
+        "ai-agents",
+        "claude",
+        "ai"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "guillaumemeyer/watermarks-remover",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "harry0703/MoneyPrinterTurbo",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "holaboss-ai/holaOS",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "bojieli/ai-agent-book",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "santifer/career-ops",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "firecrawl/firecrawl",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Leonxlnx/taste-skill",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "TencentCloud/TencentDB-Agent-Memory",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "guillaumemeyer/watermarks-remover",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "holaboss-ai/holaOS",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "santifer/career-ops",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "herdrdev/herdr",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "blader/humanizer",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "JuliusBrussee/caveman",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DietrichGebert/ponytail",
+      "Graphify-Labs/graphify",
+      "JuliusBrussee/caveman",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "Wei-Shaw/sub2api",
+      "affaan-m/ECC",
+      "can1357/oh-my-pi",
+      "citrolabs/ego-lite",
+      "diegosouzapw/OmniRoute",
+      "guillaumemeyer/watermarks-remover",
+      "holaboss-ai/holaOS",
+      "lidge-jun/opencodex",
+      "mukul975/Anthropic-Cybersecurity-Skills",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "santifer/career-ops"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "guillaumemeyer/watermarks-remover",
+          "total_stars_gained": 67101,
+          "days_appeared": 7,
+          "excerpt": "A Python service plus agent skill that strips AI provenance marks from text and files — covering invisible Unicode, statistical token-sampling watermarks (SynthID-Text, Kirchenbauer-style), and C2PA/EXIF/XMP metadata across PNG, JPEG, PDF, DOCX, HTML, and more."
+        },
+        {
+          "full_name": "harry0703/MoneyPrinterTurbo",
+          "total_stars_gained": 54222,
+          "days_appeared": 6,
+          "excerpt": "MoneyPrinterTurbo is a Python tool that takes a topic or keyword and automatically generates a short video — writing the script via LLM, fetching stock footage, generating subtitles, adding background music, and rendering a final MP4 through FFmpeg."
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 36265,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is a self-hosted TypeScript gateway that exposes 1,200+ models across 340 providers through a single OpenAI-compatible endpoint, with quota-aware auto-fallback and token compression (RTK + Caveman) that cuts usage by 15–95%."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 35812,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a Claude Code skill/agent plugin that injects a \"laziest senior dev\" heuristic into AI coding agents, pushing them to reach for `<input type=\"date\">` instead of installing flatpickr — cutting generated LOC by ~54% on average across real agentic sessions on a FastAPI + React codebase."
+        },
+        {
+          "full_name": "holaboss-ai/holaOS",
+          "total_stars_gained": 20614,
+          "days_appeared": 5,
+          "excerpt": "holaOS is a local-first Electron desktop workspace that runs Claude Code, Codex, or its own built-in agent side-by-side, sharing a single durable memory store, file system, browser, and 100+ MCP-connected tool integrations across sessions."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "guillaumemeyer/watermarks-remover",
+          "total_stars_gained": 67088,
+          "days_appeared": 7,
+          "excerpt": "`watermarks-remover` is a Python stdlib service plus agent skill that strips multi-vendor AI provenance marks — invisible Unicode, statistical token-sampling watermarks, and C2PA/EXIF/XMP metadata — from text and files including PNG, JPEG, PDF, DOCX, and Markdown."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 41930,
+          "days_appeared": 7,
+          "excerpt": "Orca is an agent development environment (ADE) that runs Codex, Claude Code, OpenCode, or Pi side-by-side in isolated git worktrees, with a mobile companion app for monitoring and steering agents remotely."
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 36273,
+          "days_appeared": 7,
+          "excerpt": "OmniRoute is a free MIT-licensed AI gateway that routes requests across 341 providers and 1,200+ models through a single OpenAI-compatible endpoint, with quota-aware auto-fallback and RTK+Caveman compression that cuts token usage 15–95%."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 35811,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is an AI agent skill that steers code agents (Claude Code, Cursor, etc.) toward the laziest-correct solution — replacing over-built implementations with native primitives, like swapping a flatpickr date picker for `<input type=\"date\">`."
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "total_stars_gained": 26721,
+          "days_appeared": 7,
+          "excerpt": "Hermes Agent is a self-improving AI agent that creates and refines skills from experience, searches past conversations, and builds a persistent user model across sessions — deployable on any infra from a $5 VPS to serverless Modal/Daytona environments."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant story this week is infrastructure consolidation: teams are standardizing on unified AI gateways and shared memory layers rather than wiring together point solutions. OmniRoute, a self-hosted gateway that routes requests across more than 1,200 models through a single compatible endpoint, held the top of the trending charts all seven days — a signal that provider lock-in anxiety is now a purchasing driver. The week's most-starred project overall was a tool designed to strip AI-origin watermarks from text and files, which should prompt any legal or compliance team to revisit what \"AI provenance\" means in their workflows. Agent development environments — platforms that let engineers run multiple coding agents side-by-side with shared memory and tooling — are maturing fast, with both holaOS and Orca drawing sustained attention. The quarter's watch item: teams that invest now in model-routing and agent-orchestration infrastructure will be positioned to swap underlying models freely as the cost curve keeps falling.",
+    "generalist": "The builder stack shifted noticeably toward *coordination* this week rather than raw model capability. OmniRoute gives you a single local endpoint that spans 340-plus providers and falls back automatically when quotas are hit — practically eliminating the boilerplate of multi-provider failover. Orca and holaOS are both pushing toward the same idea from different angles: run Claude Code, Codex, or OpenCode in parallel inside a single workspace, share memory and file state across sessions, and optionally steer the agents from a mobile app. Ponytail, a Claude Code skill, takes a different but equally practical angle — it trains agents to reach for the simplest native solution first, which the authors measured as cutting generated line counts by roughly half on real codebases.\n\nThe skills side of the chart was dominated by something harder to categorize neatly: NousResearch's Hermes Agent, which creates and stores skills from its own experience across sessions, building a persistent model of the user over time. That's less a tool and more a pattern — self-improving, memory-augmented agents as a deployable primitive — and it held the trending charts for the full seven days. The watermarks-remover project also appeared in both the OSS and skills charts simultaneously, which is unusual; it functions as both a standalone Python service and an agent-callable skill, a dual-mode packaging pattern worth watching as more developers ship work this way.",
+    "statistician": "Both editions this week were ranked solely on seven-day star delta, which amplifies anything that caught a single viral moment early in the week and then coasted — watermarks-remover's lead in raw stars gained almost certainly reflects a Monday spike rather than seven days of steady organic growth. The full-week streaks (seven repos held the charts every single day in both editions) are the more reliable signal of durable interest; those repeat appearances are harder to manufacture. Cross-edition overlap was unusually high — seventeen repos appeared in both the OSS and skills tables — so the aggregate star totals should not be added together; they count largely the same audience twice."
+  },
+  "email": {
+    "verdict": "A tool for stripping AI watermarks from text and files dominated every day of the week, and that tells you something about where the anxiety in this field actually lives right now.",
+    "body": "[watermarks-remover](https://github.com/guillaumemeyer/watermarks-remover), a Python service that strips AI provenance marks from text and files, led both AI Tastemakers and Skill Tastemakers (the daily lists of open-source AI tools and installable agent skills, respectively) every single day from Monday through Friday. That is not a spike; it is a sustained pressure event. The tool covers invisible Unicode characters, statistical token-sampling watermarks of the kind used by SynthID-Text and Kirchenbauer-style systems, and embedded metadata across PNG, JPEG, PDF, DOCX, HTML, and more. When something this specific holds the top spot for five consecutive days on both lists simultaneously, the attention is not accidental.\n\nWhat moved alongside it tells a second story. [OmniRoute](https://github.com/diegosouzapw/OmniRoute), a self-hosted TypeScript gateway that routes requests across more than 1,200 models and 340 providers through one OpenAI-compatible endpoint, held both lists all week. [Ponytail](https://github.com/DietrichGebert/ponytail), a Claude Code plugin that pushes coding agents toward minimal native solutions instead of installed libraries, did the same. Both are about controlling what your agent does and costs, not expanding its reach.\n\nThe week's attention concentrated on constraint: stripping markers you did not put there, routing around providers you cannot depend on, and keeping agents from over-building. That is the shape of a field that has moved past \"can it work\" and is now asking \"can I trust and control what it produces.\""
+  },
+  "generated_at": "2026-08-23T13:48:06.870Z"
+}
