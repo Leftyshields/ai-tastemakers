@@ -20,7 +20,7 @@ One JSON object per line, append-only.
   "run_id": "uuid",
   "generated_at": "2026-06-06T14:00:00.000Z",
   "ranking_mode": "delta_7d",
-  "topic_queries": ["llm", "ai-agent", "mcp", "openai", "claude", "langchain", "ai-tools"],
+  "topic_queries": ["llm", "ai-agent", "mcp", "openai", "claude", "langchain", "ai-tools", "spacex.ai", "cursor", "grok"],
   "repos": []
 }
 ```

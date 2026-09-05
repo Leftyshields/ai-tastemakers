@@ -2,8 +2,12 @@ import type { WeeklyEmailCopy, WeeklyReview } from "../types.js";
 import { rankingModeLabel, renderBriefForEmail, renderBriefForPlainText } from "./html.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
 
-export const SUNDAY_EMAIL_DEK =
-  "The Sunday wrap-up: one opinionated read on what actually moved this week. The ranked top 10 still posts daily on the site, linked below.";
+/** Standing inbox subject. The week's hook opens the body, not the subject. */
+export const SUNDAY_EMAIL_SUBJECT =
+  "The Sunday wrap-up: one opinionated read on what actually moved this week";
+
+export const SUNDAY_EMAIL_LISTS_DEK =
+  "The ranked top 10 still posts daily on the site, linked below.";
 
 const GITHUB_MD_LINK_SOURCE = /\[([^\]]+)\]\((https:\/\/github\.com\/[^)\s]+)\)/;
 
@@ -69,12 +73,12 @@ export function resolveWeeklyEmail(review: WeeklyReview): WeeklyEmailCopy {
   };
 }
 
-export function weeklyEmailSubject(review: WeeklyReview): string {
-  return resolveWeeklyEmail(review).verdict.replace(/\s+/g, " ").trim();
+export function weeklyEmailSubject(_review: WeeklyReview): string {
+  return SUNDAY_EMAIL_SUBJECT;
 }
 
-export function weeklyEmailPreheader(_review: WeeklyReview): string {
-  return SUNDAY_EMAIL_DEK;
+export function weeklyEmailPreheader(review: WeeklyReview): string {
+  return resolveWeeklyEmail(review).verdict.replace(/\s+/g, " ").trim();
 }
 
 function rankingMethodLabel(review: WeeklyReview): string {
@@ -129,7 +133,7 @@ export function renderWeeklyEmailHtml(review: WeeklyReview, siteUrl: string): st
       ${escapeHtml(copy.verdict)}
     </h1>
     <p style="margin:0 0 16px;font-family:system-ui,sans-serif;font-size:14px;line-height:1.5;color:#57534e;">
-      ${escapeHtml(SUNDAY_EMAIL_DEK)}
+      ${escapeHtml(SUNDAY_EMAIL_LISTS_DEK)}
     </p>
     ${rankedListLinksHtml(ossUrl, skillsUrl)}
     ${copy.body ? bodyParagraphsHtml(copy.body) : ""}
@@ -159,7 +163,7 @@ export function renderWeeklyEmailText(review: WeeklyReview, siteUrl: string): st
   const lines: string[] = [
     copy.verdict,
     "",
-    SUNDAY_EMAIL_DEK,
+    SUNDAY_EMAIL_LISTS_DEK,
     "",
     `AI Tastemakers: ${ossUrl}`,
     `Skill Tastemakers: ${skillsUrl}`,

@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   EDITIONS,
+  OSS_DISCOVER_TOPIC_CHIPS,
   resolveEditionId,
   briefingsDirForEdition,
   snapshotPathForEdition,
@@ -32,8 +33,14 @@ describe("skills edition paths", () => {
 });
 
 describe("edition topic queries", () => {
-  it("share only claude, so dual-list overlap is not one pool ranked twice", () => {
+  it("share claude and cursor, so dual-list overlap is not one pool ranked twice", () => {
     const shared = EDITIONS.oss.topics.filter((t) => EDITIONS.skills.topics.includes(t));
-    expect(shared).toEqual(["claude"]);
+    expect(shared).toEqual(["claude", "cursor"]);
+  });
+
+  it("Discover chips are topics the OSS edition actually searches", () => {
+    for (const topic of OSS_DISCOVER_TOPIC_CHIPS) {
+      expect(EDITIONS.oss.topics).toContain(topic);
+    }
   });
 });

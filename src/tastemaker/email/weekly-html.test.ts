@@ -4,9 +4,11 @@ import {
   renderWeeklyEmailHtml,
   renderWeeklyEmailText,
   weeklyEmailSubject,
+  weeklyEmailPreheader,
   ossTop10Url,
   skillsTop10Url,
-  SUNDAY_EMAIL_DEK,
+  SUNDAY_EMAIL_SUBJECT,
+  SUNDAY_EMAIL_LISTS_DEK,
   renderWeeklyMarkup,
 } from "./weekly-html.js";
 
@@ -38,15 +40,22 @@ const sampleReview: WeeklyReview = {
 };
 
 describe("weekly email", () => {
-  it("subject is the verdict", () => {
-    expect(weeklyEmailSubject(sampleReview)).toBe(sampleReview.email!.verdict);
+  it("subject is the standing wrap-up line", () => {
+    expect(weeklyEmailSubject(sampleReview)).toBe(SUNDAY_EMAIL_SUBJECT);
+    expect(weeklyEmailSubject(sampleReview)).not.toBe(sampleReview.email!.verdict);
   });
 
-  it("html leads with verdict, dek, list links, then flowing body and receipts", () => {
+  it("inbox preview is the week's hook", () => {
+    expect(weeklyEmailPreheader(sampleReview)).toBe(sampleReview.email!.verdict);
+  });
+
+  it("html leads with hook, lists dek, list links, then flowing body and receipts", () => {
     const html = renderWeeklyEmailHtml(sampleReview, "https://example.com/app");
     expect(html).toContain(sampleReview.email!.verdict);
-    expect(html).toContain(SUNDAY_EMAIL_DEK);
-    expect(html.indexOf(SUNDAY_EMAIL_DEK)).toBeLessThan(
+    expect(html).toContain(SUNDAY_EMAIL_LISTS_DEK);
+    expect(html).not.toContain(SUNDAY_EMAIL_SUBJECT);
+    expect(html.indexOf(sampleReview.email!.verdict!)).toBeLessThan(html.indexOf(SUNDAY_EMAIL_LISTS_DEK));
+    expect(html.indexOf(SUNDAY_EMAIL_LISTS_DEK)).toBeLessThan(
       html.indexOf(ossTop10Url("https://example.com/app", "2026-08-16")),
     );
     expect(html).toContain("https://github.com/diegosouzapw/OmniRoute");
@@ -66,9 +75,11 @@ describe("weekly email", () => {
     expect(html).not.toContain("DIGEST_");
   });
 
-  it("plain text includes dek then top 10 URLs and receipts", () => {
+  it("plain text includes hook, lists dek, then top 10 URLs and receipts", () => {
     const text = renderWeeklyEmailText(sampleReview, "https://example.com");
-    expect(text).toContain(SUNDAY_EMAIL_DEK);
+    expect(text.startsWith(sampleReview.email!.verdict!)).toBe(true);
+    expect(text).toContain(SUNDAY_EMAIL_LISTS_DEK);
+    expect(text).not.toContain(SUNDAY_EMAIL_SUBJECT);
     expect(text).toContain("Monday a hub jumped");
     expect(text).toContain("RECEIPTS");
     expect(text).toContain("briefings/2026-08-16.html");

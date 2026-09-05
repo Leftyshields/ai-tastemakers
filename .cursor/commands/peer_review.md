@@ -21,16 +21,18 @@ Maintain engineering ownership.
 
 | Check | Fail if |
 |---|---|
-| Lead with a spoken sentence | Subject is list-meta, ad-copy, or a construction a stranger would not say out loud |
+| Standing subject | Inbox subject is not exactly "The Sunday wrap-up: one opinionated read on what actually moved this week" |
+| Lead with a spoken hook | Body headline is list-meta, ad-copy, or a construction a stranger would not say out loud |
 | Day anchors are earned | Monday/Thursday/etc. used when that day's top 10 does not show it, or a repo "led both" when it was never #1 on both the same day |
 | Sourced details | Concrete files, features, or measurements not in that repo's excerpt/brief |
 | Open on something concrete | First body sentence is a thesis, not a repo/surge/surprise |
 | Inclusivity | First mention is a noun only ("OmniRoute is the router") with no what-it-does |
 | Flowing prose | Internal headers (The tell, Evidence, Watch) in the email body |
-| Close is a takeaway | Last paragraph restates the subject, or talks about us (Lab, tokens, how the digest is made) |
-| Dek verbatim | Standing dek missing, paraphrased, or placed below the ranked-list links |
+| Close is a takeaway | Last paragraph restates the hook, or talks about us (Lab, tokens, how the digest is made) |
+| Lists dek | "The ranked top 10 still posts daily on the site, linked below." missing, paraphrased, or placed below the ranked-list links |
 | GitHub link on first mention | Named repo with no URL, invented URL, or a second link for the same name |
 | **Referent check** | Nouns in a payoff sentence do not map to the repos named in that stretch |
+| Example is not the product | A repo reduced to its illustrative example without naming what it actually does |
 | Honesty | Quantified spend or adoption inferred from star growth |
 | Stars are attention | Totals treated as adoption |
 | Same list names | "Open-source list" in prose, "AI Tastemakers" in the counts |

@@ -3,6 +3,7 @@ import path from "node:path";
 import { marked } from "marked";
 import {
   EDITIONS,
+  OSS_DISCOVER_TOPIC_CHIPS,
   type EditionDefinition,
 } from "../src/tastemaker/editions.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
@@ -819,7 +820,7 @@ function ossIndexBody(
     <section class="mb-12 border-t border-stone-200 pt-10 dark:border-stone-800">
       <h2 class="mb-5 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">How it works</h2>
       <ol class="space-y-3 pl-5 font-sans text-sm leading-relaxed text-stone-700 dark:text-stone-300">
-        <li><strong class="text-stone-900 dark:text-stone-100">Discover</strong> &mdash; Search GitHub across AI topics (<code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">llm</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-agent</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">mcp</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude</code>, and more).</li>
+        ${ossDiscoverStepHtml()}
         <li><strong class="text-stone-900 dark:text-stone-100">Rank</strong> &mdash; Score by 7-day star delta; bootstrap mode until a week of snapshots accumulates.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
@@ -982,10 +983,21 @@ function wrapUpSecondaryCtaHtml(wrap?: WrapUpArchive): string {
   return "";
 }
 
+const TOPIC_CHIP_CLASS = "rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800";
+
+function topicChipHtml(topic: string): string {
+  return `<code class="${TOPIC_CHIP_CLASS}">${topic}</code>`;
+}
+
+function ossDiscoverStepHtml(): string {
+  const chips = OSS_DISCOVER_TOPIC_CHIPS.map(topicChipHtml).join(", ");
+  return `<li><strong class="text-stone-900 dark:text-stone-100">Discover</strong> &mdash; Search GitHub across AI topics (${chips}, and more).</li>`;
+}
+
 function howItWorksMainBlockHtml(): string {
   const body = `
       <ol class="m-0 space-y-3 pl-5 font-sans text-sm leading-relaxed text-stone-700 dark:text-stone-300">
-        <li><strong class="text-stone-900 dark:text-stone-100">Discover</strong> &mdash; Search GitHub across AI topics (<code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">llm</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-agent</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">mcp</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude</code>, and more).</li>
+        ${ossDiscoverStepHtml()}
         <li><strong class="text-stone-900 dark:text-stone-100">Rank</strong> &mdash; Score by 7-day star delta; bootstrap mode until a week of snapshots accumulates.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>

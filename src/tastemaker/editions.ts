@@ -32,8 +32,8 @@ const SHARED_BLOCKLIST = [
 
 /**
  * Topic queries are per-edition and mostly disjoint. Both lists then rank by the same
- * 7-day star metric. They share one search tag (`claude`). A name on both lists was
- * dual-tagged by the author, or it only hit `claude`. Raw overlap counts mix construction
+ * 7-day star metric. They share search tags (`claude`, `cursor`). A name on both lists was
+ * dual-tagged by the author, or it only hit a shared tag. Raw overlap counts mix construction
  * with labeling; they are not automatic proof that the tool/skill line disappeared.
  */
 export const EDITIONS: Record<EditionId, EditionDefinition> = {
@@ -41,7 +41,18 @@ export const EDITIONS: Record<EditionId, EditionDefinition> = {
     id: "oss",
     name: "AI Tastemakers",
     tagline: "Daily intelligence on AI-derivative open source",
-    topics: ["llm", "ai-agent", "mcp", "openai", "claude", "langchain", "ai-tools"],
+    topics: [
+      "llm",
+      "ai-agent",
+      "mcp",
+      "openai",
+      "claude",
+      "langchain",
+      "ai-tools",
+      "spacex.ai",
+      "cursor",
+      "grok",
+    ],
     minStarsDefault: 50,
     maxStarsBootstrapDefault: 80_000,
     briefingsSubdir: "",
@@ -80,6 +91,17 @@ export const EDITIONS: Record<EditionId, EditionDefinition> = {
     ],
   },
 };
+
+/** Homepage Discover chips; keep in sync with a subset of `EDITIONS.oss.topics`. */
+export const OSS_DISCOVER_TOPIC_CHIPS = [
+  "llm",
+  "ai-agent",
+  "mcp",
+  "claude",
+  "spacex.ai",
+  "cursor",
+  "grok",
+] as const;
 
 export function resolveEditionId(raw?: string): EditionId {
   const id = raw?.trim() || process.env.DIGEST_EDITION?.trim() || "oss";

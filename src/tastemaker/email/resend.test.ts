@@ -136,11 +136,15 @@ describe("sendWeeklyDigestEmail", () => {
 
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
-        subject: "This week the interesting work was making agents cheaper to run, and making them remember.",
+        subject: "The Sunday wrap-up: one opinionated read on what actually moved this week",
         bcc: ["alice@example.com"],
       }),
     );
-    expect(sendMock.mock.calls[0][0].html).toContain("The Sunday wrap-up");
+    expect(sendMock.mock.calls[0][0].html).toContain(
+      "This week the interesting work was making agents cheaper to run, and making them remember.",
+    );
+    expect(sendMock.mock.calls[0][0].html).toContain("The ranked top 10 still posts daily");
+    expect(sendMock.mock.calls[0][0].html).not.toContain("The Sunday wrap-up");
     expect(sendMock.mock.calls[0][0].html).not.toContain("The tell");
     expect(sendMock.mock.calls[0][0].html).not.toContain("For executives");
   });

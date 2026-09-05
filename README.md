@@ -4,7 +4,7 @@
 
 **Skill Tastemakers** is a companion edition focused on agent skills, Claude Code extensions, and reusable instruction artifacts.
 
-**Tastemakers Weekly** — every Sunday, the site keeps a three-part wrap-up (executives, then AI generalists, then the numbers). The Sunday email is a short single-voice read for builders: verdict, the tell, evidence, watch, plus receipts and links to that day's ranked lists.
+**Tastemakers Weekly** — every Sunday, the site keeps a three-part wrap-up (executives, then AI generalists, then the numbers). The Sunday email uses a standing subject ("The Sunday wrap-up: one opinionated read on what actually moved this week"), then leads the body with that week's hook, the story, receipts, and links to that day's ranked lists.
 
 Instantiated from [Project Genesis](https://github.com/Leftyshields/project-genesis) for structured AI-assisted development.
 
@@ -16,11 +16,11 @@ Instantiated from [Project Genesis](https://github.com/Leftyshields/project-gene
 
 Each daily run (both editions):
 
-1. Searches GitHub by topic queries (`llm`, `ai-agent`, `mcp`, … or skill-focused topics for the skills edition)
+1. Searches GitHub by topic queries (`llm`, `ai-agent`, `mcp`, `spacex.ai`, `cursor`, `grok`, … or skill-focused topics for the skills edition)
 2. Ranks by stars gained in the last 7 days (bootstrap fallback during the first week)
 3. Sends top 10 to Claude for scannable briefs with three sections: **What it does:** / **Why now:** / **Build with it:**
 4. Writes `briefings/<edition>/YYYY-MM-DD/daily_brief.md` + `digest.json`
-5. Optionally emails subscribers (Resend) and deploys to GitHub Pages. **Weekdays** send the daily top 10. **Sundays** skip that email and send the weekly builder email instead (verdict + ranked-list links).
+5. Optionally emails subscribers (Resend) and deploys to GitHub Pages. **Weekdays** send the daily top 10. **Sundays** skip that email and send the weekly builder email instead (standing wrap-up subject, week's hook, then the story).
 
 **Skills edition enrichment (production):** For the top 3 ranked repos, the pipeline fetches external context before narration — Firecrawl deep scrape (README + releases + discussions), Hacker News Algolia, and Reddit recent-post search — then applies editorial rules (concrete “Why now” hooks, no star-count-only blurbs). Rank-1 brief quality is logged to `data/quality/rubric-scores.jsonl` when `DIGEST_QUALITY_RUBRIC=1`.
 

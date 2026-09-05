@@ -95,6 +95,7 @@ export interface WeeklyNarrative {
 
 /** Sunday email: one story, one take. Not the layered site page. */
 export interface WeeklyEmailCopy {
+  /** Spoken hook that opens the email body. Inbox subject is a standing wrap-up line. */
   verdict: string;
   body: string;
 }

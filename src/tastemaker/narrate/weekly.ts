@@ -154,7 +154,7 @@ This is a weekly wrap-up with a point of view, not the ranked list. Tell the sto
 WRITE, in this order, with these exact headers:
 
 ## Verdict
-The week's takeaway as a plain, natural sentence a stranger would understand. The payoff of the story, said up front as a hook. This is also the subject line. Write it the way you would say it out loud. No contorted constructions. Someone who has never seen the lists still gets it.
+The week's takeaway as a plain, natural sentence a stranger would understand. The payoff of the story, said up front as a hook. This opens the email body (the inbox subject is a standing wrap-up label, not this sentence). Write it the way you would say it out loud. No contorted constructions. Someone who has never seen the lists still gets it.
 
 ## Body
 One piece of prose (paragraphs separated by blank lines). No subheads.
@@ -165,9 +165,9 @@ Then walk two or three threads through the real repos that defined the week. Mak
 
 Use day anchors (Monday, by Thursday) ONLY when the Daily #1 data actually shows that timing. Never invent or smooth a chronology for momentum (do not say a repo "led both lists" unless it was #1 on both the same day). If the week has no real day-by-day arc, tell it straight without the timeline.
 
-Any concrete detail about what a repo does or contains must come from that repo's excerpt in DATA, not a plausible-sounding guess. If you only have the function at a high level, stay high level. Do not invent files, features, measurements, or product claims.
+Any concrete detail about what a repo does or contains must come from that repo's excerpt in DATA, not a plausible-sounding guess. If you only have the function at a high level, stay high level. Do not invent files, features, measurements, or product claims. An example in the excerpt illustrates the product; it is not the product. Name the function first (Ponytail steers agents toward minimal solutions), then you may use the example.
 
-Close with the so-what: one paragraph that tells the reader what the week means for what they build. A genuine takeaway (the shape of the field is shifting, a problem is consolidating, a layer is maturing), not a restatement of the subject.
+Close with the so-what: one paragraph that tells the reader what the week means for what they build. A genuine takeaway (the shape of the field is shifting, a problem is consolidating, a layer is maturing), not a restatement of the hook.
 
 Inclusivity:
 - On first mention of any repo, say in plain language what it DOES before you say why it matters. A noun alone is not enough. Bad: "OmniRoute is the router." Good: "OmniRoute (a gateway that sends each request to one of hundreds of model providers)..."
