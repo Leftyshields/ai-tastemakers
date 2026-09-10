@@ -13,4 +13,10 @@ describe("digestUnsubscribeUrl", () => {
       "https://example.com/app/unsubscribe.html?email=user%40example.com",
     );
   });
+
+  it("includes token when provided", () => {
+    expect(digestUnsubscribeUrl("https://example.com/app", "a@b.com", "secret-token")).toBe(
+      "https://example.com/app/unsubscribe.html?email=a%40b.com&token=secret-token",
+    );
+  });
 });

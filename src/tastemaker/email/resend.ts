@@ -1,6 +1,10 @@
 import { Resend } from "resend";
 import type { AppConfig, Digest, WeeklyReview } from "../types.js";
-import { resolveDigestRecipients } from "../subscribers/load.js";
+import {
+  resolveDigestRecipients,
+  resolveDigestSubscriberRecords,
+} from "../subscribers/load.js";
+import type { FirestoreSubscriberRecord } from "../subscribers/firestore.js";
 import {
   digestEmailSubject,
   renderDigestEmailHtml,
@@ -30,46 +34,73 @@ export function parseFromAddress(from: string): string {
   return (match ? match[1] : from).trim();
 }
 
+function resolveSendRecords(
+  recipients: string[] | undefined,
+  records: FirestoreSubscriberRecord[],
+): FirestoreSubscriberRecord[] {
+  if (!recipients) return records;
+  return recipients.map((email) => ({ email }));
+}
+
 export async function sendDigestEmail(
   config: AppConfig,
   digest: Digest,
   dateLabel: string,
   recipients?: string[],
 ): Promise<{ id: string }> {
-  const to = recipients ?? (await resolveDigestRecipients(config));
-  if (!config.resendApiKey || !config.digestEmailFrom || to.length === 0) {
+  const records = resolveSendRecords(
+    recipients,
+    await resolveDigestSubscriberRecords(config),
+  );
+  if (!config.resendApiKey || !config.digestEmailFrom || records.length === 0) {
     throw new Error(
       "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
     );
   }
 
   const resend = new Resend(config.resendApiKey);
-  const html = renderDigestEmailHtml(digest, dateLabel, config.digestSiteUrl);
-  const text = renderDigestEmailText(digest, dateLabel, config.digestSiteUrl);
   const subject = digestEmailSubject(dateLabel);
+  let lastId = "";
 
-  const unsubscribeUrl = digestUnsubscribeUrl(config.digestSiteUrl);
-  // BCC hides the subscriber list; Resend requires at least one `to` address.
-  const { data, error } = await resend.emails.send({
-    from: config.digestEmailFrom,
-    to: [parseFromAddress(config.digestEmailFrom)],
-    bcc: to,
-    subject,
-    html,
-    text,
-    headers: {
-      "List-Unsubscribe": `<${unsubscribeUrl}>`,
-    },
-  });
+  for (const record of records) {
+    const unsubscribeUrl = digestUnsubscribeUrl(
+      config.digestSiteUrl,
+      record.email,
+      record.unsubscribeToken,
+    );
+    const html = renderDigestEmailHtml(
+      digest,
+      dateLabel,
+      config.digestSiteUrl,
+      unsubscribeUrl,
+    );
+    const text = renderDigestEmailText(
+      digest,
+      dateLabel,
+      config.digestSiteUrl,
+      unsubscribeUrl,
+    );
+    const { data, error } = await resend.emails.send({
+      from: config.digestEmailFrom,
+      to: [record.email],
+      subject,
+      html,
+      text,
+      headers: {
+        "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      },
+    });
 
-  if (error) {
-    throw new Error(`Resend API error: ${error.message}`);
+    if (error) {
+      throw new Error(`Resend API error: ${error.message}`);
+    }
+    if (!data?.id) {
+      throw new Error("Resend API returned no message id");
+    }
+    lastId = data.id;
   }
-  if (!data?.id) {
-    throw new Error("Resend API returned no message id");
-  }
 
-  return { id: data.id };
+  return { id: lastId };
 }
 
 export async function sendWeeklyDigestEmail(
@@ -77,35 +108,47 @@ export async function sendWeeklyDigestEmail(
   review: WeeklyReview,
   recipients?: string[],
 ): Promise<{ id: string }> {
-  const to = recipients ?? (await resolveDigestRecipients(config));
-  if (!config.resendApiKey || !config.digestEmailFrom || to.length === 0) {
+  const records = resolveSendRecords(
+    recipients,
+    await resolveDigestSubscriberRecords(config),
+  );
+  if (!config.resendApiKey || !config.digestEmailFrom || records.length === 0) {
     throw new Error(
       "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
     );
   }
 
   const resend = new Resend(config.resendApiKey);
-  const unsubscribeUrl = digestUnsubscribeUrl(config.digestSiteUrl);
-  const { data, error } = await resend.emails.send({
-    from: config.digestEmailFrom,
-    to: [parseFromAddress(config.digestEmailFrom)],
-    bcc: to,
-    subject: weeklyEmailSubject(review),
-    html: renderWeeklyEmailHtml(review, config.digestSiteUrl),
-    text: renderWeeklyEmailText(review, config.digestSiteUrl),
-    headers: {
-      "List-Unsubscribe": `<${unsubscribeUrl}>`,
-    },
-  });
+  const subject = weeklyEmailSubject(review);
+  let lastId = "";
 
-  if (error) {
-    throw new Error(`Resend API error: ${error.message}`);
-  }
-  if (!data?.id) {
-    throw new Error("Resend API returned no message id");
+  for (const record of records) {
+    const unsubscribeUrl = digestUnsubscribeUrl(
+      config.digestSiteUrl,
+      record.email,
+      record.unsubscribeToken,
+    );
+    const { data, error } = await resend.emails.send({
+      from: config.digestEmailFrom,
+      to: [record.email],
+      subject,
+      html: renderWeeklyEmailHtml(review, config.digestSiteUrl, unsubscribeUrl),
+      text: renderWeeklyEmailText(review, config.digestSiteUrl, unsubscribeUrl),
+      headers: {
+        "List-Unsubscribe": `<${unsubscribeUrl}>`,
+      },
+    });
+
+    if (error) {
+      throw new Error(`Resend API error: ${error.message}`);
+    }
+    if (!data?.id) {
+      throw new Error("Resend API returned no message id");
+    }
+    lastId = data.id;
   }
 
-  return { id: data.id };
+  return { id: lastId };
 }
 
 export interface OpsEmailPayload {

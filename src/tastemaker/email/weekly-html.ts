@@ -109,13 +109,17 @@ function rankedListLinksHtml(ossUrl: string, skillsUrl: string): string {
     </p>`;
 }
 
-export function renderWeeklyEmailHtml(review: WeeklyReview, siteUrl: string): string {
+export function renderWeeklyEmailHtml(
+  review: WeeklyReview,
+  siteUrl: string,
+  unsubscribeUrlOverride?: string,
+): string {
   const copy = resolveWeeklyEmail(review);
   const preheader = escapeHtml(weeklyEmailPreheader(review));
   const weekUrl = weeklyOnlineUrl(siteUrl, review.week_id);
   const ossUrl = ossTop10Url(siteUrl, review.week_end);
   const skillsUrl = skillsTop10Url(siteUrl, review.week_end);
-  const unsubscribeUrl = digestUnsubscribeUrl(siteUrl);
+  const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
   const both = review.stats.cross_edition_overlap.length;
 
   return `<!DOCTYPE html>
@@ -155,7 +159,11 @@ export function renderWeeklyEmailHtml(review: WeeklyReview, siteUrl: string): st
 </html>`;
 }
 
-export function renderWeeklyEmailText(review: WeeklyReview, siteUrl: string): string {
+export function renderWeeklyEmailText(
+  review: WeeklyReview,
+  siteUrl: string,
+  unsubscribeUrlOverride?: string,
+): string {
   const copy = resolveWeeklyEmail(review);
   const ossUrl = ossTop10Url(siteUrl, review.week_end);
   const skillsUrl = skillsTop10Url(siteUrl, review.week_end);
@@ -177,7 +185,7 @@ export function renderWeeklyEmailText(review: WeeklyReview, siteUrl: string): st
     `Both lists: ${both}`,
     `Ranked by ${rankingMethodLabel(review)}`,
     `Full week on the site: ${weeklyOnlineUrl(siteUrl, review.week_id)}`,
-    `Unsubscribe: ${digestUnsubscribeUrl(siteUrl)}`,
+    `Unsubscribe: ${unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl)}`,
   );
   return lines.join("\n");
 }

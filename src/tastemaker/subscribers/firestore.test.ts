@@ -1,5 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
+  generateUnsubscribeToken,
+  hasValidUnsubscribeToken,
   isFirebaseAdminConfigured,
   subscriberDocId,
   TASTEMAKERS_SUBSCRIBERS_COLLECTION,
@@ -74,5 +76,22 @@ describe("isFirebaseAdminConfigured", () => {
 describe("TASTEMAKERS_SUBSCRIBERS_COLLECTION", () => {
   it("uses expected collection name", () => {
     expect(TASTEMAKERS_SUBSCRIBERS_COLLECTION).toBe("tastemakers_subscribers");
+  });
+});
+
+describe("unsubscribe token helpers", () => {
+  it("generateUnsubscribeToken returns a UUID-length token", () => {
+    const token = generateUnsubscribeToken();
+    expect(token).toMatch(
+      /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i,
+    );
+    expect(hasValidUnsubscribeToken(token)).toBe(true);
+  });
+
+  it("hasValidUnsubscribeToken rejects short or missing values", () => {
+    expect(hasValidUnsubscribeToken(undefined)).toBe(false);
+    expect(hasValidUnsubscribeToken("")).toBe(false);
+    expect(hasValidUnsubscribeToken("short")).toBe(false);
+    expect(hasValidUnsubscribeToken("secret-token-123456")).toBe(true);
   });
 });

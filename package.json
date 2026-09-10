@@ -18,7 +18,8 @@
     "verify:digest": "node scripts/verify-daily-digest.mjs",
     "subscribers:add": "tsx scripts/add-subscriber.ts",
     "subscribers:remove": "tsx scripts/remove-subscriber.ts",
-    "subscribers:seed-firestore": "tsx scripts/seed-subscribers-firestore.ts"
+    "subscribers:seed-firestore": "tsx scripts/seed-subscribers-firestore.ts",
+    "subscribers:migrate-unsubscribe-tokens": "tsx scripts/migrate-subscriber-unsubscribe-tokens.ts"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",

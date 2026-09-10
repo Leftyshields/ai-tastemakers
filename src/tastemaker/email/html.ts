@@ -83,6 +83,7 @@ export function renderDigestEmailHtml(
   digest: Digest,
   dateLabel: string,
   siteUrl: string,
+  unsubscribeUrlOverride?: string,
 ): string {
   const bootstrapNote = digest.ranking_mode === "delta_7d" ? "" : bootstrapNoteHtml();
   const preheader = escapeHtml(digestEmailPreheader(digest));
@@ -108,7 +109,7 @@ export function renderDigestEmailHtml(
     .join("\n");
 
   const briefUrl = `${siteUrl.replace(/\/$/, "")}/briefings/${dateLabel}.html`;
-  const unsubscribeUrl = digestUnsubscribeUrl(siteUrl);
+  const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -148,6 +149,7 @@ export function renderDigestEmailText(
   digest: Digest,
   dateLabel: string,
   siteUrl: string,
+  unsubscribeUrlOverride?: string,
 ): string {
   const lines: string[] = [
     `AI TASTEMAKERS — Daily Brief — ${dateLabel}`,
@@ -174,7 +176,7 @@ export function renderDigestEmailText(
   }
 
   const briefUrl = `${siteUrl.replace(/\/$/, "")}/briefings/${dateLabel}.html`;
-  const unsubscribeUrl = digestUnsubscribeUrl(siteUrl);
+  const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
   lines.push(
     `Read online: ${briefUrl}`,
     `Archive: ${siteUrl}`,

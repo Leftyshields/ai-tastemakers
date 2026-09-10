@@ -3,7 +3,9 @@ import path from "node:path";
 import type { AppConfig } from "../types.js";
 import {
   isFirebaseAdminConfigured,
+  readFirestoreSubscriberRecords,
   readFirestoreSubscribers,
+  type FirestoreSubscriberRecord,
 } from "./firestore.js";
 
 const SUBSCRIBERS_FILE = "data/subscribers.json";
@@ -92,6 +94,26 @@ export async function resolveDigestRecipients(config: AppConfig): Promise<string
     ? []
     : await readSubscribersFile(config.rootDir);
   return filterDeliverableEmails(mergeRecipientEmails(fromFirestore, fromFile));
+}
+
+/** Firestore records plus file-only local dev recipients (no token). */
+export async function resolveDigestSubscriberRecords(
+  config: AppConfig,
+): Promise<FirestoreSubscriberRecord[]> {
+  const fromFirestore = await readFirestoreSubscriberRecords(config);
+  const fromFile = isFirebaseAdminConfigured(config)
+    ? []
+    : await readSubscribersFile(config.rootDir);
+  const deliverable = filterDeliverableEmails(mergeRecipientEmails(fromFile));
+  const seen = new Set(fromFirestore.map((entry) => entry.email));
+  const merged = [...fromFirestore];
+  for (const email of deliverable) {
+    if (!seen.has(email)) {
+      merged.push({ email });
+      seen.add(email);
+    }
+  }
+  return merged;
 }
 
 export function subscribersFilePath(rootDir: string): string {

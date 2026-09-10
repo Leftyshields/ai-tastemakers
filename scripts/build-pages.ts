@@ -35,6 +35,13 @@ function loadFirebaseWebConfig(): FirebaseWebConfig | null {
   return { apiKey, authDomain, projectId, appId };
 }
 
+function loadTastemakersUnsubscribeApiUrl(): string {
+  return (
+    process.env.TASTEMAKERS_UNSUBSCRIBE_API_URL?.trim() ||
+    "https://us-central1-epiphoric-prod.cloudfunctions.net/api/api/tastemakers-unsubscribe"
+  );
+}
+
 function escapeHtml(text: string): string {
   return text
     .replace(/&/g, "&amp;")
@@ -43,7 +50,9 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
-function subscribeFormScript(firebase: FirebaseWebConfig | null): string {
+function subscribeFormScript(
+  firebase: FirebaseWebConfig | null,
+): string {
   if (!firebase) {
     return `<script>
 (function () {
@@ -102,6 +111,7 @@ form.addEventListener("submit", async function (event) {
       email: normalized,
       subscribedAt: serverTimestamp(),
       source: "ai-tastemakers",
+      unsubscribeToken: crypto.randomUUID(),
     }, { merge: false });
     emailInput.value = "";
     setStatus("You are subscribed. The next digest will land in your inbox.", "success");
@@ -119,7 +129,10 @@ form.addEventListener("submit", async function (event) {
 </script>`;
 }
 
-function unsubscribeFormScript(firebase: FirebaseWebConfig | null): string {
+function unsubscribeFormScript(
+  firebase: FirebaseWebConfig | null,
+  unsubscribeApiUrl: string,
+): string {
   if (!firebase) {
     return `<script>
 (function () {
@@ -134,14 +147,9 @@ function unsubscribeFormScript(firebase: FirebaseWebConfig | null): string {
 </script>`;
   }
 
-  const configJson = JSON.stringify(firebase);
+  const apiUrlJson = JSON.stringify(unsubscribeApiUrl);
   return `<script type="module">
-import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-app.js";
-import { getFirestore, doc, deleteDoc } from "https://www.gstatic.com/firebasejs/11.6.0/firebase-firestore.js";
-
-const firebaseConfig = ${configJson};
-const app = initializeApp(firebaseConfig);
-const db = getFirestore(app);
+const UNSUBSCRIBE_API = ${apiUrlJson};
 
 const form = document.getElementById("unsubscribe-form");
 const emailInput = document.getElementById("unsubscribe-email");
@@ -157,14 +165,11 @@ function setStatus(message, kind) {
       : "text-stone-500 dark:text-stone-400");
 }
 
-function subscriberDocId(email) {
-  return email.trim().toLowerCase();
-}
-
 var params = new URLSearchParams(window.location.search);
-var prefill = params.get("email");
-if (prefill) {
-  emailInput.value = prefill;
+var prefillEmail = params.get("email");
+var prefillToken = params.get("token");
+if (prefillEmail) {
+  emailInput.value = prefillEmail;
 }
 
 form.addEventListener("submit", async function (event) {
@@ -179,17 +184,28 @@ form.addEventListener("submit", async function (event) {
   setStatus("Unsubscribing…", "info");
 
   try {
-    const normalized = subscriberDocId(email);
-    await deleteDoc(doc(db, "tastemakers_subscribers", normalized));
-    emailInput.value = "";
-    setStatus("You are unsubscribed. You will not receive further digests at this address.", "success");
-  } catch (err) {
-    const code = err && err.code ? String(err.code) : "";
-    if (code === "not-found" || code === "permission-denied") {
-      setStatus("That address is not on the list (or was already removed).", "success");
-    } else {
-      setStatus("Something went wrong. Please try again.", "error");
+    const body = { email: email.trim().toLowerCase() };
+    if (prefillToken) {
+      body.token = prefillToken;
     }
+    const response = await fetch(UNSUBSCRIBE_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const payload = await response.json().catch(function () { return {}; });
+    if (response.ok) {
+      emailInput.value = "";
+      setStatus("You are unsubscribed. You will not receive further digests at this address.", "success");
+      return;
+    }
+    if (response.status === 403) {
+      setStatus(payload.error || "Invalid unsubscribe link. Use the link from your digest email.", "error");
+      return;
+    }
+    setStatus(payload.error || "Something went wrong. Please try again.", "error");
+  } catch (err) {
+    setStatus("Something went wrong. Please try again.", "error");
   } finally {
     submitBtn.disabled = false;
   }
@@ -321,7 +337,7 @@ async function buildUnsubscribePage(): Promise<void> {
       </p>
     </form>
 
-    ${unsubscribeFormScript(firebase)}`;
+    ${unsubscribeFormScript(firebase, loadTastemakersUnsubscribeApiUrl())}`;
 
   await fs.writeFile(
     path.join(SITE_DIR, "unsubscribe.html"),

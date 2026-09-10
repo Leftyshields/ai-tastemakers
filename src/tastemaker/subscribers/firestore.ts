@@ -60,26 +60,43 @@ export function getAdminFirestore(config: AppConfig): Firestore | null {
   return cachedDb;
 }
 
-export async function readFirestoreSubscribers(
+export interface FirestoreSubscriberRecord {
+  email: string;
+  unsubscribeToken?: string;
+}
+
+export async function readFirestoreSubscriberRecords(
   config: AppConfig,
-): Promise<string[]> {
+): Promise<FirestoreSubscriberRecord[]> {
   try {
     const db = getAdminFirestore(config);
     if (!db) return [];
 
     const snapshot = await db.collection(TASTEMAKERS_SUBSCRIBERS_COLLECTION).get();
-    const emails: string[] = [];
+    const records: FirestoreSubscriberRecord[] = [];
     for (const doc of snapshot.docs) {
-      const email = doc.data().email;
-      if (typeof email === "string") {
-        emails.push(normalizeEmail(email));
-      }
+      const data = doc.data();
+      const email = data.email;
+      if (typeof email !== "string") continue;
+      const normalized = normalizeEmail(email);
+      const token =
+        typeof data.unsubscribeToken === "string" && data.unsubscribeToken.trim()
+          ? data.unsubscribeToken.trim()
+          : undefined;
+      records.push({ email: normalized, unsubscribeToken: token });
     }
-    return emails.filter(Boolean);
+    return records.filter((entry) => entry.email);
   } catch (err) {
     console.warn("Firestore subscriber read failed; using file/env recipients only:", err);
     return [];
   }
+}
+
+export async function readFirestoreSubscribers(
+  config: AppConfig,
+): Promise<string[]> {
+  const records = await readFirestoreSubscriberRecords(config);
+  return records.map((entry) => entry.email);
 }
 
 export async function deleteFirestoreSubscriber(
@@ -100,6 +117,58 @@ export async function deleteFirestoreSubscriber(
   return "removed";
 }
 
+export function generateUnsubscribeToken(): string {
+  return crypto.randomUUID();
+}
+
+export function hasValidUnsubscribeToken(value: unknown): boolean {
+  return typeof value === "string" && value.trim().length >= 16;
+}
+
+export interface UnsubscribeTokenBackfillResult {
+  scanned: number;
+  alreadyHadToken: number;
+  wouldBackfill: number;
+  backfilled: number;
+}
+
+export async function backfillUnsubscribeTokens(
+  config: AppConfig,
+  options: { apply?: boolean } = {},
+): Promise<UnsubscribeTokenBackfillResult> {
+  const db = getAdminFirestore(config);
+  if (!db) {
+    throw new Error("Firebase Admin is not configured");
+  }
+
+  const snapshot = await db.collection(TASTEMAKERS_SUBSCRIBERS_COLLECTION).get();
+  const result: UnsubscribeTokenBackfillResult = {
+    scanned: 0,
+    alreadyHadToken: 0,
+    wouldBackfill: 0,
+    backfilled: 0,
+  };
+
+  for (const docSnap of snapshot.docs) {
+    result.scanned += 1;
+    const data = docSnap.data();
+    if (hasValidUnsubscribeToken(data.unsubscribeToken)) {
+      result.alreadyHadToken += 1;
+      continue;
+    }
+
+    result.wouldBackfill += 1;
+    if (!options.apply) continue;
+
+    await docSnap.ref.update({
+      unsubscribeToken: generateUnsubscribeToken(),
+    });
+    result.backfilled += 1;
+  }
+
+  return result;
+}
+
 export async function writeFirestoreSubscriber(
   config: AppConfig,
   email: string,
@@ -118,6 +187,7 @@ export async function writeFirestoreSubscriber(
     email: normalized,
     subscribedAt: new Date(),
     source: "ai-tastemakers",
+    unsubscribeToken: generateUnsubscribeToken(),
   });
   return "added";
 }

@@ -63,7 +63,7 @@ describe("parseFromAddress", () => {
 });
 
 describe("sendDigestEmail", () => {
-  it("sends subscribers as BCC so the list is hidden", async () => {
+  it("sends one email per subscriber with personalized unsubscribe links", async () => {
     await sendDigestEmail(
       baseConfig,
       sampleDigest,
@@ -71,17 +71,24 @@ describe("sendDigestEmail", () => {
       ["alice@example.com", "bob@example.com"],
     );
 
-    expect(sendMock).toHaveBeenCalledWith(
+    expect(sendMock).toHaveBeenCalledTimes(2);
+    expect(sendMock).toHaveBeenNthCalledWith(
+      1,
       expect.objectContaining({
         from: "AI Tastemakers <digest@epiphoric.com>",
-        to: ["digest@epiphoric.com"],
-        bcc: ["alice@example.com", "bob@example.com"],
+        to: ["alice@example.com"],
       }),
     );
-    expect(sendMock.mock.calls[0][0]).not.toHaveProperty("to", [
-      "alice@example.com",
-      "bob@example.com",
-    ]);
+    expect(sendMock).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        to: ["bob@example.com"],
+      }),
+    );
+    expect(sendMock.mock.calls[0][0].html).toContain(
+      "unsubscribe.html?email=alice%40example.com",
+    );
+    expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
   });
 });
 
@@ -137,9 +144,10 @@ describe("sendWeeklyDigestEmail", () => {
     expect(sendMock).toHaveBeenCalledWith(
       expect.objectContaining({
         subject: "The Sunday wrap-up: one opinionated read on what actually moved this week",
-        bcc: ["alice@example.com"],
+        to: ["alice@example.com"],
       }),
     );
+    expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
     expect(sendMock.mock.calls[0][0].html).toContain(
       "This week the interesting work was making agents cheaper to run, and making them remember.",
     );

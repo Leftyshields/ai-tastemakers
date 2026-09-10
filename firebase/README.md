@@ -4,15 +4,17 @@ AI Tastemakers stores digest subscribers in Firestore collection **`tastemakers_
 
 ## One-time setup
 
-### 1. Deploy Firestore rules (Epiphoric repo)
+### 1. Deploy Firestore rules + API (Epiphoric repo)
 
-Rules live in **`/home/brian/docker/epiphoric/firestore.rules`** (already patched). Deploy from the Epiphoric project:
+Rules and **`POST /api/tastemakers-unsubscribe`** live in the **Epiphoric** repo. Deploy from Epiphoric:
 
 ```bash
 cd /path/to/epiphoric
 firebase use epiphoric-prod
-firebase deploy --only firestore:rules
+firebase deploy --only firestore:rules,functions
 ```
+
+Public Firestore **delete** is disabled; unsubscribe goes through the API (token required when the doc has `unsubscribeToken`).
 
 ### 2. Seed existing subscribers
 
@@ -23,7 +25,20 @@ Copy `data/subscribers.json` into Firestore:
 npm run subscribers:seed-firestore
 ```
 
-### 3. GitHub Actions secrets
+New docs include `unsubscribeToken` automatically.
+
+### 3. Backfill tokens for legacy subscribers
+
+After deploying rules + unsubscribe API, run once against **epiphoric-prod**:
+
+```bash
+npm run subscribers:migrate-unsubscribe-tokens -- --dry-run
+npm run subscribers:migrate-unsubscribe-tokens -- --apply
+```
+
+Legacy docs without a token can still unsubscribe via the API (email only) until backfill runs. After backfill, digest links include `?email=&token=` and manual griefing via Firestore delete is blocked.
+
+### 4. GitHub Actions secrets
 
 **Pages build** (public web config — from Firebase Console → Project settings → Web app):
 
@@ -40,19 +55,25 @@ gh secret set FIREBASE_PRIVATE_KEY --repo Leftyshields/ai-tastemakers
 # Paste private key with literal \n newlines, or use FIREBASE_SERVICE_ACCOUNT JSON
 ```
 
-### 4. Local `.env`
+### 5. Local `.env`
 
-Copy public keys from `epiphoric/.env.production` (`REACT_APP_FIREBASE_*` → `FIREBASE_*`) and Admin credentials for digest/seed scripts.
+Copy public keys from `epiphoric/.env.production` (`REACT_APP_FIREBASE_*` → `FIREBASE_*`) and Admin credentials for digest/seed/migrate scripts.
+
+Optional Pages build override for unsubscribe API URL (defaults to prod Cloud Functions):
+
+```bash
+TASTEMAKERS_UNSUBSCRIBE_API_URL=https://us-central1-epiphoric-prod.cloudfunctions.net/api/api/tastemakers-unsubscribe
+```
 
 ## How it works
 
-- **Subscribe page** (`/subscribe.html`) — Firebase web SDK creates `tastemakers_subscribers/{email}`
-- **Unsubscribe page** (`/unsubscribe.html`) — Firebase web SDK deletes the same document (rules allow public delete by doc ID)
-- **Daily digest** — Admin SDK reads Firestore `tastemakers_subscribers` only. `data/subscribers.json` is **seed-only** when Admin is configured (not merged at send time).
-- **Manual add** — `npm run subscribers:add -- email@example.com` (Firestore when Admin configured; otherwise JSON for local dev)
-- **Manual remove** — `npm run subscribers:remove -- email@example.com` (Firestore + JSON cleanup)
+- **Subscribe page** (`/subscribe.html`) — Firebase web SDK creates `tastemakers_subscribers/{email}` with `unsubscribeToken`
+- **Unsubscribe page** (`/unsubscribe.html`) — POST to Epiphoric **`/api/tastemakers-unsubscribe`** (not client Firestore delete)
+- **Daily digest** — Admin SDK reads Firestore; one email per subscriber with personalized unsubscribe URL
+- **Manual add** — `npm run subscribers:add -- email@example.com`
+- **Manual remove** — `npm run subscribers:remove -- email@example.com` (Admin SDK)
 
-Digest emails include an **Unsubscribe** link and `List-Unsubscribe` header pointing at `/unsubscribe.html`. Unsubscribe deletes the Firestore doc — that stops digests for that address.
+Digest emails include an **Unsubscribe** link and `List-Unsubscribe` header pointing at `/unsubscribe.html?email=…&token=…` when the subscriber has a token.
 
 ## Collection schema
 
@@ -60,7 +81,8 @@ Digest emails include an **Unsubscribe** link and `List-Unsubscribe` header poin
 {
   "email": "you@example.com",
   "subscribedAt": "<Firestore Timestamp>",
-  "source": "ai-tastemakers"
+  "source": "ai-tastemakers",
+  "unsubscribeToken": "<uuid>"
 }
 ```
 
