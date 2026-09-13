@@ -131,5 +131,22 @@ describe("buildQueueSummary", () => {
     expect(summary).toContain("The change is on");
     expect(summary).toContain("2026-08-17");
     expect(summary).toContain("2026-08-29");
+    expect(summary).toContain("Token dashboard");
+  });
+
+  it("uses how_we_measure instead of the Token dashboard for active experiments", () => {
+    const summary = buildQueueSummary([
+      {
+        id: "EXP-20260715-soft-dedup-diversity-skills",
+        title: "Less-repeated Skills picks",
+        status: "active",
+        treatment_window: { start: "2026-09-13", end: "2026-09-26" },
+        how_we_measure:
+          "We compare consecutive-day top-10 overlap from digest.json. PostHog clicks are secondary.",
+      } as ExperimentDashboardItem,
+    ]);
+    expect(summary).toContain("Less-repeated Skills picks");
+    expect(summary).toContain("consecutive-day top-10 overlap");
+    expect(summary).not.toContain("Token dashboard");
   });
 });

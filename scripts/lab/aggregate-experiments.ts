@@ -112,7 +112,9 @@ export function buildQueueSummary(experiments: ExperimentRecord[]): string {
   if (active?.status === "active") {
     const start = active.treatment_window?.start || "—";
     const end = active.treatment_window?.end || "—";
-    return `We're testing ${displayTitle(active)}. The change is on for Skills digests from ${start} through ${end}. Watch cost and writing quality on the Token dashboard.`;
+    const measure = active.how_we_measure?.trim();
+    const tail = measure || "Watch cost and writing quality on the Token dashboard.";
+    return `We're testing ${displayTitle(active)}. The change is on for Skills digests from ${start} through ${end}. ${tail}`;
   }
   const draft = experiments.find((e) => e.status === "draft");
   if (draft) {

@@ -43,7 +43,7 @@ Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
-| 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **draft** (queued; baseline 2026-08-30) |
+| 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **active** (treatment 2026-09-13 → 2026-09-26) |
 | — | EXP-20260802-ponytail-narration-skills | Skills digest | **complete** (keep) |
 | — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
@@ -90,9 +90,9 @@ Archived: [data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json](.
 
 ---
 
-### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **draft / queued #2**
+### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **active**
 
-Queued behind ponytail. Do **not** start until ponytail treatment ends (2026-08-29). Windows slipped so reminders fire on the new dates:
+Ponytail closed 2026-08-29 (keep). Baseline snapshot imported 2026-09-13; treatment flags on Skills digest command from 2026-09-13.
 
 | Window | Dates (PT) |
 |--------|------------|
