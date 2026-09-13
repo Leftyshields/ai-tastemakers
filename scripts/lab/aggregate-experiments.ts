@@ -57,7 +57,7 @@ export function statusLabel(
 ): string {
   if (status === "baseline") return "Measuring before";
   if (status === "active") return "Measuring after";
-  if (status === "draft") return "On hold";
+  if (status === "draft") return "Waiting list";
   if (status === "complete") {
     if (archived && keepChange === true) return "Shipped";
     if (keepChange === true) return "Kept";

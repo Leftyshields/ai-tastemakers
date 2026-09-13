@@ -38,6 +38,8 @@
       Reverted: "reverted",
       Finished: "finished",
       "On hold": "hold",
+      "Waiting list": "hold",
+      Queued: "hold",
       "Measuring before": "running",
       "Measuring after": "running",
     };
@@ -97,7 +99,14 @@
     }
 
     const running = allExperiments.filter((e) => e.status === "baseline" || e.status === "active");
-    const held = allExperiments.filter((e) => e.status === "draft" && !e.archived);
+    const held = allExperiments
+      .filter((e) => e.status === "draft" && !e.archived)
+      .sort((a, b) => {
+        const aStart = a.baseline_window?.start || "";
+        const bStart = b.baseline_window?.start || "";
+        if (aStart !== bStart) return aStart.localeCompare(bStart);
+        return (a.title || a.id || "").localeCompare(b.title || b.id || "");
+      });
     const live = allExperiments.filter((e) => e.keep_change === true);
     const tried = allExperiments.filter((e) => e.status === "complete" || e.archived);
 
@@ -109,14 +118,14 @@
         running.length ? `<div class="experiment-card-list">${running.map(cardHtml).join("")}</div>` : "",
       )}
       ${sectionHtml(
+        "Waiting list",
+        "Next up after the current window. Ordered by planned start.",
+        held.length ? `<div class="experiment-card-list">${held.map(cardHtml).join("")}</div>` : "",
+      )}
+      ${sectionHtml(
         "On the site today",
         "Changes we kept. They are live for readers even if we skipped a full measured window.",
         live.length ? `<ul class="experiment-live-list">${live.map(liveRowHtml).join("")}</ul>` : "",
-      )}
-      ${sectionHtml(
-        "On hold",
-        "Ideas we still want to test after the current window ends.",
-        held.length ? `<div class="experiment-card-list">${held.map(cardHtml).join("")}</div>` : "",
       )}
       ${sectionHtml(
         "What we tried",

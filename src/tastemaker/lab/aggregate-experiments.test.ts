@@ -42,7 +42,7 @@ describe("experiment display helpers", () => {
   it("statusLabel uses shipped for archived keep", () => {
     expect(statusLabel("complete", true, true)).toBe("Shipped");
     expect(statusLabel("complete", true, false)).toBe("Kept");
-    expect(statusLabel("draft", null, false)).toBe("On hold");
+    expect(statusLabel("draft", null, false)).toBe("Waiting list");
     expect(statusLabel("active", null, false)).toBe("Measuring after");
   });
 });
