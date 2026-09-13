@@ -10,11 +10,31 @@ export function renderToolInventoryMarkdown(inventory: ToolInventory): string {
     "",
     "Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by capability and mapped to pipeline roles.",
     "",
+  ];
+
+  const labStatus = inventory.entries
+    .filter((e) => e.recommendation)
+    .sort((a, b) => {
+      const rank = (r: string) => ({ adopted: 0, queued: 1, watch: 2 }[r] ?? 3);
+      const byRec = rank(a.recommendation!) - rank(b.recommendation!);
+      return byRec !== 0 ? byRec : b.appearance_count - a.appearance_count;
+    });
+
+  if (labStatus.length > 0) {
+    lines.push("## Lab queue", "");
+    for (const entry of labStatus) {
+      const note = entry.notes ? ` — ${entry.notes}` : "";
+      lines.push(`- **${entry.full_name}** _(${entry.recommendation})_${note}`);
+    }
+    lines.push("");
+  }
+
+  lines.push(
     "## Top candidates by appearance",
     "",
     "| Repo | Appearances | Pipeline roles | Capability tags |",
     "|------|-------------|------------------|-----------------|",
-  ];
+  );
 
   const top = inventory.entries.filter((e) => e.pipeline_roles.length > 0).slice(0, TOP_N);
   for (const entry of top) {
