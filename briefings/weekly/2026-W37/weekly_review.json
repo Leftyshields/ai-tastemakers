@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W37",
+  "week_start": "2026-09-07",
+  "week_end": "2026-09-13",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 35,
+      "skills": 34
+    },
+    "total_stars_gained": {
+      "oss": 115411,
+      "skills": 112706
+    },
+    "top_topics": {
+      "oss": [
+        "claude",
+        "claude-code",
+        "ai-agents",
+        "llm",
+        "mcp"
+      ],
+      "skills": [
+        "claude-code",
+        "codex",
+        "ai-agents",
+        "claude",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "microsoft/markitdown",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "blader/humanizer",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "coreyhaines31/marketingskills",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "blader/humanizer",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "cathrynlavery/diagram-design",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "NousResearch/hermes-agent",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "freestylefly/awesome-gpt-image-2",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DietrichGebert/ponytail",
+      "Graphify-Labs/graphify",
+      "Imbad0202/academic-research-skills",
+      "JuliusBrussee/caveman",
+      "K-Dense-AI/scientific-agent-skills",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Panniantong/Agent-Reach",
+      "affaan-m/ECC",
+      "blader/humanizer",
+      "coreyhaines31/marketingskills",
+      "diegosouzapw/OmniRoute",
+      "headroomlabs-ai/headroom",
+      "kepano/obsidian-skills",
+      "mksglu/context-mode",
+      "nextlevelbuilder/ui-ux-pro-max-skill"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 82166,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that injects a YAGNI-first constraint layer, steering agents toward minimal solutions—like swapping a flatpickr-powered date picker for a native `<input type=\"date\">`."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 58282,
+          "days_appeared": 7,
+          "excerpt": "ECC is a configuration and prompt layer (\"agent harness\") that adds persistent memory, security guardrails, and research-first behavioral instincts to AI coding agents like Claude Code, Codex, Cursor, and Opencode."
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "total_stars_gained": 31318,
+          "days_appeared": 7,
+          "excerpt": "HyperFrames is an open-source TypeScript framework that renders HTML, CSS, and GSAP animations into deterministic MP4 videos via Puppeteer and FFmpeg, with an MCP-compatible skill system so coding agents can author and render video programmatically."
+        },
+        {
+          "full_name": "microsoft/markitdown",
+          "total_stars_gained": 30354,
+          "days_appeared": 7,
+          "excerpt": "MarkItDown is a Python library and CLI that converts PDFs, Office documents, images, audio, HTML, and more into Markdown optimized for LLM ingestion, preserving headings, tables, and lists."
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "total_stars_gained": 24330,
+          "days_appeared": 3,
+          "excerpt": "A collection of agent skills that teach Claude Code, Codex, and OpenCode how to read and write Obsidian-specific formats — Markdown with wikilinks, Bases `.base` files, JSON Canvas, and vault CLI operations."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 82169,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a skill/prompt layer for AI coding agents (Claude Code, Cursor, and 19 others) that enforces a YAGNI-first style — steering the agent to reach for native browser APIs and built-ins before installing dependencies or writing boilerplate."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 51482,
+          "days_appeared": 6,
+          "excerpt": "ECC is an agent harness configuration system that layers skills, memory, security (via `ecc-agentshield`), and research-first workflows on top of AI coding agents like Claude Code, Codex, and Cursor."
+        },
+        {
+          "full_name": "cathrynlavery/diagram-design",
+          "total_stars_gained": 39719,
+          "days_appeared": 6,
+          "excerpt": "Diagram Design is a Claude Code skill that generates 39 editorial diagram types (architecture, flowchart, Sankey, Wardley map, UML class, and more) as self-contained HTML + SVG with no build step, no Mermaid defaults, and no external dependencies."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 33997,
+          "days_appeared": 6,
+          "excerpt": "Orca is a desktop/mobile ADE that runs multiple coding agents (Codex, Claude Code, OpenCode, Pi) simultaneously, each isolated in its own git worktree, tracked from a single UI."
+        },
+        {
+          "full_name": "blader/humanizer",
+          "total_stars_gained": 32927,
+          "days_appeared": 6,
+          "excerpt": "Humanizer is an agent skill that rewrites AI-generated text by detecting 25 named patterns—staged phrasing, dramatic fragments, hollow emphasis—and replacing them with direct, human-sounding prose without altering facts."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant theme of 2026-W37 is discipline: the open-source community's most-starred work this week is not about making AI agents more powerful, but about making them more restrained and predictable. Ponytail, a JavaScript plugin that appeared every day of the week, steers coding agents toward the simplest possible solution rather than layering in dependencies — a direct response to the sprawl that unconstrained agents produce. ECC, similarly persistent, adds memory, security guardrails, and research-first instincts on top of agents like Claude Code and Cursor. Microsoft's MarkItDown — a document-to-Markdown converter optimized for LLM ingestion — signals how seriously enterprises are treating the \"data preparation\" layer as infrastructure, not an afterthought. The watch-item for the quarter: the gap between raw agent capability and production-readiness is closing fastest through behavioral constraint tooling, and teams that don't standardize agent configuration and guardrails now will retrofit that work under pressure later.",
+    "generalist": "The builder stack shifted noticeably toward **agent behavior shaping** this week. Two repos led both the open-source and skills charts simultaneously: **Ponytail** (a plugin that injects YAGNI-first constraints into Claude Code, Cursor, and similar tools, nudging agents to use a native `<input type=\"date\">` instead of pulling in a date-picker library) and **ECC** (a configuration harness that gives agents persistent memory, a security layer called `ecc-agentshield`, and research-first habits). These aren't model improvements — they're opinionated wrappers that change how existing agents decide and act. Also notable: **HyperFrames** from HeyGen opened a TypeScript framework that lets agents author and render MP4 video programmatically via Puppeteer and FFmpeg, with an MCP-compatible skill interface. That's a meaningful expansion of the agent action space beyond text and code.\n\nOn the skills side, **cathrynlavery/diagram-design** was the surprise: a Claude Code skill that can produce 39 distinct diagram types — Wardley maps, Sankey charts, UML class diagrams — as self-contained HTML/SVG with zero build steps or external dependencies. **Humanizer** rounds out the picture, offering a rewriting skill that identifies 25 specific AI prose patterns (staged phrasing, hollow emphasis, dramatic fragments) and replaces them with direct language — useful for any team publishing agent-drafted content.",
+    "statistician": "Both the open-source and skills editions tracked roughly 35 repos each, so the per-repo star averages are dominated by a handful of breakouts — Ponytail alone accounts for a substantial share of the ~115K and ~113K total stars gained in each edition, so treat aggregate totals as skewed rather than broad. The repos appearing all seven days (Ponytail, ECC, HyperFrames, MarkItDown on the OSS side; Ponytail and ECC on skills) represent genuine week-long sustained interest, not a single viral day; the high cross-edition overlap of 16 repos confirms that the same projects are resonating with both general and skills-focused audiences this week."
+  },
+  "email": {
+    "verdict": "Ponytail owned this week so completely that the more interesting question is what kept rising beneath it.",
+    "body": "[Ponytail](https://github.com/DietrichGebert/ponytail), a JavaScript plugin that injects a YAGNI-first constraint layer into AI coding agents (Claude Code, Cursor, and about nineteen others), sat at number one on both AI Tastemakers and Skill Tastemakers every single day this week except Thursday, when [obsidian-skills](https://github.com/kepano/obsidian-skills) briefly took the top spot. The idea is simple: before your agent reaches for a dependency, Ponytail pushes it toward whatever the platform already provides. The canonical example in the repo is swapping a flatpickr date picker for a native `<input type=\"date\">`. That is not a dramatic feature; it is discipline, and apparently a lot of engineers wanted it at the same time.\n\nWhat makes that interesting is what surged alongside it. [ECC](https://github.com/affaan-m/ECC) is an agent harness that wraps coding agents in persistent memory, security guardrails, and research-first behavioral defaults. [Diagram Design](https://github.com/cathrynlavery/diagram-design) generates 39 editorial diagram types as self-contained HTML and SVG with no build step and no external dependencies. [Humanizer](https://github.com/blader/humanizer) detects 25 named patterns in AI-generated text and rewrites them to sound less staged. [MarkItDown](https://github.com/microsoft/markitdown), Microsoft's library that converts PDFs, Office documents, images, and audio into Markdown for LLM ingestion, held the AI Tastemakers list all seven days.\n\nThe through-line is constraint. Not more capability; better behavior from what agents already do. Attention consolidated this week around tools that make agents cheaper to trust, not just more powerful to run."
+  },
+  "generated_at": "2026-09-13T17:01:39.116Z"
+}
