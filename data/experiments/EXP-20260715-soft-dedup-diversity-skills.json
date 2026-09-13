@@ -20,9 +20,7 @@
   "change": {
     "flags": {
       "DIGEST_SOFT_DEDUP_BRIEFINGS": "14",
-      "DIGEST_SOFT_DEDUP_PENALTY": "0.15",
-      "DIGEST_NARRATE_STRUCTURED_CONTEXT": "1",
-      "DIGEST_NARRATE_PONYTAIL": "1"
+      "DIGEST_SOFT_DEDUP_PENALTY": "0.15"
     }
   },
   "snapshots": [
@@ -33,24 +31,19 @@
         "end": "2026-09-12"
       },
       "metrics": {
-        "outbound_clicks": {
-          "_digest_runs": 14,
-          "_consecutive_day_overlap_pct": 70.0,
-          "_unique_repos": 33,
-          "_top10_slots": 140,
-          "_is_new_share_pct": 4.3,
-          "_aggregate": 0
-        },
         "pageviews_by_path": {
           "/ai-tastemakers/skills/briefings/2026-09-01.html": 2,
           "/ai-tastemakers/skills/": 2
+        },
+        "outbound_clicks": {
+          "_aggregate": 0
         }
       },
-      "source": "data/experiments/exports/EXP-20260715-soft-dedup-diversity-skills-baseline.csv + briefings/skills/*/digest.json"
+      "source": "data/experiments/exports/EXP-20260715-soft-dedup-diversity-skills-baseline.csv"
     }
   ],
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Treatment live 2026-09-13→2026-09-26. Baseline imported 2026-09-13: 14 Skills digests, 70.0% mean consecutive-day top-10 overlap, 33 unique repos / 140 slots, 4.3% is_new share; PostHog secondary (2 briefing pageviews, 0 outbound clicks). Flags on Skills digest command only; OSS defaults unchanged; ponytail narration flags remain on Skills. Backlog: RANK-2. Lab post: briefings/lab/posts/EXP-20260715-soft-dedup-diversity-skills.md."
+  "notes": "Treatment live 2026-09-13→2026-09-26. Baseline diversity from digest.json (not in PostHog snapshot): 14 Skills digests, 70.0% mean consecutive-day top-10 overlap, 33 unique repos / 140 slots, 4.3% is_new share. PostHog secondary: 2 briefing pageviews, 2 index pageviews, 0 outbound_repo_click (edition=skills). Flags on Skills digest command only; OSS defaults unchanged; ponytail narration flags remain on Skills. Backlog: RANK-2. Lab post: briefings/lab/posts/EXP-20260715-soft-dedup-diversity-skills.md."
 }
