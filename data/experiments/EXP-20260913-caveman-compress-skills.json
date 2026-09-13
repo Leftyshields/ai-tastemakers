@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260913-caveman-compress-skills",
+  "title": "Shorter enrichment context",
+  "reader_summary": "Compress web/HN enrichment text before Claude writes Skills blurbs, so we spend fewer tokens on fluff and keep the facts.",
+  "outcome_line": "Queued #3. Baseline planned 2026-10-25.",
+  "how_we_measure": "Primary: enrichment/input token cost and output tokens vs baseline. Must not drop rank-1 rubric pass rate or Why-now quality. PostHog secondary.",
+  "reader_glossary": [
+    {
+      "term": "Caveman",
+      "meaning": "A Claude Code skill (JuliusBrussee/caveman) and OmniRoute RTK+Caveman pattern: strip verbose prose in agent context; leave code, paths, and facts. We did not install Caveman. We compress Firecrawl/HN enrichment bundles before narration, not agent output."
+    }
+  ],
+  "hypothesis": "Compressing enrichment context before narration cuts input/output tokens without lowering rubric pass rate or Why-now quality.",
+  "change_summary": "Add DIGEST_ENRICH_COMPRESS=1 on Skills only (compress enrich bundles before narrate).",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-10-25",
+    "end": "2026-11-07"
+  },
+  "treatment_window": {
+    "start": "2026-11-08",
+    "end": "2026-11-21"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_ENRICH_COMPRESS": "1"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Queued #3 after humanizer polish. Distinct from Ponytail (output writing rules). Distinct from Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md."
+}

@@ -35,15 +35,19 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
-## Registered experiments (as of 2026-08-29)
+## Registered experiments (as of 2026-09-13)
 
 ### Active Lab queue
 
-Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep).
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup treatment runs through 2026-09-26; four narration/ranking experiments queued behind it.
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
 | 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **active** (treatment 2026-09-13 → 2026-09-26) |
+| 2 | EXP-20260913-humanizer-polish-skills | Skills digest | **draft** (queued; baseline 2026-09-27) |
+| 3 | EXP-20260913-caveman-compress-skills | Skills digest | **draft** (queued; baseline 2026-10-25) |
+| 4 | EXP-20260913-whynow-memory-skills | Skills digest | **draft** (queued; baseline 2026-11-22) |
+| 5 | EXP-20260913-rank-bootstrap-skills | Skills digest | **draft** (queued; baseline 2026-12-20) |
 | — | EXP-20260802-ponytail-narration-skills | Skills digest | **complete** (keep) |
 | — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
@@ -147,6 +151,97 @@ npm run digest -- --edition skills
 **Lab writeup:** [briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md](../briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md)
 
 **Backlog:** [NARR-1](./PRODUCT_BACKLOG.md)
+
+---
+
+### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **draft / queued #2**
+
+Queued behind soft-dedup. Baseline starts the day after soft-dedup treatment ends.
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-09-27** → **2026-10-10** |
+| Treatment | **2026-10-11** → **2026-10-24** |
+
+**Hypothesis:** A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.
+
+**Treatment flags (Skills digest command only):**
+
+- `DIGEST_HUMANIZER_POLISH=1`
+
+**Primary metrics:** Editorial rubric (specificity, why-now, accuracy) plus human-sounding spot-check. Token log secondary. Do not gate on PostHog CTR.
+
+**Lab writeup:** [briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md](../briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md)
+
+**Backlog:** [NARR-2](./PRODUCT_BACKLOG.md)
+
+---
+
+### EXP-20260913-caveman-compress-skills (Caveman enrichment compression) — **draft / queued #3**
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-10-25** → **2026-11-07** |
+| Treatment | **2026-11-08** → **2026-11-21** |
+
+**Hypothesis:** Compressing enrichment context before narration cuts input/output tokens without lowering rubric pass rate or Why-now quality.
+
+**Treatment flags (Skills digest command only):**
+
+- `DIGEST_ENRICH_COMPRESS=1`
+
+Requires Firecrawl enrich still on. Distinct from Ponytail (output rules) and Humanizer (post-polish).
+
+**Primary metrics:** Enrichment/input token cost and output tokens vs baseline; rank-1 rubric pass rate; Why-now quality. PostHog secondary.
+
+**Lab writeup:** [briefings/lab/posts/EXP-20260913-caveman-compress-skills.md](../briefings/lab/posts/EXP-20260913-caveman-compress-skills.md)
+
+**Backlog:** [ENRICH-3](./PRODUCT_BACKLOG.md)
+
+---
+
+### EXP-20260913-whynow-memory-skills (Why-now cross-digest memory) — **draft / queued #4**
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-11-22** → **2026-12-05** |
+| Treatment | **2026-12-06** → **2026-12-19** |
+
+**Hypothesis:** Feeding prior Skills brief Why-now lines for repeat repos reduces repeated hooks and raises Why-now uniqueness without hurting accuracy.
+
+**Treatment flags (Skills digest command only):**
+
+- `DIGEST_WHYNOW_MEMORY=1`
+- `DIGEST_WHYNOW_MEMORY_BRIEFINGS=7`
+
+Complements soft-dedup (ranking) with narration memory. Inspired by Hermes/ECC agent memory habits.
+
+**Primary metrics:** Why-now uniqueness for repeat repos (lexical overlap with prior briefs); why-now rubric score.
+
+**Lab writeup:** [briefings/lab/posts/EXP-20260913-whynow-memory-skills.md](../briefings/lab/posts/EXP-20260913-whynow-memory-skills.md)
+
+**Backlog:** [NARR-3](./PRODUCT_BACKLOG.md)
+
+---
+
+### EXP-20260913-rank-bootstrap-skills (RANK-1 ranking/bootstrap tune) — **draft / queued #5**
+
+| Window | Dates (PT) |
+|--------|------------|
+| Baseline | **2026-12-20** → **2027-01-02** |
+| Treatment | **2027-01-03** → **2027-01-16** |
+
+**Hypothesis:** Tightening bootstrap / max-stars guards improves list quality and day-over-day stability without hiding real momentum picks.
+
+**Treatment flags (Skills digest command only; confirm values after baseline review):**
+
+- `DIGEST_SKILLS_MAX_STARS_BOOTSTRAP` — placeholder `20000` in experiment JSON (default today 25000)
+
+**Primary metrics:** Ranking stability (day-over-day top-10 overlap during bootstrap-like periods); fewer junk/mega-repo swings from `digest.json`. PostHog secondary.
+
+**Lab writeup:** [briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md](../briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md)
+
+**Backlog:** [RANK-1](./PRODUCT_BACKLOG.md)
 
 ---
 

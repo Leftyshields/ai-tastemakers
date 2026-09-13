@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260913-rank-bootstrap-skills",
+  "title": "Smarter early ranking",
+  "reader_summary": "Tune how we rank Skills repos when 7-day star history is thin, so bootstrap weeks look less noisy.",
+  "outcome_line": "Queued #5 (backlog RANK-1). Baseline planned 2026-12-20.",
+  "how_we_measure": "Primary: ranking stability (day-over-day overlap of top 10 during bootstrap-like periods), fewer obvious junk/mega-repo swings. Use digest.json; PostHog secondary.",
+  "reader_glossary": [],
+  "hypothesis": "Tightening bootstrap / max-stars guards improves list quality and day-over-day stability without hiding real momentum picks.",
+  "change_summary": "Tune Skills ranking bootstrap knobs (DIGEST_SKILLS_MAX_STARS_BOOTSTRAP and related filters) — exact values fixed at treatment start after baseline review.",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-12-20",
+    "end": "2027-01-02"
+  },
+  "treatment_window": {
+    "start": "2027-01-03",
+    "end": "2027-01-16"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_SKILLS_MAX_STARS_BOOTSTRAP": "20000"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Queued #5. Product backlog RANK-1. Placeholder bootstrap cap 20000 (production default today 25000 in .env.example); confirm tighter/looser value after baseline digest.json review at treatment start. Lab post: briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md."
+}

@@ -187,13 +187,24 @@ Manual run: Actions → **Experiment Reminders** → Run workflow (optional `dat
 
 | Date (PT) | Experiment | Milestone |
 |-----------|------------|-----------|
-| 2026-07-11 | EXP-20260628-web-enrich-skills | Baseline ends → import snapshot |
-| 2026-07-12 | EXP-20260628-web-enrich-skills | Treatment starts → enable enrich flags in GHA |
-| 2026-07-18 | EXP-20260628-web-enrich-skills | Closed — verdict recorded; enrich kept on |
-| 2026-08-01 | EXP-20260701-landing-layout + EXP-20260716-firecrawl-enrich-skills | Shipped to production; archived from Lab queue |
-| 2026-08-16 | EXP-20260802-ponytail-narration-skills | Treatment start — flags on for next Skills digest (2026-08-16 published as control) |
-| 2026-08-29 | EXP-20260802-ponytail-narration-skills | Treatment ends → token compare + verdict |
-| 2026-08-30 | EXP-20260715-soft-dedup-diversity-skills | Queued baseline start (still draft until ponytail verdict) |
+| 2026-09-13 | EXP-20260715-soft-dedup-diversity-skills | Treatment starts → soft-dedup flags on Skills digest |
+| 2026-09-26 | EXP-20260715-soft-dedup-diversity-skills | Treatment ends → import snapshot + verdict |
+| 2026-09-27 | EXP-20260913-humanizer-polish-skills | Queued baseline start (draft until soft-dedup closes) |
+| 2026-10-10 | EXP-20260913-humanizer-polish-skills | Baseline ends → import snapshot |
+| 2026-10-11 | EXP-20260913-humanizer-polish-skills | Treatment starts → `DIGEST_HUMANIZER_POLISH=1` on Skills command |
+| 2026-10-24 | EXP-20260913-humanizer-polish-skills | Treatment ends → verdict |
+| 2026-10-25 | EXP-20260913-caveman-compress-skills | Queued baseline start |
+| 2026-11-07 | EXP-20260913-caveman-compress-skills | Baseline ends → import snapshot |
+| 2026-11-08 | EXP-20260913-caveman-compress-skills | Treatment starts → `DIGEST_ENRICH_COMPRESS=1` on Skills command |
+| 2026-11-21 | EXP-20260913-caveman-compress-skills | Treatment ends → verdict |
+| 2026-11-22 | EXP-20260913-whynow-memory-skills | Queued baseline start |
+| 2026-12-05 | EXP-20260913-whynow-memory-skills | Baseline ends → import snapshot |
+| 2026-12-06 | EXP-20260913-whynow-memory-skills | Treatment starts → Why-now memory flags on Skills command |
+| 2026-12-19 | EXP-20260913-whynow-memory-skills | Treatment ends → verdict |
+| 2026-12-20 | EXP-20260913-rank-bootstrap-skills | Queued baseline start (RANK-1) |
+| 2027-01-02 | EXP-20260913-rank-bootstrap-skills | Baseline ends → import snapshot + confirm bootstrap caps |
+| 2027-01-03 | EXP-20260913-rank-bootstrap-skills | Treatment starts → tuned `DIGEST_SKILLS_MAX_STARS_BOOTSTRAP` on Skills command |
+| 2027-01-16 | EXP-20260913-rank-bootstrap-skills | Treatment ends → verdict |
 
 **Bot push rejected:** If commit step fails with `Changes must be made through a pull request`, add **GitHub Actions** (or `github-actions[bot]`) to the ruleset bypass list on `main` — see [GITHUB_SETTINGS.md](GITHUB_SETTINGS.md).
 

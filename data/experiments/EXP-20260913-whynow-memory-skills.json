@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260913-whynow-memory-skills",
+  "title": "Fresher Why-now on repeats",
+  "reader_summary": "When a Skills repo repeats, remember what we already said so Why-now does not remix the same hook.",
+  "outcome_line": "Queued #4. Baseline planned 2026-11-22.",
+  "how_we_measure": "Primary: Why-now uniqueness for repeat repos (lexical overlap with prior Skills briefs) and why-now rubric score. Complements soft-dedup (ranking) with narration memory.",
+  "reader_glossary": [
+    {
+      "term": "Hermes / ECC memory",
+      "meaning": "Agent memory habits from NousResearch/hermes-agent and affaan-m/ECC: carry prior session facts forward so the model does not repeat itself. We feed prior brief Why-now lines for the same repo into the Skills narrator; we do not run Hermes or ECC."
+    }
+  ],
+  "hypothesis": "Feeding prior Skills brief Why-now lines for repeat repos reduces repeated hooks and raises Why-now uniqueness without hurting accuracy.",
+  "change_summary": "Add DIGEST_WHYNOW_MEMORY=1 and DIGEST_WHYNOW_MEMORY_BRIEFINGS=7 on Skills only.",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-11-22",
+    "end": "2026-12-05"
+  },
+  "treatment_window": {
+    "start": "2026-12-06",
+    "end": "2026-12-19"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_WHYNOW_MEMORY": "1",
+      "DIGEST_WHYNOW_MEMORY_BRIEFINGS": "7"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Queued #4. Inspired by NousResearch/hermes-agent and affaan-m/ECC appearances on the Skills list. Complements soft-dedup (ranking diversity) with narration memory. Lab post: briefings/lab/posts/EXP-20260913-whynow-memory-skills.md."
+}

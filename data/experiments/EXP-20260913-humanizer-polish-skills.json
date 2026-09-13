@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "id": "EXP-20260913-humanizer-polish-skills",
+  "title": "Less AI-sounding Skills briefs",
+  "reader_summary": "After Claude writes a Skills blurb, apply a light polish that strips common AI-writing tells without changing facts.",
+  "outcome_line": "Queued behind soft-dedup. Baseline planned 2026-09-27.",
+  "how_we_measure": "Editorial rubric (specificity, why-now, accuracy) plus a short human-sounding spot-check. Token log is secondary (expect a small cost bump). Do not gate on PostHog CTR.",
+  "reader_glossary": [
+    {
+      "term": "Humanizer",
+      "meaning": "A Claude Code skill (blader/humanizer) that detects named AI-writing patterns and rewrites prose without inventing facts. We did not install it. We copied the habit: one post-narration polish pass on Skills blurbs to strip filler and stock phrases while keeping README-grounded facts intact."
+    }
+  ],
+  "hypothesis": "A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.",
+  "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on Skills digest command only (post-narrate polish pass).",
+  "status": "draft",
+  "edition": "skills",
+  "baseline_window": {
+    "start": "2026-09-27",
+    "end": "2026-10-10"
+  },
+  "treatment_window": {
+    "start": "2026-10-11",
+    "end": "2026-10-24"
+  },
+  "change": {
+    "flags": {
+      "DIGEST_HUMANIZER_POLISH": "1"
+    }
+  },
+  "snapshots": [],
+  "shadow_runs": [],
+  "verdict": "",
+  "keep_change": null,
+  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer on Skills digests. Implement polish at treatment start; until then keep draft. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md."
+}
