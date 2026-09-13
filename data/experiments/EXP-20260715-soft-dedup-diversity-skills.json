@@ -3,10 +3,10 @@
   "id": "EXP-20260715-soft-dedup-diversity-skills",
   "title": "Less-repeated Skills picks",
   "reader_summary": "Remember more of the recent Skills list and penalize repeats harder, so more unique repos show up week to week.",
-  "outcome_line": "Baseline snapshot imported (sparse PostHog). Treatment starts 2026-09-13.",
+  "outcome_line": "Treatment live from 2026-09-13 (soft-dedup flags on Skills digest).",
   "hypothesis": "Stronger soft-dedup (14-day window, 0.15 penalty) reduces consecutive-day list overlap and raises weekly unique / NEW share on Skills digests, while still ranking by 7-day momentum so the list stays about discovery of real activity.",
   "change_summary": "Tighten soft-dedup for Skills digests only: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 (defaults today: 5 and 0.5).",
-  "status": "baseline",
+  "status": "active",
   "edition": "skills",
   "baseline_window": {
     "start": "2026-08-30",
@@ -44,5 +44,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Baseline PostHog snapshot imported 2026-09-12 PT: 2 Skills briefing pageviews (2026-09-01 only), 2 Skills index pageviews, 0 outbound_repo_click with edition=skills (one OSS outbound_repo_click existed in window, excluded). Traffic sparse; secondary only. Primary keep/revert gate remains structural diversity from digest.json. Treatment 2026-09-13 to 2026-09-26: enable DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on Skills digest command only. Backlog: RANK-2."
+  "notes": "Baseline PostHog snapshot imported 2026-09-12 PT: 2 Skills briefing pageviews (2026-09-01 only), 2 Skills index pageviews, 0 outbound_repo_click with edition=skills (one OSS outbound_repo_click existed in window, excluded). Traffic sparse; secondary only. Primary keep/revert gate remains structural diversity from digest.json. Treatment 2026-09-13 to 2026-09-26: enable DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on Skills digest command only. Backlog: RANK-2. Treatment started 2026-09-13: soft-dedup flags (DIGEST_SOFT_DEDUP_BRIEFINGS=14, DIGEST_SOFT_DEDUP_PENALTY=0.15) now on Skills digest command; OSS defaults unchanged; ponytail narration flags (DIGEST_NARRATE_STRUCTURED_CONTEXT, DIGEST_NARRATE_PONYTAIL) remain on Skills."
 }
