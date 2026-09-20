@@ -1,0 +1,211 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W38",
+  "week_start": "2026-09-14",
+  "week_end": "2026-09-20",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 33,
+      "skills": 49
+    },
+    "total_stars_gained": {
+      "oss": 100503,
+      "skills": 84722
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "llm",
+        "claude",
+        "ai-agents",
+        "mcp"
+      ],
+      "skills": [
+        "claude-code",
+        "claude",
+        "codex",
+        "ai-agents",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "Tencent/WeKnora",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "miuuyy/codex-chatgpt-web",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "asgeirtj/system_prompts_leaks",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "blader/humanizer",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "microsoft/markitdown",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "nextlevelbuilder/ui-ux-pro-max-skill",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DietrichGebert/ponytail",
+      "Panniantong/Agent-Reach",
+      "addyosmani/agent-skills",
+      "affaan-m/ECC",
+      "blader/humanizer",
+      "calesthio/OpenMontage",
+      "diegosouzapw/OmniRoute",
+      "kepano/obsidian-skills"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 47272,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript plugin for AI coding agents (Claude Code, Cursor, etc.) that injects a \"lazy senior dev\" heuristic — steering the agent to delete or skip code rather than over-build, reportedly cutting generated code volume by ~54% on average across real agentic sessions."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 38925,
+          "days_appeared": 7,
+          "excerpt": "ECC is an agent harness configuration layer that adds persistent memory, security (AgentShield), and cross-tool CLAUDE.md-style instinct files to AI coding agents like Claude Code, Codex, Cursor, and Opencode."
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "total_stars_gained": 33196,
+          "days_appeared": 4,
+          "excerpt": "A collection of agent skills that teach AI coding assistants (Claude Code, Codex, OpenCode) to read and write Obsidian-specific formats — Markdown with wikilinks, Bases, JSON Canvas, and CLI interactions — following the emerging Agent Skills specification."
+        },
+        {
+          "full_name": "Tencent/WeKnora",
+          "total_stars_gained": 20841,
+          "days_appeared": 5,
+          "excerpt": "WeKnora is a Go-based, self-hostable knowledge platform that ingests documents from 10+ sources (Notion, GitLab, Feishu, etc.), exposes them via RAG Q&A and a ReAct agent, and auto-generates a self-maintaining interlinked markdown Wiki with revision history and rollback."
+        },
+        {
+          "full_name": "diegosouzapw/OmniRoute",
+          "total_stars_gained": 20252,
+          "days_appeared": 6,
+          "excerpt": "OmniRoute is a self-hosted TypeScript gateway that exposes a single OpenAI-compatible endpoint routing across 352 AI providers (150+ free tiers), with quota-aware auto-fallback and RTK+Caveman token compression claiming 15–95% token savings."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 47264,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a skill/prompt layer for AI coding agents (Claude Code, Cursor, and 20 others) that enforces YAGNI discipline — replacing verbose, over-engineered output with the minimal code that actually solves the task."
+        },
+        {
+          "full_name": "kepano/obsidian-skills",
+          "total_stars_gained": 33196,
+          "days_appeared": 4,
+          "excerpt": "A collection of Agent Skills–spec–compliant skill files that teach Claude Code, Codex, or OpenCode how to read and write Obsidian-native formats — Markdown with wikilinks, Bases, JSON Canvas, and CLI commands."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 28158,
+          "days_appeared": 5,
+          "excerpt": "ECC is an agent harness layer that adds skills, memory, security (via `ecc-agentshield`), and research-first workflows on top of Claude Code, Codex, Opencode, and Cursor."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 26933,
+          "days_appeared": 5,
+          "excerpt": "Orca is a desktop/mobile orchestration layer that runs Codex, Claude Code, OpenCode, or Pi in parallel git worktrees — letting you fan one prompt across multiple agents, compare outputs, and merge the winner."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 11465,
+          "days_appeared": 3,
+          "excerpt": "Agent Reach is a Python CLI that gives AI agents (Claude, Cursor, etc.) read and search access to Twitter, Reddit, YouTube, Bilibili, XiaoHongShu, GitHub, and the web via MCP — no API keys or paid accounts required."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "AI coding agents are rapidly accumulating a support ecosystem of configuration layers, routing infrastructure, and domain-specific skill packs — meaning the agent itself is increasingly just one component in a larger stack your teams will need to manage. The breakout project this week, Ponytail, is a discipline plug-in that steers coding agents toward deleting or skipping code rather than over-building, a direct response to a well-documented cost and quality problem with agentic code generation. ECC pairs well with it: it adds persistent memory, security guardrails, and shared instruction files across whichever agent tools your developers are already using. On the infrastructure side, OmniRoute — a self-hosted gateway routing across hundreds of AI providers with automatic fallback — signals that teams are starting to treat model access as a reliability problem, not just a vendor choice. Watch whether agent skill standardization (the emerging \"Agent Skills spec\") becomes a coordination layer teams adopt the way they adopted shared linting rules — if it does, the skills repositories trending this week are early templates worth evaluating.",
+    "generalist": "The dominant theme of W38 is the maturing agent toolchain: the raw models are being wrapped in increasingly opinionated configuration and orchestration layers, and those wrappers are what developers are actually starring and sharing.\n\n**Ponytail** grabbed the most attention — it's a prompt/plugin layer that instills YAGNI (\"you aren't gonna need it\") discipline into Claude Code, Cursor, and similar tools, pushing agents toward smaller, more surgical edits. **ECC** complements it by acting as a harness layer that wires persistent memory, a security module, and cross-tool instruction files across multiple agent environments simultaneously. **kepano/obsidian-skills** is a tidy example of the emerging Agent Skills specification in practice: it teaches coding agents how to correctly read and write Obsidian's native formats (wikilinks, JSON Canvas, Bases), and its appearance in both the OSS and Skills charts suggests the spec is gaining real traction as a distribution format. **Orca** by StablyAI takes a different angle — parallel execution: it fans a single prompt across Codex, Claude Code, and others in separate git worktrees so you can compare outputs and merge the best result. Rounding things out, **WeKnora** from Tencent is a self-hostable knowledge platform that ingests from a dozen sources and auto-generates a self-maintaining wiki via a ReAct agent — enterprise-flavored RAG infrastructure for teams that can't (or won't) send documents to a third-party SaaS.",
+    "statistician": "Both the OSS and Skills editions this week rank purely on seven-day star delta, so a project that appeared all seven days and sustained momentum — like Ponytail and ECC — will naturally dominate the totals over newer entrants that spiked on a single day. The cross-edition overlap list (eight repos appearing in both) is the more reliable signal of genuine, broad interest rather than audience-specific virality. Star totals here reflect cumulative gains across the week, not single-day peaks, so a mid-week launch with a strong tail can outscore a launch-day spike that faded quickly."
+  },
+  "email": {
+    "verdict": "Coding agents stopped being something you configure once and forget; this week, engineers started treating them like junior developers who need rules, memory, and the occasional reminder not to over-engineer everything.",
+    "body": "The story of the week started Monday, when [obsidian-skills](https://github.com/kepano/obsidian-skills), a collection of skill files that teach Claude Code, Codex, and OpenCode how to read and write Obsidian's native formats (wikilinks, JSON Canvas, Bases, CLI interactions), led both AI Tastemakers, the daily list of open-source AI tools, and Skill Tastemakers, the daily list of skills you install on an agent, for four consecutive days. That kind of sustained lock on both lists at once is unusual, and it signals something specific: people are not just running agents on generic tasks anymore; they are building agents into their actual workflows, and those workflows have opinions about file formats.\n\nBy Thursday, [Ponytail](https://github.com/DietrichGebert/ponytail), a JavaScript plugin for coding agents like Claude Code and Cursor that enforces a \"lazy senior dev\" heuristic steering the agent toward deleting or skipping code rather than over-building, took the top spot on both lists. It held all seven days on AI Tastemakers. The attention makes sense: bloated agent output is a real, daily tax, and Ponytail addresses it at the behavioral layer rather than by prompting around it.\n\nClosing the week, [ECC](https://github.com/affaan-m/ECC), a configuration harness that adds persistent memory, security, and cross-tool instruction files to coding agents, led Saturday on both lists. Together, these three repos point at the same thing: the coding agent layer is maturing from raw capability into something people want to govern. Attention this week concentrated almost entirely on what agents do by default and how to change it, which suggests that infrastructure for shaping agent behavior is now where the interesting engineering problems live."
+  },
+  "generated_at": "2026-09-20T16:50:10.817Z"
+}
