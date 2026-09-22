@@ -49,3 +49,4 @@
 {"scored_at":"2026-09-19T16:31:26.149Z","edition":"skills","date":"2026-09-19","full_name":"DietrichGebert/ponytail","scores":{"accuracy":4,"specificity":5,"why_now":5,"build_with_it":4,"noise":4,"comment":"All three sections present."},"pass":true}
 {"scored_at":"2026-09-20T16:50:10.072Z","edition":"skills","date":"2026-09-20","full_name":"affaan-m/ECC","scores":{"accuracy":4,"specificity":5,"why_now":5,"build_with_it":4,"noise":4,"comment":"All three sections present."},"pass":true}
 {"scored_at":"2026-09-21T18:44:09.033Z","edition":"skills","date":"2026-09-21","full_name":"affaan-m/ECC","scores":{"accuracy":4,"specificity":5,"why_now":5,"build_with_it":4,"noise":4,"comment":"All three sections present."},"pass":true}
+{"scored_at":"2026-09-22T17:41:09.062Z","edition":"skills","date":"2026-09-22","full_name":"herdrdev/herdr","scores":{"accuracy":4,"specificity":5,"why_now":3,"build_with_it":4,"noise":4,"comment":"All three sections present."},"pass":true}
