@@ -116,8 +116,8 @@ jobs:
           DIGEST_SOFT_DEDUP_BRIEFINGS=14 \
           DIGEST_SOFT_DEDUP_PENALTY=0.15 \
           npm run digest -- --edition oss
-          # Skills edition (same kept flags).
-          EXPERIMENT_ID=EXP-20260715-soft-dedup-diversity-skills \
+          # Skills edition (same kept flags). Humanizer baseline 2026-09-27 to 2026-10-10: no DIGEST_HUMANIZER_POLISH yet.
+          EXPERIMENT_ID=EXP-20260913-humanizer-polish-skills \
           DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
           DIGEST_NARRATE_PONYTAIL=1 \
           DIGEST_SOFT_DEDUP_BRIEFINGS=14 \
