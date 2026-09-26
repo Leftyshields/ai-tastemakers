@@ -242,7 +242,7 @@ export async function buildExperimentTokenRows(
       const w = window === "baseline" ? exp.baseline_window : exp.treatment_window;
       const matched = production.filter(
         (e) =>
-          e.edition === exp.edition &&
+          (exp.edition === "both" || e.edition === exp.edition) &&
           dateInWindow(e.date, w.start, w.end) &&
           (exp.edition !== "skills" || e.flags.enrich_web === (exp.change.flags.DIGEST_ENRICH_WEB === "1")),
       );

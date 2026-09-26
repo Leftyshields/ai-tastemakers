@@ -12,9 +12,9 @@
     }
   ],
   "hypothesis": "Feeding prior Skills brief Why-now lines for repeat repos reduces repeated hooks and raises Why-now uniqueness without hurting accuracy.",
-  "change_summary": "Add DIGEST_WHYNOW_MEMORY=1 and DIGEST_WHYNOW_MEMORY_BRIEFINGS=7 on Skills only.",
+  "change_summary": "Add DIGEST_WHYNOW_MEMORY=1 and DIGEST_WHYNOW_MEMORY_BRIEFINGS=7 on both the OSS and Skills digest commands.",
   "status": "draft",
-  "edition": "skills",
+  "edition": "both",
   "baseline_window": {
     "start": "2026-11-22",
     "end": "2026-12-05"
@@ -33,5 +33,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #4. Inspired by NousResearch/hermes-agent and affaan-m/ECC appearances on the Skills list. Complements soft-dedup (ranking diversity) with narration memory. Lab post: briefings/lab/posts/EXP-20260913-whynow-memory-skills.md."
+  "notes": "Queued #4. Inspired by NousResearch/hermes-agent and affaan-m/ECC appearances on the Skills list. Complements soft-dedup (ranking diversity) with narration memory. Lab post: briefings/lab/posts/EXP-20260913-whynow-memory-skills.md. 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity)."
 }

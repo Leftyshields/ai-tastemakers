@@ -12,9 +12,9 @@
     }
   ],
   "hypothesis": "Compressing enrichment context before narration cuts input/output tokens without lowering rubric pass rate or Why-now quality.",
-  "change_summary": "Add DIGEST_ENRICH_COMPRESS=1 on Skills only (compress enrich bundles before narrate).",
+  "change_summary": "Add DIGEST_ENRICH_COMPRESS=1 on both the OSS and Skills digest commands (compress enrich bundles before narrate).",
   "status": "draft",
-  "edition": "skills",
+  "edition": "both",
   "baseline_window": {
     "start": "2026-10-25",
     "end": "2026-11-07"
@@ -32,5 +32,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #3 after humanizer polish. Distinct from Ponytail (output writing rules). Distinct from Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md."
+  "notes": "Queued #3 after humanizer polish. Distinct from Ponytail (output writing rules). Distinct from Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md. 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity)."
 }

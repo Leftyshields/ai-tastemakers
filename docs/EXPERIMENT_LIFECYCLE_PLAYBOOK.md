@@ -44,10 +44,10 @@ Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
 | 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **complete** (keep; closed 2026-09-26) |
-| 2 | EXP-20260913-humanizer-polish-skills | Skills digest | **baseline** (2026-09-27 to 2026-10-10) (queued; baseline 2026-09-27) |
-| 3 | EXP-20260913-caveman-compress-skills | Skills digest | **draft** (queued; baseline 2026-10-25) |
-| 4 | EXP-20260913-whynow-memory-skills | Skills digest | **draft** (queued; baseline 2026-11-22) |
-| 5 | EXP-20260913-rank-bootstrap-skills | Skills digest | **draft** (queued; baseline 2026-12-20) |
+| 2 | EXP-20260913-humanizer-polish-skills | Both digests | **baseline** (2026-09-27 to 2026-10-10) |
+| 3 | EXP-20260913-caveman-compress-skills | Both digests | **draft** (queued; baseline 2026-10-25) |
+| 4 | EXP-20260913-whynow-memory-skills | Both digests | **draft** (queued; baseline 2026-11-22) |
+| 5 | EXP-20260913-rank-bootstrap-skills | Both digests | **draft** (queued; baseline 2026-12-20) |
 | — | EXP-20260802-ponytail-narration-skills | Skills digest | **complete** (keep) |
 | — | EXP-20260628-web-enrich-skills | Skills digest | **complete** (keep) |
 
@@ -165,7 +165,7 @@ Baseline prepped 2026-09-26: `EXPERIMENT_ID` on the Skills digest command now po
 
 **Hypothesis:** A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.
 
-**Treatment flags (Skills digest command only):**
+**Treatment flags (both OSS and Skills digest commands):**
 
 - `DIGEST_HUMANIZER_POLISH=1`
 
@@ -186,7 +186,7 @@ Baseline prepped 2026-09-26: `EXPERIMENT_ID` on the Skills digest command now po
 
 **Hypothesis:** Compressing enrichment context before narration cuts input/output tokens without lowering rubric pass rate or Why-now quality.
 
-**Treatment flags (Skills digest command only):**
+**Treatment flags (both OSS and Skills digest commands):**
 
 - `DIGEST_ENRICH_COMPRESS=1`
 
@@ -209,7 +209,7 @@ Requires Firecrawl enrich still on. Distinct from Ponytail (output rules) and Hu
 
 **Hypothesis:** Feeding prior Skills brief Why-now lines for repeat repos reduces repeated hooks and raises Why-now uniqueness without hurting accuracy.
 
-**Treatment flags (Skills digest command only):**
+**Treatment flags (both OSS and Skills digest commands):**
 
 - `DIGEST_WHYNOW_MEMORY=1`
 - `DIGEST_WHYNOW_MEMORY_BRIEFINGS=7`
@@ -233,9 +233,10 @@ Complements soft-dedup (ranking) with narration memory. Inspired by Hermes/ECC a
 
 **Hypothesis:** Tightening bootstrap / max-stars guards improves list quality and day-over-day stability without hiding real momentum picks.
 
-**Treatment flags (Skills digest command only; confirm values after baseline review):**
+**Treatment flags (both digests; confirm values after baseline review):**
 
-- `DIGEST_SKILLS_MAX_STARS_BOOTSTRAP` — placeholder `20000` in experiment JSON (default today 25000)
+- `DIGEST_SKILLS_MAX_STARS_BOOTSTRAP` (Skills) — placeholder `20000` in experiment JSON (default today 25000)
+- `DIGEST_MAX_STARS_BOOTSTRAP` (OSS) — value TBD from the OSS baseline
 
 **Primary metrics:** Ranking stability (day-over-day top-10 overlap during bootstrap-like periods); fewer junk/mega-repo swings from `digest.json`. PostHog secondary.
 
@@ -414,6 +415,8 @@ Pushing experiment JSON triggers **Deploy GitHub Pages** (see `pages.yml` paths)
    "status": "complete"
    ```
    Use `"keep_change": false` if reverting.
+_Experiments from 2026-09-26 on run on both the OSS and Skills digests by default (`"edition": "both"`), with `EXPERIMENT_ID` and treatment flags on both commands._
+
 5. **If keeping:** apply the kept change to **both** the Skills and the non Skills (OSS / main repo) digest in `digest.yml`, even when the experiment only ran on one edition. Standing rule from Brian (2026-09-26); note any real reason a flag cannot apply to one side in the verdict.
 6. **If not keeping:** remove treatment flags (`digest.yml` env vars or `SITE_LANDING_LAYOUT_V2` variable), commit, redeploy.
 7. `npm run build:pages` → commit experiment JSON → push.

@@ -12,9 +12,9 @@
     }
   ],
   "hypothesis": "A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.",
-  "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on Skills digest command only (post-narrate polish pass).",
+  "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on both the OSS and Skills digest commands (post-narrate polish pass).",
   "status": "baseline",
-  "edition": "skills",
+  "edition": "both",
   "baseline_window": {
     "start": "2026-09-27",
     "end": "2026-10-10"
@@ -32,5 +32,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer on Skills digests. Implement polish at treatment start; until then keep draft. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md. Baseline prep 2026-09-26: EXPERIMENT_ID on Skills digest switched to this experiment. If kept, apply DIGEST_HUMANIZER_POLISH to both Skills and OSS digests (both lists rule)."
+  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer on Skills digests. Implement polish at treatment start; until then keep draft. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md. Baseline prep 2026-09-26: EXPERIMENT_ID on Skills digest switched to this experiment. If kept, apply DIGEST_HUMANIZER_POLISH to both Skills and OSS digests (both lists rule). 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity)."
 }

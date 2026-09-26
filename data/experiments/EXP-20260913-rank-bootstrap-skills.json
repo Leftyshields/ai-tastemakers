@@ -7,9 +7,9 @@
   "how_we_measure": "Primary: ranking stability (day-over-day overlap of top 10 during bootstrap-like periods), fewer obvious junk/mega-repo swings. Use digest.json; PostHog secondary.",
   "reader_glossary": [],
   "hypothesis": "Tightening bootstrap / max-stars guards improves list quality and day-over-day stability without hiding real momentum picks.",
-  "change_summary": "Tune Skills ranking bootstrap knobs (DIGEST_SKILLS_MAX_STARS_BOOTSTRAP and related filters) — exact values fixed at treatment start after baseline review.",
+  "change_summary": "Tune ranking bootstrap knobs on both digests (DIGEST_SKILLS_MAX_STARS_BOOTSTRAP for Skills, DIGEST_MAX_STARS_BOOTSTRAP for OSS, and related filters). Exact values fixed at treatment start after baseline review; OSS value set separately from its own baseline.",
   "status": "draft",
-  "edition": "skills",
+  "edition": "both",
   "baseline_window": {
     "start": "2026-12-20",
     "end": "2027-01-02"
@@ -27,5 +27,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #5. Product backlog RANK-1. Placeholder bootstrap cap 20000 (production default today 25000 in .env.example); confirm tighter/looser value after baseline digest.json review at treatment start. Lab post: briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md."
+  "notes": "Queued #5. Product backlog RANK-1. Placeholder bootstrap cap 20000 (production default today 25000 in .env.example); confirm tighter/looser value after baseline digest.json review at treatment start. Lab post: briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md. 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity)."
 }
