@@ -39,11 +39,11 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ### Active Lab queue
 
-Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup treatment runs through 2026-09-26; four narration/ranking experiments queued behind it.
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup closed 2026-09-26 (keep); humanizer baseline starts 2026-09-27.
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
-| 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **active** (treatment 2026-09-13 → 2026-09-26) |
+| 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **complete** (keep; closed 2026-09-26) |
 | 2 | EXP-20260913-humanizer-polish-skills | Skills digest | **draft** (queued; baseline 2026-09-27) |
 | 3 | EXP-20260913-caveman-compress-skills | Skills digest | **draft** (queued; baseline 2026-10-25) |
 | 4 | EXP-20260913-whynow-memory-skills | Skills digest | **draft** (queued; baseline 2026-11-22) |
@@ -94,9 +94,9 @@ Archived: [data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json](.
 
 ---
 
-### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **active**
+### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **complete (keep)**
 
-Ponytail closed 2026-08-29 (keep). Baseline snapshot imported 2026-09-13; treatment flags on Skills digest command from 2026-09-13.
+Ponytail closed 2026-08-29 (keep). Baseline snapshot imported 2026-09-13; treatment closed 2026-09-26 with digest.json diversity (37.5% mean overlap vs 70% baseline). Soft-dedup flags **kept** on Skills digest command.
 
 | Window | Dates (PT) |
 |--------|------------|

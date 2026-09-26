@@ -1,0 +1,4 @@
+type,key,count
+pageview,_aggregate_skills_briefings,0
+pageview,/ai-tastemakers/skills/,0
+outbound_click,_aggregate,0
