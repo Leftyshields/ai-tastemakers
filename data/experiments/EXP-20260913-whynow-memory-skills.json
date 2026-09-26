@@ -12,7 +12,7 @@
     }
   ],
   "hypothesis": "Feeding prior Skills brief Why-now lines for repeat repos reduces repeated hooks and raises Why-now uniqueness without hurting accuracy.",
-  "change_summary": "Add DIGEST_WHYNOW_MEMORY=1 and DIGEST_WHYNOW_MEMORY_BRIEFINGS=7 on both the OSS (main) and Skills digest commands.",
+  "change_summary": "Add DIGEST_WHYNOW_MEMORY=1 and DIGEST_WHYNOW_MEMORY_BRIEFINGS=7 on both the OSS and Skills digest commands.",
   "status": "draft",
   "edition": "both",
   "baseline_window": {
