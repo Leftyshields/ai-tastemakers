@@ -99,7 +99,7 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-          # EXP-20260802-ponytail-narration-skills — kept on Skills (complete)
+          # EXP-20260802-ponytail-narration-skills — complete (keep); on both OSS and Skills
           # EXP-20260715-soft-dedup-diversity-skills — complete (keep); soft dedup on both OSS and Skills (kept results apply to both lists)
           DIGEST_ENRICH_WEB: "1"
           DIGEST_ENRICH_WEB_PROVIDER: "firecrawl"
@@ -110,11 +110,13 @@ jobs:
           DIGEST_QUALITY_RUBRIC: "1"
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
-          # Kept soft dedup (EXP-20260715) applies to both editions.
+          # Kept soft dedup (EXP-20260715) and Ponytail narration (EXP-20260802) apply to both editions.
+          DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
+          DIGEST_NARRATE_PONYTAIL=1 \
           DIGEST_SOFT_DEDUP_BRIEFINGS=14 \
           DIGEST_SOFT_DEDUP_PENALTY=0.15 \
           npm run digest -- --edition oss
-          # Ponytail narration flags remain (kept) on Skills.
+          # Skills edition (same kept flags).
           EXPERIMENT_ID=EXP-20260715-soft-dedup-diversity-skills \
           DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
           DIGEST_NARRATE_PONYTAIL=1 \
