@@ -3,7 +3,7 @@
   "id": "EXP-20260913-humanizer-polish-skills",
   "title": "Less AI-sounding Skills briefs",
   "reader_summary": "After Claude writes a Skills blurb, apply a light polish that strips common AI-writing tells without changing facts.",
-  "outcome_line": "Queued behind soft-dedup. Baseline planned 2026-09-27.",
+  "outcome_line": "Measuring before: baseline 2026-09-27 to 2026-10-10 on Skills. Treatment starts 2026-10-11.",
   "how_we_measure": "Editorial rubric (specificity, why-now, accuracy) plus a short human-sounding spot-check. Token log is secondary (expect a small cost bump). Do not gate on PostHog CTR.",
   "reader_glossary": [
     {
@@ -13,7 +13,7 @@
   ],
   "hypothesis": "A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.",
   "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on Skills digest command only (post-narrate polish pass).",
-  "status": "draft",
+  "status": "baseline",
   "edition": "skills",
   "baseline_window": {
     "start": "2026-09-27",
@@ -32,5 +32,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer on Skills digests. Implement polish at treatment start; until then keep draft. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md."
+  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer on Skills digests. Implement polish at treatment start; until then keep draft. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md. Baseline prep 2026-09-26: EXPERIMENT_ID on Skills digest switched to this experiment. If kept, apply DIGEST_HUMANIZER_POLISH to both Skills and OSS digests (both lists rule)."
 }
