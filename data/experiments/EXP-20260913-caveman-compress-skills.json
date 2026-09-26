@@ -12,7 +12,7 @@
     }
   ],
   "hypothesis": "Compressing enrichment context before narration cuts input/output tokens without lowering rubric pass rate or Why-now quality.",
-  "change_summary": "Add DIGEST_ENRICH_COMPRESS=1 on both the OSS (main) and Skills digest commands (compress enrich bundles before narrate).",
+  "change_summary": "Add DIGEST_ENRICH_COMPRESS=1 on both the OSS and Skills digest commands (compress enrich bundles before narrate).",
   "status": "draft",
   "edition": "both",
   "baseline_window": {
