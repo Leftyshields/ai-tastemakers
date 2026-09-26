@@ -44,7 +44,7 @@ Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
 | 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **complete** (keep; closed 2026-09-26) |
-| 2 | EXP-20260913-humanizer-polish-skills | Skills digest | **draft** (queued; baseline 2026-09-27) |
+| 2 | EXP-20260913-humanizer-polish-skills | Skills digest | **baseline** (2026-09-27 to 2026-10-10) (queued; baseline 2026-09-27) |
 | 3 | EXP-20260913-caveman-compress-skills | Skills digest | **draft** (queued; baseline 2026-10-25) |
 | 4 | EXP-20260913-whynow-memory-skills | Skills digest | **draft** (queued; baseline 2026-11-22) |
 | 5 | EXP-20260913-rank-bootstrap-skills | Skills digest | **draft** (queued; baseline 2026-12-20) |
@@ -154,9 +154,9 @@ npm run digest -- --edition skills
 
 ---
 
-### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **draft / queued #2**
+### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **baseline (active #1)**
 
-Queued behind soft-dedup. Baseline starts the day after soft-dedup treatment ends.
+Baseline prepped 2026-09-26: `EXPERIMENT_ID` on the Skills digest command now points here, with no polish flag. Treatment needs the `DIGEST_HUMANIZER_POLISH` pass implemented before 2026-10-11. If kept, apply to both Skills and OSS digests.
 
 | Window | Dates (PT) |
 |--------|------------|
