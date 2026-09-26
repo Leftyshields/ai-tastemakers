@@ -96,7 +96,7 @@ Archived: [data/experiments/archive/EXP-20260716-firecrawl-enrich-skills.json](.
 
 ### EXP-20260715-soft-dedup-diversity-skills (Skills soft-dedup diversity) — **complete (keep)**
 
-Ponytail closed 2026-08-29 (keep). Baseline snapshot imported 2026-09-13; treatment closed 2026-09-26 with digest.json diversity (37.5% mean overlap vs 70% baseline). Soft-dedup flags **kept** on Skills digest command.
+Ponytail closed 2026-08-29 (keep). Baseline snapshot imported 2026-09-13; treatment closed 2026-09-26 with digest.json diversity (37.5% mean overlap vs 70% baseline). Soft-dedup flags **kept** on Skills digest command and extended to the OSS (main repo) digest on 2026-09-26 per the both lists rule.
 
 | Window | Dates (PT) |
 |--------|------------|
@@ -414,8 +414,9 @@ Pushing experiment JSON triggers **Deploy GitHub Pages** (see `pages.yml` paths)
    "status": "complete"
    ```
    Use `"keep_change": false` if reverting.
-5. **If not keeping:** remove treatment flags (`digest.yml` env vars or `SITE_LANDING_LAYOUT_V2` variable), commit, redeploy.
-6. `npm run build:pages` → commit experiment JSON → push.
+5. **If keeping:** apply the kept change to **both** the Skills and the non Skills (OSS / main repo) digest in `digest.yml`, even when the experiment only ran on one edition. Standing rule from Brian (2026-09-26); note any real reason a flag cannot apply to one side in the verdict.
+6. **If not keeping:** remove treatment flags (`digest.yml` env vars or `SITE_LANDING_LAYOUT_V2` variable), commit, redeploy.
+7. `npm run build:pages` → commit experiment JSON → push.
 
 ---
 
