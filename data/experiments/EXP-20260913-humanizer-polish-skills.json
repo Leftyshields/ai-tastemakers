@@ -12,7 +12,7 @@
     }
   ],
   "hypothesis": "A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.",
-  "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on both the OSS (main) and Skills digest commands (post-narrate polish pass).",
+  "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on both the OSS and Skills digest commands (post-narrate polish pass).",
   "status": "baseline",
   "edition": "both",
   "baseline_window": {
