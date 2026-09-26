@@ -47,7 +47,7 @@ export function displayTitle(record: ExperimentRecord): string {
 export function editionLabel(edition: ExperimentEdition): string {
   if (edition === "skills") return "Skills digest";
   if (edition === "oss") return "OSS digest";
-  return "Site · both editions";
+  return "Both editions (OSS + Skills)";
 }
 
 export function statusLabel(
