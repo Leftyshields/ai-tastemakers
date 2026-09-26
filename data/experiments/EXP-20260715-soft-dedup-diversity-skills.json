@@ -3,11 +3,11 @@
   "id": "EXP-20260715-soft-dedup-diversity-skills",
   "title": "Less-repeated Skills picks",
   "reader_summary": "Remember more of the recent Skills list and penalize repeats harder, so more unique repos show up week to week.",
-  "outcome_line": "The change is on. Measuring list diversity through 2026-09-26.",
+  "outcome_line": "Kept. Treatment mean consecutive-day top-10 overlap was 37.5% (baseline 70%); 82 unique repos and 26.2% NEW share in top 10 over 13 digests.",
   "how_we_measure": "We compare consecutive-day top-10 overlap, unique repos per week, and NEW share in the top 10 from digest.json. Success bar: overlap down at least 15 percentage points vs the 70% baseline. PostHog clicks are secondary and sparse.",
   "hypothesis": "Stronger soft-dedup (14-day window, 0.15 penalty) reduces consecutive-day list overlap and raises weekly unique / NEW share on Skills digests, while still ranking by 7-day momentum so the list stays about discovery of real activity.",
   "change_summary": "Tighten soft-dedup for Skills digests only: DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 (defaults today: 5 and 0.5).",
-  "status": "active",
+  "status": "complete",
   "edition": "skills",
   "baseline_window": {
     "start": "2026-08-30",
@@ -31,6 +31,14 @@
         "end": "2026-09-12"
       },
       "metrics": {
+        "digest_diversity": {
+          "digest_count": 14,
+          "consecutive_day_pairs": 13,
+          "mean_top10_overlap_pct": 70.0,
+          "unique_repos": 33,
+          "top10_slots": 140,
+          "is_new_share_pct": 4.3
+        },
         "pageviews_by_path": {
           "/ai-tastemakers/skills/briefings/2026-09-01.html": 2,
           "/ai-tastemakers/skills/": 2
@@ -40,10 +48,33 @@
         }
       },
       "source": "data/experiments/exports/EXP-20260715-soft-dedup-diversity-skills-baseline.csv"
+    },
+    {
+      "imported_at": "2026-09-26T22:00:00.000Z",
+      "period": {
+        "start": "2026-09-13",
+        "end": "2026-09-26"
+      },
+      "metrics": {
+        "digest_diversity": {
+          "digest_count": 13,
+          "consecutive_day_pairs": 12,
+          "mean_top10_overlap_pct": 37.5,
+          "unique_repos": 82,
+          "top10_slots": 130,
+          "is_new_share_pct": 26.2,
+          "missing_digest_dates": ["2026-09-26"]
+        },
+        "pageviews_by_path": {},
+        "outbound_clicks": {
+          "_aggregate": 0
+        }
+      },
+      "source": "data/experiments/exports/EXP-20260715-soft-dedup-diversity-skills-treatment.csv"
     }
   ],
   "shadow_runs": [],
-  "verdict": "",
-  "keep_change": null,
-  "notes": "Treatment live 2026-09-13→2026-09-26. Baseline diversity from digest.json (not in PostHog snapshot): 14 Skills digests, 70.0% mean consecutive-day top-10 overlap, 33 unique repos / 140 slots, 4.3% is_new share. PostHog secondary: 2 briefing pageviews, 2 index pageviews, 0 outbound_repo_click (edition=skills). Flags on Skills digest command only; OSS defaults unchanged; ponytail narration flags remain on Skills. Backlog: RANK-2. Lab post: briefings/lab/posts/EXP-20260715-soft-dedup-diversity-skills.md."
+  "verdict": "Treatment window 2026-09-13→2026-09-26 (13 Skills digests through 2026-09-25; 2026-09-26 digest not in repo at close). From digest.json: mean consecutive-day top-10 overlap 37.5% vs 70.0% baseline (−32.5pp, clears the ≥15pp success bar); 82 unique repos across 130 top-10 slots vs 33/140 baseline; 26.2% of top-10 slots marked is_new vs 4.3% baseline. Secondary PostHog pageviews/clicks were not exported in the cloud agent (placeholder CSV: 0 aggregate outbound clicks). **Keep** DIGEST_SOFT_DEDUP_BRIEFINGS=14 and DIGEST_SOFT_DEDUP_PENALTY=0.15 on the Skills digest command.",
+  "keep_change": true,
+  "notes": "Closed 2026-09-26 PT. Baseline diversity: 14 digests, 70.0% mean overlap, 33 unique repos / 140 slots, 4.3% is_new (digest.json). Treatment diversity: 13 digests (missing 2026-09-26), 37.5% mean overlap, 82 unique repos / 130 slots, 26.2% is_new. PostHog secondary not fetched in cloud agent; primary gate is digest diversity only. Soft-dedup flags kept on Skills digest; OSS defaults unchanged; ponytail narration flags remain on Skills. Backlog: RANK-2. Lab post: briefings/lab/posts/EXP-20260715-soft-dedup-diversity-skills.md."
 }

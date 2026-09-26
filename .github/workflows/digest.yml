@@ -100,7 +100,7 @@ jobs:
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
           # EXP-20260802-ponytail-narration-skills — kept on Skills (complete)
-          # EXP-20260715-soft-dedup-diversity-skills — treatment 2026-09-13 → 2026-09-26 (Skills only)
+          # EXP-20260715-soft-dedup-diversity-skills — complete (keep); flags remain on Skills only
           DIGEST_ENRICH_WEB: "1"
           DIGEST_ENRICH_WEB_PROVIDER: "firecrawl"
           DIGEST_ENRICH_WEB_DEEP: "1"

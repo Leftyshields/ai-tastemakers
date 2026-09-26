@@ -1,6 +1,6 @@
 # Less-repeated Skills picks
 
-_Treatment is live from 2026-09-13 through 2026-09-26. Baseline PostHog is frozen. We have not decided keep or revert yet._
+_Treatment closed 2026-09-26 (PT). **Kept** stronger soft-dedup on Skills digest._
 
 ## In plain English
 
@@ -49,7 +49,16 @@ Fourteen Skills digests under default soft-dedup (5 briefings, 0.5 penalty). Pon
 
 ## Treatment (2026-09-13 → 2026-09-26)
 
-Flags enabled on the **Skills digest command** in `.github/workflows/digest.yml` as of 2026-09-13:
+Thirteen Skills digests in repo through **2026-09-25** (`2026-09-26` digest missing at close). Diversity from `digest.json`:
+
+| Metric | Value |
+|--------|-------|
+| Skills digests | 13 |
+| Average consecutive-day top-10 overlap | **37.5%** |
+| Unique repos across window | **82** (130 top-10 slots) |
+| Average `is_new` share in top 10 | **26.2%** |
+
+Flags enabled on the **Skills digest command** in `.github/workflows/digest.yml` as of 2026-09-13 (still on after close):
 
 | Flag | Value | Default |
 |------|-------|---------|
@@ -65,7 +74,7 @@ OSS digest soft-dedup is unchanged.
 
 ## Recommendation
 
-**Not decided yet.** Wait until treatment ends 2026-09-26, then compare diversity metrics (especially consecutive-day overlap) against the **70%** baseline.
+**Keep.** Mean consecutive-day overlap **37.5%** is **32.5pp** below the **70%** baseline (exceeds the ≥15pp success bar). Unique repos and NEW share rose sharply. PostHog clicks were not used to gate the decision.
 
 ## Published briefs (baseline samples)
 
