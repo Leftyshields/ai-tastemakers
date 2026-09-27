@@ -1,0 +1,215 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W39",
+  "week_start": "2026-09-21",
+  "week_end": "2026-09-27",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 45,
+      "skills": 41
+    },
+    "total_stars_gained": {
+      "oss": 112926,
+      "skills": 67185
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "llm",
+        "mcp",
+        "ai-agents",
+        "ai"
+      ],
+      "skills": [
+        "claude-code",
+        "ai-agents",
+        "claude",
+        "codex",
+        "mcp"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "hypit-ai/hypit",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "Tencent/WeKnora",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "Donchitos/Claude-Code-Game-Studios",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "rocketride-org/rocketride-server",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "helloianneo/ian-xiaohei-illustrations",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Donchitos/Claude-Code-Game-Studios",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "addyosmani/agent-skills",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "Asymptote-Labs/agent-beacon",
+      "DietrichGebert/ponytail",
+      "Donchitos/Claude-Code-Game-Studios",
+      "Graphify-Labs/graphify",
+      "Imbad0202/academic-research-skills",
+      "K-Dense-AI/scientific-agent-skills",
+      "Leonxlnx/taste-skill",
+      "NousResearch/hermes-agent",
+      "Observal/Observal",
+      "Panniantong/Agent-Reach",
+      "addyosmani/agent-skills",
+      "affaan-m/ECC",
+      "davila7/claude-code-templates",
+      "farion1231/cc-switch",
+      "irinabuht12-oss/marketing-skills",
+      "pacifio/atlas"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 30584,
+          "days_appeared": 5,
+          "excerpt": "ECC is an agent harness optimization layer that adds skills, memory, security (AgentShield), and research-first workflows to AI coding agents like Claude Code, Codex, Cursor, and Opencode via CLAUDE.md config files and npm packages."
+        },
+        {
+          "full_name": "hypit-ai/hypit",
+          "total_stars_gained": 29897,
+          "days_appeared": 5,
+          "excerpt": "Hypit is a TypeScript monorepo that uses AI agents, a custom DSL/compiler, and FFmpeg to analyze a viral video then generate 100 variants — swapping face, voiceover, and B-roll — from a single CLI command."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 24440,
+          "days_appeared": 5,
+          "excerpt": "Ponytail is a JavaScript agent-skill plugin for Claude Code and Cursor that injects a \"laziest senior dev\" heuristic into AI coding agents, steering them toward minimal, already-existing solutions instead of scaffolding new dependencies."
+        },
+        {
+          "full_name": "Tencent/WeKnora",
+          "total_stars_gained": 18707,
+          "days_appeared": 4,
+          "excerpt": "WeKnora is a Go-based, self-hostable knowledge platform that ingests documents from 10+ sources (Feishu, Notion, GitLab, RSS, etc.), exposes them via RAG Q&A and a ReAct agent, and continuously distills content into a self-maintaining interlinked markdown Wiki with revision history."
+        },
+        {
+          "full_name": "rocketride-org/rocketride-server",
+          "total_stars_gained": 12740,
+          "days_appeared": 3,
+          "excerpt": "RocketRide is an open-source AI pipeline engine with a multithreaded C++ runtime, 100+ nodes covering 15+ LLM providers and 9 vector databases, visual pipeline editing via a VS Code extension, and portable JSON pipeline definitions deployable on your own infrastructure."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 44323,
+          "days_appeared": 7,
+          "excerpt": "Orca is a desktop/mobile ADE (Agent Development Environment) that runs Codex, Claude Code, OpenCode, or Pi side-by-side in isolated git worktrees, letting you fan one prompt across multiple agents and merge the best result."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 40518,
+          "days_appeared": 7,
+          "excerpt": "ECC is an agent harness configuration system that layers skills, memory, security (AgentShield), and research-first workflows onto Claude Code, Codex, Opencode, and Cursor via installable npm packages and a GitHub App."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 32282,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a skill/prompt layer for AI coding agents (Claude Code, Cursor, etc.) that enforces YAGNI discipline — steering the agent to reach for native browser APIs or built-ins before installing a library or writing wrapper code."
+        },
+        {
+          "full_name": "Donchitos/Claude-Code-Game-Studios",
+          "total_stars_gained": 17553,
+          "days_appeared": 5,
+          "excerpt": "Claude Code Game Studios is a Shell-based configuration layer for Claude Code that installs 49 specialized subagents (directors, department leads, and specialists), 74 slash-command skills, 12 automated hooks, and 13 path-scoped coding rules to impose real studio structure on an otherwise free-form AI session."
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "total_stars_gained": 13439,
+          "days_appeared": 4,
+          "excerpt": "CC Switch is a cross-platform Tauri desktop app that centralizes API provider configuration and switching across nine AI coding tools including Claude Code, Codex, Gemini CLI, and Grok Build."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant pattern this week is infrastructure hardening around AI coding agents — tools that manage, constrain, or orchestrate agents like Claude Code and Codex are attracting outsized attention. ECC (an optimization and security layer for coding agents) and Ponytail (a plugin that pushes agents toward minimal, dependency-light solutions) both sustained multi-day momentum, signaling that teams are less focused on raw agent capability and more focused on making agents predictable and cost-controlled in production. Stablyai's Orca, a desktop environment that runs multiple coding agents in parallel and lets you pick the best output, points toward a near-term workflow where developers routinely compare agent outputs rather than trusting a single one. Tencent's WeKnora, a self-hostable knowledge platform with continuous wiki-building, is a credible enterprise alternative to commercial RAG products worth watching for internal knowledge-management procurement decisions. The quarter's bet: teams that invest now in agent governance tooling — guardrails, skill layers, provider-switching — will have a meaningful productivity edge over those still evaluating raw models.",
+    "generalist": "The builder story this week was less about new models and more about what sits around them. The most persistent projects across the week were skill and configuration layers — CLAUDE.md files, npm packages, shell scripts — that reshape how coding agents behave without touching the model itself. Ponytail enforces YAGNI discipline (no new libraries if a built-in exists); ECC adds memory, security, and research-first workflows; Claude Code Game Studios goes further, installing 49 subagents, 74 slash commands, and 12 automated hooks to impose the structure of a real game studio on a single agent session. The underlying pattern: the model is becoming a commodity runtime, and the differentiation is happening in the prompt-and-hook layer above it.\n\nOn the infrastructure side, two projects stand out. Orca (from stablyai) is an Agent Development Environment that fans a single prompt to Codex, Claude Code, OpenCode, or Pi simultaneously in isolated git worktrees, then lets you merge the best result — a practical answer to \"which agent is best for this task?\" RocketRide is a C++ pipeline engine with 100+ nodes, support for 15+ LLM providers and 9 vector databases, and a VS Code visual editor, positioning itself as a self-hosted alternative to managed orchestration services. CC Switch rounds out the picture as a Tauri desktop app for centrally managing API keys and provider switching across nine coding tools — unglamorous but clearly filling a real gap.",
+    "statistician": "Star counts here reflect seven-day delta totals, so a repo that appeared every day of the week (like Orca at 7/7 days in the skills edition) will naturally accumulate larger numbers than a project that broke through late in the cycle. The skills and OSS editions track overlapping but distinct populations, which is why the same repo (ECC, Ponytail) can show different star totals between sections — treat the cross-edition overlap list as the week's most durable signal, not the individual counts. All ranking in this edition uses the `delta_7d` mode, meaning recency and consistency of appearance matter more than all-time standing."
+  },
+  "email": {
+    "verdict": "The week's most crowded corner of open-source AI was not a new model or a new framework; it was the layer between you and your coding agent, with builders racing to install opinions, guardrails, and structure on top of agents that ship without them.",
+    "body": "The thing that moved hardest and earliest was [ECC](https://github.com/affaan-m/ECC), an agent harness that bolts memory, security, and research-first workflows onto Claude Code, Codex, Cursor, and Opencode through config files and npm packages. It topped both AI Tastemakers (the daily list of open-source AI tools) and Skill Tastemakers (the daily list of skills you install on an agent) on Monday, and held both lists for most of the week, accumulating more combined attention than anything else here.\n\nWhat made it interesting was not its ambition in isolation; it was the company it kept. [Ponytail](https://github.com/DietrichGebert/ponytail), a plugin for Claude Code and Cursor that steers agents toward minimal, already-existing solutions rather than new dependencies, held both lists for the full seven days. [Orca](https://github.com/stablyai/orca), a desktop environment that runs Codex, Claude Code, and others in parallel git worktrees so you can fan one prompt across agents and pick the best result, led Skill Tastemakers twice. [CC Switch](https://github.com/farion1231/cc-switch), a desktop app that centralizes API provider switching across nine coding tools, held Skill Tastemakers for four days. The week also gave real attention to [RocketRide](https://github.com/rocketride-org/rocketride-server), a self-hosted pipeline engine with a C++ runtime and support for 15+ LLM providers.\n\nAttention concentrated this week on tooling that assumes the agent already exists and asks what you put around it. That suggests a maturing instinct: raw agent capability is abundant enough that the marginal problem is control, not power."
+  },
+  "generated_at": "2026-09-27T17:47:12.485Z"
+}
