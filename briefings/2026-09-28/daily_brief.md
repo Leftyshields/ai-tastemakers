@@ -1,0 +1,104 @@
+# AI Tastemakers — Daily Brief — 2026-09-28
+
+_Ranking: delta_7d · 10 repos · generated 2026-09-28T20:06:46.539Z_
+
+
+## 1. rocketride-org/rocketride-server
+
+https://github.com/rocketride-org/rocketride-server · ★ 17194 (+8092 this week) · ai, cpp, data-pipeline, data-processing, machine-learning, mcp, python, sdk, typescript, vscode-extension
+
+**What it does:** RocketRide is an open-source AI pipeline builder and runtime with a multithreaded C++ execution engine, 100+ nodes across 15+ LLM providers and 9 vector databases, a VS Code extension for visual pipeline authoring, and Python/TypeScript SDKs — all self-hosted with pipelines defined as portable JSON.
+
+**Why now:** The repo gained 8,000+ stars this week, signaling a sharp spike in builder attention that makes it worth evaluating before the ecosystem around it solidifies.
+
+**Build with it:** Install the VS Code extension, wire a retrieval pipeline using the built-in vector database nodes and an LLM provider node, and run it locally via the C++ runtime to validate latency before any cloud deployment.
+
+## 2. vastsa/PI-Desktop
+
+https://github.com/vastsa/PI-Desktop · ★ 6022 (+1079 this week) · ai-agent, coding-agent, desktop-app, electron, global, i18n, local-first, mcp, pi, pi-agent, pi-desktop, plugins, react, rust, typescript
+
+**What it does:** PI-Desktop is a local-first Electron + Rust desktop app that gives AI agents their own persistent workspace with installable plugins covering tools, MCP servers, panels, and background services — independent of any IDE or terminal.
+
+**Why now:** The repo gained over 1,000 stars this week, signaling rapid community discovery of the 0.15.x Early Preview release.
+
+**Build with it:** Write a plugin that registers an MCP server alongside a Work Panel view to expose a custom data source directly inside the agent's workspace.
+
+## 3. helloianneo/ian-xiaohei-illustrations
+
+https://github.com/helloianneo/ian-xiaohei-illustrations · ★ 12185 (+5436 this week) · ai-agent, chinese, codex-skill, handdrawn, illustration, image-generation, xiaohei
+
+**What it does:** Ian Xiaohei Illustrations is a Codex Skill that analyzes Chinese articles and generates 16:9 hand-drawn body illustrations featuring "Xiaohei" — a black stick-figure character — turning abstract arguments, workflows, and metaphors into single-concept white-background sketches with sparse red/orange/blue Chinese annotations.
+
+**Why now:** The repo gained 5,436 stars this week, signaling a surge of interest in structured visual-language skills for AI coding agents following Codex's rollout as an agentic platform.
+
+**Build with it:** Drop the `ian-xiaohei-illustrations/` subdirectory into `~/.codex/skills/`, then invoke `Use $ian-xiaohei-illustrations` with a pasted Chinese article to get a shot list of 4–8 illustration briefs before committing to image generation.
+
+## 4. dimthink/PriceAI <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/dimthink/PriceAI · ★ 3474 (+784 this week) · ai, ai-subscription, chatgpt, claude, gemini, grok, nextjs, price-comparison, price-tracker, supabase
+
+**What it does:** PriceAI aggregates 200+ Chinese AI card-shop and relay-API channels—covering ChatGPT Plus/Pro/Team, Claude Pro, Gemini, and Grok subscriptions plus DeepSeek/Qwen/Kimi API relay stations—displaying live prices, stock status, multipliers, and delivery-method risk in a single comparison table.
+
+**Why now:** The repo gained 784 stars this week, signaling a spike in demand likely tied to ongoing regional pricing shifts and the proliferation of third-party API relay stations for models like DeepSeek.
+
+**Build with it:** Fork the Next.js + Supabase codebase and point the channel data layer at your own Supabase table to spin up a niche price-tracker for any single subscription category (e.g., Cursor or Codex relay APIs) with the existing comparison UI already wired.
+
+## 5. rohitg00/ai-engineering-from-scratch
+
+https://github.com/rohitg00/ai-engineering-from-scratch · ★ 60266 (+5110 this week) · agents, ai, ai-agents, ai-engineering, computer-vision, course, deep-learning, from-scratch, generative-ai, llm, machine-learning, mcp, nlp, python, reinforcement-learning, rust, swarm-intelligence, transformers, tutorial, typescript
+
+**What it does:** A 523-lesson, 20-phase open curriculum (Python/TypeScript/Rust/Julia) that teaches AI engineering end-to-end, where every lesson ships a reusable artifact — prompt, skill, agent, or MCP server.
+
+**Why now:** The repo gained 5,110 stars this week, signaling a sudden spike in builder attention worth riding before the momentum consolidates elsewhere.
+
+**Build with it:** Clone Phase 14 (Agent Engineering) and follow the Agent Loop lesson to wire a working agent with persistent memory using the author's companion `agentmemory` library.
+
+## 6. coreyhaines31/marketingskills
+
+https://github.com/coreyhaines31/marketingskills · ★ 51798 (+719 this week) · claude, codex, marketing
+
+**What it does:** A collection of markdown skill files that give AI coding agents (Claude Code, Codex, Cursor) specialized marketing workflows covering CRO, SEO, copywriting, and paid growth, anchored by a `product-marketing` skill that every other skill reads first for shared context.
+
+**Why now:** The repo crossed 51,000 stars with 719 added this week, signaling a rapid spike in adoption likely tied to the current wave of agentic coding tools making markdown-based skill injection a practical workflow rather than a novelty.
+
+**Build with it:** Drop the `cro` skill file into your Claude Code project, point it at a landing page, and let the agent apply conversion frameworks directly against your actual copy without leaving the terminal.
+
+## 7. TNT-Likely/PanWatch <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/TNT-Likely/PanWatch · ★ 1858 (+715 this week) · a-share, agent, ai, ai-agent, akshare, deepseek, fastapi, fintech, langgraph, llm, mcp, openai, pwa, quant, self-hosted, stock, stock-analysis, stock-market, trading-agents, trading-bot
+
+**What it does:** PanWatch is a self-hosted AI stock monitoring platform that connects a nine-agent TradingAgents research team (bull/bear debate, risk review, PM decision) to real-time watchlists and portfolios across China A-shares, Hong Kong, and U.S. markets, delivering results via Telegram, WeCom, DingTalk, or webhooks.
+
+**Why now:** The repo gained 715 stars this week, signaling a rapid surge in builder attention that makes this a live adoption moment rather than a backlog item.
+
+**Build with it:** Point PanWatch at a local Ollama model via its OpenAI-compatible provider config, add a watchlist of A-share tickers, and wire the scheduled pre-market agent output to a Telegram bot to get AI research memos without sending portfolio data to a third-party API.
+
+## 8. Wei-Shaw/sub2api
+
+https://github.com/Wei-Shaw/sub2api · ★ 42987 (+711 this week) · 2api, antigravity2api, cc2api, claude, claude-code, codex, crs, crs2, gemini
+
+**What it does:** Sub2API is an open-source gateway that pools Claude, OpenAI, Gemini, and Grok subscriptions behind a single API endpoint, enabling shared quota distribution across multiple users.
+
+**Why now:** The repo gained 711 stars this week and is trending on Trendshift, coinciding with active developer interest in cost-splitting Claude Code and Codex access without per-seat billing.
+
+**Build with it:** Point Claude Code's API base URL at a self-hosted Sub2API instance (Docker-ready, PostgreSQL + Redis backend) to share a single Anthropic subscription across a small team and split the cost.
+
+## 9. hypit-ai/hypit
+
+https://github.com/hypit-ai/hypit · ★ 17199 (+4636 this week) · agentic-ai, ai, ai-agents, ai-video, compiler, dsl, ffmpeg, generative-ai, llm, markup-language, monorepo, plugin-system, programming-language, text-to-video, typescript, video, video-automation, video-clone, video-editing, video-generation
+
+**What it does:** Hypit is a TypeScript CLI tool that takes a viral video URL and uses AI agents to clone its full production workflow — swapping face, voiceover, and B-roll — then ships up to 100 variants in a single command.
+
+**Why now:** The repo hit #1 on Trendshift's daily TypeScript rankings this week, adding 4,636 stars in seven days, signaling rapid builder adoption.
+
+**Build with it:** Run the quickstart against one of your existing short-form videos to generate variant scripts via the DSL layer and pipe the output through the built-in FFmpeg plugin to validate the clone pipeline end-to-end.
+
+## 10. elder-plinius/CL4R1T4S
+
+https://github.com/elder-plinius/CL4R1T4S · ★ 50777 (+678 this week) · agents, ai, chatgpt, gemini, google, grok, hacking, leak, leaked, openai, prompt, prompt-engineering, prompts, red-team, red-teaming, system, system-info, system-prompts, tools, transparency
+
+**What it does:** CL4R1T4S is a crowdsourced collection of extracted system prompts from major AI products—ChatGPT, Claude, Gemini, Grok, Cursor, Replit, and others—exposing the hidden instructions that shape model behavior.
+
+**Why now:** The repo is pulling 678 stars this week, signaling a spike in developer interest likely tied to ongoing discourse around AI agent transparency and the rapid proliferation of agentic scaffolds like Manus and Devin.
+
+**Build with it:** Pull the system prompt for a specific model you're integrating, diff it against your own prompt scaffold, and use the delta to identify constraint collisions or persona bleed before shipping.
