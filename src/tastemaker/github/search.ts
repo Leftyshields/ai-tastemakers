@@ -31,6 +31,42 @@ function mapItem(item: GitHubSearchItem): CandidateRepo {
   };
 }
 
+export function buildRepositorySearchQuery(
+  innerQuery: string,
+  minStars: number,
+  pushedAfter: string,
+): string {
+  return `${innerQuery} stars:>=${minStars} pushed:>${pushedAfter}`;
+}
+
+export async function paginateRepositorySearch(
+  client: GitHubClient,
+  innerQuery: string,
+  maxPages: number,
+): Promise<{ items: CandidateRepo[]; failed: boolean }> {
+  const items: CandidateRepo[] = [];
+  let failed = false;
+
+  for (let page = 1; page <= maxPages; page++) {
+    const q = encodeURIComponent(innerQuery);
+    const url = `https://api.github.com/search/repositories?q=${q}&sort=stars&order=desc&per_page=100&page=${page}`;
+
+    try {
+      const data = await client.request<GitHubSearchResponse>(url);
+      items.push(...data.items.map(mapItem));
+      if (data.items.length < 100) {
+        break;
+      }
+    } catch (err) {
+      console.error(`Repository search failed for "${innerQuery}" page ${page}:`, err);
+      failed = true;
+      break;
+    }
+  }
+
+  return { items, failed };
+}
+
 export function mergeCandidates(maps: CandidateRepo[][]): CandidateRepo[] {
   const byName = new Map<string, CandidateRepo>();
 
@@ -69,23 +105,15 @@ export async function searchByTopics(
     const topicResults: CandidateRepo[] = [];
     let topicFailed = false;
 
-    for (let page = 1; page <= pagesPerTopic; page++) {
-      const q = encodeURIComponent(
-        `topic:${topic} stars:>=${minStars} pushed:>${pushedAfter}`,
-      );
-      const url = `https://api.github.com/search/repositories?q=${q}&sort=stars&order=desc&per_page=100&page=${page}`;
-
-      try {
-        const data = await client.request<GitHubSearchResponse>(url);
-        topicResults.push(...data.items.map(mapItem));
-        if (data.items.length < 100) {
-          break;
-        }
-      } catch (err) {
-        console.error(`Search failed for topic ${topic} page ${page}:`, err);
-        topicFailed = true;
-        break;
-      }
+    const innerQuery = buildRepositorySearchQuery(`topic:${topic}`, minStars, pushedAfter);
+    const { items, failed } = await paginateRepositorySearch(
+      client,
+      innerQuery,
+      pagesPerTopic,
+    );
+    topicResults.push(...items);
+    if (failed && items.length === 0) {
+      topicFailed = true;
     }
 
     if (topicFailed && topicResults.length === 0) {

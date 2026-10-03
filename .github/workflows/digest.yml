@@ -123,6 +123,7 @@ jobs:
           DIGEST_NARRATE_PONYTAIL=1 \
           DIGEST_SOFT_DEDUP_BRIEFINGS=14 \
           DIGEST_SOFT_DEDUP_PENALTY=0.15 \
+          DIGEST_SKILLS_EXTRA_DISCOVERY=1 \
           npm run digest -- --edition skills
 
       - name: Run monthly rollup (fourth Sunday)

@@ -35,6 +35,14 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ---
 
+## Pipeline changes (not experiment variables)
+
+| Date (PT) | Change | Editions | Notes |
+|-----------|--------|----------|-------|
+| 2026-10-03 | Skills supplemental GitHub discovery (`DIGEST_SKILLS_EXTRA_DISCOVERY`, default on for Skills) | Skills only | Adds extra topic and text/readme repository searches before the existing min-stars, blocklist, and ranking steps. Widens the **candidate pool** only; not part of EXP-20260913-humanizer-polish-skills (baseline 2026-09-27 to 2026-10-10). Account for possible shifts in which repos enter snapshots when comparing Lab metrics across this date. |
+
+---
+
 ## Registered experiments (as of 2026-09-13)
 
 ### Active Lab queue

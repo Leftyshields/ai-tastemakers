@@ -134,6 +134,10 @@ export function loadConfig(options?: {
     qualityRubric: parseEnvBool("DIGEST_QUALITY_RUBRIC"),
     narrateStructuredContext: parseEnvBool("DIGEST_NARRATE_STRUCTURED_CONTEXT"),
     narratePonytail: parseEnvBool("DIGEST_NARRATE_PONYTAIL"),
+    skillsExtraDiscovery:
+      edition.id === "skills"
+        ? parseEnvBool("DIGEST_SKILLS_EXTRA_DISCOVERY", true)
+        : false,
     experimentId: (() => {
       const id = process.env.EXPERIMENT_ID?.trim();
       if (!id) return undefined;

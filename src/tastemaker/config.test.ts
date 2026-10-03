@@ -26,6 +26,22 @@ describe("loadConfig", () => {
     );
   });
 
+  it("defaults skills extra discovery on for skills edition", () => {
+    process.env.GITHUB_TOKEN = "gh";
+    process.env.ANTHROPIC_API_KEY = "sk";
+    delete process.env.DIGEST_SKILLS_EXTRA_DISCOVERY;
+    const config = loadConfig({ editionId: "skills", rootDir: tempRoot });
+    expect(config.skillsExtraDiscovery).toBe(true);
+  });
+
+  it("defaults skills extra discovery off for oss edition", () => {
+    process.env.GITHUB_TOKEN = "gh";
+    process.env.ANTHROPIC_API_KEY = "sk";
+    process.env.DIGEST_SKILLS_EXTRA_DISCOVERY = "1";
+    const config = loadConfig({ editionId: "oss", rootDir: tempRoot });
+    expect(config.skillsExtraDiscovery).toBe(false);
+  });
+
   it("allows missing pipeline secrets when requirePipelineSecrets is false", () => {
     process.env.RESEND_API_KEY = "re_test";
     process.env.DIGEST_EMAIL_FROM = "Digest <digest@example.com>";

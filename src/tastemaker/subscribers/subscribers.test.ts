@@ -50,6 +50,7 @@ const baseConfig: AppConfig = {
   qualityRubric: false,
   narrateStructuredContext: false,
   narratePonytail: false,
+  skillsExtraDiscovery: false,
 };
 
 beforeEach(() => {

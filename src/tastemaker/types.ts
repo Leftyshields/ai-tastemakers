@@ -219,4 +219,6 @@ export interface AppConfig {
   narrateStructuredContext: boolean;
   /** Ponytail YAGNI constraints in Claude narration prompt. */
   narratePonytail: boolean;
+  /** Skills edition: supplemental GitHub search beyond topic queries (default on for skills). */
+  skillsExtraDiscovery: boolean;
 }
