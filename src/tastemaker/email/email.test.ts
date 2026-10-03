@@ -217,6 +217,7 @@ describe("shouldSendDigestEmail", () => {
   qualityRubric: false,
   narrateStructuredContext: false,
   narratePonytail: false,
+  skillsExtraDiscovery: false,
   };
 
   it("returns false when email env incomplete", async () => {

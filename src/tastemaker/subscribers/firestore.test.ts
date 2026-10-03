@@ -39,6 +39,7 @@ const base: AppConfig = {
   qualityRubric: false,
   narrateStructuredContext: false,
   narratePonytail: false,
+  skillsExtraDiscovery: false,
 };
 
 describe("subscriberDocId", () => {

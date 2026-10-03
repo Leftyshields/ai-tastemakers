@@ -1,9 +1,9 @@
 import { randomUUID } from "node:crypto";
 import path from "node:path";
 import type { AppConfig, Digest, DigestRepo, ScoredRepo, SnapshotRecord } from "./types.js";
-import { formatDateInTimezone, pushedAfterIso } from "./config.js";
+import { formatDateInTimezone } from "./config.js";
 import { GitHubClient } from "./github/client.js";
-import { searchByTopics } from "./github/search.js";
+import { discoverCandidates } from "./github/discover.js";
 import { enrichCandidates } from "./github/enrich.js";
 import { appendSnapshots, readSnapshots } from "./snapshot/store.js";
 import {
@@ -50,7 +50,7 @@ export interface PipelineResult {
 
 export interface PipelineDeps {
   narrate?: typeof narrateRepos;
-  search?: typeof searchByTopics;
+  search?: typeof discoverCandidates;
   enrich?: typeof enrichCandidates;
   externalEnrich?: typeof enrichExternalContext;
   sendEmail?: typeof sendDigestEmail;
@@ -63,19 +63,15 @@ export async function runPipeline(
 ): Promise<PipelineResult> {
   const now = deps.now ?? new Date();
   const narrate = deps.narrate ?? narrateRepos;
-  const search = deps.search ?? searchByTopics;
+  const search = deps.search ?? discoverCandidates;
   const enrich = deps.enrich ?? enrichCandidates;
   const externalEnrich = deps.externalEnrich ?? enrichExternalContext;
   const client = new GitHubClient(config.githubToken);
-  const pushedAfter = pushedAfterIso(config.pushedWithinDays);
 
   console.error("Discovering repos…");
   const { candidates: discovered, succeededTopics, failedTopics } = await search(
     client,
-    config.topics,
-    config.minStars,
-    pushedAfter,
-    config.searchPagesPerTopic,
+    config,
   );
 
   if (succeededTopics.length < 4) {
