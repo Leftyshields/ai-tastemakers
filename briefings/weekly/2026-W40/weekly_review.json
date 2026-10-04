@@ -1,0 +1,180 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W40",
+  "week_start": "2026-09-28",
+  "week_end": "2026-10-04",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 51,
+      "skills": 53
+    },
+    "total_stars_gained": {
+      "oss": 85837,
+      "skills": 174959
+    },
+    "top_topics": {
+      "oss": [
+        "ai",
+        "llm",
+        "ai-agents",
+        "mcp",
+        "claude-code"
+      ],
+      "skills": [
+        "claude-code",
+        "ai-agents",
+        "claude",
+        "mcp",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "rocketride-org/rocketride-server",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "rohitg00/ai-engineering-from-scratch",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "helloianneo/ian-xiaohei-illustrations",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "lexmount/moli",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "farion1231/cc-switch",
+          "days_appeared": 3
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "ComposioHQ/awesome-claude-skills",
+      "DietrichGebert/ponytail",
+      "EverMind-AI/Raven",
+      "NVIDIA/SkillSpector",
+      "Panniantong/Agent-Reach",
+      "Ryze-AI-Adgent/open-seo-mcp-skills",
+      "Wei-Shaw/sub2api",
+      "affaan-m/ECC",
+      "calesthio/OpenMontage",
+      "career-ops-hq/career-ops",
+      "dimthink/PriceAI",
+      "f/prompts.chat",
+      "irinabuht12-oss/google-ads-meta-ads-mcp",
+      "isjiamu/gzh-design-skill",
+      "langgenius/dify",
+      "rohitg00/ai-engineering-from-scratch",
+      "router-for-me/CLIProxyAPI",
+      "rtk-ai/rtk",
+      "shanraisshan/claude-code-best-practice",
+      "thedotmack/claude-mem",
+      "tradecatlabs/vibe-coding-cn"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "rocketride-org/rocketride-server",
+          "total_stars_gained": 47306,
+          "days_appeared": 7,
+          "excerpt": "RocketRide is an open-source AI pipeline builder and runtime with a multithreaded C++ execution engine, 100+ nodes across 15+ LLM providers and 9 vector databases, a VS Code extension for visual pipeline authoring, and Python/TypeScript SDKs — all self-hosted with pipelines defined as portable JSON."
+        },
+        {
+          "full_name": "rohitg00/ai-engineering-from-scratch",
+          "total_stars_gained": 39213,
+          "days_appeared": 7,
+          "excerpt": "A 523-lesson, 20-phase open curriculum (Python/TypeScript/Rust/Julia) that teaches AI engineering end-to-end, where every lesson ships a reusable artifact — prompt, skill, agent, or MCP server."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 25085,
+          "days_appeared": 4,
+          "excerpt": "Ponytail is a prompt-engineering skill layer for AI coding agents (Claude Code, Cursor, and 19 others) that enforces a YAGNI-first mindset, producing measurably less generated code—~54% on average, up to 94%—without dropping safety guards."
+        },
+        {
+          "full_name": "helloianneo/ian-xiaohei-illustrations",
+          "total_stars_gained": 21933,
+          "days_appeared": 4,
+          "excerpt": "Ian Xiaohei Illustrations is a Codex Skill that analyzes Chinese articles and generates 16:9 hand-drawn body illustrations featuring \"Xiaohei\" — a black stick-figure character — turning abstract arguments, workflows, and metaphors into single-concept white-background sketches with sparse red/orange/blue Chinese annotations."
+        },
+        {
+          "full_name": "lexmount/moli",
+          "total_stars_gained": 5525,
+          "days_appeared": 2,
+          "excerpt": "Moli is a headless browser built in Rust that serves AI agents via CLI, CDP, WebDriver Classic, or WebDriver BiDi, with rendering and layout computed only on demand to keep resource use low."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 34749,
+          "days_appeared": 6,
+          "excerpt": "Orca is a desktop/mobile agent orchestration environment that runs Codex, Claude Code, OpenCode, or Pi side-by-side, each in an isolated git worktree, with a mobile companion for remote monitoring and steering."
+        },
+        {
+          "full_name": "rohitg00/ai-engineering-from-scratch",
+          "total_stars_gained": 34031,
+          "days_appeared": 1,
+          "excerpt": "A 523-lesson, 20-phase open curriculum that teaches AI engineering through hands-on artifacts—prompts, agents, and MCP servers—across Python, TypeScript, Rust, and Julia."
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "total_stars_gained": 31393,
+          "days_appeared": 1,
+          "excerpt": "HyperFrames is a TypeScript framework that converts HTML, CSS, and GSAP animations into deterministic MP4 videos using Chrome's BeginFrame API, controllable via CLI or AI coding agent skills."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 28565,
+          "days_appeared": 6,
+          "excerpt": "Ponytail is a skill/prompt layer for AI coding agents (Claude Code, Cursor, and 20 others) that enforces a \"laziest senior dev\" heuristic — preferring native browser APIs and existing primitives over installing libraries, cutting a measured ~54% of generated code on average."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 24420,
+          "days_appeared": 6,
+          "excerpt": "ECC is an agent harness layer that adds skills, memory, security (AgentShield), and research-first workflows on top of coding agents like Claude Code, Codex, Cursor, and Opencode."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant story this week is infrastructure maturity: teams are no longer just experimenting with AI code generation — they are building systems to *control and measure* it. Ponytail, a prompt-engineering layer that works across Claude Code, Cursor, and roughly 20 other coding agents, demonstrated a measurable ~54% reduction in generated code volume, which translates directly to review burden and maintenance risk. RocketRide, a self-hosted AI pipeline builder with a C++ execution engine and connections to over 15 large language model providers, held the top star-growth position for the full seven days — a sustained signal, not a one-day spike. Orca, an agent orchestration environment that runs multiple AI coding agents in parallel isolated workspaces with mobile monitoring, suggests enterprises are beginning to manage fleets of agents the way they once managed developer workstations. The watch-item for Q4: the same handful of projects are appearing in both open-source and skills-focused rankings simultaneously, meaning the line between \"infrastructure\" and \"workflow tooling\" is collapsing — teams that treat those as separate procurement decisions will be slower to consolidate.",
+    "generalist": "The builder stack shifted noticeably toward *constraint and orchestration* this week. Ponytail and ECC represent two ends of the same idea: Ponytail bakes a YAGNI-first (\"you aren't gonna need it\") heuristic directly into agent prompts, nudging agents toward native APIs and existing primitives rather than reaching for new libraries, while ECC wraps coding agents in a harness that layers on memory, security guardrails (AgentShield), and structured research-first workflows. Together they reflect a maturing recognition that raw agent capability is less of a bottleneck than *steering* that capability reliably. Moli, a Rust-built headless browser designed specifically for agent use via CLI, CDP, or WebDriver, is a quieter but important infrastructure piece — it makes on-demand rendering cheap enough that browser-based agents don't have to hold expensive persistent sessions.\n\nOn the content and media side, two projects stand out for different reasons. HyperFrames converts HTML/CSS/GSAP animations into deterministic MP4 video using Chrome's BeginFrame API, making AI-driven video generation reproducible and scriptable. Ian Xiaohei Illustrations, a Codex skill for generating hand-drawn Chinese-language explainer art from article text, shows how narrow, culturally specific agent skills are finding real audiences — it held four days of trending momentum. The `rohitg00/ai-engineering-from-scratch` curriculum appeared in *both* the open-source and skills charts with strong numbers, reinforcing that structured learning paths for AI engineering are themselves becoming a content category worth tracking.",
+    "statistician": "The skills edition ran notably hotter than the open-source edition this week — nearly twice the total stars gained across a similar number of repos — which likely reflects the continued popularity of Claude Code–adjacent tooling, the dominant topic tag in both lists. DietrichGebert/ponytail and rohitg00/ai-engineering-from-scratch each appeared in both editions and in both repeat-appearance lists, making them the most durable signals of genuine ongoing interest rather than single-day viral moments; weight those accordingly. The ranking mode this week is `delta_7d` (seven-day star change), so projects that arrived mid-week with a single big day can still surface — check days-appeared counts to distinguish a real streak from a spike."
+  },
+  "email": {
+    "verdict": "The week's attention landed on one thing: taming the agents you already have, not finding new ones.",
+    "body": "The number that opens this week is 47,306. That is how much attention [RocketRide](https://github.com/rocketride-org/rocketride-server), a self-hosted AI pipeline builder with a multithreaded C++ execution engine and support for over 100 node types across 15-plus LLM providers, pulled on the AI Tastemakers daily list (the daily ranking of open-source AI tools). It held the top spot Monday and again Thursday, which is unusual. Something about a portable, visually authored pipeline runtime with no cloud dependency clearly resonated with people who are tired of vendor lock-in.\n\nBut the more durable story was about the agents people are already running and the frustration accumulating around them. [Ponytail](https://github.com/DietrichGebert/ponytail), a prompt-engineering layer for coding agents like Claude Code and Cursor that enforces a minimal-solution mindset and measurably cuts generated code by around 54% on average, held both AI Tastemakers and Skill Tastemakers (the daily list of skills you install on an agent) for most of the week. Alongside it, [Orca](https://github.com/stablyai/orca), an orchestration environment that runs multiple coding agents in parallel, each isolated in its own git worktree with a mobile interface for remote steering, led Skill Tastemakers three days running.\n\nBoth repos are solving the same frustration from different angles: agents produce too much, too chaotically, with too little oversight. The week's attention concentrated on control surfaces, not raw capability. That suggests the field is moving from \"get an agent working\" toward \"get an agent working the way I actually want.\""
+  },
+  "generated_at": "2026-10-04T17:36:49.438Z"
+}
