@@ -61,7 +61,7 @@ export interface TokenUsageLogEntry {
     enrich_web: boolean;
     structured_context: boolean;
     ponytail: boolean;
-    humanizer_polish: boolean;
+    humanizer_polish?: boolean;
   };
   humanizer_polish?: {
     input_tokens: number;
