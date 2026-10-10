@@ -34,6 +34,14 @@ describe("loadConfig", () => {
     expect(config.skillsExtraDiscovery).toBe(true);
   });
 
+  it("parses DIGEST_HUMANIZER_POLISH when set", () => {
+    process.env.GITHUB_TOKEN = "gh";
+    process.env.ANTHROPIC_API_KEY = "sk";
+    process.env.DIGEST_HUMANIZER_POLISH = "1";
+    const config = loadConfig({ editionId: "oss", rootDir: tempRoot });
+    expect(config.humanizerPolish).toBe(true);
+  });
+
   it("defaults skills extra discovery off for oss edition", () => {
     process.env.GITHUB_TOKEN = "gh";
     process.env.ANTHROPIC_API_KEY = "sk";

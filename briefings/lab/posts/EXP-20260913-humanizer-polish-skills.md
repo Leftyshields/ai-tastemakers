@@ -1,12 +1,12 @@
 # Less AI-sounding Skills briefs
 
-_**Queued (#2).** Not started. Baseline planned **2026-09-27** through **2026-10-10**; treatment **2026-10-11** through **2026-10-24**. Soft-dedup diversity is still measuring (treatment through **2026-09-26**)._
+_**Active (#1).** Baseline **2026-09-27** through **2026-10-10** (snapshot imported 2026-10-10). Treatment **2026-10-11** through **2026-10-24** with `DIGEST_HUMANIZER_POLISH=1` on **both** OSS and Skills digests._
 
 ## The question, in English
 
-Skills blurbs already go through Ponytail (short sections, one try-this step) and Firecrawl enrichment. They can still read like generic AI copy: stock phrases, filler transitions, and "in today's fast-paced landscape" energy.
+Skills and OSS blurbs already go through Ponytail (short sections, one try-this step) and Firecrawl enrichment. They can still read like generic AI copy: stock phrases, filler transitions, and "in today's fast-paced landscape" energy.
 
-After Claude writes each blurb, we want a **light polish pass** that strips those tells without changing facts or the Why-now hook.
+After Claude writes each blurb, we want a **light polish pass** that strips those tells without changing facts or the Why-now hook, and adds a plain-language line when a repo name assumes specialist knowledge.
 
 That is the whole test. Humanizer is *where the idea came from*, not a tool we installed.
 
@@ -16,7 +16,7 @@ That is the whole test. Humanizer is *where the idea came from*, not a tool we i
 
 We are **not** installing Humanizer on the digest pipeline.
 
-We copied the habit: **one post-narration edit** on Skills blurbs only. README-grounded specifics stay. Why-now hooks stay. Filler and stock AI phrasing go.
+We copied the habit: **one post-narration batch edit** per digest run on **both** editions. README-grounded specifics stay. Why-now hooks stay. Filler and stock AI phrasing go.
 
 ## How we'll know
 
@@ -25,7 +25,7 @@ We copied the habit: **one post-narration edit** on Skills blurbs only. README-g
 | Less AI-sounding | Editorial spot-check: fewer stock phrases and filler transitions |
 | Still accurate | Rank-1 rubric pass rate holds (specificity, accuracy) |
 | Still timely | Why-now rubric score does not regress |
-| Cost | Token log is secondary; expect a small polish-pass bump |
+| Cost | Token log includes one extra batch call per edition per run |
 
 PostHog CTR is **out of scope** for this experiment. We gate on editorial rubric and human-sounding spot-checks.
 
@@ -38,7 +38,7 @@ PostHog CTR is **out of scope** for this experiment. We gate on editorial rubric
 
 ## Recommendation
 
-**Not started.** Implement `DIGEST_HUMANIZER_POLISH=1` at treatment start on the Skills digest command only. Keep status `draft` until soft-dedup closes.
+**In treatment.** Production enables polish from **2026-10-11** Pacific via `digest.yml` date guard. Compare token log and rubric to baseline through **2026-10-24**.
 
 ---
 
@@ -46,11 +46,11 @@ PostHog CTR is **out of scope** for this experiment. We gate on editorial rubric
 
 | Flag | What it does |
 |------|----------------|
-| `DIGEST_HUMANIZER_POLISH=1` | Post-narrate polish pass on Skills blurbs (strip AI-writing tells; no new facts) |
+| `DIGEST_HUMANIZER_POLISH=1` | One batch post-narrate polish pass per digest run (strip AI-writing tells; no new facts; plain-language gloss for jargon) |
 
-Flags go on the **Skills digest command only**, not the shared OSS env block. Do **not** enable in `digest.yml` until treatment start.
+Flags go on **both** OSS and Skills digest commands. GitHub Actions turns the flag on only when `steps.gate.outputs.date` is **2026-10-11** or later (Pacific).
 
-### Optional side-by-side preview (after implementation)
+### Optional side-by-side preview
 
 ```bash
 EXPERIMENT_ID=EXP-20260913-humanizer-polish-skills \

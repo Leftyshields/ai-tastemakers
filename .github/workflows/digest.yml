@@ -110,6 +110,11 @@ jobs:
           DIGEST_QUALITY_RUBRIC: "1"
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
+          # EXP-20260913-humanizer-polish-skills: polish only from 2026-10-11 PT (baseline through 2026-10-10).
+          # ISO dates: [[ d < start ]] is false when d >= start (lexicographic). Do not use [ ] with >= (invalid in test).
+          if [[ ! "${{ steps.gate.outputs.date }}" < "2026-10-11" ]]; then
+            export DIGEST_HUMANIZER_POLISH=1
+          fi
           # Kept soft dedup (EXP-20260715) and Ponytail narration (EXP-20260802) apply to both editions.
           DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
           DIGEST_NARRATE_PONYTAIL=1 \
@@ -117,7 +122,7 @@ jobs:
           DIGEST_SOFT_DEDUP_PENALTY=0.15 \
           EXPERIMENT_ID=EXP-20260913-humanizer-polish-skills \
           npm run digest -- --edition oss
-          # Skills edition (same kept flags). Humanizer baseline 2026-09-27 to 2026-10-10 on both editions: no DIGEST_HUMANIZER_POLISH yet.
+          # Skills edition (same kept flags + optional humanizer polish when date guard passes).
           EXPERIMENT_ID=EXP-20260913-humanizer-polish-skills \
           DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
           DIGEST_NARRATE_PONYTAIL=1 \

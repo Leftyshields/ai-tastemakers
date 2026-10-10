@@ -57,7 +57,7 @@ describe("quality/tokens", () => {
       model: "claude-sonnet-4-6",
       variant: "treatment",
       shadow: true,
-      flags: { enrich_web: true, structured_context: true, ponytail: true },
+      flags: { enrich_web: true, structured_context: true, ponytail: true, humanizer_polish: false },
       results,
       enrich_chars: new Map([["acme/one", 2400], ["acme/two", 0]]),
       readme_chars: new Map([["acme/one", 1800], ["acme/two", 1500]]),
@@ -87,6 +87,42 @@ describe("quality/tokens", () => {
     expect(entry.per_repo[0].enrich_chars).toBe(2400);
   });
 
+  it("buildTokenLogEntry adds humanizer polish tokens to run totals", () => {
+    const results = new Map<string, NarrationResult>([
+      [
+        "acme/one",
+        {
+          brief: "Hello world",
+          usage: { input_tokens: 1000, output_tokens: 120 },
+          prompt_chars: 4200,
+          latency_ms: 900,
+        },
+      ],
+    ]);
+    const entry = buildTokenLogEntry({
+      run_id: "run-h",
+      edition: "skills",
+      date: "2026-10-11",
+      model: "claude-sonnet-4-6",
+      variant: "single",
+      shadow: false,
+      flags: { enrich_web: true, structured_context: true, ponytail: true, humanizer_polish: true },
+      results,
+      humanizer_polish: {
+        briefs: new Map([["acme/one", "Hello world"]]),
+        usage: { input_tokens: 8000, output_tokens: 1500 },
+        prompt_chars: 12000,
+        latency_ms: 2000,
+        batch_failed: false,
+        validation_fallbacks: [],
+      },
+    });
+    expect(entry.input_tokens).toBe(9000);
+    expect(entry.output_tokens).toBe(1620);
+    expect(entry.humanizer_polish?.output_tokens).toBe(1500);
+    expect(entry.estimated_usd).toBeGreaterThan(0);
+  });
+
   it("appendTokenLog and readTokenLog round-trip", async () => {
     const entry = buildTokenLogEntry({
       run_id: "run-2",
@@ -95,7 +131,7 @@ describe("quality/tokens", () => {
       model: "claude-sonnet-4-6",
       variant: "single",
       shadow: false,
-      flags: { enrich_web: false, structured_context: false, ponytail: false },
+      flags: { enrich_web: false, structured_context: false, ponytail: false, humanizer_polish: false },
       results: new Map([
         [
           "o/r",
