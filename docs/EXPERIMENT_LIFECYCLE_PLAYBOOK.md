@@ -47,7 +47,7 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ### Active Lab queue
 
-Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup closed 2026-09-26 (keep); humanizer baseline starts 2026-09-27.
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup closed 2026-09-26 (keep). Humanizer treatment from 2026-10-11 (baseline closed 2026-10-10).
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
