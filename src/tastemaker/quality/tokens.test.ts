@@ -87,6 +87,56 @@ describe("quality/tokens", () => {
     expect(entry.per_repo[0].enrich_chars).toBe(2400);
   });
 
+  it("buildTokenLogEntry records enrich compress before/after char totals", () => {
+    const results = new Map<string, NarrationResult>([
+      [
+        "acme/one",
+        {
+          brief: "Hello world",
+          usage: { input_tokens: 900, output_tokens: 100 },
+          prompt_chars: 3000,
+          latency_ms: 800,
+        },
+      ],
+    ]);
+    const entry = buildTokenLogEntry({
+      run_id: "run-c",
+      edition: "skills",
+      date: "2026-11-08",
+      model: "claude-sonnet-4-6",
+      variant: "single",
+      shadow: false,
+      flags: {
+        enrich_web: true,
+        structured_context: true,
+        ponytail: true,
+        humanizer_polish: false,
+        enrich_compress: true,
+      },
+      results,
+      enrich_chars: new Map([["acme/one", 1200]]),
+      enrich_chars_raw: new Map([["acme/one", 2400]]),
+      enrich_compress: {
+        per_repo: [
+          {
+            full_name: "acme/one",
+            chars_before: 2400,
+            chars_after: 1200,
+            fallback: false,
+          },
+        ],
+        bundles_compressed: 1,
+        fallbacks: 0,
+        chars_before_total: 2400,
+        chars_after_total: 1200,
+      },
+    });
+    expect(entry.enrich_chars_total).toBe(1200);
+    expect(entry.enrich_chars_raw_total).toBe(2400);
+    expect(entry.enrich_compress?.chars_before_total).toBe(2400);
+    expect(entry.per_repo[0].enrich_chars_raw).toBe(2400);
+  });
+
   it("buildTokenLogEntry adds humanizer polish tokens to run totals", () => {
     const results = new Map<string, NarrationResult>([
       [

@@ -39,6 +39,8 @@ function baseConfig(overrides: Partial<AppConfig> = {}): AppConfig {
     narrateStructuredContext: false,
     narratePonytail: false,
     skillsExtraDiscovery: true,
+    humanizerPolish: false,
+    enrichCompress: false,
     ...overrides,
   };
 }

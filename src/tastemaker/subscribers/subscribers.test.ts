@@ -51,6 +51,8 @@ const baseConfig: AppConfig = {
   narrateStructuredContext: false,
   narratePonytail: false,
   skillsExtraDiscovery: false,
+  humanizerPolish: false,
+  enrichCompress: false,
 };
 
 beforeEach(() => {

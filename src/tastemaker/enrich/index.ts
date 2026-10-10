@@ -11,6 +11,14 @@ import { fetchWebContext } from "./web.js";
 
 export type { EnrichmentBundle, EnrichmentSource, ExternalEnrichOptions } from "./types.js";
 export { compactEnrichment } from "./compact.js";
+export {
+  applyEnrichCompressIfEnabled,
+  compressEnrichmentBundles,
+  compressEnrichmentBundle,
+  compressEnrichmentProse,
+  compressEnrichmentText,
+} from "./caveman-compress.js";
+export type { EnrichCompressBatchResult } from "./caveman-compress.js";
 export { fetchFirecrawlContext, fetchFirecrawlDeepContext } from "./firecrawl.js";
 export { githubEnrichUrls } from "./github-urls.js";
 export { fetchHnContext } from "./hn.js";

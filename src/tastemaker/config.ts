@@ -139,6 +139,7 @@ export function loadConfig(options?: {
         ? parseEnvBool("DIGEST_SKILLS_EXTRA_DISCOVERY", true)
         : false,
     humanizerPolish: parseEnvBool("DIGEST_HUMANIZER_POLISH"),
+    enrichCompress: parseEnvBool("DIGEST_ENRICH_COMPRESS"),
     experimentId: (() => {
       const id = process.env.EXPERIMENT_ID?.trim();
       if (!id) return undefined;
