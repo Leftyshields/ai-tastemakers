@@ -111,7 +111,8 @@ jobs:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
           # EXP-20260913-humanizer-polish-skills: polish only from 2026-10-11 PT (baseline through 2026-10-10).
-          if [ "${{ steps.gate.outputs.date }}" \>= "2026-10-11" ]; then
+          # ISO dates: [[ d < start ]] is false when d >= start (lexicographic). Do not use [ ] with >= (invalid in test).
+          if [[ ! "${{ steps.gate.outputs.date }}" < "2026-10-11" ]]; then
             export DIGEST_HUMANIZER_POLISH=1
           fi
           # Kept soft dedup (EXP-20260715) and Ponytail narration (EXP-20260802) apply to both editions.
