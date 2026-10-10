@@ -52,7 +52,7 @@ Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
 | 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **complete** (keep; closed 2026-09-26) |
-| 2 | EXP-20260913-humanizer-polish-skills | Both digests | **baseline** (2026-09-27 to 2026-10-10) |
+| 2 | EXP-20260913-humanizer-polish-skills | Both digests | **active** (treatment 2026-10-11 to 2026-10-24) |
 | 3 | EXP-20260913-caveman-compress-skills | Both digests | **draft** (queued; baseline 2026-10-25) |
 | 4 | EXP-20260913-whynow-memory-skills | Both digests | **draft** (queued; baseline 2026-11-22) |
 | 5 | EXP-20260913-rank-bootstrap-skills | Both digests | **draft** (queued; baseline 2026-12-20) |
@@ -162,20 +162,20 @@ npm run digest -- --edition skills
 
 ---
 
-### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **baseline (active #1)**
+### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **active (#1)**
 
-Baseline prepped 2026-09-26: `EXPERIMENT_ID` on the Skills digest command now points here, with no polish flag. Treatment needs the `DIGEST_HUMANIZER_POLISH` pass implemented before 2026-10-11. If kept, apply to both Skills and OSS digests.
+Baseline snapshot imported 2026-10-10. Treatment from **2026-10-11**: one batch post-narration polish per digest run (`DIGEST_HUMANIZER_POLISH=1`) on **both** OSS and Skills commands. `digest.yml` sets the flag only when the run date (Pacific) is **2026-10-11 or later** so catch-up runs on 2026-10-10 stay unpolished.
 
 | Window | Dates (PT) |
 |--------|------------|
 | Baseline | **2026-09-27** → **2026-10-10** |
 | Treatment | **2026-10-11** → **2026-10-24** |
 
-**Hypothesis:** A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.
+**Hypothesis:** A post-narration Humanizer-style polish reduces AI-writing tells on digest blurbs without hurting factual accuracy or Why-now hooks.
 
 **Treatment flags (both OSS and Skills digest commands):**
 
-- `DIGEST_HUMANIZER_POLISH=1`
+- `DIGEST_HUMANIZER_POLISH=1` (date-guarded in `digest.yml` from 2026-10-11 PT)
 
 **Primary metrics:** Editorial rubric (specificity, why-now, accuracy) plus human-sounding spot-check. Token log secondary. Do not gate on PostHog CTR.
 

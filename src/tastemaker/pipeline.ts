@@ -38,6 +38,8 @@ import {
 import { narrateRepos, briefsFromNarration, type NarrationOptions } from "./narrate/claude.js";
 import type { NarrationResult } from "./narrate/claude.js";
 import { appendTokenLog, buildTokenLogEntry } from "./quality/tokens.js";
+import { runHumanizerPolishIfEnabled } from "./narrate/humanizer-polish.js";
+import type { HumanizerPolishBatchResult } from "./narrate/humanizer-polish.js";
 
 import type { RubricLogEntry } from "./quality/rubric.js";
 
@@ -50,6 +52,7 @@ export interface PipelineResult {
 
 export interface PipelineDeps {
   narrate?: typeof narrateRepos;
+  humanizerPolish?: typeof runHumanizerPolishIfEnabled;
   search?: typeof discoverCandidates;
   enrich?: typeof enrichCandidates;
   externalEnrich?: typeof enrichExternalContext;
@@ -63,6 +66,7 @@ export async function runPipeline(
 ): Promise<PipelineResult> {
   const now = deps.now ?? new Date();
   const narrate = deps.narrate ?? narrateRepos;
+  const humanizerPolish = deps.humanizerPolish ?? runHumanizerPolishIfEnabled;
   const search = deps.search ?? discoverCandidates;
   const enrich = deps.enrich ?? enrichCandidates;
   const externalEnrich = deps.externalEnrich ?? enrichExternalContext;
@@ -198,6 +202,7 @@ export async function runPipeline(
     enrich_web: useExternalEnrich,
     structured_context: config.narrateStructuredContext,
     ponytail: config.narratePonytail,
+    humanizer_polish: config.humanizerPolish,
   };
 
   const enrichCharsMap = enrichCharMaps(top, externalBundles);
@@ -207,6 +212,7 @@ export async function runPipeline(
     results: Map<string, NarrationResult>,
     variant: "control" | "treatment" | "single",
     rubric?: RubricLogEntry | null,
+    humanizer_polish?: HumanizerPolishBatchResult | null,
   ): Promise<void> {
     const entry = buildTokenLogEntry({
       run_id: runId,
@@ -221,6 +227,7 @@ export async function runPipeline(
       enrich_chars: enrichCharsMap,
       readme_chars: readmeCharsMap,
       rubric,
+      humanizer_polish,
     });
     await appendTokenLog(config.rootDir, entry);
     console.error(
@@ -260,8 +267,21 @@ export async function runPipeline(
     treatmentResults = await narrate(config.anthropicApiKey, config.anthropicModel, top);
   }
 
+  let humanizerPolishResult: HumanizerPolishBatchResult | undefined;
+  const { briefs: polishedTreatmentBriefs, polish: humanizerPolishResultMaybe } =
+    await humanizerPolish(config, top, briefsFromNarration(treatmentResults));
+  humanizerPolishResult = humanizerPolishResultMaybe;
+  if (humanizerPolishResult) {
+    for (const [name, text] of humanizerPolishResult.briefs) {
+      const existing = treatmentResults.get(name);
+      if (existing) {
+        treatmentResults.set(name, { ...existing, brief: text });
+      }
+    }
+  }
+
   const controlBriefs = briefsFromNarration(controlResults);
-  const treatmentBriefs = briefsFromNarration(treatmentResults);
+  const treatmentBriefs = polishedTreatmentBriefs;
 
   const digestRepos: DigestRepo[] = top.map((repo, i) => ({
     rank: i + 1,
@@ -344,14 +364,16 @@ export async function runPipeline(
       }
     }
 
+    const polishForLog =
+      humanizerPolishResult && config.humanizerPolish ? humanizerPolishResult : null;
     if (narrateShadow) {
       await logNarrationVariant(controlResults, "control");
-      await logNarrationVariant(treatmentResults, "treatment");
+      await logNarrationVariant(treatmentResults, "treatment", null, polishForLog);
     } else if (sideBySideNarrate) {
       await logNarrationVariant(controlResults, "control");
-      await logNarrationVariant(treatmentResults, "treatment");
+      await logNarrationVariant(treatmentResults, "treatment", null, polishForLog);
     } else {
-      await logNarrationVariant(treatmentResults, "single");
+      await logNarrationVariant(treatmentResults, "single", null, polishForLog);
     }
 
     return {
@@ -397,9 +419,19 @@ export async function runPipeline(
         `Quality rubric rank-1 ${rubricEntry.full_name}: pass=${rubricEntry.pass} why_now=${rubricEntry.scores.why_now}/5`,
       );
     }
-    await logNarrationVariant(treatmentResults, "single", rubricEntry);
+    await logNarrationVariant(
+      treatmentResults,
+      "single",
+      rubricEntry,
+      humanizerPolishResult ?? null,
+    );
   } else {
-    await logNarrationVariant(treatmentResults, "single");
+    await logNarrationVariant(
+      treatmentResults,
+      "single",
+      null,
+      humanizerPolishResult ?? null,
+    );
   }
 
   return { briefingDir, markdownPath, jsonPath, digest };

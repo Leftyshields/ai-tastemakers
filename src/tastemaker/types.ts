@@ -221,4 +221,6 @@ export interface AppConfig {
   narratePonytail: boolean;
   /** Skills edition: supplemental GitHub search beyond topic queries (default on for skills). */
   skillsExtraDiscovery: boolean;
+  /** Post-narration Humanizer-style polish pass (one batch call per digest run). */
+  humanizerPolish: boolean;
 }

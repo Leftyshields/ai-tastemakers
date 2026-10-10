@@ -3,7 +3,7 @@
   "id": "EXP-20260913-humanizer-polish-skills",
   "title": "Less AI-sounding Skills briefs",
   "reader_summary": "After Claude writes a Skills blurb, apply a light polish that strips common AI-writing tells without changing facts.",
-  "outcome_line": "Measuring before: baseline 2026-09-27 to 2026-10-10 on Skills. Treatment starts 2026-10-11.",
+  "outcome_line": "Baseline closed 2026-10-10. Treatment 2026-10-11 to 2026-10-24 with DIGEST_HUMANIZER_POLISH on both digests.",
   "how_we_measure": "Editorial rubric (specificity, why-now, accuracy) plus a short human-sounding spot-check. Token log is secondary (expect a small cost bump). Do not gate on PostHog CTR.",
   "reader_glossary": [
     {
@@ -13,7 +13,7 @@
   ],
   "hypothesis": "A post-narration Humanizer-style polish reduces AI-writing tells on Skills blurbs without hurting factual accuracy or Why-now hooks.",
   "change_summary": "Add DIGEST_HUMANIZER_POLISH=1 on both the OSS and Skills digest commands (post-narrate polish pass).",
-  "status": "baseline",
+  "status": "active",
   "edition": "both",
   "baseline_window": {
     "start": "2026-09-27",
@@ -55,5 +55,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer on Skills digests. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md. Baseline prep 2026-09-26: EXPERIMENT_ID on both digest commands points here; polish flag still off until treatment. If kept, apply DIGEST_HUMANIZER_POLISH to both Skills and OSS digests (both lists rule). Baseline snapshot imported 2026-10-10 PT: 13 Skills token-log runs (2026-09-27 through 2026-10-09); 2026-10-10 digest not published at close (missing_digest_dates). Token metrics from data/quality/token-usage.jsonl + rubric-scores.jsonl. Pipeline note: DIGEST_SKILLS_EXTRA_DISCOVERY default-on change landed 2026-10-03 inside baseline (playbook pipeline changes table) — may shift candidate pool vs early baseline days. Frozen export: data/experiments/exports/EXP-20260913-humanizer-polish-skills-baseline.csv. Treatment starts 2026-10-11; implement DIGEST_HUMANIZER_POLISH before enabling flag."
+  "notes": "Queued #2 after EXP-20260715-soft-dedup-diversity-skills. Inspired by blader/humanizer. Lab post: briefings/lab/posts/EXP-20260913-humanizer-polish-skills.md. Baseline snapshot imported 2026-10-10 PT: 13 Skills token-log runs (2026-09-27 through 2026-10-09); 2026-10-10 digest not published at close (missing_digest_dates). Treatment 2026-10-11: DIGEST_HUMANIZER_POLISH implemented (one batch Claude pass per edition after narration); digest.yml enables it from 2026-10-11 PT via date guard on both OSS and Skills commands. If kept, leave flag on both digests (both lists rule). Pipeline note: DIGEST_SKILLS_EXTRA_DISCOVERY default-on change landed 2026-10-03 inside baseline. Frozen export: data/experiments/exports/EXP-20260913-humanizer-polish-skills-baseline.csv."
 }

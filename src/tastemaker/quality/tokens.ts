@@ -2,6 +2,7 @@ import path from "node:path";
 import type { RubricLogEntry } from "./rubric.js";
 import { charsPerInputToken, estimateNarrationCostUsd } from "./cost.js";
 import type { NarrationResult } from "../narrate/claude.js";
+import type { HumanizerPolishBatchResult } from "../narrate/humanizer-polish.js";
 
 /** Anthropic API token counts for a single narration call. */
 
@@ -60,6 +61,15 @@ export interface TokenUsageLogEntry {
     enrich_web: boolean;
     structured_context: boolean;
     ponytail: boolean;
+    humanizer_polish: boolean;
+  };
+  humanizer_polish?: {
+    input_tokens: number;
+    output_tokens: number;
+    prompt_chars: number;
+    latency_ms: number;
+    batch_failed: boolean;
+    validation_fallbacks: number;
   };
   repos_narrated: number;
   repos_failed: number;
@@ -109,6 +119,7 @@ export function buildTokenLogEntry(input: {
   enrich_chars?: Map<string, number>;
   readme_chars?: Map<string, number>;
   rubric?: RubricLogEntry | null;
+  humanizer_polish?: HumanizerPolishBatchResult | null;
 }): TokenUsageLogEntry {
   const per_repo: PerRepoTokenUsage[] = [];
   let repos_failed = 0;
@@ -136,8 +147,25 @@ export function buildTokenLogEntry(input: {
     });
   }
 
-  const totals = sumTokenUsage(per_repo.map((r) => ({ input_tokens: r.input_tokens, output_tokens: r.output_tokens })));
+  const narrationTotals = sumTokenUsage(
+    per_repo.map((r) => ({ input_tokens: r.input_tokens, output_tokens: r.output_tokens })),
+  );
+  const polishUsage = input.humanizer_polish?.usage;
+  const input_tokens = narrationTotals.input_tokens + (polishUsage?.input_tokens ?? 0);
+  const output_tokens = narrationTotals.output_tokens + (polishUsage?.output_tokens ?? 0);
+  const totals = { input_tokens, output_tokens };
   const repos_narrated = input.results.size;
+
+  const humanizer_polish = input.humanizer_polish?.usage
+    ? {
+        input_tokens: input.humanizer_polish.usage.input_tokens,
+        output_tokens: input.humanizer_polish.usage.output_tokens,
+        prompt_chars: input.humanizer_polish.prompt_chars,
+        latency_ms: input.humanizer_polish.latency_ms,
+        batch_failed: input.humanizer_polish.batch_failed,
+        validation_fallbacks: input.humanizer_polish.validation_fallbacks.length,
+      }
+    : undefined;
 
   return {
     logged_at: new Date().toISOString(),
@@ -151,8 +179,9 @@ export function buildTokenLogEntry(input: {
     flags: input.flags,
     repos_narrated,
     repos_failed,
-    input_tokens: totals.input_tokens,
-    output_tokens: totals.output_tokens,
+    input_tokens,
+    output_tokens,
+    humanizer_polish,
     output_words: per_repo.reduce((n, r) => n + r.output_words, 0),
     prompt_chars,
     latency_ms_total,
