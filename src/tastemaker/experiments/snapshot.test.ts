@@ -29,6 +29,22 @@ describe("parseSnapshotCsv", () => {
     expect(snapshot.source).toBe("tests/fixtures/analytics-export.csv");
   });
 
+  it("parses token metric rows into outbound_clicks with _ prefix", () => {
+    const tokenCsv = `type,key,count
+metric,runs,13
+metric,avg_output_tokens,1622
+metric,why_now_avg,3.7
+`;
+    const snapshot = parseSnapshotCsv(tokenCsv, {
+      period: { start: "2026-09-27", end: "2026-10-10" },
+    });
+    expect(snapshot.metrics.outbound_clicks).toEqual({
+      _runs: 13,
+      _avg_output_tokens: 1622,
+      _why_now_avg: 3.7,
+    });
+  });
+
   it("parses analytics pages export", () => {
     const pagesCsv = `Page,Pageviews
 /briefings/2026-06-27.html,100

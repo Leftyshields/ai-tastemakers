@@ -93,6 +93,12 @@ export function parseSnapshotCsv(
       } else if (type === "outbound_click" || type === "outbound") {
         const repo = key.startsWith("repo:") ? key.slice(5) : key;
         metrics.outbound_clicks![repo] = (metrics.outbound_clicks![repo] ?? 0) + count;
+      } else if (type === "metric" || type === "metrics") {
+        const raw = cols[countIdx] ?? "0";
+        const value = raw.includes(".") ? parseFloat(raw) : parseInt(raw, 10);
+        if (!key || !Number.isFinite(value)) continue;
+        const metricKey = key.startsWith("_") ? key : `_${key}`;
+        metrics.outbound_clicks![metricKey] = value;
       }
 
       if (startIdx >= 0 && cols[startIdx] && !period.start) period.start = cols[startIdx];
