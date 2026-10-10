@@ -85,6 +85,8 @@ describe("runPipeline integration", () => {
       narrateStructuredContext: false,
       narratePonytail: false,
       skillsExtraDiscovery: false,
+      humanizerPolish: false,
+      enrichCompress: false,
     };
   });
 

@@ -115,6 +115,7 @@ jobs:
           if [[ ! "${{ steps.gate.outputs.date }}" < "2026-10-11" ]]; then
             export DIGEST_HUMANIZER_POLISH=1
           fi
+          # EXP-20260913-caveman-compress-skills: enable DIGEST_ENRICH_COMPRESS=1 from 2026-11-08 PT (treatment start).
           # Kept soft dedup (EXP-20260715) and Ponytail narration (EXP-20260802) apply to both editions.
           DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
           DIGEST_NARRATE_PONYTAIL=1 \
