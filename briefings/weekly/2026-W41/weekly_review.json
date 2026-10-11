@@ -1,0 +1,188 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W41",
+  "week_start": "2026-10-05",
+  "week_end": "2026-10-11",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 45,
+      "skills": 45
+    },
+    "total_stars_gained": {
+      "oss": 182267,
+      "skills": 290022
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "ai-agents",
+        "mcp",
+        "llm",
+        "claude"
+      ],
+      "skills": [
+        "mcp",
+        "ai",
+        "ai-agents",
+        "claude-code",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "lexmount/moli",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 3
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "D4Vinci/Scrapling",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "rohitg00/ai-engineering-from-scratch",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "eternity4719/HowToLiveBetter",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 2
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "ConardLi/garden-skills",
+      "D4Vinci/Scrapling",
+      "DietrichGebert/ponytail",
+      "Graphify-Labs/graphify",
+      "NousResearch/hermes-agent",
+      "Orchestra-Research/AI-Research-SKILLs",
+      "addyosmani/agent-skills",
+      "blader/humanizer",
+      "diegosouzapw/OmniRoute",
+      "firecrawl/firecrawl",
+      "heygen-com/hyperframes",
+      "morluto/rea",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "rehan-remade/universal-modder",
+      "rohitg00/ai-engineering-from-scratch",
+      "tt-a1i/archify",
+      "yihui-dev/awesome-opus5-5-videos"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 216898,
+          "days_appeared": 6,
+          "excerpt": "REA is a TypeScript MCP server that connects AI agents (Claude, Cursor, etc.) to local reverse-engineering tools — Hopper, Ghidra, and static JS analysis — so agents can inspect closed-source binaries, Electron apps, and .NET assemblies without source code."
+        },
+        {
+          "full_name": "lexmount/moli",
+          "total_stars_gained": 64541,
+          "days_appeared": 7,
+          "excerpt": "Moli is a headless browser built in Rust that exposes web pages to AI agents as structured semantic trees, Markdown, screenshots, or PDFs via CLI, CDP, WebDriver Classic, or WebDriver BiDi."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 55437,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a single-prompt AI agent skill (`SKILL.md` / `AGENTS.md`) that instructs agents like Claude Code and Codex to delete or avoid code rather than add it, benchmarked at ~54% less code written and ~20% lower token cost on real FastAPI + React tasks."
+        },
+        {
+          "full_name": "Panniantong/Agent-Reach",
+          "total_stars_gained": 43107,
+          "days_appeared": 7,
+          "excerpt": "Agent Reach is a Python CLI that gives AI agents (Claude Code, Cursor, etc.) authenticated read and search access to Twitter, Reddit, YouTube, GitHub, Bilibili, and XiaoHongShu without API fees, by handling platform blocks, login walls, and HTML cleanup under one `mcp` config surface."
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "total_stars_gained": 14045,
+          "days_appeared": 3,
+          "excerpt": "ECC is an agent harness layer that adds skills, memory, security (via `ecc-agentshield`), and research-first workflows on top of AI coding agents like Claude Code, Codex, Cursor, and Opencode."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "rohitg00/ai-engineering-from-scratch",
+          "total_stars_gained": 215925,
+          "days_appeared": 6,
+          "excerpt": "A structured 523-lesson, 20-phase curriculum (Python, TypeScript, Rust, Julia) that teaches AI engineering from fundamentals to deployment, with every lesson producing a reusable artifact like a prompt, script, or model."
+        },
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 208504,
+          "days_appeared": 5,
+          "excerpt": "REA is a TypeScript MCP server that connects AI agents to reverse-engineering tools (Hopper, Ghidra, static JS analysis) so they can inspect native binaries, Electron apps, and .NET assemblies without source code."
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "total_stars_gained": 201084,
+          "days_appeared": 6,
+          "excerpt": "HyperFrames is an open-source TypeScript framework that converts HTML, CSS, and seekable animations into deterministic MP4 videos via Chrome's BeginFrame API, operable from a CLI, AI coding agents, or hosted authoring workflows."
+        },
+        {
+          "full_name": "D4Vinci/Scrapling",
+          "total_stars_gained": 146418,
+          "days_appeared": 6,
+          "excerpt": "Scrapling is a Python web scraping framework that handles single requests through full crawls, with adaptive element tracking, stealth capabilities via Playwright, and MCP server support."
+        },
+        {
+          "full_name": "eternity4719/HowToLiveBetter",
+          "total_stars_gained": 59443,
+          "days_appeared": 5,
+          "excerpt": "A 667-entry evidence-based life-optimization guide for mainland China covering longevity, frugality, legal pitfalls, social insurance, and entrepreneurship compliance, with each entry citing cost, benefit, and source quality (journal papers or official documents)."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant theme of W41 is AI agents gaining direct access to previously locked surfaces — binaries, social platforms, and the open web — without needing custom API arrangements or source code. REA, a tool that lets AI agents reverse-engineer closed-source software, and Agent Reach, which gives agents authenticated access to Twitter, Reddit, YouTube, and similar platforms, both held the top of trending lists all week; together they signal that the \"what can an agent see and touch?\" boundary is actively being redrawn by the open-source community. HyperFrames from HeyGen — a framework for rendering deterministic video from HTML and CSS — points to AI-driven content production pipelines becoming a legitimate engineering category, not just a demo. On the education side, a structured 523-lesson AI engineering curriculum drew sustained attention, suggesting enterprises hungry to upskill engineers are turning to open-source learning paths rather than waiting for formal programs. The quarter's watch item: agent capability expansion is outpacing agent governance tooling — teams should be stress-testing what their agents can now reach before that gap widens further.",
+    "generalist": "The builder stack shifted noticeably toward **agent access and perception** this week. REA (morluto/rea) is the clearest example: it wraps Hopper, Ghidra, and static JavaScript analysis behind an MCP server, so agents like Claude Code can reason about a closed binary or Electron app the same way they'd reason about readable source. Moli (lexmount/moli) tackles a different perception problem — it's a Rust-based headless browser that presents web pages to agents as structured semantic trees, Markdown, or screenshots via standard protocols, rather than raw HTML soup. Agent Reach rounds out the access theme by federating authenticated reads across Twitter, Reddit, YouTube, GitHub, and several Chinese platforms under a single MCP config, sidestepping API costs and login walls. Ponytail, which appeared across both OSS and skills editions, is worth noting for a different reason: it's a one-file agent skill (`SKILL.md`) that instructs coding agents to *delete* code rather than add it, and its benchmarks on real FastAPI and React projects are attracting serious attention from teams trying to manage context bloat and token spend.\n\nOn the learning and tooling side, HyperFrames (heygen-com/hyperframes) offers a clean TypeScript path for converting HTML/CSS animations into deterministic MP4s via Chrome's BeginFrame API — a building block that slots naturally into agent-driven content workflows. The AI engineering curriculum (rohitg00/ai-engineering-from-scratch) with 523 lessons across Python, TypeScript, Rust, and Julia held a six-day streak, which for a learning repo is a strong signal of genuine community engagement rather than a launch spike.",
+    "statistician": "The OSS and skills editions each tracked 45 unique repos this week, but the star totals — 182K for OSS and 290K for skills — are skewed heavily upward by two repos (REA and the AI engineering curriculum) each pulling over 200K stars on their own; remove those two and the distributions look far more typical. Repos like DietrichGebert/ponytail and morluto/rea appearing all seven days of the window are meaningful persistence signals, distinct from single-day spikes that can reflect a Product Hunt post or a viral tweet. The cross-edition overlap list of 17 repos is unusually large for a single week, suggesting a cohesive community wave rather than separate trending events in each list."
+  },
+  "email": {
+    "verdict": "A reverse-engineering tool for AI agents came out of nowhere and ended the week dominating both lists simultaneously, which almost never happens.",
+    "body": "Start with the number that matters: on Saturday, [REA](https://github.com/morluto/rea), a TypeScript server that connects AI agents like Claude and Cursor to local reverse-engineering tools (Hopper, Ghidra, static JavaScript analysis), pulled in over 90,000 attention points in a single day, on both AI Tastemakers (the daily list of open-source AI tools) and Skill Tastemakers (the daily list of skills you install on an agent). It held AI Tastemakers for six days and crossed both lists at once by the weekend. The proposition is specific: agents can now inspect closed-source binaries, Electron apps, and .NET assemblies without source code. That is a workflow that previously required a human sitting in a disassembler.\n\nEarly in the week, a different kind of tool set the pace. [Ponytail](https://github.com/DietrichGebert/ponytail), a single-file skill that instructs coding agents to delete or avoid code rather than add it, held AI Tastemakers all seven days. The project claims around 54% less code written on real FastAPI and React tasks. Separately, [Agent Reach](https://github.com/Panniantong/Agent-Reach), a CLI that gives agents authenticated access to Twitter, Reddit, YouTube, and several other platforms without API fees, also held the full week.\n\nOn Skill Tastemakers, [ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch), a 523-lesson curriculum spanning Python, TypeScript, Rust, and Julia, led that list every day through Friday before REA overtook it.\n\nWhat the week shows is that attention is concentrating on the agent's environment: what it can read, what it can reach, and how much code it writes in the process. Those are infrastructure questions, and they are getting answered at the tool layer right now."
+  },
+  "generated_at": "2026-10-11T18:08:01.230Z"
+}
