@@ -1,8 +1,15 @@
+import type { EditionId } from "../editions.js";
 import type { Digest, RankingMode } from "../types.js";
+import {
+  buildEmailGoUrl,
+  buildFullDigestPagesUrl,
+} from "../analytics/repo-click.js";
 import { newRepoEmailBadge, newRepoPlainLabel } from "../writers/new-badge.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
 
 const EMAIL_TOPIC_LIMIT = 5;
+const BRAND_LINK = "#1e40af";
+const BRAND_BUTTON = "#1e40af";
 
 function escapeHtml(text: string): string {
   return text
@@ -79,11 +86,28 @@ function bootstrapNotePlain(): string {
   return "Note: Rankings use recent momentum while 7-day star history matures. They'll sharpen after a week of daily snapshots.\n\n";
 }
 
+function emailGoLink(
+  siteUrl: string,
+  section: EditionId,
+  digestDate: string,
+  repo: Digest["repos"][0],
+  target: "title" | "button" | "url",
+): string {
+  return buildEmailGoUrl(siteUrl, {
+    repo: repo.full_name,
+    section,
+    position: repo.rank,
+    target,
+    digestDate,
+  });
+}
+
 export function renderDigestEmailHtml(
   digest: Digest,
   dateLabel: string,
   siteUrl: string,
   unsubscribeUrlOverride?: string,
+  section: EditionId = "oss",
 ): string {
   const bootstrapNote = digest.ranking_mode === "delta_7d" ? "" : bootstrapNoteHtml();
   const preheader = escapeHtml(digestEmailPreheader(digest));
@@ -95,20 +119,29 @@ export function renderDigestEmailHtml(
         ? renderBriefForEmail(repo.brief)
         : "<em>_[brief unavailable]_</em>";
       const topics = escapeHtml(formatTopics(repo.topics));
+      const titleHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "title"));
+      const buttonHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "button"));
 
       return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e7e5e4;">
         <h2 style="margin:0 0 6px;font-family:system-ui,sans-serif;font-size:18px;font-weight:600;color:#1c1917;">
-          ${repo.rank}. <a href="${escapeHtml(repo.html_url)}" style="color:#1e40af;text-decoration:none;">${escapeHtml(repo.full_name)}</a>${newRepoEmailBadge(repo.is_new)}
+          ${repo.rank}. <a href="${titleHref}" style="color:${BRAND_LINK};font-weight:700;text-decoration:underline;">${escapeHtml(repo.full_name)}</a>${newRepoEmailBadge(repo.is_new)}
         </h2>
         <p style="margin:0 0 10px;font-family:system-ui,sans-serif;font-size:13px;color:#78716c;">
           ${formatStars(repo, digest.ranking_mode)} · ${topics}
         </p>
-        <p style="margin:0;font-family:Georgia,serif;font-size:16px;line-height:1.6;color:#292524;">${brief}</p>
+        <p style="margin:0 0 16px;font-family:Georgia,serif;font-size:16px;line-height:1.6;color:#292524;">${brief}</p>
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
+          <tr>
+            <td bgcolor="${BRAND_BUTTON}" style="background-color:${BRAND_BUTTON};border-radius:6px;">
+              <a href="${buttonHref}" style="display:inline-block;padding:10px 16px;color:#ffffff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;">View on GitHub</a>
+            </td>
+          </tr>
+        </table>
       </div>`;
     })
     .join("\n");
 
-  const briefUrl = `${siteUrl.replace(/\/$/, "")}/briefings/${dateLabel}.html`;
+  const fullDigestUrl = escapeHtml(buildFullDigestPagesUrl(siteUrl, dateLabel, section));
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
 
   return `<!DOCTYPE html>
@@ -131,7 +164,7 @@ export function renderDigestEmailHtml(
     ${bootstrapNote}
     ${repoBlocks}
     <p style="margin:32px 0 0;font-family:system-ui,sans-serif;font-size:14px;text-align:center;">
-      <a href="${escapeHtml(briefUrl)}" style="color:#1e40af;font-weight:600;">Read online</a>
+      <a href="${fullDigestUrl}" style="color:${BRAND_LINK};font-weight:600;text-decoration:underline;">Open the full digest</a>
       · <a href="${escapeHtml(siteUrl)}" style="color:#78716c;">Archive</a>
     </p>
     <p style="margin:16px 0 0;font-family:system-ui,sans-serif;font-size:11px;color:#a8a29e;text-align:center;">
@@ -150,6 +183,7 @@ export function renderDigestEmailText(
   dateLabel: string,
   siteUrl: string,
   unsubscribeUrlOverride?: string,
+  section: EditionId = "oss",
 ): string {
   const lines: string[] = [
     `AI TASTEMAKERS — Daily Brief — ${dateLabel}`,
@@ -168,17 +202,17 @@ export function renderDigestEmailText(
     const topics = formatTopics(repo.topics);
     lines.push(
       `${repo.rank}. ${repo.full_name}${newRepoPlainLabel(repo.is_new)}`,
-      repo.html_url,
+      `${repo.full_name}  ${repo.html_url}`,
       `${formatStars(repo, digest.ranking_mode)} · ${topics}`,
       brief,
       "",
     );
   }
 
-  const briefUrl = `${siteUrl.replace(/\/$/, "")}/briefings/${dateLabel}.html`;
+  const fullDigestUrl = buildFullDigestPagesUrl(siteUrl, dateLabel, section);
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
   lines.push(
-    `Read online: ${briefUrl}`,
+    `Open the full digest: ${fullDigestUrl}`,
     `Archive: ${siteUrl}`,
     `Unsubscribe: ${unsubscribeUrl}`,
     "",
