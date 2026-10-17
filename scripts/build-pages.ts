@@ -375,6 +375,14 @@ async function main(): Promise<void> {
   await buildUnsubscribePage();
 
   const allowlist = await collectDigestRepoAllowlist(ROOT);
+  const siteHomePath = (() => {
+    try {
+      const pathname = new URL(siteBaseUrl).pathname.replace(/\/+$/, "");
+      return pathname ? `${pathname}/` : "/";
+    } catch {
+      return "/";
+    }
+  })();
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(
     path.join(SITE_DIR, "assets", "digest-repo-allowlist.json"),
@@ -384,7 +392,7 @@ async function main(): Promise<void> {
   await fs.mkdir(path.join(SITE_DIR, "go"), { recursive: true });
   await fs.writeFile(
     path.join(SITE_DIR, "go", "index.html"),
-    renderGoRedirectPage(allowlist, "/"),
+    renderGoRedirectPage(allowlist, siteHomePath),
     "utf8",
   );
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml);
