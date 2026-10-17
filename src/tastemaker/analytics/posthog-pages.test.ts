@@ -2,7 +2,7 @@ import { describe, it, expect, beforeEach, afterEach } from "vitest";
 import {
   posthogAnalyticsEnabled,
   posthogScriptHtml,
-  briefOutboundTrackingScript,
+  digestRepoClickTrackingScript,
 } from "../../../scripts/edition-pages.js";
 
 describe("PostHog page analytics", () => {
@@ -21,7 +21,7 @@ describe("PostHog page analytics", () => {
   it("posthogAnalyticsEnabled is false without POSTHOG_KEY", () => {
     expect(posthogAnalyticsEnabled()).toBe(false);
     expect(posthogScriptHtml()).toBe("");
-    expect(briefOutboundTrackingScript("oss", "2026-06-27")).toBe("");
+    expect(digestRepoClickTrackingScript()).toBe("");
   });
 
   it("posthogScriptHtml injects init with key and default host", () => {
@@ -40,12 +40,12 @@ describe("PostHog page analytics", () => {
     expect(html).toContain("https://eu.i.posthog.com");
   });
 
-  it("briefOutboundTrackingScript captures outbound_repo_click", () => {
+  it("digestRepoClickTrackingScript captures repo_click on cards", () => {
     process.env.POSTHOG_KEY = "phc_test_key";
-    const html = briefOutboundTrackingScript("skills", "2026-06-28");
-    expect(html).toContain('posthog.capture("outbound_repo_click"');
-    expect(html).toContain('edition: "skills"');
-    expect(html).toContain('page_date: "2026-06-28"');
+    const html = digestRepoClickTrackingScript();
+    expect(html).toContain('posthog.capture("repo_click"');
+    expect(html).toContain('channel: "pages"');
+    expect(html).toContain("utm_source");
   });
 });
 

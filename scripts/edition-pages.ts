@@ -27,10 +27,15 @@ import {
   landingLayoutV2Enabled,
   loadTopRepoMetaMap,
 } from "./index-layout-helpers.js";
+import {
+  renderDigestBriefArticle,
+  splitDailyBriefMarkdown,
+} from "../src/tastemaker/pages/brief-cards.js";
+import type { Digest } from "../src/tastemaker/types.js";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
 
-function escapeScriptString(value: string): string {
+export function escapeScriptString(value: string): string {
   return value.replace(/\\/g, "\\\\").replace(/'/g, "\\'");
 }
 
@@ -104,6 +109,60 @@ export function posthogScriptHtml(): string {
   </script>`;
 }
 
+export function digestRepoClickTrackingScript(): string {
+  if (!posthogAnalyticsEnabled()) return "";
+  return `<script>
+(function () {
+  function clickSource() {
+    try {
+      return new URLSearchParams(window.location.search).get("utm_source") === "email"
+        ? "email"
+        : "direct";
+    } catch (e) {
+      return "direct";
+    }
+  }
+
+  function captureRepoClick(card, target) {
+    if (typeof posthog === "undefined" || !posthog.capture) return;
+    var repo = card.getAttribute("data-repo") || "";
+    var section = card.getAttribute("data-section") || "";
+    var positionRaw = card.getAttribute("data-position") || "";
+    var position = parseInt(positionRaw, 10);
+    var digestDate = card.getAttribute("data-digest-date") || "";
+    if (!repo || (section !== "oss" && section !== "skills") || !Number.isFinite(position)) return;
+    posthog.capture("repo_click", {
+      repo: repo,
+      section: section,
+      channel: "pages",
+      position: position,
+      target: target,
+      digest_date: digestDate,
+      source: clickSource()
+    }, { transport: "sendBeacon", send_instantly: true });
+  }
+
+  document.addEventListener("click", function (event) {
+    var targetEl = event.target;
+    if (!targetEl || !targetEl.closest) return;
+    var card = targetEl.closest(".digest-repo-card");
+    if (!card) return;
+    var link = targetEl.closest("a[href]");
+    if (!link || !card.contains(link)) return;
+    if (link.closest(".digest-repo-card__body")) return;
+    var clickTarget = link.classList.contains("digest-repo-card__cta")
+      ? "button"
+      : link.classList.contains("digest-repo-card__title-link")
+        ? "title"
+        : null;
+    if (!clickTarget) return;
+    captureRepoClick(card, clickTarget);
+  }, true);
+})();
+</script>`;
+}
+
+/** @deprecated Legacy brief markdown link tracking; kept for shadow/lab pages if needed. */
 export function briefOutboundTrackingScript(editionId: string, pageDate: string): string {
   if (!posthogAnalyticsEnabled()) return "";
   const edition = escapeScriptString(editionId);
@@ -1382,7 +1441,15 @@ export async function buildEditionSite(
     }
     markdown = normalizeLegacyNewMarkdown(markdown);
     const paths = editionSitePaths(edition.siteSegment, 1);
-    const html = renderSafeMarkdown(markdown);
+    let html = renderSafeMarkdown(markdown);
+    try {
+      const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
+      const digest = JSON.parse(digestRaw) as Digest;
+      const { headerMarkdown } = splitDailyBriefMarkdown(markdown);
+      html = renderDigestBriefArticle(digest, date, edition.id, headerMarkdown, escapeHtml);
+    } catch {
+      /* fall back to markdown-only body */
+    }
     const siblingHref =
       edition.id === "skills" ? paths.editionNav.ossHref : paths.editionNav.skillsHref;
     const siblingLabel = edition.id === "skills" ? "AI Tastemakers" : "Skill Tastemakers";
@@ -1449,8 +1516,8 @@ export async function buildEditionSite(
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${siblingHref}">${siblingLabel} &rarr;</a>
       </nav>
-      <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>
-      ${briefOutboundTrackingScript(edition.id, date)}`;
+      ${html}
+      ${digestRepoClickTrackingScript()}`;
     await fs.writeFile(
       path.join(briefOutDir, `${date}.html`),
       pageShell(pageTitle, body, paths, brand, description, escapeHtml, {

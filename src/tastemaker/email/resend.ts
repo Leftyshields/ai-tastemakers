@@ -73,12 +73,14 @@ export async function sendDigestEmail(
       dateLabel,
       config.digestSiteUrl,
       unsubscribeUrl,
+      config.editionId,
     );
     const text = renderDigestEmailText(
       digest,
       dateLabel,
       config.digestSiteUrl,
       unsubscribeUrl,
+      config.editionId,
     );
     const { data, error } = await resend.emails.send({
       from: config.digestEmailFrom,

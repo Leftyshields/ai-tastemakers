@@ -14,6 +14,8 @@ import {
 } from "./edition-pages.js";
 import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
 import { writeDefaultOgPng } from "./generate-brief-og.js";
+import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
+import { renderGoRedirectPage } from "./digest-go-page.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
@@ -371,6 +373,20 @@ async function main(): Promise<void> {
 
   await buildSubscribePage();
   await buildUnsubscribePage();
+
+  const allowlist = await collectDigestRepoAllowlist(ROOT);
+  await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
+  await fs.writeFile(
+    path.join(SITE_DIR, "assets", "digest-repo-allowlist.json"),
+    `${JSON.stringify(allowlist, null, 0)}\n`,
+    "utf8",
+  );
+  await fs.mkdir(path.join(SITE_DIR, "go"), { recursive: true });
+  await fs.writeFile(
+    path.join(SITE_DIR, "go", "index.html"),
+    renderGoRedirectPage(allowlist, "/"),
+    "utf8",
+  );
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml);
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
