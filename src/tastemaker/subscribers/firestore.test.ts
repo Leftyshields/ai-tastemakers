@@ -40,6 +40,8 @@ const base: AppConfig = {
   narrateStructuredContext: false,
   narratePonytail: false,
   skillsExtraDiscovery: false,
+  humanizerPolish: false,
+  enrichCompress: false,
 };
 
 describe("subscriberDocId", () => {

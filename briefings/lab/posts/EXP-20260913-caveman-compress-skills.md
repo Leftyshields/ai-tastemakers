@@ -40,7 +40,7 @@ PostHog is secondary. Firecrawl enrich must stay on during this test.
 
 ## Recommendation
 
-**Not started.** Implement `DIGEST_ENRICH_COMPRESS=1` at treatment start on the Skills digest command only. Keep status `draft` until humanizer polish closes.
+**Code ready (2026-10-10).** Turn on `DIGEST_ENRICH_COMPRESS=1` at treatment start on both digest commands. Keep status `draft` until baseline begins 2026-10-25.
 
 ---
 
@@ -50,7 +50,7 @@ PostHog is secondary. Firecrawl enrich must stay on during this test.
 |------|----------------|
 | `DIGEST_ENRICH_COMPRESS=1` | Compress Firecrawl/HN enrichment bundles before Skills narration |
 
-Flags go on the **Skills digest command only**. Requires existing Firecrawl enrich flags. Do **not** enable in `digest.yml` until treatment start.
+Flags go on **both OSS and Skills digest commands** (same pattern as Humanizer). Requires existing Firecrawl enrich flags. Do **not** enable in `digest.yml` until treatment start **2026-11-08**.
 
 ### Optional side-by-side preview (after implementation)
 

@@ -3,6 +3,7 @@ import type { RubricLogEntry } from "./rubric.js";
 import { charsPerInputToken, estimateNarrationCostUsd } from "./cost.js";
 import type { NarrationResult } from "../narrate/claude.js";
 import type { HumanizerPolishBatchResult } from "../narrate/humanizer-polish.js";
+import type { EnrichCompressBatchResult } from "../enrich/caveman-compress.js";
 
 /** Anthropic API token counts for a single narration call. */
 
@@ -35,6 +36,8 @@ export interface PerRepoTokenUsage {
   prompt_chars: number;
   latency_ms: number;
   enrich_chars: number;
+  /** Pre-compression enrichment chars when DIGEST_ENRICH_COMPRESS ran. */
+  enrich_chars_raw?: number;
   readme_chars: number;
 }
 
@@ -62,7 +65,16 @@ export interface TokenUsageLogEntry {
     structured_context: boolean;
     ponytail: boolean;
     humanizer_polish?: boolean;
+    enrich_compress?: boolean;
   };
+  enrich_compress?: {
+    chars_before_total: number;
+    chars_after_total: number;
+    bundles_compressed: number;
+    fallbacks: number;
+  };
+  /** Sum of pre-compression enrichment payload chars (when compress flag on). */
+  enrich_chars_raw_total?: number;
   humanizer_polish?: {
     input_tokens: number;
     output_tokens: number;
@@ -117,23 +129,30 @@ export function buildTokenLogEntry(input: {
   flags: TokenUsageLogEntry["flags"];
   results: Map<string, NarrationResult>;
   enrich_chars?: Map<string, number>;
+  enrich_chars_raw?: Map<string, number>;
   readme_chars?: Map<string, number>;
   rubric?: RubricLogEntry | null;
   humanizer_polish?: HumanizerPolishBatchResult | null;
+  enrich_compress?: EnrichCompressBatchResult | null;
 }): TokenUsageLogEntry {
   const per_repo: PerRepoTokenUsage[] = [];
   let repos_failed = 0;
   let prompt_chars = 0;
   let latency_ms_total = 0;
   let enrich_chars_total = 0;
+  let enrich_chars_raw_total = 0;
 
   for (const [full_name, result] of input.results) {
     if (!result.brief) repos_failed += 1;
     const enrich_chars = input.enrich_chars?.get(full_name) ?? 0;
+    const enrich_chars_raw = input.enrich_chars_raw?.get(full_name);
     const readme_chars = input.readme_chars?.get(full_name) ?? 0;
     prompt_chars += result.prompt_chars;
     latency_ms_total += result.latency_ms;
     enrich_chars_total += enrich_chars;
+    if (enrich_chars_raw !== undefined) {
+      enrich_chars_raw_total += enrich_chars_raw;
+    }
     per_repo.push({
       full_name,
       input_tokens: result.usage?.input_tokens ?? 0,
@@ -143,6 +162,7 @@ export function buildTokenLogEntry(input: {
       prompt_chars: result.prompt_chars,
       latency_ms: result.latency_ms,
       enrich_chars,
+      enrich_chars_raw,
       readme_chars,
     });
   }
@@ -167,6 +187,15 @@ export function buildTokenLogEntry(input: {
       }
     : undefined;
 
+  const enrich_compress = input.enrich_compress
+    ? {
+        chars_before_total: input.enrich_compress.chars_before_total,
+        chars_after_total: input.enrich_compress.chars_after_total,
+        bundles_compressed: input.enrich_compress.bundles_compressed,
+        fallbacks: input.enrich_compress.fallbacks,
+      }
+    : undefined;
+
   return {
     logged_at: new Date().toISOString(),
     run_id: input.run_id,
@@ -182,11 +211,14 @@ export function buildTokenLogEntry(input: {
     input_tokens,
     output_tokens,
     humanizer_polish,
+    enrich_compress,
     output_words: per_repo.reduce((n, r) => n + r.output_words, 0),
     prompt_chars,
     latency_ms_total,
     latency_ms_avg: repos_narrated > 0 ? Math.round(latency_ms_total / repos_narrated) : 0,
     enrich_chars_total,
+    enrich_chars_raw_total:
+      input.enrich_compress && enrich_chars_raw_total > 0 ? enrich_chars_raw_total : undefined,
     estimated_usd: estimateNarrationCostUsd(input.model, totals.input_tokens, totals.output_tokens),
     chars_per_input_token: charsPerInputToken(prompt_chars, totals.input_tokens),
     rubric: input.rubric ? rubricSummaryFromEntry(input.rubric) : undefined,
