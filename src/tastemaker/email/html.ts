@@ -86,10 +86,6 @@ function bootstrapNotePlain(): string {
   return "Note: Rankings use recent momentum while 7-day star history matures. They'll sharpen after a week of daily snapshots.\n\n";
 }
 
-function githubHostLabel(fullName: string): string {
-  return `github.com/${fullName}`;
-}
-
 function emailGoLink(
   siteUrl: string,
   section: EditionId,
@@ -125,8 +121,6 @@ export function renderDigestEmailHtml(
       const topics = escapeHtml(formatTopics(repo.topics));
       const titleHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "title"));
       const buttonHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "button"));
-      const fallbackHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "url"));
-      const fallbackLabel = escapeHtml(githubHostLabel(repo.full_name));
 
       return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e7e5e4;">
         <h2 style="margin:0 0 6px;font-family:system-ui,sans-serif;font-size:18px;font-weight:600;color:#1c1917;">
@@ -136,16 +130,13 @@ export function renderDigestEmailHtml(
           ${formatStars(repo, digest.ranking_mode)} · ${topics}
         </p>
         <p style="margin:0 0 16px;font-family:Georgia,serif;font-size:16px;line-height:1.6;color:#292524;">${brief}</p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0 0 10px;">
+        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
           <tr>
             <td bgcolor="${BRAND_BUTTON}" style="background-color:${BRAND_BUTTON};border-radius:6px;">
               <a href="${buttonHref}" style="display:inline-block;padding:10px 16px;color:#ffffff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;">View on GitHub</a>
             </td>
           </tr>
         </table>
-        <p style="margin:0;font-family:system-ui,sans-serif;font-size:12px;color:#a8a29e;">
-          <a href="${fallbackHref}" style="color:#78716c;text-decoration:underline;">${fallbackLabel}</a>
-        </p>
       </div>`;
     })
     .join("\n");

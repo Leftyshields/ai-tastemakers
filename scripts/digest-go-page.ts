@@ -34,11 +34,12 @@ export function renderGoRedirectPage(
     body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #fafaf9; color: #1c1917; }
     main { max-width: 28rem; margin: 0 auto; text-align: center; }
     a { color: #1e40af; font-weight: 600; }
+    a:focus-visible { outline: 2px solid #1e40af; outline-offset: 3px; }
   </style>
 </head>
 <body>
   <main>
-    <p>Opening GitHub…</p>
+    <p>Opening GitHub</p>
     <p><a id="continue-link" href="${escapeHtml(homePath)}">Continue to GitHub</a></p>
   </main>
   <noscript>

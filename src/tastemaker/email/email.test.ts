@@ -105,14 +105,14 @@ describe("renderDigestEmailHtml", () => {
     expect(html).toContain("/briefings/2026-06-06.html");
   });
 
-  it("includes bulletproof View on GitHub button and github.com fallback through /go/", () => {
+  it("includes bulletproof View on GitHub button with /go/ tracking links", () => {
     const html = renderDigestEmailHtml(sampleDigest, "2026-06-06", "https://example.com/app");
     expect(html).toContain("View on GitHub");
     expect(html).toContain('bgcolor="#1e40af"');
-    expect(html).toContain("github.com/acme/demo");
     expect(html).toContain("/go/?");
     expect(html).toContain("target=button");
-    expect(html).toContain("target=url");
+    expect(html).toContain("target=title");
+    expect(html).not.toContain("font-size:12px;color:#a8a29e");
   });
 
   it("shows NEW badge for first-time picks", () => {
