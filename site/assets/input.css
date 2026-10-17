@@ -27,17 +27,15 @@
     @apply scroll-mt-20 font-sans text-lg font-semibold tracking-tight;
   }
 
-  .digest-repo-card__title-link {
-    position: relative;
-  }
-
   .digest-repo-card__title-link::after {
     content: "";
     position: absolute;
     inset: 0;
+    z-index: 0;
   }
 
-  .digest-repo-card__body a {
+  .digest-repo-card__body a,
+  .digest-repo-card__cta {
     position: relative;
     z-index: 1;
   }
