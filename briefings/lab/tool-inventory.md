@@ -1,6 +1,6 @@
 # Tool inventory — digest-featured candidates
 
-_Generated 2026-10-11T19:16:26.019Z from 274 briefing artifact(s)._
+_Generated 2026-10-18T16:36:10.176Z from 289 briefing artifact(s)._
 
 Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by capability and mapped to pipeline roles.
 
@@ -19,43 +19,43 @@ Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by
 
 | Repo | Appearances | Pipeline roles | Capability tags |
 |------|-------------|------------------|-----------------|
-| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 241 | editorial-quality | agent-skill |
+| [DietrichGebert/ponytail](https://github.com/DietrichGebert/ponytail) | 249 | editorial-quality | agent-skill |
+| [Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) | 153 | agent-tooling, context-enrichment, editorial-quality, multi-source-search | agent-skill, mcp, search |
 | [diegosouzapw/OmniRoute](https://github.com/diegosouzapw/OmniRoute) | 152 | agent-tooling, compaction, editorial-quality, token-optimization | agent-skill, compression, mcp |
-| [Panniantong/Agent-Reach](https://github.com/Panniantong/Agent-Reach) | 152 | agent-tooling, context-enrichment, editorial-quality, multi-source-search | agent-skill, mcp, search |
 | [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) | 150 | cross-run-memory | memory |
-| [affaan-m/ECC](https://github.com/affaan-m/ECC) | 102 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
-| [stablyai/orca](https://github.com/stablyai/orca) | 94 | editorial-quality | agent-skill |
-| [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | 88 | editorial-quality | agent-skill |
-| [calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) | 76 | editorial-quality | agent-skill |
+| [affaan-m/ECC](https://github.com/affaan-m/ECC) | 107 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
+| [stablyai/orca](https://github.com/stablyai/orca) | 95 | editorial-quality | agent-skill |
+| [Leonxlnx/taste-skill](https://github.com/Leonxlnx/taste-skill) | 89 | editorial-quality | agent-skill |
+| [calesthio/OpenMontage](https://github.com/calesthio/OpenMontage) | 77 | editorial-quality | agent-skill |
 | [Graphify-Labs/graphify](https://github.com/Graphify-Labs/graphify) | 75 | agent-tooling, editorial-quality | agent-skill, mcp |
 | [DeusData/codebase-memory-mcp](https://github.com/DeusData/codebase-memory-mcp) | 58 | agent-tooling, cross-run-memory, editorial-quality | agent-skill, mcp, memory |
-| [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | 56 | editorial-quality | agent-skill |
-| [farion1231/cc-switch](https://github.com/farion1231/cc-switch) | 54 | agent-tooling, editorial-quality | agent-skill, mcp |
+| [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) | 57 | editorial-quality | agent-skill |
+| [farion1231/cc-switch](https://github.com/farion1231/cc-switch) | 55 | agent-tooling, editorial-quality | agent-skill, mcp |
 | [firecrawl/firecrawl](https://github.com/firecrawl/firecrawl) | 52 | context-enrichment, multi-source-search | search |
 | [addyosmani/agent-skills](https://github.com/addyosmani/agent-skills) | 50 | editorial-quality | agent-skill |
 | [nextlevelbuilder/ui-ux-pro-max-skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill) | 47 | editorial-quality | agent-skill |
-| [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book) | 42 | agent-tooling, cross-run-memory | mcp, memory |
+| [bojieli/ai-agent-book](https://github.com/bojieli/ai-agent-book) | 43 | agent-tooling, cross-run-memory | mcp, memory |
 | [asgeirtj/system_prompts_leaks](https://github.com/asgeirtj/system_prompts_leaks) | 34 | experiment-framework | eval |
 | [guillaumemeyer/watermarks-remover](https://github.com/guillaumemeyer/watermarks-remover) | 33 | editorial-quality | agent-skill |
 | [rohitg00/ai-engineering-from-scratch](https://github.com/rohitg00/ai-engineering-from-scratch) | 33 | agent-tooling | mcp |
 | [mvanhorn/last30days-skill](https://github.com/mvanhorn/last30days-skill) | 31 | context-enrichment, editorial-quality, multi-source-search, usage-measurement | agent-skill, analytics, search |
-| [K-Dense-AI/scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills) | 29 | context-enrichment, editorial-quality, multi-source-search | agent-skill, search |
+| [K-Dense-AI/scientific-agent-skills](https://github.com/K-Dense-AI/scientific-agent-skills) | 30 | context-enrichment, editorial-quality, multi-source-search | agent-skill, search |
 | [blader/humanizer](https://github.com/blader/humanizer) | 28 | editorial-quality | agent-skill |
 | [chopratejas/headroom](https://github.com/chopratejas/headroom) | 28 | agent-tooling, compaction, cross-run-memory, editorial-quality, token-optimization | agent-skill, compression, mcp, memory |
+| [heygen-com/hyperframes](https://github.com/heygen-com/hyperframes) | 28 | agent-tooling, editorial-quality | agent-skill, mcp |
 | [headroomlabs-ai/headroom](https://github.com/headroomlabs-ai/headroom) | 27 | agent-tooling, compaction, editorial-quality, token-optimization | agent-skill, compression, mcp |
-| [elder-plinius/CL4R1T4S](https://github.com/elder-plinius/CL4R1T4S) | 24 | experiment-framework | eval |
 
 ## Role matrix
 
 ### agent-tooling
 
+- **Panniantong/Agent-Reach** — 153 appearances (2026-06-07 → 2026-10-18)
 - **diegosouzapw/OmniRoute** — 152 appearances (2026-07-01 → 2026-10-11) _(watch)_
-- **Panniantong/Agent-Reach** — 152 appearances (2026-06-07 → 2026-10-11)
-- **affaan-m/ECC** — 102 appearances (2026-06-14 → 2026-10-11) _(queued)_
+- **affaan-m/ECC** — 107 appearances (2026-06-14 → 2026-10-18) _(queued)_
 - **Graphify-Labs/graphify** — 75 appearances (2026-07-08 → 2026-10-11) _(adopted)_
 - **DeusData/codebase-memory-mcp** — 58 appearances (2026-06-12 → 2026-10-01)
-- **farion1231/cc-switch** — 54 appearances (2026-06-14 → 2026-10-10)
-- **bojieli/ai-agent-book** — 42 appearances (2026-07-18 → 2026-10-06)
+- **farion1231/cc-switch** — 55 appearances (2026-06-14 → 2026-10-16)
+- **bojieli/ai-agent-book** — 43 appearances (2026-07-18 → 2026-10-13)
 - **rohitg00/ai-engineering-from-scratch** — 33 appearances (2026-06-07 → 2026-10-11)
 
 ### compaction
@@ -63,43 +63,43 @@ Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by
 - **diegosouzapw/OmniRoute** — 152 appearances (2026-07-01 → 2026-10-11) _(watch)_
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
 - **headroomlabs-ai/headroom** — 27 appearances (2026-06-24 → 2026-09-23)
-- **TencentCloud/TencentDB-Agent-Memory** — 20 appearances (2026-07-13 → 2026-08-23)
+- **TencentCloud/TencentDB-Agent-Memory** — 21 appearances (2026-07-13 → 2026-10-13)
 - **tirth8205/code-review-graph** — 17 appearances (2026-07-20 → 2026-08-02)
-- **hugohe3/ppt-master** — 13 appearances (2026-06-09 → 2026-10-10)
+- **hugohe3/ppt-master** — 14 appearances (2026-06-09 → 2026-10-18)
 - **lyogavin/airllm** — 10 appearances (2026-08-03 → 2026-10-11)
-- **rtk-ai/rtk** — 9 appearances (2026-06-08 → 2026-10-04)
+- **mksglu/context-mode** — 9 appearances (2026-06-10 → 2026-10-18)
 
 ### context-enrichment
 
-- **Panniantong/Agent-Reach** — 152 appearances (2026-06-07 → 2026-10-11)
+- **Panniantong/Agent-Reach** — 153 appearances (2026-06-07 → 2026-10-18)
 - **firecrawl/firecrawl** — 52 appearances (2026-06-14 → 2026-10-11) _(adopted)_
 - **mvanhorn/last30days-skill** — 31 appearances (2026-06-07 → 2026-09-19)
-- **K-Dense-AI/scientific-agent-skills** — 29 appearances (2026-08-28 → 2026-10-11)
+- **K-Dense-AI/scientific-agent-skills** — 30 appearances (2026-08-28 → 2026-10-14)
+- **MadsLorentzen/ai-job-search** — 21 appearances (2026-07-15 → 2026-10-12)
 - **santifer/career-ops** — 21 appearances (2026-06-07 → 2026-08-30)
-- **MadsLorentzen/ai-job-search** — 20 appearances (2026-07-15 → 2026-09-24)
+- **lexmount/moli** — 16 appearances (2026-10-01 → 2026-10-18)
 - **D4Vinci/Scrapling** — 14 appearances (2026-06-09 → 2026-10-11)
-- **rocketride-org/rocketride-server** — 12 appearances (2026-09-23 → 2026-10-04)
 
 ### cross-run-memory
 
 - **NousResearch/hermes-agent** — 150 appearances (2026-06-14 → 2026-10-11) _(queued)_
-- **affaan-m/ECC** — 102 appearances (2026-06-14 → 2026-10-11) _(queued)_
+- **affaan-m/ECC** — 107 appearances (2026-06-14 → 2026-10-18) _(queued)_
 - **DeusData/codebase-memory-mcp** — 58 appearances (2026-06-12 → 2026-10-01)
-- **bojieli/ai-agent-book** — 42 appearances (2026-07-18 → 2026-10-06)
+- **bojieli/ai-agent-book** — 43 appearances (2026-07-18 → 2026-10-13)
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
-- **TencentCloud/TencentDB-Agent-Memory** — 20 appearances (2026-07-13 → 2026-08-23)
+- **TencentCloud/TencentDB-Agent-Memory** — 21 appearances (2026-07-13 → 2026-10-13)
 - **mukul975/Anthropic-Cybersecurity-Skills** — 18 appearances (2026-06-09 → 2026-09-26)
 - **tirth8205/code-review-graph** — 17 appearances (2026-07-20 → 2026-08-02)
 
 ### editorial-quality
 
-- **DietrichGebert/ponytail** — 241 appearances (2026-06-13 → 2026-10-11) _(adopted)_
+- **DietrichGebert/ponytail** — 249 appearances (2026-06-13 → 2026-10-18) _(adopted)_
+- **Panniantong/Agent-Reach** — 153 appearances (2026-06-07 → 2026-10-18)
 - **diegosouzapw/OmniRoute** — 152 appearances (2026-07-01 → 2026-10-11) _(watch)_
-- **Panniantong/Agent-Reach** — 152 appearances (2026-06-07 → 2026-10-11)
-- **affaan-m/ECC** — 102 appearances (2026-06-14 → 2026-10-11) _(queued)_
-- **stablyai/orca** — 94 appearances (2026-06-28 → 2026-10-04)
-- **Leonxlnx/taste-skill** — 88 appearances (2026-06-07 → 2026-10-07)
-- **calesthio/OpenMontage** — 76 appearances (2026-06-24 → 2026-10-04)
+- **affaan-m/ECC** — 107 appearances (2026-06-14 → 2026-10-18) _(queued)_
+- **stablyai/orca** — 95 appearances (2026-06-28 → 2026-10-18)
+- **Leonxlnx/taste-skill** — 89 appearances (2026-06-07 → 2026-10-12)
+- **calesthio/OpenMontage** — 77 appearances (2026-06-24 → 2026-10-18)
 - **Graphify-Labs/graphify** — 75 appearances (2026-07-08 → 2026-10-11) _(adopted)_
 
 ### experiment-framework
@@ -107,7 +107,7 @@ Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by
 - **asgeirtj/system_prompts_leaks** — 34 appearances (2026-06-22 → 2026-09-28)
 - **elder-plinius/CL4R1T4S** — 24 appearances (2026-06-12 → 2026-09-28)
 - **can1357/oh-my-pi** — 22 appearances (2026-06-08 → 2026-10-11)
-- **TauricResearch/TradingAgents** — 13 appearances (2026-08-13 → 2026-10-03)
+- **TauricResearch/TradingAgents** — 14 appearances (2026-08-13 → 2026-10-18)
 - **Zackriya-Solutions/meetily** — 9 appearances (2026-08-26 → 2026-09-06)
 - **safishamsi/graphify** — 5 appearances (2026-06-15 → 2026-07-03)
 - **Imbad0202/academic-research-skills-codex** — 4 appearances (2026-06-08 → 2026-09-17)
@@ -115,25 +115,25 @@ Repos surfaced repeatedly in daily, weekly, and monthly briefings, classified by
 
 ### multi-source-search
 
-- **Panniantong/Agent-Reach** — 152 appearances (2026-06-07 → 2026-10-11)
+- **Panniantong/Agent-Reach** — 153 appearances (2026-06-07 → 2026-10-18)
 - **firecrawl/firecrawl** — 52 appearances (2026-06-14 → 2026-10-11) _(adopted)_
 - **mvanhorn/last30days-skill** — 31 appearances (2026-06-07 → 2026-09-19)
-- **K-Dense-AI/scientific-agent-skills** — 29 appearances (2026-08-28 → 2026-10-11)
+- **K-Dense-AI/scientific-agent-skills** — 30 appearances (2026-08-28 → 2026-10-14)
+- **MadsLorentzen/ai-job-search** — 21 appearances (2026-07-15 → 2026-10-12)
 - **santifer/career-ops** — 21 appearances (2026-06-07 → 2026-08-30)
-- **MadsLorentzen/ai-job-search** — 20 appearances (2026-07-15 → 2026-09-24)
+- **lexmount/moli** — 16 appearances (2026-10-01 → 2026-10-18)
 - **D4Vinci/Scrapling** — 14 appearances (2026-06-09 → 2026-10-11)
-- **rocketride-org/rocketride-server** — 12 appearances (2026-09-23 → 2026-10-04)
 
 ### token-optimization
 
 - **diegosouzapw/OmniRoute** — 152 appearances (2026-07-01 → 2026-10-11) _(watch)_
 - **chopratejas/headroom** — 28 appearances (2026-06-07 → 2026-06-21)
 - **headroomlabs-ai/headroom** — 27 appearances (2026-06-24 → 2026-09-23)
-- **TencentCloud/TencentDB-Agent-Memory** — 20 appearances (2026-07-13 → 2026-08-23)
+- **TencentCloud/TencentDB-Agent-Memory** — 21 appearances (2026-07-13 → 2026-10-13)
 - **tirth8205/code-review-graph** — 17 appearances (2026-07-20 → 2026-08-02)
-- **hugohe3/ppt-master** — 13 appearances (2026-06-09 → 2026-10-10)
+- **hugohe3/ppt-master** — 14 appearances (2026-06-09 → 2026-10-18)
 - **lyogavin/airllm** — 10 appearances (2026-08-03 → 2026-10-11)
-- **rtk-ai/rtk** — 9 appearances (2026-06-08 → 2026-10-04)
+- **mksglu/context-mode** — 9 appearances (2026-06-10 → 2026-10-18)
 
 ### usage-measurement
 

@@ -1,0 +1,189 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W42",
+  "week_start": "2026-10-12",
+  "week_end": "2026-10-18",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 44,
+      "skills": 40
+    },
+    "total_stars_gained": {
+      "oss": 369266,
+      "skills": 409312
+    },
+    "top_topics": {
+      "oss": [
+        "llm",
+        "ai-agents",
+        "claude-code",
+        "mcp",
+        "developer-tools"
+      ],
+      "skills": [
+        "claude-code",
+        "agent-skills",
+        "codex",
+        "ai-agents",
+        "mcp"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "lexmount/moli",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "yetone/magpie",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "DuarteSantos8/openGym",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "cathrynlavery/diagram-design",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "eternity4719/HowToLiveBetter",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "wheresryan22/anatomy",
+          "days_appeared": 3
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "Imbad0202/academic-research-skills",
+      "Ryze-AI-Adgent/open-seo-mcp-skills",
+      "affaan-m/ECC",
+      "anthropics/claude-plugins-official",
+      "career-ops-hq/career-ops",
+      "mksglu/context-mode",
+      "morluto/rea",
+      "ruvnet/ruflo",
+      "thedotmack/claude-mem",
+      "yetone/magpie"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 1597089,
+          "days_appeared": 7,
+          "excerpt": "REA is an MCP server (a standardized bridge between AI agents and external tools) that lets agents like Claude Code, Cursor, and Codex reverse-engineer closed-source software — native binaries, Electron apps, .NET assemblies, websites — by delegating decompilation to Hopper, Ghidra, or IDA."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 45051,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript agent skill that steers AI coding agents (Claude Code, Cursor, and ~18 others) toward YAGNI-style decisions — generating less code, fewer tokens, and higher test coverage for risky logic compared to the same agent running without it."
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "total_stars_gained": 31620,
+          "days_appeared": 4,
+          "excerpt": "A zero-config dsh plugin that routes requests to frontier models — DeepSeek V4.1 Flash, Kimi K3, and others — through the OpenCode Zen and Kilo AI public gateways with no account, API key, or usage cap required."
+        },
+        {
+          "full_name": "lexmount/moli",
+          "total_stars_gained": 28775,
+          "days_appeared": 4,
+          "excerpt": "Moli is a Rust-based headless browser built specifically for AI agents, offering on-demand layout and rendering with CLI, CDP, WebDriver Classic, and WebDriver BiDi interfaces — covering the control surfaces most agent frameworks already expect."
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "total_stars_gained": 23770,
+          "days_appeared": 4,
+          "excerpt": "HyperFrames is an open-source TypeScript framework that converts HTML, CSS, and seekable GSAP animations into deterministic MP4 videos via Puppeteer and FFmpeg, controllable through a CLI, MCP, or AI coding agent skills."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 1597289,
+          "days_appeared": 7,
+          "excerpt": "REA is an MCP server (a standardized bridge between AI agents and external tools) that connects Claude Code, Cursor, and Codex to reverse-engineering tools like Hopper, Ghidra, and IDA, letting agents inspect native binaries, Electron apps, .NET assemblies, and JavaScript without source code."
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "total_stars_gained": 85690,
+          "days_appeared": 7,
+          "excerpt": "A collection of small, composable agent skill files for Claude Code, Codex, Copilot, and others that guide coding agents through structured workflows — triaging tickets, generating specs — without handing over process control to a heavier framework."
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "total_stars_gained": 83491,
+          "days_appeared": 6,
+          "excerpt": "VoiceStudio is a fully local, open-source desktop app for voice cloning, video dubbing, dictation, transcription, and audiobook generation across 646 languages, powered by k2-fsa/OmniVoice with a swappable engine catalog."
+        },
+        {
+          "full_name": "eternity4719/HowToLiveBetter",
+          "total_stars_gained": 81587,
+          "days_appeared": 6,
+          "excerpt": "A Chinese-language life-optimization reference covering health, law, finance, and social policy across 687 prioritized tips, each citing peer-reviewed journals or official documents with graded evidence levels (A/B/C)."
+        },
+        {
+          "full_name": "cathrynlavery/diagram-design",
+          "total_stars_gained": 69569,
+          "days_appeared": 7,
+          "excerpt": "An agent skill that generates self-contained HTML + SVG diagram files across 45 diagram types, styled to your brand's palette and fonts, installable in Cursor, Claude Code, Codex, Copilot, and others via `npx skills add cathrynlavery/diagram-design`."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant story of the week is the accelerating specialization of AI coding agents: developers are no longer just using agents to write code, they are equipping them with purpose-built \"skills\" and server bridges that let agents interact with external tools, render video, clone voices, and even reverse-engineer compiled software. The project drawing the most sustained attention — morluto/rea, an MCP server that connects agents to professional reverse-engineering tools like Ghidra and IDA — signals that AI agents are being adopted inside security, compliance, and legacy-system teams, not just greenfield development. A parallel trend is the rise of lightweight skill files (small instruction sets dropped into an agent's context) as an alternative to heavyweight orchestration frameworks, lowering the bar to standardize how AI agents behave across a whole engineering org. Teams that have not yet defined a policy for agent skills — what agents are permitted to do, and how — should treat that as a near-term governance gap. The watch item for Q4: whether MCP (the standardized protocol connecting agents to external tools) consolidates further as a de facto integration layer, or fragments as competing agent platforms assert proprietary alternatives.",
+    "generalist": "The builder stack moved in two directions simultaneously this week: deeper tool integration and leaner control primitives. On the integration side, morluto/rea emerged as the most-watched project — it is an MCP server that hands AI coding agents like Claude Code and Cursor a direct interface into professional reverse-engineering tools (Ghidra, Hopper, IDA), enabling agents to reason about compiled binaries, Electron apps, and .NET assemblies without source code. Alongside it, lexmount/moli offers a Rust-built headless browser designed from the ground up for agent use, exposing the control surfaces (CDP, WebDriver BiDi) that agent frameworks already speak. On the infrastructure side, Ebony-Vinyl/dsh-our-free-model gained traction fast by solving a practical friction point: routing agent requests to capable frontier models through public gateways with no signup or API key required.\n\nThe leaner-control thread is equally notable. mattpocock/skills and cathrynlavery/diagram-design both exemplify the \"skill file\" pattern — small, composable instruction sets that nudge agents toward specific workflows (ticket triage, spec generation, diagram rendering) without requiring a new framework or runtime. DietrichGebert/ponytail takes this further by steering agents toward YAGNI-style discipline, actively reducing generated code volume and token use. Taken together, these projects suggest the community is converging on a model where agents are general-purpose runtimes and behavior is shaped by layered, swappable skills rather than monolithic prompts or hardcoded pipelines.",
+    "statistician": "The ranking mode this week is `delta_7d` — seven-day star momentum — which means projects that appeared every day of the window (like morluto/rea and DietrichGebert/ponytail) accumulate totals that reflect sustained viral spread rather than a single spike, so treat their figures as a ceiling for week-long compounding rather than a literal one-day event. The cross-edition overlap list (ten repos appearing in both the OSS and skills editions) is unusually long, suggesting a cohort of projects that are genuinely dual-natured — infrastructure tools that also ship usable agent skills — rather than miscategorized entries. Star totals for morluto/rea are notably large relative to the rest of the field; treat that outlier as a signal of category interest (agent-assisted reverse engineering) more than a precise popularity benchmark."
+  },
+  "email": {
+    "verdict": "One repo absorbed almost all the oxygen this week, and it was not a framework or a model: it was a bridge that lets AI agents read software they were never given the source code for.",
+    "body": "[REA](https://github.com/morluto/rea), an MCP server (a standardized bridge between AI agents and external tools) that lets coding agents like Claude Code, Cursor, and Codex hand decompilation work to Hopper, Ghidra, or IDA, topped both AI Tastemakers and Skill Tastemakers every single day from Monday through Sunday. That kind of sustained dominance across both lists is unusual. The pull is clear: reverse engineering has historically required specialist tooling and specialist people, and REA collapses that into a task an agent can just do.\n\nTwo other repos add texture to what the week was actually about. [Ponytail](https://github.com/DietrichGebert/ponytail), a JavaScript agent skill that nudges coding agents toward writing less code and fewer tokens while increasing test coverage for risky logic, held AI Tastemakers all seven days. It is not a new capability; it is a constraint, and that is the point. As agents get more autonomous, the appetite for mechanisms that keep their output lean is growing.\n\n[Moli](https://github.com/lexmount/moli), a Rust-based headless browser built for agents rather than humans, offering CLI, CDP, and WebDriver interfaces, also drew sustained attention. Agents need to navigate the web like programs, not like people. A browser designed for that from the start is a different thing than Playwright with a wrapper.\n\nThe shape of this week: attention concentrated not on models or chat interfaces but on the layer where agents touch the world as it already exists. Closed binaries, constrained output, browser surfaces. If you are building agent systems, that is the layer to watch."
+  },
+  "generated_at": "2026-10-18T16:35:35.238Z"
+}
