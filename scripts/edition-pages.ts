@@ -11,6 +11,7 @@ import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.
 import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experiments.js";
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import { renderTokenUsagePage } from "./lab/render-token-usage.js";
+import { renderLabDashboardHtml, writeLabPublicArtifacts } from "./lab/build-lab-public.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -1591,14 +1592,18 @@ export async function buildLabSite(
 
   const labShell = { labLayout: true as const };
 
+  const labPublic = writeLabPublicArtifacts(repoRoot, labSiteDir);
+  const dashboardHtml = renderLabDashboardHtml(labPublic, escapeHtml);
+
   const labIndexMd = path.join(repoRoot, "briefings", "lab", "index.md");
-  let indexBody = `${labNavHtml("home", escapeHtml)}`;
+  let indexBody = `${labNavHtml("home", escapeHtml)}
+    ${dashboardHtml}`;
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
     const html = renderSafeMarkdown(markdown);
-    indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
+    indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans mt-10">${html}</article>`;
   } catch {
-    indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans">
+    indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">
       <p>Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>
     </section>`;
   }

@@ -21,6 +21,7 @@ Shadow runs let us preview enriched blurbs side-by-side with production output b
 
 - **[Tool inventory](tools.html)** — repos that appeared in briefing history, tagged by pipeline role (search, compaction, eval, analytics). Candidates for adoption, not endorsements.
 - **[Experiments](experiments.html)** — what we tested, what is live on the site today, and what is on hold. Written for readers first.
+- **Control panel, timeline, backlog, and history** on this page (from `lab/experiments.public.json` at build time).
 - **[Token usage](token-usage.html)** — how much it costs to write each digest, and whether the writing still passes a quality check.
 - **[Posts](posts/)** — short stories when we try a digest-featured tool in our own stack.
 - **[Shadow rubric](shadow-rubric.html)** — how we score “before” vs “after” blurbs before a change stays on.
