@@ -6,6 +6,21 @@ export type LabSurface = "digest_ui" | "narration_oss" | "narration_skills" | "e
 
 export type LabExperimentStatus = "planned" | "running" | "done";
 export type LabVerdict = "ship" | "revert" | "inconclusive";
+export type LabMetricDirection = "increase" | "decrease";
+
+export interface LabSuccessMetric {
+  posthog: string;
+  direction: LabMetricDirection;
+  baseline: number | null;
+  target: number;
+  pass_threshold: string;
+}
+
+export interface LabSuccess {
+  success_criteria: string;
+  metric: LabSuccessMetric;
+  guessed?: boolean;
+}
 
 export interface PostHogEndSnapshot {
   captured_at?: string | null;
@@ -32,6 +47,7 @@ export interface LabExperimentEntry {
   result_summary?: string | null;
   verdict?: LabVerdict | null;
   posthog_snapshot_at_end?: PostHogEndSnapshot | null;
+  success: LabSuccess;
 }
 
 export interface LabExperimentsFile {
@@ -40,9 +56,76 @@ export interface LabExperimentsFile {
 }
 
 export interface ValidationIssue {
-  code: "overlap" | "depends_order" | "min_read_days" | "schema";
+  code: "overlap" | "depends_order" | "min_read_days" | "schema" | "success";
   message: string;
   experiment_ids?: string[];
+}
+
+const METRIC_DIRECTIONS: LabMetricDirection[] = ["increase", "decrease"];
+
+export function validateSuccessBlock(exp: LabExperimentEntry): ValidationIssue[] {
+  const issues: ValidationIssue[] = [];
+  const success = exp.success;
+  if (!success || typeof success !== "object") {
+    issues.push({
+      code: "success",
+      message: `Missing success object on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+    return issues;
+  }
+  if (!success.success_criteria?.trim()) {
+    issues.push({
+      code: "success",
+      message: `Missing success.success_criteria on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  const m = success.metric;
+  if (!m || typeof m !== "object") {
+    issues.push({
+      code: "success",
+      message: `Missing success.metric on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+    return issues;
+  }
+  if (!m.posthog?.trim()) {
+    issues.push({
+      code: "success",
+      message: `Missing success.metric.posthog on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (!METRIC_DIRECTIONS.includes(m.direction)) {
+    issues.push({
+      code: "success",
+      message: `Invalid success.metric.direction on '${exp.id}' (use increase or decrease).`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (m.target == null || !Number.isFinite(Number(m.target))) {
+    issues.push({
+      code: "success",
+      message: `Missing or invalid success.metric.target on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (m.baseline != null && !Number.isFinite(Number(m.baseline))) {
+    issues.push({
+      code: "success",
+      message: `Invalid success.metric.baseline on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (!m.pass_threshold?.trim()) {
+    issues.push({
+      code: "success",
+      message: `Missing success.metric.pass_threshold on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  return issues;
 }
 
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
@@ -113,6 +196,8 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
         experiment_ids: [exp.id],
       });
     }
+    issues.push(...validateSuccessBlock(exp));
+
     if (exp.verdict != null && !VERDICTS.includes(exp.verdict)) {
       issues.push({
         code: "schema",

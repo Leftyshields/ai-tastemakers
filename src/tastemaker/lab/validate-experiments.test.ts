@@ -5,8 +5,10 @@ import { fileURLToPath } from "node:url";
 import { listArchivedExperimentIds, listExperimentIds } from "../experiments/load.js";
 import {
   validateExperimentsFile,
+  validateSuccessBlock,
   inclusiveDaySpan,
   type LabExperimentsFile,
+  type LabExperimentEntry,
 } from "../../../scripts/lab/validate-experiments.js";
 import { buildLabPublicFile } from "../../../scripts/lab/build-lab-public.js";
 
@@ -64,5 +66,46 @@ describe("lab/experiments.json", () => {
 describe("inclusiveDaySpan", () => {
   it("counts inclusive calendar days", () => {
     expect(inclusiveDaySpan("2026-11-01", "2026-11-08")).toBe(8);
+  });
+});
+
+describe("validateSuccessBlock", () => {
+  const base: LabExperimentEntry = {
+    id: "EXP-test",
+    label: "Test",
+    surface: "narration_skills",
+    metric: "m",
+    start: "2026-01-01",
+    end: "2026-01-07",
+    min_read_days: 7,
+    depends_on: [],
+    status: "planned",
+    success: {
+      success_criteria: "Ship it.",
+      metric: {
+        posthog: "event:outbound_repo_click?edition=skills",
+        direction: "increase",
+        baseline: 1,
+        target: 2,
+        pass_threshold: "≥10% lift",
+      },
+    },
+  };
+
+  it("flags missing posthog ref", () => {
+    const issues = validateSuccessBlock({
+      ...base,
+      success: {
+        success_criteria: "x",
+        metric: {
+          posthog: "",
+          direction: "increase",
+          baseline: null,
+          target: 1,
+          pass_threshold: "p",
+        },
+      },
+    });
+    expect(issues.some((i) => i.code === "success")).toBe(true);
   });
 });

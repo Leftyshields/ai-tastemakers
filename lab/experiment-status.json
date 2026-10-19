@@ -8,5 +8,6 @@
   "discrepancies": [],
   "posthog_experiments": [],
   "matched": [],
-  "live": {}
+  "live": {},
+  "metrics": {}
 }

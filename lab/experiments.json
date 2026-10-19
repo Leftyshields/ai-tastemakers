@@ -23,7 +23,18 @@
         "captured_at": null,
         "note": "Formal PostHog experiment not linked; snapshot from imported CSV only."
       },
-      "note": "Treatment window; baseline 2026-06-28 to 2026-07-11."
+      "note": "Treatment window; baseline 2026-06-28 to 2026-07-11.",
+      "success": {
+        "success_criteria": "Post-rank web/HN enrichment lifts Skills outbound repo clicks during the treatment window without a material drop in Skills briefing pageviews.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "increase",
+          "baseline": null,
+          "target": 120,
+          "pass_threshold": "Treatment window aggregate outbound_repo_click (edition=skills) ≥ baseline window; qualitative review that Why-now hooks cite enrich sources."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260701-landing-layout",
@@ -40,7 +51,18 @@
       "result_summary": "Shipped layout v2 without completing formal before/after measurement.",
       "verdict": "ship",
       "posthog_snapshot_at_end": null,
-      "note": "SITE_LANDING_LAYOUT_V2 in Pages build."
+      "note": "SITE_LANDING_LAYOUT_V2 in Pages build.",
+      "success": {
+        "success_criteria": "Homepage layout v2 raises homepage_index_click and index pageviews vs the baseline window without increasing bounce on /index.html or /skills/index.html.",
+        "metric": {
+          "posthog": "event:homepage_index_click",
+          "direction": "increase",
+          "baseline": null,
+          "target": 80,
+          "pass_threshold": "Treatment aggregate homepage_index_click ≥ baseline aggregate (playbook export)."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260716-firecrawl-enrich-skills",
@@ -57,7 +79,18 @@
       "result_summary": "Firecrawl provider shipped for Skills web enrich.",
       "verdict": "ship",
       "posthog_snapshot_at_end": null,
-      "note": "Shipped 2026-08-01."
+      "note": "Shipped 2026-08-01.",
+      "success": {
+        "success_criteria": "Firecrawl web enrich matches or beats Jina/HN shadow rubric on specificity, accuracy, and timely hooks on Skills shadow runs.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "increase",
+          "baseline": null,
+          "target": 60,
+          "pass_threshold": "Shadow rubric pass on ≥90% of reviewed repos; outbound_repo_click tracked as secondary (sparse traffic)."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260715-soft-dedup-diversity-skills",
@@ -74,7 +107,18 @@
       "result_summary": "Overlap down to 37.5% vs 70% baseline; kept tighter soft dedup.",
       "verdict": "ship",
       "posthog_snapshot_at_end": null,
-      "note": "Treatment window; baseline 2026-08-30 to 2026-09-12."
+      "note": "Treatment window; baseline 2026-08-30 to 2026-09-12.",
+      "success": {
+        "success_criteria": "Stronger soft-dedup cuts consecutive-day top-10 overlap by ≥15 percentage points vs the 70% baseline while keeping weekly unique repos and NEW share in the top 10 at or above baseline.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "decrease",
+          "baseline": 70,
+          "target": 55,
+          "pass_threshold": "digest.json mean consecutive-day overlap ≤55% (≥15pp below 70% baseline); PostHog clicks secondary per playbook."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260802-ponytail-narration-skills",
@@ -91,7 +135,18 @@
       "result_summary": "Treatment cut output about 18% with rubric pass held.",
       "verdict": "ship",
       "posthog_snapshot_at_end": null,
-      "note": "Treatment window; baseline 2026-08-02 to 2026-08-16."
+      "note": "Treatment window; baseline 2026-08-02 to 2026-08-16.",
+      "success": {
+        "success_criteria": "Ponytail narration cuts average output tokens per repo by ≥15% vs baseline with rank-1 rubric pass rate ≥95% and Why-now still citing timely hooks.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "decrease",
+          "baseline": 2005,
+          "target": 1650,
+          "pass_threshold": "Lab token log: ≥15% lower avg output tokens vs baseline (~2005) with rubric pass ≥95%; PostHog series is secondary monitoring."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260913-humanizer-polish-skills",
@@ -110,7 +165,18 @@
       "status": "running",
       "experiment_key": "EXP-20260913-humanizer-polish-skills",
       "posthog_flag": null,
-      "note": "Treatment window; baseline 2026-09-27 to 2026-10-10. DIGEST_HUMANIZER_POLISH; PR #32 merged."
+      "note": "Treatment window; baseline 2026-09-27 to 2026-10-10. DIGEST_HUMANIZER_POLISH; PR #32 merged.",
+      "success": {
+        "success_criteria": "Post-narration Humanizer polish improves human-sounding quality on OSS and Skills blurbs without hurting specificity, Why-now, or factual accuracy (editorial rubric + spot-check). Do not gate on PostHog CTR.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "increase",
+          "baseline": 3,
+          "target": 5,
+          "pass_threshold": "Rubric avg ≥4.0 on specificity, why-now, and accuracy on treatment runs; human-sounding spot-check pass. PostHog daily count is monitoring only."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "POLICY-DIGEST-UI-FREEZE",
@@ -126,7 +192,18 @@
       "status": "planned",
       "experiment_key": "POLICY-DIGEST-UI-FREEZE",
       "posthog_flag": null,
-      "note": "Baseline observation through 2026-11-08; extension through caveman readout tbd."
+      "note": "Baseline observation through 2026-11-08; extension through caveman readout tbd.",
+      "success": {
+        "success_criteria": "No digest UI or Pages layout changes during the freeze window so caveman compression and rubric reads stay unbiased.",
+        "metric": {
+          "posthog": "event:homepage_index_click",
+          "direction": "increase",
+          "baseline": 12,
+          "target": 12,
+          "pass_threshold": "Daily homepage_index_click stays within ±25% of baseline average; zero shipped digest_ui changes in git during the window."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260913-caveman-compress-skills",
@@ -145,7 +222,18 @@
       "status": "planned",
       "experiment_key": "EXP-20260913-caveman-compress-skills",
       "posthog_flag": null,
-      "note": "DIGEST_ENRICH_COMPRESS; PR #33 draft."
+      "note": "DIGEST_ENRICH_COMPRESS; PR #33 draft.",
+      "success": {
+        "success_criteria": "DIGEST_ENRICH_COMPRESS lowers enrich input and output tokens vs baseline without dropping rank-1 rubric pass rate or Why-now quality (both editions).",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "decrease",
+          "baseline": 1600,
+          "target": 1300,
+          "pass_threshold": "≥15% lower avg enrich input tokens vs baseline with rubric pass ≥95%; PostHog outbound_repo_click secondary."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260913-whynow-memory-skills",
@@ -163,7 +251,18 @@
       ],
       "status": "planned",
       "experiment_key": "EXP-20260913-whynow-memory-skills",
-      "posthog_flag": null
+      "posthog_flag": null,
+      "success": {
+        "success_criteria": "Why-now memory reduces lexical overlap with prior briefs on repeat repos while keeping why-now rubric score and accuracy at or above baseline.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "increase",
+          "baseline": 3.7,
+          "target": 4.2,
+          "pass_threshold": "Why-now rubric avg ≥4.0 on repeat repos with ≥20% lower hook overlap vs baseline; PostHog clicks secondary."
+        },
+        "guessed": true
+      }
     },
     {
       "id": "EXP-20260913-rank-bootstrap-skills",
@@ -182,7 +281,18 @@
       "status": "planned",
       "experiment_key": "EXP-20260913-rank-bootstrap-skills",
       "posthog_flag": null,
-      "note": "Bootstrap flag values tbd after baseline review."
+      "note": "Bootstrap flag values tbd after baseline review.",
+      "success": {
+        "success_criteria": "Tighter bootstrap max-stars guards improve list quality and day-over-day top-10 stability during bootstrap-like weeks without hiding real momentum picks.",
+        "metric": {
+          "posthog": "event:outbound_repo_click?edition=skills",
+          "direction": "decrease",
+          "baseline": 65,
+          "target": 45,
+          "pass_threshold": "Mean consecutive-day top-10 overlap down ≥15pp vs baseline from digest.json; fewer junk mega-repo swings; PostHog secondary."
+        },
+        "guessed": true
+      }
     }
   ]
 }

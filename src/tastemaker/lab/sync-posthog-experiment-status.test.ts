@@ -20,6 +20,7 @@ describe("PostHog experiment sync helpers", () => {
 
   const entry: LabExperimentEntry = {
     id: "EXP-20260913-humanizer-polish-skills",
+    label: "Humanizer",
     surface: "narration_skills",
     metric: "m",
     start: "2026-10-11",
@@ -29,6 +30,16 @@ describe("PostHog experiment sync helpers", () => {
     status: "running",
     experiment_key: "EXP-20260913-humanizer-polish-skills",
     posthog_flag: "digest-humanizer",
+    success: {
+      success_criteria: "Rubric passes.",
+      metric: {
+        posthog: "event:outbound_repo_click?edition=skills",
+        direction: "increase",
+        baseline: 1,
+        target: 2,
+        pass_threshold: "≥4.0 rubric",
+      },
+    },
   };
 
   it("matches by posthog_flag", () => {

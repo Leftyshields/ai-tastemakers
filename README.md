@@ -47,7 +47,7 @@ A public **measure → experiment → report** loop for improving the digest pip
 
 See [docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md](docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md) and [briefings/lab/shadow-rubric.md](briefings/lab/shadow-rubric.md).
 
-**Adding a Lab experiment window:** Register the change in `data/experiments/` and add one row to [lab/experiments.json](lab/experiments.json) with `label`, `surface`, `metric`, dates, `min_read_days`, `depends_on`, `status`, plus `result_summary`, `verdict`, and `posthog_snapshot_at_end` when done. Run `npm run lab:validate-experiments`; `npm run build:pages` writes `site/lab/experiments.public.json` (full registry plus control panel, timeline, backlog, and history sections). PostHog sync: workflow `lab-experiment-status.yml` with `POSTHOG_PERSONAL_API_KEY` (read only, project 489599).
+**Adding a Lab experiment window:** Register the change in `data/experiments/` and add one row to [lab/experiments.json](lab/experiments.json) with `label`, `surface`, `metric`, dates, `min_read_days`, `depends_on`, `status`, required `success` (`success_criteria` plus `metric.posthog`, `direction`, `baseline`, `target`, `pass_threshold`), plus `result_summary`, `verdict`, and `posthog_snapshot_at_end` when done. Run `npm run lab:validate-experiments`; `npm run build:pages` writes `site/lab/experiments.public.json` (full registry plus control panel, timeline, backlog, and history sections). PostHog sync: workflow `lab-experiment-status.yml` with `POSTHOG_PERSONAL_API_KEY` (read only, project 489599) pulls daily series from each row's `success.metric.posthog` into `lab/experiment-status.json`.
 
 ### Editions
 

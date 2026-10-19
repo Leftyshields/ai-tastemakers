@@ -6,6 +6,11 @@ import {
   type LabExperimentEntry,
   type LabExperimentStatus,
 } from "./validate-experiments.js";
+import {
+  fetchPostHogMetricSeries,
+  sumDailySeries,
+  type DailyMetricPoint,
+} from "./posthog-metric.js";
 
 const DEFAULT_HOST = "https://us.posthog.com";
 const DEFAULT_PROJECT = "489599";
@@ -33,6 +38,11 @@ export interface PostHogLiveSnapshot {
   sample_count?: number | null;
   metric_delta?: number | null;
   metric_delta_label?: string | null;
+  metric_posthog?: string | null;
+  metric_current?: number | null;
+  metric_daily?: DailyMetricPoint[];
+  metric_window_sum?: number | null;
+  metric_fetch_error?: string | null;
 }
 
 export interface ExperimentStatusDiscrepancy {
@@ -58,6 +68,7 @@ export interface ExperimentStatusFile {
     posthog_flag_key: string | null;
   }>;
   live: Record<string, PostHogLiveSnapshot>;
+  metrics: Record<string, PostHogLiveSnapshot>;
 }
 
 function mapPostHogArchivedToStatus(archived: boolean, endDate: string | null): LabExperimentStatus {
@@ -159,6 +170,7 @@ export async function syncPostHogExperimentStatus(repoRoot: string): Promise<Exp
     posthog_experiments: [],
     matched: [],
     live: {},
+    metrics: {},
   };
 
   if (!apiKey) {
@@ -173,6 +185,35 @@ export async function syncPostHogExperimentStatus(repoRoot: string): Promise<Exp
   const rows = await fetchPostHogExperiments(apiKey, projectId, host);
   base.posthog_experiments = rows;
 
+  const today = new Date().toISOString().slice(0, 10);
+
+  for (const entry of file.experiments) {
+    if (entry.start && entry.end && entry.success?.metric?.posthog) {
+      const end = entry.end < today ? entry.end : today;
+      if (entry.start <= end) {
+        const pulled = await fetchPostHogMetricSeries(
+          apiKey,
+          projectId,
+          host,
+          entry.success.metric.posthog,
+          entry.start,
+          end,
+        );
+        const snapshot: PostHogLiveSnapshot = {
+          metric_posthog: pulled.posthog,
+          metric_current: pulled.current,
+          metric_daily: pulled.daily,
+          metric_window_sum: pulled.daily.length ? sumDailySeries(pulled.daily) : null,
+          metric_fetch_error: pulled.error ?? null,
+        };
+        base.metrics[entry.id] = snapshot;
+        if (entry.status === "running") {
+          base.live[entry.id] = { ...base.live[entry.id], ...snapshot };
+        }
+      }
+    }
+  }
+
   for (const entry of file.experiments) {
     if (!entry.posthog_flag && !entry.experiment_key) continue;
     const row = matchPostHogExperiment(entry, rows);
@@ -186,6 +227,7 @@ export async function syncPostHogExperimentStatus(repoRoot: string): Promise<Exp
     if (entry.status === "running") {
       const metric = row.metrics?.find((m) => m.delta != null) ?? row.metrics?.[0];
       base.live[entry.id] = {
+        ...base.live[entry.id],
         exposure_count: row.exposure ?? null,
         sample_count: row.sample_size ?? null,
         metric_delta: metric?.delta ?? null,

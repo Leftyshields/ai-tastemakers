@@ -11,6 +11,17 @@ import {
   validateExperimentsFile,
 } from "./validate-experiments.js";
 import type { ExperimentStatusFile } from "./sync-posthog-experiment-status.js";
+import type { LabSuccess } from "./validate-experiments.js";
+import type { DailyMetricPoint } from "./posthog-metric.js";
+import {
+  computeTrackStatus,
+  effectiveBaseline,
+  metricProgressPct,
+  renderProgressBarHtml,
+  renderSparklineSvg,
+  trackBadgeClass,
+  type LabTrackStatus,
+} from "./lab-metric-progress.js";
 
 export type LabVerdict = "ship" | "revert" | "inconclusive";
 
@@ -28,6 +39,11 @@ export interface PostHogLiveSnapshot {
   sample_count?: number | null;
   metric_delta?: number | null;
   metric_delta_label?: string | null;
+  metric_posthog?: string | null;
+  metric_current?: number | null;
+  metric_daily?: DailyMetricPoint[];
+  metric_window_sum?: number | null;
+  metric_fetch_error?: string | null;
 }
 
 export interface LabExperimentSource extends LabExperimentEntry {
@@ -51,6 +67,7 @@ export interface PublicControlPanelRunning {
   label: string;
   surface: LabSurface | LabSurface[];
   metric: string;
+  success: LabSuccess;
   start: string | null;
   end: string | null;
   day_of_min_read: number | null;
@@ -59,6 +76,13 @@ export interface PublicControlPanelRunning {
   sample_count: number | null;
   metric_delta: number | null;
   metric_delta_label: string | null;
+  metric_current: number | null;
+  metric_daily: DailyMetricPoint[];
+  metric_baseline: number;
+  metric_target: number;
+  metric_direction: "increase" | "decrease";
+  progress_pct: number | null;
+  track_status: LabTrackStatus | null;
 }
 
 export interface PublicTimelineBar {
@@ -146,7 +170,9 @@ function liveStatsForExperiment(
   experimentId: string,
 ): PostHogLiveSnapshot {
   const live = status?.live?.[experimentId];
-  return live ?? {};
+  if (live) return live;
+  const metrics = status?.metrics?.[experimentId];
+  return metrics ?? {};
 }
 
 export function buildTimelineGroups(
@@ -214,19 +240,38 @@ export function buildLabPublicFile(
   let control: PublicControlPanelRunning | null = null;
   if (running) {
     const live = liveStatsForExperiment(status, running.id);
+    const daily = live.metric_daily ?? [];
+    const current = live.metric_current ?? null;
+    const success = running.success;
+    const baseline = effectiveBaseline(success.metric, daily);
+    const day = dayOfMinRead(running.start, asOfIsoDate);
     control = {
       id: running.id,
       label: running.label,
       surface: running.surface,
       metric: running.metric,
+      success,
       start: running.start,
       end: running.end,
       min_read_days: running.min_read_days,
-      day_of_min_read: dayOfMinRead(running.start, asOfIsoDate),
+      day_of_min_read: day,
       exposure_count: live.exposure_count ?? null,
       sample_count: live.sample_count ?? null,
       metric_delta: live.metric_delta ?? null,
       metric_delta_label: live.metric_delta_label ?? null,
+      metric_current: current,
+      metric_daily: daily,
+      metric_baseline: baseline,
+      metric_target: success.metric.target,
+      metric_direction: success.metric.direction,
+      progress_pct: metricProgressPct(current, success.metric, baseline),
+      track_status: computeTrackStatus(
+        current,
+        success.metric,
+        baseline,
+        day,
+        running.min_read_days,
+      ),
     };
   }
 
@@ -324,12 +369,32 @@ export function renderLabDashboardHtml(
       run.day_of_min_read !== null
         ? `Day ${run.day_of_min_read} of ${run.min_read_days}`
         : "—";
+    const track = run.track_status;
+    const badge = track
+      ? `<span class="ml-2 inline-flex rounded px-2 py-0.5 text-xs font-semibold ${trackBadgeClass(track)}">${escapeHtml(track)}</span>`
+      : "";
+    const currentLine =
+      run.metric_current !== null
+        ? `${escapeHtml(String(run.metric_current))} (target ${escapeHtml(String(run.metric_target))}, baseline ${escapeHtml(String(run.metric_baseline))})`
+        : "—";
+    const spark = renderSparklineSvg(run.metric_daily);
+    const progress = renderProgressBarHtml(run.progress_pct);
     sections.push(`<div class="rounded-lg border border-stone-200 p-4 dark:border-stone-700">
-      <p class="text-base font-semibold">${escapeHtml(run.label)}</p>
-      <p class="font-mono text-xs text-stone-500">${escapeHtml(run.id)}</p>
+      <div class="flex flex-wrap items-start justify-between gap-2">
+        <div>
+          <p class="text-base font-semibold">${escapeHtml(run.label)}${badge}</p>
+          <p class="font-mono text-xs text-stone-500">${escapeHtml(run.id)}</p>
+        </div>
+        <div class="text-stone-500">${spark}</div>
+      </div>
+      <p class="mt-2 text-sm text-stone-600 dark:text-stone-400">${escapeHtml(run.success.success_criteria)}</p>
+      ${progress}
       <dl class="mt-3 grid gap-2 text-sm sm:grid-cols-2">
         <div><dt class="text-stone-500">Surface</dt><dd>${escapeHtml(formatSurfaces(run))}</dd></div>
         <div><dt class="text-stone-500">Metric</dt><dd>${escapeHtml(run.metric)}</dd></div>
+        <div><dt class="text-stone-500">PostHog series</dt><dd class="font-mono text-xs">${escapeHtml(run.success.metric.posthog)}</dd></div>
+        <div><dt class="text-stone-500">Current value</dt><dd>${currentLine}</dd></div>
+        <div><dt class="text-stone-500">Pass threshold</dt><dd>${escapeHtml(run.success.metric.pass_threshold)}</dd></div>
         <div><dt class="text-stone-500">Window</dt><dd>${escapeHtml(run.start ?? "—")} → ${escapeHtml(run.end ?? "—")}</dd></div>
         <div><dt class="text-stone-500">Read progress</dt><dd>${escapeHtml(dayLine)}</dd></div>
         <div><dt class="text-stone-500">Exposure</dt><dd>${escapeHtml(run.exposure_count !== null ? String(run.exposure_count) : "—")}</dd></div>
