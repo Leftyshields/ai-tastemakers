@@ -1,0 +1,18 @@
+{
+  "issue_id": "EPH-20261019-LAB-EXP-PAGE",
+  "genome": "genesis/experiments-page.genome",
+  "completed_at": "2026-10-19T20:07:20.567Z",
+  "mode": "autonomous",
+  "steps": [
+    { "name": "capture", "gate": "pass", "artifact": ".ai/context/last_capture.md" },
+    { "name": "explore", "gate": "pass", "artifact": ".ai/context/last_explore.md" },
+    { "name": "design_decisions", "gate": "pass", "artifact": ".ai/context/design_decisions.md" },
+    { "name": "create_plan", "gate": "pass", "artifact": ".ai/context/last_plan.md" },
+    { "name": "pre_implementation_checklist", "gate": "pass", "artifact": ".ai/context/pre_implementation_result.md" },
+    { "name": "execute_plan", "gate": "pass", "artifact": "implementation on PR branch" },
+    { "name": "code_review", "gate": "pass", "artifact": ".ai/context/code_review_changelog.md" },
+    { "name": "qa", "gate": "pass", "artifact": ".ai/context/test_results.json" },
+    { "name": "postmortem", "gate": "pass", "artifact": "docs/CLOSURE_EPH-20261019-LAB-EXP-PAGE.md" }
+  ],
+  "verify_command": "npm run genesis:verify-experiments-page"
+}
