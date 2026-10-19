@@ -11,6 +11,7 @@ Blueprint for the Lab experiments dashboard (schema, validation, PostHog sync, s
 GENOME_DIR=genesis/experiments-page.genome node -e "require('./lib/loadGenome').loadGenome({ genomeDir: process.env.GENOME_DIR })"
 
 # Lab gates
+sh scripts/verify-genesis.sh
 npm run lab:validate-experiments
 npm run test:digest
 npm run build:pages

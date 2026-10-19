@@ -19,6 +19,7 @@
     "lab:sync-posthog-status": "tsx scripts/lab/sync-posthog-experiment-status.ts",
     "genesis:run": "node scripts/genesis-run.js",
     "genesis:verify-experiments-page": "bash genesis/verify-experiments-page.sh",
+    "verify:genesis": "sh scripts/verify-genesis.sh",
     "verify:digest": "node scripts/verify-daily-digest.mjs",
     "subscribers:add": "tsx scripts/add-subscriber.ts",
     "subscribers:remove": "tsx scripts/remove-subscriber.ts",

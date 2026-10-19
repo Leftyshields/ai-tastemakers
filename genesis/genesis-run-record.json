@@ -2,7 +2,16 @@
   "issue_id": "EPH-20261019-LAB-EXP-PAGE",
   "genome": "genesis/experiments-page.genome",
   "completed_at": "2026-10-19T20:07:20.567Z",
+  "resync_completed_at": "2026-10-19T20:12:00.000Z",
   "mode": "autonomous",
+  "genesis_sync": {
+    "previous_clone_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
+    "current_main_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
+    "baseline_before_pstack_merge": "1c0d94ee29c211c73cba7f78107c21e8b9e3b140",
+    "main_changed_on_pull": false,
+    "upstream_repo": "https://github.com/Leftyshields/project-genesis",
+    "notes": "origin/main unchanged after fetch and reset; vendored orchestrator already matched a7d548d. Re-run added verify-genesis.sh per pstack QA skill."
+  },
   "steps": [
     { "name": "capture", "gate": "pass", "artifact": ".ai/context/last_capture.md" },
     { "name": "explore", "gate": "pass", "artifact": ".ai/context/last_explore.md" },
