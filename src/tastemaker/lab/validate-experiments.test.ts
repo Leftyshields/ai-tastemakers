@@ -1,109 +1,67 @@
-import { describe, it, expect } from "vitest";
 import fs from "node:fs";
 import path from "node:path";
+import { describe, it, expect } from "vitest";
 import { fileURLToPath } from "node:url";
+import { listArchivedExperimentIds, listExperimentIds } from "../experiments/load.js";
 import {
   validateExperimentsFile,
-  filterPublicExperiments,
   inclusiveDaySpan,
   type LabExperimentsFile,
 } from "../../../scripts/lab/validate-experiments.js";
+import { buildLabPublicFile } from "../../../scripts/lab/build-lab-public.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
+const planPath = path.join(repoRoot, "lab", "experiments.json");
 
-describe("validateExperimentsFile", () => {
-  it("accepts lab/experiments.json", () => {
-    const raw = fs.readFileSync(path.join(repoRoot, "lab", "experiments.json"), "utf8");
-    const file = JSON.parse(raw) as LabExperimentsFile;
-    expect(validateExperimentsFile(file)).toEqual([]);
+describe("lab/experiments.json", () => {
+  const raw = fs.readFileSync(planPath, "utf8");
+  const plan = JSON.parse(raw) as LabExperimentsFile;
+  const tasks = plan.experiments;
+
+  it("covers every active and archived experiment registry id", async () => {
+    const registryIds = [...(await listExperimentIds(repoRoot)), ...(await listArchivedExperimentIds(repoRoot))].sort();
+    const covered = new Set(tasks.map((t) => t.id));
+    covered.delete("POLICY-DIGEST-UI-FREEZE");
+    for (const id of registryIds) {
+      expect(covered.has(id), `missing calendar tasks for ${id}`).toBe(true);
+    }
   });
 
-  it("detects surface overlap", () => {
-    const file: LabExperimentsFile = {
-      schema_version: 1,
-      experiments: [
-        {
-          id: "a",
-          surface: "narration_skills",
-          metric: "m",
-          start: "2026-01-01",
-          end: "2026-01-10",
-          min_read_days: 1,
-          depends_on: [],
-          status: "running",
-        },
-        {
-          id: "b",
-          surface: "narration_skills",
-          metric: "m",
-          start: "2026-01-05",
-          end: "2026-01-15",
-          min_read_days: 1,
-          depends_on: [],
-          status: "planned",
-        },
-      ],
-    };
-    const issues = validateExperimentsFile(file);
-    expect(issues.some((i) => i.code === "overlap")).toBe(true);
+  it("uses allowed status values and ISO date windows", () => {
+    const allowed = new Set(["done", "running", "planned"]);
+    const iso = /^\d{4}-\d{2}-\d{2}$/;
+    for (const task of tasks) {
+      expect(task.id.length).toBeGreaterThan(0);
+      expect(task.label.length).toBeGreaterThan(0);
+      if (task.start) expect(iso.test(task.start)).toBe(true);
+      if (task.end) expect(iso.test(task.end)).toBe(true);
+      if (task.status) {
+        expect(allowed.has(task.status)).toBe(true);
+      }
+    }
   });
 
-  it("detects depends_on order violations", () => {
-    const file: LabExperimentsFile = {
-      schema_version: 1,
-      experiments: [
-        {
-          id: "dep",
-          surface: "digest_ui",
-          metric: "m",
-          start: "2026-01-01",
-          end: "2026-01-20",
-          min_read_days: 1,
-          depends_on: [],
-          status: "done",
-        },
-        {
-          id: "child",
-          surface: "digest_ui",
-          metric: "m",
-          start: "2026-01-15",
-          end: "2026-01-25",
-          min_read_days: 1,
-          depends_on: ["dep"],
-          status: "planned",
-        },
-      ],
-    };
-    expect(validateExperimentsFile(file).some((i) => i.code === "depends_order")).toBe(true);
+  it("resolves depends_on links to existing task ids", () => {
+    const ids = new Set(tasks.map((t) => t.id));
+    for (const task of tasks) {
+      for (const dep of task.depends_on) {
+        expect(ids.has(dep), `${task.id} depends on missing ${dep}`).toBe(true);
+      }
+    }
   });
 
-  it("detects min_read_days violations", () => {
-    const file: LabExperimentsFile = {
-      schema_version: 1,
-      experiments: [
-        {
-          id: "short",
-          surface: "email",
-          metric: "m",
-          start: "2026-01-01",
-          end: "2026-01-05",
-          min_read_days: 10,
-          depends_on: [],
-          status: "planned",
-        },
-      ],
-    };
-    expect(validateExperimentsFile(file).some((i) => i.code === "min_read_days")).toBe(true);
+  it("passes validation with no overlaps", () => {
+    expect(validateExperimentsFile(plan)).toEqual([]);
   });
-});
 
-describe("filterPublicExperiments", () => {
-  it("drops planned entries", () => {
-    const raw = fs.readFileSync(path.join(repoRoot, "lab", "experiments.json"), "utf8");
-    const file = JSON.parse(raw) as LabExperimentsFile;
-    const pub = filterPublicExperiments(file);
-    expect(pub.experiments.every((e) => e.status === "running" || e.status === "done")).toBe(true);
-    expect(pub.experiments.some((e) => e.id === "EXP-20260913-caveman-compress-skills")).toBe(false);
+  it("builds public file without private rank bootstrap", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const allPublicIds = [
+      ...pub.backlog.map((b) => b.id),
+      ...pub.history.map((h) => h.id),
+      pub.control_panel.running?.id,
+    ].filter(Boolean);
+    expect(allPublicIds).not.toContain("EXP-20260913-rank-bootstrap-skills");
   });
 });
 

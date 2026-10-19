@@ -37,7 +37,6 @@ A public **measure → experiment → report** loop for improving the digest pip
 | [/lab/](https://leftyshields.github.io/ai-tastemakers/lab/) | How we pick repos, run experiments, and publish results |
 | [/lab/tools.html](https://leftyshields.github.io/ai-tastemakers/lab/tools.html) | Tool inventory mined from past briefings (search, compaction, eval candidates) |
 | [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) | Public experiment record: what we changed, whether we kept it, and what is live today |
-| [/lab/calendar/](https://leftyshields.github.io/ai-tastemakers/lab/calendar/) | Running and completed experiment timeline (static table) |
 | [/lab/posts/](https://leftyshields.github.io/ai-tastemakers/lab/posts/) | Short write-ups when we try a digest-featured tool, or finish an experiment |
 
 **Site analytics:** PostHog pageviews + `outbound_repo_click` events on repo links (injected at Pages build when `POSTHOG_KEY` is set).
@@ -48,9 +47,9 @@ A public **measure → experiment → report** loop for improving the digest pip
 
 See [docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md](docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md) and [briefings/lab/shadow-rubric.md](briefings/lab/shadow-rubric.md).
 
-**Adding a Lab experiment window:** Register the change in `data/experiments/` and add one row to [lab/experiments.json](lab/experiments.json) (`id`, `surface`, `metric`, `start`, `end`, `min_read_days`, `depends_on`, `status`, `experiment_key` or `posthog_flag`). Use `null` for unknown dates plus a `note`. Run `npx tsx scripts/lab/validate-experiments.ts` locally; `npm run build:pages` publishes only **running** and **done** rows to `lab/experiments.public.json` and the timeline table. PostHog cross-check: scheduled workflow `lab-experiment-status.yml` with secret `POSTHOG_PERSONAL_API_KEY` (read only, project 489599).
+**Adding a Lab experiment window:** Register the change in `data/experiments/` and add one row to [lab/experiments.json](lab/experiments.json) with `label`, `surface`, `metric`, dates, `min_read_days`, `depends_on`, `status`, `visibility` (`public`, `teaser`, default `teaser`, or `private`), plus `result_summary`, `verdict`, and `posthog_snapshot_at_end` when done. Run `npm run lab:validate-experiments`; `npm run build:pages` writes `site/lab/experiments.public.json` (schema v2: control panel, timeline, backlog, history). **Private** rows never appear in the public JSON; **teaser** backlog rows show label, surface, and target month only. The source file remains in this public repo unless planned entries move to a private file or secret.
 
-**Public repo note:** `lab/experiments.json` includes **planned** queue entries in git. To hide planned work from the public repo, keep planned rows in a private file or secret and merge at build time, or accept that planned experiments are visible in source.
+PostHog sync: workflow `lab-experiment-status.yml` with `POSTHOG_PERSONAL_API_KEY` (read only, project 489599).
 
 ### Editions
 

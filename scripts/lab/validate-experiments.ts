@@ -5,9 +5,21 @@ import { fileURLToPath } from "node:url";
 export type LabSurface = "digest_ui" | "narration_oss" | "narration_skills" | "email";
 
 export type LabExperimentStatus = "planned" | "running" | "done";
+export type LabVisibility = "public" | "teaser" | "private";
+export type LabVerdict = "ship" | "revert" | "inconclusive";
+
+export interface PostHogEndSnapshot {
+  captured_at?: string | null;
+  exposure_count?: number | null;
+  sample_count?: number | null;
+  metric_delta?: number | null;
+  metric_delta_label?: string | null;
+  raw?: Record<string, unknown>;
+}
 
 export interface LabExperimentEntry {
   id: string;
+  label: string;
   surface: LabSurface | LabSurface[];
   metric: string;
   start: string | null;
@@ -15,9 +27,13 @@ export interface LabExperimentEntry {
   min_read_days: number;
   depends_on: string[];
   status: LabExperimentStatus;
+  visibility?: LabVisibility;
   experiment_key?: string | null;
   posthog_flag?: string | null;
   note?: string | null;
+  result_summary?: string | null;
+  verdict?: LabVerdict | null;
+  posthog_snapshot_at_end?: PostHogEndSnapshot | null;
 }
 
 export interface LabExperimentsFile {
@@ -34,6 +50,8 @@ export interface ValidationIssue {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SURFACES: LabSurface[] = ["digest_ui", "narration_oss", "narration_skills", "email"];
 const STATUSES: LabExperimentStatus[] = ["planned", "running", "done"];
+const VISIBILITIES: LabVisibility[] = ["public", "teaser", "private"];
+const VERDICTS: LabVerdict[] = ["ship", "revert", "inconclusive"];
 
 export function parseIsoDate(s: string): Date {
   const [y, m, d] = s.split("-").map(Number);
@@ -88,6 +106,28 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
       issues.push({
         code: "schema",
         message: `Invalid status '${exp.status}' on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (!exp.label?.trim()) {
+      issues.push({
+        code: "schema",
+        message: `Missing label on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    const vis = exp.visibility ?? "teaser";
+    if (!VISIBILITIES.includes(vis)) {
+      issues.push({
+        code: "schema",
+        message: `Invalid visibility '${String(exp.visibility)}' on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (exp.verdict != null && !VERDICTS.includes(exp.verdict)) {
+      issues.push({
+        code: "schema",
+        message: `Invalid verdict '${exp.verdict}' on '${exp.id}'.`,
         experiment_ids: [exp.id],
       });
     }
@@ -175,32 +215,9 @@ export function loadExperimentsFile(repoRoot: string): LabExperimentsFile {
   return JSON.parse(raw) as LabExperimentsFile;
 }
 
-export function filterPublicExperiments(file: LabExperimentsFile): LabExperimentsFile {
-  return {
-    schema_version: file.schema_version,
-    experiments: file.experiments.filter((e) => e.status === "running" || e.status === "done"),
-  };
-}
-
 export function assertExperimentsValid(repoRoot: string): ValidationIssue[] {
   const file = loadExperimentsFile(repoRoot);
   return validateExperimentsFile(file);
-}
-
-export function writePublicExperiments(repoRoot: string, siteLabDir: string): void {
-  const file = loadExperimentsFile(repoRoot);
-  const issues = validateExperimentsFile(file);
-  if (issues.length > 0) {
-    const summary = issues.map((i) => i.message).join("\n");
-    throw new Error(`lab/experiments.json validation failed:\n${summary}`);
-  }
-  const pub = filterPublicExperiments(file);
-  fs.mkdirSync(siteLabDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(siteLabDir, "experiments.public.json"),
-    `${JSON.stringify(pub, null, 2)}\n`,
-    "utf8",
-  );
 }
 
 const isValidateCli =

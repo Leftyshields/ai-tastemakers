@@ -15,7 +15,7 @@ on:
       - "scripts/lab/aggregate-experiments.ts"
       - "scripts/lab/experiments.js"
       - "scripts/lab/validate-experiments.ts"
-      - "scripts/lab/render-experiments-timeline.ts"
+      - "scripts/lab/build-lab-public.ts"
       - "lab/experiments.json"
       - "scripts/seo-helpers.ts"
       - "scripts/generate-brief-og.ts"

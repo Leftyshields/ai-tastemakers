@@ -11,8 +11,7 @@ import { normalizeLegacyNewMarkdown } from "../src/tastemaker/writers/new-badge.
 import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experiments.js";
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import { renderTokenUsagePage } from "./lab/render-token-usage.js";
-import { filterPublicExperiments, loadExperimentsFile, writePublicExperiments } from "./lab/validate-experiments.js";
-import { renderExperimentsTimelineTable } from "./lab/render-experiments-timeline.js";
+import { renderLabDashboardHtml, writeLabPublicArtifacts } from "./lab/build-lab-public.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -329,7 +328,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
 }
 
 export function labNavHtml(
-  active: "home" | "tools" | "experiments" | "calendar" | "tokens" | "posts",
+  active: "home" | "tools" | "experiments" | "tokens" | "posts",
   escapeHtml: (t: string) => string,
   depth: 0 | 1 = 0,
 ): string {
@@ -350,7 +349,6 @@ export function labNavHtml(
       ${pill(`${prefix}${depth === 0 ? "./" : ""}`, "Lab home", active === "home")}
       ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
-      ${pill(`${prefix}calendar/`, "Calendar", active === "calendar")}
       ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
       ${pill(postsHref, "Posts", active === "posts")}
     </nav>`;
@@ -1594,14 +1592,18 @@ export async function buildLabSite(
 
   const labShell = { labLayout: true as const };
 
+  const labPublic = writeLabPublicArtifacts(repoRoot, labSiteDir);
+  const dashboardHtml = renderLabDashboardHtml(labPublic, escapeHtml);
+
   const labIndexMd = path.join(repoRoot, "briefings", "lab", "index.md");
-  let indexBody = `${labNavHtml("home", escapeHtml)}`;
+  let indexBody = `${labNavHtml("home", escapeHtml)}
+    ${dashboardHtml}`;
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
     const html = renderSafeMarkdown(markdown);
-    indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
+    indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans mt-10">${html}</article>`;
   } catch {
-    indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans">
+    indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">
       <p>Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>
     </section>`;
   }
@@ -1662,32 +1664,6 @@ export async function buildLabSite(
       paths,
       brand,
       "Public record of digest and homepage experiments: what we changed, whether we kept it, and what is live today.",
-      escapeHtml,
-      labShell,
-    ),
-  );
-
-  writePublicExperiments(repoRoot, labSiteDir);
-  const publicExperiments = filterPublicExperiments(loadExperimentsFile(repoRoot));
-  const calendarDir = path.join(labSiteDir, "calendar");
-  await fs.mkdir(calendarDir, { recursive: true });
-
-  const calendarBody = `
-    ${labNavHtml("calendar", escapeHtml)}
-    <header class="lab-lede">
-      <h2>Experiment timeline</h2>
-      <p>Running and completed windows from <code>lab/experiments.public.json</code> (generated at build time). Planned queue entries stay in repo source only.</p>
-    </header>
-    ${renderExperimentsTimelineTable(publicExperiments, escapeHtml)}`;
-
-  await fs.writeFile(
-    path.join(calendarDir, "index.html"),
-    pageShell(
-      "Timeline · Lab",
-      calendarBody,
-      paths,
-      brand,
-      "Timeline of running and completed Tastemakers Lab experiments.",
       escapeHtml,
       labShell,
     ),
@@ -1761,7 +1737,7 @@ export async function buildLabSite(
     pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
   );
 
-  return 5 + shadowCount + 1;
+  return 4 + shadowCount + 1;
 }
 
 export function allEditions(): EditionDefinition[] {

@@ -17,6 +17,22 @@ export interface PostHogExperimentRow {
   start_date: string | null;
   end_date: string | null;
   archived: boolean;
+  exposure?: number | null;
+  sample_size?: number | null;
+  metrics?: Array<{
+    metric_type?: string;
+    name?: string;
+    delta?: number | null;
+    significant?: boolean;
+  }> | null;
+  [key: string]: unknown;
+}
+
+export interface PostHogLiveSnapshot {
+  exposure_count?: number | null;
+  sample_count?: number | null;
+  metric_delta?: number | null;
+  metric_delta_label?: string | null;
 }
 
 export interface ExperimentStatusDiscrepancy {
@@ -41,6 +57,7 @@ export interface ExperimentStatusFile {
     posthog_experiment_id: number | null;
     posthog_flag_key: string | null;
   }>;
+  live: Record<string, PostHogLiveSnapshot>;
 }
 
 function mapPostHogArchivedToStatus(archived: boolean, endDate: string | null): LabExperimentStatus {
@@ -141,6 +158,7 @@ export async function syncPostHogExperimentStatus(repoRoot: string): Promise<Exp
     discrepancies: [],
     posthog_experiments: [],
     matched: [],
+    live: {},
   };
 
   if (!apiKey) {
@@ -165,9 +183,28 @@ export async function syncPostHogExperimentStatus(repoRoot: string): Promise<Exp
     });
     if (!row) continue;
     base.discrepancies.push(...compareExperimentToPostHog(entry, row));
+    if (entry.status === "running") {
+      const metric = row.metrics?.find((m) => m.delta != null) ?? row.metrics?.[0];
+      base.live[entry.id] = {
+        exposure_count: row.exposure ?? null,
+        sample_count: row.sample_size ?? null,
+        metric_delta: metric?.delta ?? null,
+        metric_delta_label: metric?.name ?? metric?.metric_type ?? null,
+      };
+    }
   }
 
   return base;
+}
+
+export function extractLiveSnapshot(row: PostHogExperimentRow): PostHogLiveSnapshot {
+  const metric = row.metrics?.find((m) => m.delta != null) ?? row.metrics?.[0];
+  return {
+    exposure_count: row.exposure ?? null,
+    sample_count: row.sample_size ?? null,
+    metric_delta: metric?.delta ?? null,
+    metric_delta_label: metric?.name ?? metric?.metric_type ?? null,
+  };
 }
 
 async function main(): Promise<void> {
