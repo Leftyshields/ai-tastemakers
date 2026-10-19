@@ -9,3 +9,4 @@ node -e "const { decompose } = require('./lib/decompose'); const g = require('./
 npm run lab:validate-experiments
 npm run test:digest
 npm run build:pages
+sh scripts/verify-lab-dashboard-copy.sh

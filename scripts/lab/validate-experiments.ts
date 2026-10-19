@@ -7,6 +7,7 @@ export type LabSurface = "digest_ui" | "narration_oss" | "narration_skills" | "e
 export type LabExperimentStatus = "planned" | "running" | "done";
 export type LabVerdict = "ship" | "revert" | "inconclusive";
 export type LabMetricDirection = "increase" | "decrease";
+export type LabMetricType = "editorial" | "posthog";
 
 export interface LabSuccessMetric {
   posthog: string;
@@ -14,6 +15,9 @@ export interface LabSuccessMetric {
   baseline: number | null;
   target: number;
   pass_threshold: string;
+  metric_type: LabMetricType;
+  /** Human series label shown in UI (never raw PostHog event strings). */
+  metric_label: string;
 }
 
 export interface LabSuccess {
@@ -122,6 +126,20 @@ export function validateSuccessBlock(exp: LabExperimentEntry): ValidationIssue[]
     issues.push({
       code: "success",
       message: `Missing success.metric.pass_threshold on '${exp.id}'.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (m.metric_type !== "editorial" && m.metric_type !== "posthog") {
+    issues.push({
+      code: "success",
+      message: `Missing or invalid success.metric.metric_type on '${exp.id}' (use editorial or posthog).`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (!m.metric_label?.trim()) {
+    issues.push({
+      code: "success",
+      message: `Missing success.metric.metric_label on '${exp.id}'.`,
       experiment_ids: [exp.id],
     });
   }

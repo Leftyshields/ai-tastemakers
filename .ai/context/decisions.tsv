@@ -1,0 +1,23 @@
+ts	phase	decision	why	evidence	result
+2026-10-19T23:07:18.253Z	design_decisions	law:UX1	control panel null safe metrics	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.253Z	design_decisions	law:UX2	metric_type editorial vs posthog	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.253Z	design_decisions	law:UX3	control panel heading hierarchy	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.253Z	design_decisions	law:UX4	human dates and labels	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX5	no dashes in visible copy	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX6	timeline month axis and freeze band	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX7	single timeline row per experiment	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX8	backlog and history tables	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX10	how to read summary	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX11	reduced motion	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX12	unified status chips	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX1-r2	Hide target progress when null add read window bar	UX review gate round 2	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX6-r2	Timeline label fit rules mobile month list popover visible	UX review gate round 2	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX7-r2	Humanizer multi lane span with lane span metadata	UX review gate round 2	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX8-r2	Backlog four columns depends plain names	UX review gate round 2	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX6-r3-labels	Outside label only if measured box clears next bar plus 8px	UX review gate round 3 final	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX6-r3-popover	Fixed popover z-index 300 viewport flip	UX review gate round 3 final	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX8-r3-mobile	Mobile backlog Starts and Depends on field labels	UX review gate round 3 final	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX1-r3-read-window	Read window bar without duplicate day count	UX review gate round 3 final	accepted
+2026-10-19T23:22:12.728Z	qa	law:UX6-r4-inside-labels	Inside labels restored with ellipsis collision rule outside only	UX review gate round 4 desktop	accepted
+2026-10-19T23:27:10.170Z	qa	law:UX6-final-inside-no-stub	No inside label when fewer than eight characters fit no truncated fallback	Final UX conditions	accepted
+2026-10-19T23:27:10.170Z	qa	law:UX6-final-popover-name	Popover first line bold plain experiment name above muted id	Final UX conditions	accepted

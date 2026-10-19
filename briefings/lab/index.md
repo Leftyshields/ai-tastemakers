@@ -26,7 +26,7 @@ Shadow runs let us preview enriched blurbs side-by-side with production output b
 - **[Posts](posts/)** — short stories when we try a digest-featured tool in our own stack.
 - **[Shadow rubric](shadow-rubric.html)** — how we score “before” vs “after” blurbs before a change stays on.
 
-## How to read an experiment
+## How to read an experiment {#how-to-read-an-experiment}
 
 Each experiment states a **question** (what we expect to improve), **what we changed**, and two time windows: **before** (change off) and **after** (change on). Numbers come from analytics we import after each window — this page only updates when we rebuild the site.
 

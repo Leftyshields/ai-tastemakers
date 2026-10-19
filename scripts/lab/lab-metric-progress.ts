@@ -62,9 +62,12 @@ export function renderSparklineSvg(
   daily: DailyMetricPoint[],
   width = 120,
   height = 32,
+  options?: { animate?: boolean },
 ): string {
+  const animate = options?.animate !== false;
+  const motionClass = animate ? " lab-sparkline-animate" : "";
   if (daily.length === 0) {
-    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" aria-hidden="true"><line x1="0" y1="${height / 2}" x2="${width}" y2="${height / 2}" stroke="currentColor" stroke-opacity="0.2"/></svg>`;
+    return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="lab-sparkline${motionClass}" aria-hidden="true"><line x1="0" y1="${height / 2}" x2="${width}" y2="${height / 2}" stroke="currentColor" stroke-opacity="0.2"/></svg>`;
   }
   const values = daily.map((d) => d.value);
   const min = Math.min(...values);
@@ -80,13 +83,22 @@ export function renderSparklineSvg(
       return `${x.toFixed(1)},${y.toFixed(1)}`;
     })
     .join(" ");
-  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="text-blue-600 dark:text-blue-400" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.5" points="${points}"/></svg>`;
+  return `<svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" class="lab-sparkline text-blue-600 dark:text-blue-400${motionClass}" aria-hidden="true"><polyline fill="none" stroke="currentColor" stroke-width="1.5" points="${points}"/></svg>`;
 }
 
 export function renderProgressBarHtml(progressPct: number | null): string {
-  const pct = progressPct === null ? 0 : Math.max(0, Math.min(100, progressPct));
-  const label = progressPct === null ? "—" : `${pct.toFixed(0)}%`;
-  return `<div class="mt-2"><div class="flex justify-between text-xs text-stone-500"><span>Progress to target</span><span>${label}</span></div><div class="mt-1 h-2 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="h-full rounded bg-emerald-600 dark:bg-emerald-500" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+  if (progressPct === null) return "";
+  const pct = Math.max(0, Math.min(100, progressPct));
+  return `<div class="mt-2 lab-progress"><div class="flex justify-between text-xs text-stone-500"><span>Progress to target</span><span>${pct.toFixed(0)}%</span></div><div class="mt-1 h-2 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-progress-fill h-full rounded bg-emerald-600 dark:bg-emerald-500" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+}
+
+export function renderReadWindowBarHtml(
+  dayOfMinRead: number | null,
+  minReadDays: number,
+): string {
+  if (dayOfMinRead === null || minReadDays <= 0) return "";
+  const pct = Math.max(0, Math.min(100, (dayOfMinRead / minReadDays) * 100));
+  return `<div class="mt-2 lab-read-window"><div class="text-xs text-stone-500"><span>Read window</span></div><div class="mt-1 h-1 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-read-window-fill h-full rounded bg-blue-500 dark:bg-blue-400" style="width:${pct.toFixed(1)}%"></div></div></div>`;
 }
 
 export function trackBadgeClass(status: LabTrackStatus): string {

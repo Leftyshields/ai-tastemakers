@@ -88,6 +88,8 @@ describe("validateSuccessBlock", () => {
         baseline: 1,
         target: 2,
         pass_threshold: "≥10% lift",
+        metric_type: "posthog",
+        metric_label: "Repo clicks, Skills",
       },
     },
   };

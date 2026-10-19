@@ -1,73 +1,28 @@
 {
-  "issue_id": "EPH-20261019-LAB-EXP-PAGE",
+  "issue_id": "EPH-20261019-LAB-EXP-PAGE-UX",
   "genome": "genesis/experiments-page.genome",
-  "completed_at": "2026-10-19T22:45:00.000Z",
-  "resync_completed_at": "2026-10-19T22:45:00.000Z",
+  "completed_at": "2026-10-19T23:08:00.000Z",
+  "resync_completed_at": "2026-10-19T23:30:00.000Z",
   "mode": "autonomous",
-  "change_summary": "lab-experiment-status.yml dispatches pages.yml after experiment-status.json commit; digest workflows untouched",
+  "change_summary": "Lab dashboard UX genesis pass; merged main lab-experiment-status Pages dispatch and bot-synced experiment-status.json",
   "genesis_sync": {
     "previous_clone_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
     "current_main_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
     "baseline_before_pstack_merge": "1c0d94ee29c211c73cba7f78107c21e8b9e3b140",
-    "main_changed_on_pull": false,
+    "main_changed_on_pull": true,
     "upstream_repo": "https://github.com/Leftyshields/project-genesis",
-    "notes": "Resync for lab status Pages dispatch; genome mission/constraints/guardrails updated; verify and pipeline re-run on branch."
+    "notes": "Brian approved Lab UX pass; merged main lab status CI (pages.yml dispatch after experiment-status.json commit) and main experiment-status.json snapshot."
   },
   "steps": [
-    {
-      "name": "capture",
-      "gate": "pass",
-      "artifact": ".ai/context/last_capture.md",
-      "note": "Recorded lab status CI gap: bot push of experiment-status.json does not trigger pages.yml paths."
-    },
-    {
-      "name": "explore",
-      "gate": "pass",
-      "artifact": ".ai/context/last_explore.md",
-      "note": "Compared digest commit+dispatch pattern; scoped change to lab-experiment-status.yml only."
-    },
-    {
-      "name": "design_decisions",
-      "gate": "pass",
-      "artifact": ".ai/context/design_decisions.md",
-      "note": "Use github.token, changed output flag, pages.yml dispatch; hard exclude digest workflows."
-    },
-    {
-      "name": "create_plan",
-      "gate": "pass",
-      "artifact": ".ai/context/last_plan.md",
-      "note": "Single workflow edit plus genesis manifest/record refresh."
-    },
-    {
-      "name": "pre_implementation_checklist",
-      "gate": "pass",
-      "artifact": ".ai/context/pre_implementation_result.md",
-      "note": "Confirmed pages.yml excludes lab/experiment-status.json from on.push paths."
-    },
-    {
-      "name": "execute_plan",
-      "gate": "pass",
-      "artifact": ".github/workflows/lab-experiment-status.yml",
-      "note": "Added actions:write, commit step id and changed output, conditional Pages dispatch step."
-    },
-    {
-      "name": "code_review",
-      "gate": "pass",
-      "artifact": ".ai/context/code_review_changelog.md",
-      "note": "No digest workflow diffs; dispatch targets pages.yml on main ref only."
-    },
-    {
-      "name": "qa",
-      "gate": "pass",
-      "artifact": ".ai/context/test_results.json",
-      "note": "npm run genesis:verify-experiments-page and genesis/run-experiments-page-genesis.sh"
-    },
-    {
-      "name": "postmortem",
-      "gate": "pass",
-      "artifact": "docs/CLOSURE_EPH-20261019-LAB-EXP-PAGE.md",
-      "note": "Closure doc unchanged; run record captures incremental CI fix."
-    }
+    { "name": "capture", "gate": "pass", "artifact": ".ai/context/last_capture.md" },
+    { "name": "explore", "gate": "pass", "artifact": ".ai/context/last_explore.md" },
+    { "name": "design_decisions", "gate": "pass", "artifact": ".ai/context/design_decisions.md,.ai/context/decisions.tsv" },
+    { "name": "create_plan", "gate": "pass", "artifact": ".ai/context/last_plan.md" },
+    { "name": "pre_implementation_checklist", "gate": "pass", "artifact": ".ai/context/pre_implementation_result.md" },
+    { "name": "execute_plan", "gate": "pass", "artifact": "cursor/lab-ux-genesis-effa,.github/workflows/lab-experiment-status.yml" },
+    { "name": "code_review", "gate": "pass", "artifact": ".ai/context/code_review_changelog.md" },
+    { "name": "qa", "gate": "pass", "artifact": ".ai/context/test_results.json,scripts/verify-lab-dashboard-copy.sh" },
+    { "name": "postmortem", "gate": "pass", "artifact": "docs/CLOSURE_EPH-20261019-LAB-EXP-PAGE.md" }
   ],
   "verify_command": "npm run genesis:verify-experiments-page"
 }
