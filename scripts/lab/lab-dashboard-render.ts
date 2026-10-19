@@ -479,7 +479,8 @@ function renderTimelineBarItem(
       </div>
       <span class="lab-timeline-label-outside" data-lab-label-outside hidden></span>
       <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
-        <p class="font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(item.id)}</p>
+        <p class="lab-timeline-popover-name font-bold text-stone-900 dark:text-stone-100">${escapeHtml(label)}</p>
+        <p class="mt-1 font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(item.id)}</p>
         <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
         <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
       </div>
@@ -643,9 +644,7 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
         if(outW + GAP <= gapNext && outW > 0){
           outside.textContent = label;
           outside.hidden = false;
-          return;
         }
-        inside.textContent = label;
       });
     });
   }

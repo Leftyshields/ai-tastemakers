@@ -17,8 +17,8 @@ export function estimateLabelWidthPx(label: string): number {
 export type TimelineLabelPlacement = "inside" | "outside" | "hidden";
 
 /**
- * Inside label when the label has at least MIN_CHARS and the bar has room for text
- * (ellipsis handles overflow; collision rules apply to outside labels only).
+ * Inside label when the label has at least MIN_CHARS and the bar fits eight characters
+ * (ellipsis after that; no truncated inside stubs). Collision rules apply to outside only.
  */
 export function shouldRenderInsideTimelineLabel(
   barWidthPx: number,

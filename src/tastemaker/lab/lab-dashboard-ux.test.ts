@@ -93,6 +93,29 @@ describe("Lab dashboard UX copy", () => {
     expect(html).toContain("lab-timeline-bar-planned .lab-timeline-label-inside");
   });
 
+  it("UX6 final inside labels omit stubs when eight characters do not fit", () => {
+    expect(chooseTimelineLabelPlacement("Less AI sounding briefs", 36, 0)).toBe("hidden");
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    const layoutScript = html.match(/function layoutTimelineLabels\(\)[\s\S]*?\n  \}/)?.[0] ?? "";
+    expect(layoutScript).not.toMatch(/outside\.hidden = false;\s*\n\s*return;\s*\n\s*\}\s*\n\s*inside\.textContent = label/);
+  });
+
+  it("UX6 final popover shows bold name above muted id", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).toContain('class="lab-timeline-popover-name font-bold');
+    const pop = html.match(
+      /id="lab-timeline-pop-EXP_20260913_humanizer_polish_skills"[\s\S]*?<\/div>\s*<\/div>/,
+    )?.[0];
+    expect(pop).toBeTruthy();
+    const nameIdx = pop!.indexOf("lab-timeline-popover-name");
+    const idIdx = pop!.indexOf("EXP-20260913-humanizer-polish-skills");
+    expect(nameIdx).toBeGreaterThan(-1);
+    expect(idIdx).toBeGreaterThan(nameIdx);
+    expect(pop).toContain("Less AI sounding briefs");
+  });
+
   it("UX6 round 3 mobile backlog field labels", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
