@@ -21,9 +21,11 @@ import { renderLabStatusChip } from "./lab-dashboard-ui.js";
 import {
   computeTrackStatus,
   renderProgressBarHtml,
+  renderReadWindowBarHtml,
   renderSparklineSvg,
 } from "./lab-metric-progress.js";
 import { formatSurfaces } from "./lab-format.js";
+import { formatBacklogDependsOn } from "./lab-backlog-deps.js";
 
 export const SURFACE_LANE_ORDER: LabSurface[] = [
   "digest_ui",
@@ -91,9 +93,10 @@ export function buildTimelineModel(
     today_offset_pct = Math.max(0, Math.min(100, (offsetMs / totalMs) * 100));
   }
 
-  const lanes = SURFACE_LANE_ORDER.filter((lane) =>
-    dated.some((e) => surfacesList(e).includes(lane)),
-  );
+  const lanes = SURFACE_LANE_ORDER.filter((lane) => {
+    if (freeze && lane === "digest_ui") return true;
+    return dated.some((e) => surfacesList(e).includes(lane));
+  });
 
   const laneIndex = new Map(lanes.map((l, i) => [l, i]));
 
@@ -202,7 +205,20 @@ function renderLabDashboardStyles(): string {
 .lab-timeline-lane-row { display: flex; gap: 8px; margin-bottom: 12px; }
 .lab-timeline-lane-track { position: relative; flex: 1; min-height: 28px; background: rgb(245 245 244); border-radius: 4px; }
 .dark .lab-timeline-lane-track { background: rgb(28 25 23); }
-.lab-timeline-bar { position: absolute; top: 0; min-height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 0.75rem; font-weight: 600; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.lab-timeline-tracks { overflow: visible; }
+.lab-timeline-item { position: absolute; overflow: visible; pointer-events: none; }
+.lab-timeline-bar { position: absolute; inset: 0; min-height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 0.75rem; font-weight: 600; overflow: visible; white-space: nowrap; pointer-events: auto; }
+.lab-timeline-label-outside { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; max-width: 8rem; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
+.lab-timeline-label-inside { overflow: hidden; text-overflow: ellipsis; }
+.lab-timeline-both-tag { margin-left: 4px; border-radius: 4px; background: rgb(255 255 255 / 0.25); padding: 0 4px; font-size: 0.65rem; font-weight: 600; }
+.lab-timeline-desktop { display: block; }
+.lab-timeline-mobile { display: none; }
+@media (max-width: 390px) {
+  .lab-timeline-desktop { display: none; }
+  .lab-timeline-mobile { display: block; }
+  .lab-timeline-mobile-month { font-size: 0.75rem; font-weight: 700; color: rgb(87 83 78); margin: 12px 0 6px; }
+  .lab-timeline-mobile-item { border: 1px solid rgb(231 229 228); border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 0.8rem; }
+}
 .lab-timeline-bar-running { background: rgb(37 99 235); color: white; }
 .lab-timeline-bar-planned { background: transparent; border: 2px solid rgb(37 99 235); color: rgb(30 64 175); }
 .dark .lab-timeline-bar-planned { color: rgb(191 219 254); }
@@ -222,9 +238,12 @@ function renderLabDashboardStyles(): string {
 .lab-how-to-read { font-size: 0.875rem; color: rgb(87 83 78); margin-bottom: 1.5rem; }
 .dark .lab-how-to-read { color: rgb(168 162 158); }
 .lab-timeline-bar { cursor: pointer; }
-.lab-timeline-popover { position: absolute; left: 0; top: calc(100% + 4px); z-index: 20; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 4px 12px rgb(0 0 0 / 0.08); white-space: normal; }
+.lab-timeline-popover { position: absolute; left: 0; top: calc(100% + 6px); z-index: 50; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 4px 12px rgb(0 0 0 / 0.08); white-space: normal; pointer-events: auto; }
 .dark .lab-timeline-popover { background: rgb(28 25 23); border-color: rgb(68 64 60); }
 .lab-timeline-popover[hidden] { display: none !important; }
+.lab-timeline-popover:not([hidden]) { display: block !important; }
+.lab-read-window-fill { transition: width 0.6s ease; }
+@media (prefers-reduced-motion: reduce) { .lab-read-window-fill { transition: none; } }
 .lab-history-details-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 </style>`;
 }
@@ -266,7 +285,10 @@ export function renderLabDashboardHtml(
       run.day_of_min_read !== null
         ? `Day ${run.day_of_min_read} of ${run.min_read_days}`
         : "";
-    const progress = renderProgressBarHtml(run.progress_pct);
+    const progress =
+      run.progress_pct !== null
+        ? renderProgressBarHtml(run.progress_pct)
+        : renderReadWindowBarHtml(run.day_of_min_read, run.min_read_days);
     const hasDaily = run.metric_daily.length > 0;
     const spark = hasDaily
       ? renderSparklineSvg(run.metric_daily, 160, metricType === "editorial" ? 40 : 48)
@@ -385,9 +407,25 @@ export function renderLabDashboardHtml(
   if (!timeline) {
     sections.push(`<p class="text-sm text-stone-600 dark:text-stone-400">No dated experiments to show.</p>`);
   } else {
-    const laneBlock = 40;
-  const tracksHeight = timeline.lanes.length * laneBlock - 12;
-  sections.push(`<div class="lab-timeline-body">
+    sections.push(renderTimelineDesktop(timeline, escapeHtml));
+    sections.push(renderTimelineMobile(timeline, escapeHtml));
+  }
+  sections.push(`</section>`);
+
+  sections.push(renderBacklogSection(pub, escapeHtml));
+  sections.push(renderHistorySection(pub, escapeHtml));
+  sections.push(renderLabDashboardScripts());
+
+  return sections.join("\n");
+}
+
+function renderTimelineDesktop(
+  timeline: PublicTimelineModel,
+  escapeHtml: (t: string) => string,
+): string {
+  const laneBlock = 40;
+  const tracksHeight = Math.max(timeline.lanes.length * laneBlock - 12, 28);
+  return `<div class="lab-timeline-body lab-timeline-desktop">
       <div class="flex gap-2">
         <div class="w-28 shrink-0"></div>
         <div class="lab-timeline-months flex-1" aria-hidden="true">
@@ -398,39 +436,75 @@ export function renderLabDashboardHtml(
         <div class="w-28 shrink-0 space-y-3 pt-1">
           ${timeline.lanes.map((lane) => `<div class="text-xs text-stone-500" style="min-height:28px">${escapeHtml(surfaceLabel(lane))}</div>`).join("")}
         </div>
-        <div class="relative flex-1" style="min-height:${tracksHeight}px">
-          ${timeline.freeze ? `<div class="lab-timeline-freeze" style="left:${timeline.freeze.offset_pct.toFixed(2)}%;width:${timeline.freeze.width_pct.toFixed(2)}%;" title="Digest UI freeze"></div>` : ""}
-          ${timeline.today_offset_pct != null ? `<div class="lab-timeline-today" style="left:${timeline.today_offset_pct.toFixed(2)}%;" title="Today"></div>` : ""}
+        <div class="lab-timeline-tracks relative flex-1" style="height:${tracksHeight}px">
+          ${timeline.freeze ? `<div class="lab-timeline-freeze" style="left:${timeline.freeze.offset_pct.toFixed(2)}%;width:${timeline.freeze.width_pct.toFixed(2)}%;top:0;height:${tracksHeight}px;" title="Digest UI freeze"></div>` : ""}
+          ${timeline.today_offset_pct != null ? `<div class="lab-timeline-today" style="left:${timeline.today_offset_pct.toFixed(2)}%;top:0;height:${tracksHeight}px;" title="Today"></div>` : ""}
           ${timeline.items
-            .map((item) => {
-              const popId = timelinePopoverId(item.id);
-              const both = item.show_both_tag
-                ? `<span class="ml-1 rounded bg-stone-200 px-1 text-xs font-normal dark:bg-stone-700">Both</span>`
-                : "";
-              const top = item.lane_start * laneBlock;
-              const height = item.lane_span * 28 + (item.lane_span - 1) * 12;
-              const win = formatWindowHuman(item.start, item.end);
-              return `<div class="lab-timeline-bar ${barStatusClass(item.status)}" data-lab-timeline-bar role="button" tabindex="0" aria-describedby="${escapeHtml(popId)}" style="left:${item.offset_pct.toFixed(2)}%;width:${item.width_pct.toFixed(2)}%;top:${top}px;height:${height}px;">
-            <span>${escapeHtml(sanitizeVisibleCopy(item.label))}${both}</span>
-            <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
-              <p class="font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(item.id)}</p>
-              <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
-              <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
-            </div>
-          </div>`;
-            })
+            .map((item) => renderTimelineBarItem(item, laneBlock, escapeHtml))
             .join("")}
         </div>
       </div>
-    </div>`);
+    </div>`;
+}
+
+function renderTimelineBarItem(
+  item: PublicTimelineItem,
+  laneBlock: number,
+  escapeHtml: (t: string) => string,
+): string {
+  const popId = timelinePopoverId(item.id);
+  const label = sanitizeVisibleCopy(item.label);
+  const top = item.lane_start * laneBlock;
+  const height = item.lane_span * 28 + (item.lane_span - 1) * 12;
+  const win = formatWindowHuman(item.start, item.end);
+  const showBoth = item.show_both_tag && item.lane_span < 2;
+  const bothHtml = showBoth
+    ? `<span class="lab-timeline-both-tag" data-lab-both-tag>Both</span>`
+    : `<span class="lab-timeline-both-tag" data-lab-both-tag hidden>Both</span>`;
+  return `<div class="lab-timeline-item" style="left:${item.offset_pct.toFixed(2)}%;width:${item.width_pct.toFixed(2)}%;top:${top}px;height:${height}px;">
+      <div class="lab-timeline-bar ${barStatusClass(item.status)}" data-lab-timeline-bar data-label="${escapeHtml(label)}" data-lane-span="${item.lane_span}" role="button" tabindex="0" aria-describedby="${escapeHtml(popId)}" aria-expanded="false">
+        <span class="lab-timeline-label-inside" data-lab-label-inside></span>${bothHtml}
+      </div>
+      <span class="lab-timeline-label-outside" data-lab-label-outside hidden></span>
+      <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
+        <p class="font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(item.id)}</p>
+        <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
+        <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
+      </div>
+    </div>`;
+}
+
+function renderTimelineMobile(
+  timeline: PublicTimelineModel,
+  escapeHtml: (t: string) => string,
+): string {
+  const byMonth = new Map<string, PublicTimelineItem[]>();
+  for (const item of timeline.items) {
+    const key = item.start.slice(0, 7);
+    const list = byMonth.get(key) ?? [];
+    list.push(item);
+    byMonth.set(key, list);
   }
-  sections.push(`</section>`);
-
-  sections.push(renderBacklogSection(pub, escapeHtml));
-  sections.push(renderHistorySection(pub, escapeHtml));
-  sections.push(renderLabDashboardScripts());
-
-  return sections.join("\n");
+  const months = [...byMonth.keys()].sort();
+  const blocks = months.map((key) => {
+    const monthLabel = formatMonthTick(`${key}-01`) + " " + key.slice(0, 4);
+    const rows = (byMonth.get(key) ?? [])
+      .map((item) => {
+        const win = formatWindowHuman(item.start, item.end);
+        const both =
+          item.show_both_tag && item.lane_span < 2
+            ? `<span class="ml-1 text-xs text-stone-500">Both</span>`
+            : "";
+        return `<li class="lab-timeline-mobile-item">
+          <div class="font-semibold">${escapeHtml(sanitizeVisibleCopy(item.label))}${both}</div>
+          <div class="mt-1 text-stone-600 dark:text-stone-400">${escapeHtml(win)}</div>
+          <div class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</div>
+        </li>`;
+      })
+      .join("");
+    return `<div class="lab-timeline-mobile-month">${escapeHtml(monthLabel)}</div><ul class="list-none p-0">${rows}</ul>`;
+  });
+  return `<div class="lab-timeline-mobile">${blocks.join("")}</div>`;
 }
 
 function renderLabDashboardScripts(): string {
@@ -448,26 +522,86 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
 });
 (function(){
   var openPop = null;
+  var openBar = null;
   function closePopover(){
     if(openPop){ openPop.hidden = true; openPop = null; }
+    if(openBar){ openBar.setAttribute('aria-expanded','false'); openBar = null; }
+  }
+  function openForBar(bar){
+    var item = bar.closest('.lab-timeline-item');
+    if(!item) return;
+    var pop = item.querySelector('.lab-timeline-popover');
+    if(!pop) return;
+    closePopover();
+    pop.hidden = false;
+    openPop = pop;
+    openBar = bar;
+    bar.setAttribute('aria-expanded','true');
   }
   document.querySelectorAll('[data-lab-timeline-bar]').forEach(function(bar){
-    var pop = bar.querySelector('.lab-timeline-popover');
-    if(!pop) return;
-    function open(){
-      closePopover();
-      pop.hidden = false;
-      openPop = pop;
-    }
-    bar.addEventListener('click', function(e){ e.stopPropagation(); open(); });
-    bar.addEventListener('focus', function(){ open(); });
+    bar.addEventListener('click', function(e){ e.stopPropagation(); openForBar(bar); });
+    bar.addEventListener('focus', function(){ openForBar(bar); });
     bar.addEventListener('keydown', function(e){
       if(e.key === 'Escape'){ closePopover(); bar.blur(); }
-      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); }
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); openForBar(bar); }
     });
   });
-  document.addEventListener('click', function(){ closePopover(); });
+  document.addEventListener('click', function(e){
+    if(e.target.closest('[data-lab-timeline-bar]') || e.target.closest('.lab-timeline-popover')) return;
+    closePopover();
+  });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePopover(); });
+})();
+(function(){
+  var MIN_CHARS = 8;
+  function layoutTimelineLabels(){
+    document.querySelectorAll('.lab-timeline-tracks').forEach(function(track){
+      var trackW = track.clientWidth;
+      document.querySelectorAll('.lab-timeline-item').forEach(function(item){
+        if(!track.contains(item)) return;
+        var bar = item.querySelector('[data-lab-timeline-bar]');
+        var inside = item.querySelector('[data-lab-label-inside]');
+        var outside = item.querySelector('[data-lab-label-outside]');
+        var both = item.querySelector('[data-lab-both-tag]');
+        if(!bar || !inside || !outside) return;
+        var label = bar.getAttribute('data-label') || '';
+        var laneSpan = Number(bar.getAttribute('data-lane-span') || '1');
+        var trackRect = track.getBoundingClientRect();
+        var itemRect = item.getBoundingClientRect();
+        var barW = bar.getBoundingClientRect().width;
+        var spaceAfter = trackRect.right - itemRect.right - 8;
+        inside.textContent = '';
+        outside.textContent = '';
+        outside.hidden = true;
+        if(both && laneSpan >= 2) both.hidden = true;
+        if(label.length < MIN_CHARS) return;
+        var est = label.length * 7;
+        if(barW >= est){
+          inside.textContent = label;
+          return;
+        }
+        if(spaceAfter >= est){
+          outside.textContent = label;
+          outside.hidden = false;
+          return;
+        }
+        if(barW >= MIN_CHARS * 7){
+          inside.textContent = label.slice(0, MIN_CHARS);
+          return;
+        }
+        if(spaceAfter >= MIN_CHARS * 7){
+          outside.textContent = label.slice(0, MIN_CHARS);
+          outside.hidden = false;
+        }
+      });
+    });
+  }
+  if(document.readyState === 'loading'){
+    document.addEventListener('DOMContentLoaded', layoutTimelineLabels);
+  } else {
+    layoutTimelineLabels();
+  }
+  window.addEventListener('resize', layoutTimelineLabels);
 })();
 </script>`;
 }
@@ -478,22 +612,25 @@ function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
   if (pub.backlog.length === 0) {
     parts.push(`<p class="text-sm text-stone-600 dark:text-stone-400">Nothing queued for publication.</p>`);
   } else {
-    parts.push(`<div class="lab-table-wrap"><table class="lab-table border border-stone-200 text-sm dark:border-stone-700">
+    parts.push(`<div class="lab-table-wrap"><table class="lab-table lab-backlog-table border border-stone-200 text-sm dark:border-stone-700">
       <thead class="bg-stone-50 dark:bg-stone-900"><tr>
-        <th>Name</th><th>Surface</th><th class="lab-num">Starts</th><th>Depends on</th><th></th>
+        <th>Name</th><th>Surface</th><th class="lab-num">Starts</th><th>Depends on</th>
       </tr></thead><tbody>`);
     for (const b of pub.backlog) {
       const starts = b.start ? formatDayHuman(b.start) : "";
-      const deps = b.depends_on.length ? b.depends_on.map((d) => d).join(", ") : "";
+      const surfacesText = sanitizeVisibleCopy(formatSurfaces(b));
+      const deps = formatBacklogDependsOn(b.depends_on, pub.experiments);
       const rowId = escapeHtml(b.id);
+      const dependsCell = deps.htmlNames
+        ? `${deps.htmlNames} <button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button>`
+        : `<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button>`;
       parts.push(`<tr class="lab-data-row">
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(b.label))}</span></td>
-        <td>${escapeHtml(sanitizeVisibleCopy(formatSurfaces(b)))}${Array.isArray(b.surface) && b.surface.length > 1 ? `<span class="ml-1 rounded bg-stone-200 px-1 text-xs dark:bg-stone-700">Both</span>` : ""}</td>
+        <td>${escapeHtml(surfacesText)}</td>
         <td class="lab-num" title="${escapeHtml(isoTitleAttr(b.start))}">${escapeHtml(starts)}</td>
-        <td class="font-mono text-xs">${escapeHtml(deps)}</td>
-        <td><button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button></td>
+        <td class="text-xs">${dependsCell}</td>
       </tr>
-      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="5" class="text-xs text-stone-600 dark:text-stone-400">
+      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
         <p class="font-mono">${escapeHtml(b.id)}</p>
         <p>${escapeHtml(sanitizeVisibleCopy(b.metric))}</p>
         ${b.note ? `<p>${escapeHtml(sanitizeVisibleCopy(b.note))}</p>` : ""}

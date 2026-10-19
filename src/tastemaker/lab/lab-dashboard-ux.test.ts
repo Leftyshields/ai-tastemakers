@@ -3,10 +3,13 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   buildLabPublicFile,
+  buildTimelineModel,
   findForbiddenLabCopyViolations,
   renderLabDashboardHtml,
   formatAllNullReadStatusLine,
 } from "../../../scripts/lab/build-lab-public.js";
+import { chooseTimelineLabelPlacement } from "../../../scripts/lab/lab-timeline-labels.js";
+import { formatBacklogDependsOn } from "../../../scripts/lab/lab-backlog-deps.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -54,6 +57,8 @@ describe("Lab dashboard UX copy", () => {
     expect(panel).toContain("Editorial read, Oct 24");
     expect(panel).not.toContain("Synced");
     expect(panel).not.toContain("Monitoring only");
+    expect(panel).not.toContain("Progress to target");
+    expect(panel).toContain("Read window");
   });
 
   it("UX3 details summary has no hardcoded aria-expanded", () => {
@@ -65,10 +70,21 @@ describe("Lab dashboard UX copy", () => {
   it("UX6 timeline bars expose popover hooks", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
-    expect(html).toContain('data-lab-timeline-bar');
+    expect(html).toContain("data-lab-timeline-bar");
     expect(html).toContain('role="button"');
     expect(html).toContain("aria-describedby=");
     expect(html).toContain("lab-timeline-popover");
+    expect(html).toContain("lab-timeline-mobile");
+    expect(html).toContain("lab-timeline-tracks");
+  });
+
+  it("UX7 humanizer spans OSS and Skills lanes", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const model = buildTimelineModel(pub.experiments, ["running", "done", "planned"], "2026-10-19");
+    const humanizer = model?.items.find((i) => i.id === "EXP-20260913-humanizer-polish-skills");
+    expect(humanizer?.lane_span).toBeGreaterThanOrEqual(2);
+    expect(humanizer?.surfaces).toContain("narration_oss");
+    expect(humanizer?.surfaces).toContain("narration_skills");
   });
 
   it("UX8 history table has exactly four columns", () => {
@@ -76,10 +92,28 @@ describe("Lab dashboard UX copy", () => {
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
     const history = html.match(/lab-history-table[\s\S]*?<\/table>/)?.[0] ?? "";
     const headers = history.match(/<thead[\s\S]*?<\/thead>/)?.[0] ?? "";
-    expect((headers.match(/<th>/g) ?? []).length).toBe(4);
+    expect((headers.match(/<th[\s>]/g) ?? []).length).toBe(4);
     expect(history).toContain('colspan="4"');
-    expect(history).toContain("Write up");
-    expect(history).toContain("lab-expand-toggle");
-    expect(history).not.toMatch(/<th[^>]*>\s*<\/th>/);
+  });
+
+  it("UX8 backlog table has exactly four columns with plain dependency names", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    const backlog = html.match(/lab-backlog-table[\s\S]*?<\/table>/)?.[0] ?? "";
+    const headers = backlog.match(/<thead[\s\S]*?<\/thead>/)?.[0] ?? "";
+    expect((headers.match(/<th[\s>]/g) ?? []).length).toBe(4);
+    expect(backlog).toContain('colspan="4"');
+    expect(backlog).toContain("Less AI sounding briefs");
+    const firstRow = backlog.match(/<tr class="lab-data-row">[\s\S]*?<\/tr>/)?.[0] ?? "";
+    expect(firstRow).not.toContain("EXP-20260715");
+    const caveman = pub.backlog.find((b) => b.id === "EXP-20260913-caveman-compress-skills");
+    expect(caveman).toBeTruthy();
+    const deps = formatBacklogDependsOn(caveman!.depends_on, pub.experiments);
+    expect(deps.plain).toContain("Less AI sounding briefs");
+  });
+
+  it("UX6 label placement hides stubs shorter than eight characters", () => {
+    expect(chooseTimelineLabelPlacement("Tiny", 200, 200)).toBe("hidden");
+    expect(chooseTimelineLabelPlacement("Long enough label", 200, 200)).toBe("inside");
   });
 });

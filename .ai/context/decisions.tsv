@@ -10,3 +10,7 @@ ts	phase	decision	why	evidence	result
 2026-10-19T23:07:18.254Z	design_decisions	law:UX10	how to read summary	Brian Lab UX approved 2026-10-19	accepted
 2026-10-19T23:07:18.254Z	design_decisions	law:UX11	reduced motion	Brian Lab UX approved 2026-10-19	accepted
 2026-10-19T23:07:18.254Z	design_decisions	law:UX12	unified status chips	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX1-r2	Hide target progress when null add read window bar	UX review gate round 2	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX6-r2	Timeline label fit rules mobile month list popover visible	UX review gate round 2	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX7-r2	Humanizer multi lane span with lane span metadata	UX review gate round 2	accepted
+2026-10-19T23:15:31.178Z	qa	law:UX8-r2	Backlog four columns depends plain names	UX review gate round 2	accepted
