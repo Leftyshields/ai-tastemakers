@@ -31,7 +31,9 @@
           "direction": "increase",
           "baseline": null,
           "target": 120,
-          "pass_threshold": "Treatment window aggregate outbound_repo_click (edition=skills) ≥ baseline window; qualitative review that Why-now hooks cite enrich sources."
+          "pass_threshold": "Treatment window aggregate outbound_repo_click (edition=skills) ≥ baseline window; qualitative review that Why-now hooks cite enrich sources.",
+          "metric_type": "posthog",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -59,7 +61,9 @@
           "direction": "increase",
           "baseline": null,
           "target": 80,
-          "pass_threshold": "Treatment aggregate homepage_index_click ≥ baseline aggregate (playbook export)."
+          "pass_threshold": "Treatment aggregate homepage_index_click ≥ baseline aggregate (playbook export).",
+          "metric_type": "posthog",
+          "metric_label": "Homepage brief clicks"
         },
         "guessed": true
       }
@@ -87,7 +91,9 @@
           "direction": "increase",
           "baseline": null,
           "target": 60,
-          "pass_threshold": "Shadow rubric pass on ≥90% of reviewed repos; outbound_repo_click tracked as secondary (sparse traffic)."
+          "pass_threshold": "Shadow rubric pass on ≥90% of reviewed repos; outbound_repo_click tracked as secondary (sparse traffic).",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -115,7 +121,9 @@
           "direction": "decrease",
           "baseline": 70,
           "target": 55,
-          "pass_threshold": "digest.json mean consecutive-day overlap ≤55% (≥15pp below 70% baseline); PostHog clicks secondary per playbook."
+          "pass_threshold": "digest.json mean consecutive-day overlap ≤55% (≥15pp below 70% baseline); PostHog clicks secondary per playbook.",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -143,7 +151,9 @@
           "direction": "decrease",
           "baseline": 2005,
           "target": 1650,
-          "pass_threshold": "Lab token log: ≥15% lower avg output tokens vs baseline (~2005) with rubric pass ≥95%; PostHog series is secondary monitoring."
+          "pass_threshold": "Lab token log: ≥15% lower avg output tokens vs baseline (~2005) with rubric pass ≥95%; PostHog series is secondary monitoring.",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -173,7 +183,9 @@
           "direction": "increase",
           "baseline": 3,
           "target": 5,
-          "pass_threshold": "Rubric avg ≥4.0 on specificity, why-now, and accuracy on treatment runs; human-sounding spot-check pass. PostHog daily count is monitoring only."
+          "pass_threshold": "Rubric avg ≥4.0 on specificity, why-now, and accuracy on treatment runs; human-sounding spot-check pass. PostHog daily count is monitoring only.",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -200,7 +212,9 @@
           "direction": "increase",
           "baseline": 12,
           "target": 12,
-          "pass_threshold": "Daily homepage_index_click stays within ±25% of baseline average; zero shipped digest_ui changes in git during the window."
+          "pass_threshold": "Daily homepage_index_click stays within ±25% of baseline average; zero shipped digest_ui changes in git during the window.",
+          "metric_type": "editorial",
+          "metric_label": "Homepage brief clicks"
         },
         "guessed": true
       }
@@ -230,7 +244,9 @@
           "direction": "decrease",
           "baseline": 1600,
           "target": 1300,
-          "pass_threshold": "≥15% lower avg enrich input tokens vs baseline with rubric pass ≥95%; PostHog outbound_repo_click secondary."
+          "pass_threshold": "≥15% lower avg enrich input tokens vs baseline with rubric pass ≥95%; PostHog outbound_repo_click secondary.",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -259,7 +275,9 @@
           "direction": "increase",
           "baseline": 3.7,
           "target": 4.2,
-          "pass_threshold": "Why-now rubric avg ≥4.0 on repeat repos with ≥20% lower hook overlap vs baseline; PostHog clicks secondary."
+          "pass_threshold": "Why-now rubric avg ≥4.0 on repeat repos with ≥20% lower hook overlap vs baseline; PostHog clicks secondary.",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }
@@ -289,7 +307,9 @@
           "direction": "decrease",
           "baseline": 65,
           "target": 45,
-          "pass_threshold": "Mean consecutive-day top-10 overlap down ≥15pp vs baseline from digest.json; fewer junk mega-repo swings; PostHog secondary."
+          "pass_threshold": "Mean consecutive-day top-10 overlap down ≥15pp vs baseline from digest.json; fewer junk mega-repo swings; PostHog secondary.",
+          "metric_type": "editorial",
+          "metric_label": "Repo clicks, Skills"
         },
         "guessed": true
       }

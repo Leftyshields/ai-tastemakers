@@ -1,0 +1,12 @@
+ts	phase	decision	why	evidence	result
+2026-10-19T23:07:18.253Z	design_decisions	law:UX1	control panel null safe metrics	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.253Z	design_decisions	law:UX2	metric_type editorial vs posthog	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.253Z	design_decisions	law:UX3	control panel heading hierarchy	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.253Z	design_decisions	law:UX4	human dates and labels	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX5	no dashes in visible copy	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX6	timeline month axis and freeze band	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX7	single timeline row per experiment	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX8	backlog and history tables	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX10	how to read summary	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX11	reduced motion	Brian Lab UX approved 2026-10-19	accepted
+2026-10-19T23:07:18.254Z	design_decisions	law:UX12	unified status chips	Brian Lab UX approved 2026-10-19	accepted

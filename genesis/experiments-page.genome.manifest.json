@@ -1,9 +1,10 @@
 {
   "id": "experiments-page",
-  "issue_id": "EPH-20261019-LAB-EXP-PAGE",
+  "issue_id": "EPH-20261019-LAB-EXP-PAGE-UX",
   "genome_dir": "genesis/experiments-page.genome",
   "workflow": "project-genesis nine-step",
   "verify": "npm run genesis:verify-experiments-page",
+  "acceptance_criteria": "UX1 UX2 UX3 UX4 UX5 UX6 UX7 UX8 UX10 UX11 UX12",
   "pipeline": "bash genesis/run-experiments-page-genesis.sh",
   "runtime": {
     "loadGenome": "GENOME_DIR=genesis/experiments-page.genome node -e \"require('./lib/loadGenome').loadGenome({ genomeDir: process.env.GENOME_DIR })\"",
