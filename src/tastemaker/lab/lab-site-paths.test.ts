@@ -22,6 +22,7 @@ describe("lab site paths", () => {
     expect(html).toContain('href="../"');
     expect(html).toContain('href="../tools.html"');
     expect(html).toContain('href="../experiments.html"');
+    expect(html).toContain('href="../calendar/"');
     expect(html).toContain('aria-current="page"');
   });
 });

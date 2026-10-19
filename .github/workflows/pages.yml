@@ -14,6 +14,8 @@ on:
       - "scripts/lab/aggregate-token-usage.ts"
       - "scripts/lab/aggregate-experiments.ts"
       - "scripts/lab/experiments.js"
+      - "scripts/lab/calendar.js"
+      - "lab/**"
       - "scripts/seo-helpers.ts"
       - "scripts/generate-brief-og.ts"
       - "scripts/og-theme.ts"

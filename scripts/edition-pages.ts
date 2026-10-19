@@ -327,7 +327,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
 }
 
 export function labNavHtml(
-  active: "home" | "tools" | "experiments" | "tokens" | "posts",
+  active: "home" | "tools" | "experiments" | "calendar" | "tokens" | "posts",
   escapeHtml: (t: string) => string,
   depth: 0 | 1 = 0,
 ): string {
@@ -348,6 +348,7 @@ export function labNavHtml(
       ${pill(`${prefix}${depth === 0 ? "./" : ""}`, "Lab home", active === "home")}
       ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
+      ${pill(`${prefix}calendar/`, "Calendar", active === "calendar")}
       ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
       ${pill(postsHref, "Posts", active === "posts")}
     </nav>`;
@@ -1664,6 +1665,45 @@ export async function buildLabSite(
     ),
   );
 
+  const calendarDir = path.join(labSiteDir, "calendar");
+  await fs.mkdir(calendarDir, { recursive: true });
+  const janttVendorSrc = path.join(repoRoot, "lab", "vendor", "jantt");
+  const janttVendorDest = path.join(labSiteDir, "vendor", "jantt");
+  await fs.mkdir(janttVendorDest, { recursive: true });
+  for (const file of ["jantt.standalone.iife.js", "jantt.css", "LICENSE"]) {
+    await fs.copyFile(path.join(janttVendorSrc, file), path.join(janttVendorDest, file));
+  }
+  await fs.copyFile(
+    path.join(repoRoot, "lab", "experiments.jantt.json"),
+    path.join(calendarDir, "experiments.jantt.json"),
+  );
+  await fs.copyFile(path.join(repoRoot, "scripts", "lab", "calendar.js"), path.join(calendarDir, "calendar.js"));
+
+  const calendarBody = `
+    ${labNavHtml("calendar", escapeHtml)}
+    <header class="lab-lede">
+      <h2>Experiment calendar</h2>
+      <p>Baseline and treatment windows for registered Lab experiments, plus queue dependencies. Read-only Gantt view built from <code>lab/experiments.jantt.json</code> (Jantt).</p>
+      <p class="text-sm text-stone-600 dark:text-stone-400">Drag and edit are off so the bundle stays small. Update the JSON and rebuild Pages to refresh.</p>
+    </header>
+    <div id="jantt-root" class="jantt-lab-mount min-h-[28rem] w-full overflow-hidden rounded-lg border border-stone-200 dark:border-stone-700"></div>
+    <link rel="stylesheet" href="../vendor/jantt/jantt.css" />
+    <script src="../vendor/jantt/jantt.standalone.iife.js"></script>
+    <script src="calendar.js"></script>`;
+
+  await fs.writeFile(
+    path.join(calendarDir, "index.html"),
+    pageShell(
+      "Calendar · Lab",
+      calendarBody,
+      paths,
+      brand,
+      "Gantt calendar of Tastemakers Lab experiment baseline and treatment windows.",
+      escapeHtml,
+      labShell,
+    ),
+  );
+
   await writeTokenUsageData(repoRoot, labSiteDir);
   const tokenDataRaw = await fs.readFile(path.join(labSiteDir, "token-usage-data.json"), "utf8");
   const tokenData = JSON.parse(tokenDataRaw) as import("./lab/aggregate-token-usage.js").TokenUsageDataFile;
@@ -1732,7 +1772,7 @@ export async function buildLabSite(
     pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
   );
 
-  return 4 + shadowCount + 1;
+  return 5 + shadowCount + 1;
 }
 
 export function allEditions(): EditionDefinition[] {
