@@ -8,5 +8,14 @@
   "runtime": {
     "loadGenome": "GENOME_DIR=genesis/experiments-page.genome node -e \"require('./lib/loadGenome').loadGenome({ genomeDir: process.env.GENOME_DIR })\"",
     "runPath": "GENOME_DIR=genesis/experiments-page.genome node scripts/run-path.js genesis/experiments-page.genome/mission.md"
+  },
+  "lab_status_ci": {
+    "workflow": ".github/workflows/lab-experiment-status.yml",
+    "pages_dispatch": "gh workflow run pages.yml --ref main",
+    "digest_workflows_forbidden": [
+      "digest.yml",
+      "digest-catchup.yml",
+      "digest-verify.yml"
+    ]
   }
 }
