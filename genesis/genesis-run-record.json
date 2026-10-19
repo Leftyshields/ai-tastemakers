@@ -2,15 +2,16 @@
   "issue_id": "EPH-20261019-LAB-EXP-PAGE-UX",
   "genome": "genesis/experiments-page.genome",
   "completed_at": "2026-10-19T23:08:00.000Z",
-  "resync_completed_at": "2026-10-19T20:12:00.000Z",
+  "resync_completed_at": "2026-10-19T23:30:00.000Z",
   "mode": "autonomous",
+  "change_summary": "Lab dashboard UX genesis pass; merged main lab-experiment-status Pages dispatch and bot-synced experiment-status.json",
   "genesis_sync": {
     "previous_clone_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
     "current_main_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
     "baseline_before_pstack_merge": "1c0d94ee29c211c73cba7f78107c21e8b9e3b140",
-    "main_changed_on_pull": false,
+    "main_changed_on_pull": true,
     "upstream_repo": "https://github.com/Leftyshields/project-genesis",
-    "notes": "Brian approved Lab UX pass on experiments dashboard; verify includes verify-lab-dashboard-copy.sh"
+    "notes": "Brian approved Lab UX pass; merged main lab status CI (pages.yml dispatch after experiment-status.json commit) and main experiment-status.json snapshot."
   },
   "steps": [
     { "name": "capture", "gate": "pass", "artifact": ".ai/context/last_capture.md" },
@@ -18,7 +19,7 @@
     { "name": "design_decisions", "gate": "pass", "artifact": ".ai/context/design_decisions.md,.ai/context/decisions.tsv" },
     { "name": "create_plan", "gate": "pass", "artifact": ".ai/context/last_plan.md" },
     { "name": "pre_implementation_checklist", "gate": "pass", "artifact": ".ai/context/pre_implementation_result.md" },
-    { "name": "execute_plan", "gate": "pass", "artifact": "cursor/lab-ux-genesis-effa" },
+    { "name": "execute_plan", "gate": "pass", "artifact": "cursor/lab-ux-genesis-effa,.github/workflows/lab-experiment-status.yml" },
     { "name": "code_review", "gate": "pass", "artifact": ".ai/context/code_review_changelog.md" },
     { "name": "qa", "gate": "pass", "artifact": ".ai/context/test_results.json,scripts/verify-lab-dashboard-copy.sh" },
     { "name": "postmortem", "gate": "pass", "artifact": "docs/CLOSURE_EPH-20261019-LAB-EXP-PAGE.md" }

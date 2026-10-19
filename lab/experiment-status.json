@@ -1,13 +1,140 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-19T00:00:00.000Z",
+  "generated_at": "2026-10-19T22:37:06.428Z",
   "project_id": "489599",
   "posthog_host": "https://us.posthog.com",
-  "skipped": true,
-  "skip_reason": "POSTHOG_PERSONAL_API_KEY not set",
+  "skipped": false,
   "discrepancies": [],
   "posthog_experiments": [],
-  "matched": [],
-  "live": {},
-  "metrics": {}
+  "matched": [
+    {
+      "experiment_id": "EXP-20260628-web-enrich-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260701-landing-layout",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260716-firecrawl-enrich-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260715-soft-dedup-diversity-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260802-ponytail-narration-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260913-humanizer-polish-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "POLICY-DIGEST-UI-FREEZE",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260913-caveman-compress-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260913-whynow-memory-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    },
+    {
+      "experiment_id": "EXP-20260913-rank-bootstrap-skills",
+      "posthog_experiment_id": null,
+      "posthog_flag_key": null
+    }
+  ],
+  "live": {
+    "EXP-20260913-humanizer-polish-skills": {
+      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_current": null,
+      "metric_daily": [],
+      "metric_window_sum": null,
+      "metric_fetch_error": null
+    }
+  },
+  "metrics": {
+    "EXP-20260628-web-enrich-skills": {
+      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_current": null,
+      "metric_daily": [],
+      "metric_window_sum": null,
+      "metric_fetch_error": null
+    },
+    "EXP-20260701-landing-layout": {
+      "metric_posthog": "event:homepage_index_click",
+      "metric_current": 1,
+      "metric_daily": [
+        {
+          "date": "2026-08-02",
+          "value": 1
+        },
+        {
+          "date": "2026-08-03",
+          "value": 1
+        },
+        {
+          "date": "2026-08-06",
+          "value": 1
+        },
+        {
+          "date": "2026-08-14",
+          "value": 1
+        }
+      ],
+      "metric_window_sum": 4,
+      "metric_fetch_error": null
+    },
+    "EXP-20260716-firecrawl-enrich-skills": {
+      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_current": 1,
+      "metric_daily": [
+        {
+          "date": "2026-08-06",
+          "value": 1
+        },
+        {
+          "date": "2026-08-14",
+          "value": 1
+        }
+      ],
+      "metric_window_sum": 2,
+      "metric_fetch_error": null
+    },
+    "EXP-20260715-soft-dedup-diversity-skills": {
+      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_current": null,
+      "metric_daily": [],
+      "metric_window_sum": null,
+      "metric_fetch_error": null
+    },
+    "EXP-20260802-ponytail-narration-skills": {
+      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_current": null,
+      "metric_daily": [],
+      "metric_window_sum": null,
+      "metric_fetch_error": null
+    },
+    "EXP-20260913-humanizer-polish-skills": {
+      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_current": null,
+      "metric_daily": [],
+      "metric_window_sum": null,
+      "metric_fetch_error": null
+    }
+  }
 }
