@@ -12,7 +12,6 @@ import {
 } from "./validate-experiments.js";
 import type { ExperimentStatusFile } from "./sync-posthog-experiment-status.js";
 
-export type LabVisibility = "public" | "teaser" | "private";
 export type LabVerdict = "ship" | "revert" | "inconclusive";
 
 export interface PostHogEndSnapshot {
@@ -33,7 +32,6 @@ export interface PostHogLiveSnapshot {
 
 export interface LabExperimentSource extends LabExperimentEntry {
   label: string;
-  visibility?: LabVisibility;
   result_summary?: string | null;
   verdict?: LabVerdict | null;
   posthog_snapshot_at_end?: PostHogEndSnapshot | null;
@@ -85,13 +83,15 @@ export interface PublicBacklogItem {
   id: string;
   label: string;
   surface: LabSurface | LabSurface[];
-  target_month: string | null;
-  metric?: string;
-  start?: string | null;
-  end?: string | null;
-  depends_on?: string[];
+  metric: string;
+  start: string | null;
+  end: string | null;
+  min_read_days: number;
+  depends_on: string[];
+  experiment_key?: string | null;
+  posthog_flag?: string | null;
   note?: string | null;
-  visibility: "public" | "teaser";
+  target_month: string | null;
 }
 
 export interface PublicHistoryItem {
@@ -114,18 +114,11 @@ export interface LabExperimentsPublicFile {
     skipped: boolean;
     skip_reason?: string | null;
   };
+  experiments: LabExperimentSource[];
   control_panel: PublicControlPanel;
   timeline: PublicTimelineGroup[];
   backlog: PublicBacklogItem[];
   history: PublicHistoryItem[];
-}
-
-export function visibilityOf(entry: LabExperimentSource): LabVisibility {
-  return entry.visibility ?? "teaser";
-}
-
-export function isPublished(entry: LabExperimentSource): boolean {
-  return visibilityOf(entry) !== "private";
 }
 
 export function targetMonthFromStart(start: string | null): string | null {
@@ -161,11 +154,7 @@ export function buildTimelineGroups(
   statuses: LabExperimentStatus[],
 ): PublicTimelineGroup[] {
   const dated = entries.filter(
-    (e) =>
-      isPublished(e) &&
-      statuses.includes(e.status) &&
-      e.start !== null &&
-      e.end !== null,
+    (e) => statuses.includes(e.status) && e.start !== null && e.end !== null,
   );
   if (dated.length === 0) return [];
 
@@ -219,8 +208,8 @@ export function buildLabPublicFile(
   const source = loadExperimentsFile(repoRoot) as LabExperimentsSourceFile;
   const status = loadExperimentStatus(repoRoot);
 
-  const published = source.experiments.filter(isPublished);
-  const running = published.find((e) => e.status === "running");
+  const all = source.experiments;
+  const running = all.find((e) => e.status === "running");
 
   let control: PublicControlPanelRunning | null = null;
   if (running) {
@@ -241,35 +230,25 @@ export function buildLabPublicFile(
     };
   }
 
-  const backlog: PublicBacklogItem[] = published
+  const backlog: PublicBacklogItem[] = all
     .filter((e) => e.status === "planned")
-    .map((e) => {
-      const vis = visibilityOf(e);
-      if (vis === "teaser") {
-        return {
-          id: e.id,
-          label: e.label,
-          surface: e.surface,
-          target_month: targetMonthFromStart(e.start),
-          visibility: "teaser" as const,
-        };
-      }
-      return {
-        id: e.id,
-        label: e.label,
-        surface: e.surface,
-        target_month: targetMonthFromStart(e.start),
-        visibility: "public" as const,
-        metric: e.metric,
-        start: e.start,
-        end: e.end,
-        depends_on: e.depends_on,
-        note: e.note ?? null,
-      };
-    })
+    .map((e) => ({
+      id: e.id,
+      label: e.label,
+      surface: e.surface,
+      metric: e.metric,
+      start: e.start,
+      end: e.end,
+      min_read_days: e.min_read_days,
+      depends_on: e.depends_on,
+      experiment_key: e.experiment_key ?? null,
+      posthog_flag: e.posthog_flag ?? null,
+      note: e.note ?? null,
+      target_month: targetMonthFromStart(e.start),
+    }))
     .sort((a, b) => (a.target_month ?? "9999").localeCompare(b.target_month ?? "9999"));
 
-  const history: PublicHistoryItem[] = published
+  const history: PublicHistoryItem[] = all
     .filter((e) => e.status === "done")
     .map((e) => ({
       id: e.id,
@@ -284,7 +263,7 @@ export function buildLabPublicFile(
     }))
     .sort((a, b) => (b.end ?? "").localeCompare(a.end ?? ""));
 
-  const timeline = buildTimelineGroups(published, ["running", "done", "planned"]);
+  const timeline = buildTimelineGroups(all, ["running", "done", "planned"]);
 
   return {
     schema_version: 2,
@@ -294,6 +273,7 @@ export function buildLabPublicFile(
       skipped: status?.skipped ?? true,
       skip_reason: status?.skip_reason ?? "experiment-status.json missing",
     },
+    experiments: all,
     control_panel: { running: control },
     timeline,
     backlog,
@@ -394,14 +374,29 @@ export function renderLabDashboardHtml(
   if (pub.backlog.length === 0) {
     sections.push(`<p class="text-sm text-stone-600 dark:text-stone-400">Nothing queued for publication.</p>`);
   } else {
-    sections.push(`<ul class="space-y-2 text-sm">${pub.backlog
-      .map((b) => {
-        if (b.visibility === "teaser") {
-          return `<li><strong>${escapeHtml(b.label)}</strong> · ${escapeHtml(formatSurfaces(b))} · target ${escapeHtml(b.target_month ?? "tbd")} <span class="text-xs text-stone-500">(teaser)</span></li>`;
-        }
-        return `<li><strong>${escapeHtml(b.label)}</strong> · ${escapeHtml(formatSurfaces(b))} · ${escapeHtml(b.start ?? "—")} → ${escapeHtml(b.end ?? "—")} · ${escapeHtml(b.metric ?? "")}</li>`;
-      })
-      .join("")}</ul>`);
+    sections.push(`<div class="overflow-x-auto"><table class="min-w-full border-collapse border border-stone-200 text-sm dark:border-stone-700">
+      <thead class="bg-stone-50 dark:bg-stone-900"><tr>
+        <th class="border px-2 py-1 text-left text-xs">Experiment</th>
+        <th class="border px-2 py-1 text-left text-xs">Surface</th>
+        <th class="border px-2 py-1 text-left text-xs">Window</th>
+        <th class="border px-2 py-1 text-left text-xs">min_read_days</th>
+        <th class="border px-2 py-1 text-left text-xs">depends_on</th>
+        <th class="border px-2 py-1 text-left text-xs">Metric</th>
+      </tr></thead><tbody>
+      ${pub.backlog
+        .map((b) => {
+          const deps = b.depends_on.length ? b.depends_on.join(", ") : "—";
+          return `<tr>
+            <td class="border px-2 py-1"><div class="font-semibold">${escapeHtml(b.label)}</div><div class="font-mono text-xs">${escapeHtml(b.id)}</div></td>
+            <td class="border px-2 py-1 text-xs">${escapeHtml(formatSurfaces(b))}</td>
+            <td class="border px-2 py-1 whitespace-nowrap text-xs">${escapeHtml(b.start ?? "—")} → ${escapeHtml(b.end ?? "—")}</td>
+            <td class="border px-2 py-1 text-xs">${escapeHtml(String(b.min_read_days))}</td>
+            <td class="border px-2 py-1 text-xs font-mono">${escapeHtml(deps)}</td>
+            <td class="border px-2 py-1 text-xs">${escapeHtml(b.metric)}${b.note ? `<span class="block text-xs text-stone-500">${escapeHtml(b.note)}</span>` : ""}</td>
+          </tr>`;
+        })
+        .join("")}
+      </tbody></table></div>`);
   }
   sections.push(`</section>`);
 

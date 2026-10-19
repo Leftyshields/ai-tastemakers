@@ -11,7 +11,6 @@
       "min_read_days": 7,
       "depends_on": [],
       "status": "done",
-      "visibility": "public",
       "experiment_key": "EXP-20260628-web-enrich-skills",
       "posthog_flag": null,
       "result_summary": "Kept enrich on; click data sparse but blurbs cited timelier hooks.",
@@ -36,7 +35,6 @@
       "min_read_days": 14,
       "depends_on": [],
       "status": "done",
-      "visibility": "public",
       "experiment_key": "EXP-20260701-landing-layout",
       "posthog_flag": null,
       "result_summary": "Shipped layout v2 without completing formal before/after measurement.",
@@ -54,7 +52,6 @@
       "min_read_days": 14,
       "depends_on": [],
       "status": "done",
-      "visibility": "public",
       "experiment_key": "EXP-20260716-firecrawl-enrich-skills",
       "posthog_flag": null,
       "result_summary": "Firecrawl provider shipped for Skills web enrich.",
@@ -72,7 +69,6 @@
       "min_read_days": 14,
       "depends_on": [],
       "status": "done",
-      "visibility": "public",
       "experiment_key": "EXP-20260715-soft-dedup-diversity-skills",
       "posthog_flag": null,
       "result_summary": "Overlap down to 37.5% vs 70% baseline; kept tighter soft dedup.",
@@ -90,7 +86,6 @@
       "min_read_days": 13,
       "depends_on": [],
       "status": "done",
-      "visibility": "public",
       "experiment_key": "EXP-20260802-ponytail-narration-skills",
       "posthog_flag": null,
       "result_summary": "Treatment cut output about 18% with rubric pass held.",
@@ -101,14 +96,18 @@
     {
       "id": "EXP-20260913-humanizer-polish-skills",
       "label": "Less AI-sounding briefs",
-      "surface": ["narration_oss", "narration_skills"],
+      "surface": [
+        "narration_oss",
+        "narration_skills"
+      ],
       "metric": "editorial rubric; human-sounding spot-check",
       "start": "2026-10-11",
       "end": "2026-10-24",
       "min_read_days": 14,
-      "depends_on": ["EXP-20260715-soft-dedup-diversity-skills"],
+      "depends_on": [
+        "EXP-20260715-soft-dedup-diversity-skills"
+      ],
       "status": "running",
-      "visibility": "public",
       "experiment_key": "EXP-20260913-humanizer-polish-skills",
       "posthog_flag": null,
       "note": "Treatment window; baseline 2026-09-27 to 2026-10-10. DIGEST_HUMANIZER_POLISH; PR #32 merged."
@@ -121,9 +120,10 @@
       "start": "2026-11-01",
       "end": "2026-11-08",
       "min_read_days": 8,
-      "depends_on": ["EXP-20260913-humanizer-polish-skills"],
+      "depends_on": [
+        "EXP-20260913-humanizer-polish-skills"
+      ],
       "status": "planned",
-      "visibility": "teaser",
       "experiment_key": "POLICY-DIGEST-UI-FREEZE",
       "posthog_flag": null,
       "note": "Baseline observation through 2026-11-08; extension through caveman readout tbd."
@@ -131,14 +131,18 @@
     {
       "id": "EXP-20260913-caveman-compress-skills",
       "label": "Shorter enrichment context",
-      "surface": ["narration_oss", "narration_skills"],
+      "surface": [
+        "narration_oss",
+        "narration_skills"
+      ],
       "metric": "enrich input/output tokens; rank-1 rubric; Why-now rubric",
       "start": "2026-10-25",
       "end": "2026-11-21",
       "min_read_days": 28,
-      "depends_on": ["EXP-20260913-humanizer-polish-skills"],
+      "depends_on": [
+        "EXP-20260913-humanizer-polish-skills"
+      ],
       "status": "planned",
-      "visibility": "public",
       "experiment_key": "EXP-20260913-caveman-compress-skills",
       "posthog_flag": null,
       "note": "DIGEST_ENRICH_COMPRESS; PR #33 draft."
@@ -146,28 +150,36 @@
     {
       "id": "EXP-20260913-whynow-memory-skills",
       "label": "Fresher Why-now on repeats",
-      "surface": ["narration_oss", "narration_skills"],
+      "surface": [
+        "narration_oss",
+        "narration_skills"
+      ],
       "metric": "Why-now uniqueness on repeat repos; rubric score",
       "start": "2026-11-22",
       "end": "2026-12-19",
       "min_read_days": 28,
-      "depends_on": ["EXP-20260913-caveman-compress-skills"],
+      "depends_on": [
+        "EXP-20260913-caveman-compress-skills"
+      ],
       "status": "planned",
-      "visibility": "teaser",
       "experiment_key": "EXP-20260913-whynow-memory-skills",
       "posthog_flag": null
     },
     {
       "id": "EXP-20260913-rank-bootstrap-skills",
       "label": "Smarter early ranking",
-      "surface": ["narration_oss", "narration_skills"],
+      "surface": [
+        "narration_oss",
+        "narration_skills"
+      ],
       "metric": "top-10 day-over-day stability during bootstrap weeks",
       "start": "2026-12-20",
       "end": "2027-01-16",
       "min_read_days": 28,
-      "depends_on": ["EXP-20260913-whynow-memory-skills"],
+      "depends_on": [
+        "EXP-20260913-whynow-memory-skills"
+      ],
       "status": "planned",
-      "visibility": "private",
       "experiment_key": "EXP-20260913-rank-bootstrap-skills",
       "posthog_flag": null,
       "note": "Bootstrap flag values tbd after baseline review."

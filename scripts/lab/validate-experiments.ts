@@ -5,7 +5,6 @@ import { fileURLToPath } from "node:url";
 export type LabSurface = "digest_ui" | "narration_oss" | "narration_skills" | "email";
 
 export type LabExperimentStatus = "planned" | "running" | "done";
-export type LabVisibility = "public" | "teaser" | "private";
 export type LabVerdict = "ship" | "revert" | "inconclusive";
 
 export interface PostHogEndSnapshot {
@@ -27,7 +26,6 @@ export interface LabExperimentEntry {
   min_read_days: number;
   depends_on: string[];
   status: LabExperimentStatus;
-  visibility?: LabVisibility;
   experiment_key?: string | null;
   posthog_flag?: string | null;
   note?: string | null;
@@ -50,7 +48,6 @@ export interface ValidationIssue {
 const ISO_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const SURFACES: LabSurface[] = ["digest_ui", "narration_oss", "narration_skills", "email"];
 const STATUSES: LabExperimentStatus[] = ["planned", "running", "done"];
-const VISIBILITIES: LabVisibility[] = ["public", "teaser", "private"];
 const VERDICTS: LabVerdict[] = ["ship", "revert", "inconclusive"];
 
 export function parseIsoDate(s: string): Date {
@@ -113,14 +110,6 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
       issues.push({
         code: "schema",
         message: `Missing label on '${exp.id}'.`,
-        experiment_ids: [exp.id],
-      });
-    }
-    const vis = exp.visibility ?? "teaser";
-    if (!VISIBILITIES.includes(vis)) {
-      issues.push({
-        code: "schema",
-        message: `Invalid visibility '${String(exp.visibility)}' on '${exp.id}'.`,
         experiment_ids: [exp.id],
       });
     }

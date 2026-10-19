@@ -54,14 +54,10 @@ describe("lab/experiments.json", () => {
     expect(validateExperimentsFile(plan)).toEqual([]);
   });
 
-  it("builds public file without private rank bootstrap", () => {
+  it("builds public file with full experiment registry", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
-    const allPublicIds = [
-      ...pub.backlog.map((b) => b.id),
-      ...pub.history.map((h) => h.id),
-      pub.control_panel.running?.id,
-    ].filter(Boolean);
-    expect(allPublicIds).not.toContain("EXP-20260913-rank-bootstrap-skills");
+    expect(pub.experiments.length).toBe(tasks.length);
+    expect(pub.backlog.some((b) => b.id === "EXP-20260913-rank-bootstrap-skills")).toBe(true);
   });
 });
 
