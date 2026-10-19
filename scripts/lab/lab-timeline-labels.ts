@@ -1,6 +1,14 @@
 /** Heuristic label width in px (0.55em per char at 12px bold). */
 export const TIMELINE_LABEL_MIN_CHARS = 8;
-const PX_PER_CHAR = 7;
+export const TIMELINE_LABEL_PX_PER_CHAR = 7;
+/** Matches `.lab-timeline-bar` horizontal padding (8px each side). */
+export const TIMELINE_BAR_HORIZONTAL_PADDING_PX = 16;
+
+const PX_PER_CHAR = TIMELINE_LABEL_PX_PER_CHAR;
+
+export function minBarWidthPxForInsideLabel(): number {
+  return TIMELINE_LABEL_MIN_CHARS * PX_PER_CHAR + TIMELINE_BAR_HORIZONTAL_PADDING_PX;
+}
 
 export function estimateLabelWidthPx(label: string): number {
   return label.length * PX_PER_CHAR;
@@ -17,7 +25,7 @@ export function shouldRenderInsideTimelineLabel(
   labelLength: number,
 ): boolean {
   if (labelLength < TIMELINE_LABEL_MIN_CHARS) return false;
-  return barWidthPx >= 24;
+  return barWidthPx >= minBarWidthPxForInsideLabel();
 }
 
 export function chooseTimelineLabelPlacement(

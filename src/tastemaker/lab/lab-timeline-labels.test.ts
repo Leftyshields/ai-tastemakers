@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import {
   chooseTimelineLabelPlacement,
+  minBarWidthPxForInsideLabel,
   outsideLabelClearsNextBar,
   shouldRenderInsideTimelineLabel,
   TIMELINE_LABEL_MIN_CHARS,
@@ -13,9 +14,12 @@ describe("chooseTimelineLabelPlacement", () => {
   });
 
   it("prefers inside labels when eight characters fit", () => {
-    expect(shouldRenderInsideTimelineLabel(60, 20)).toBe(true);
-    expect(shouldRenderInsideTimelineLabel(36, 12)).toBe(true);
-    expect(chooseTimelineLabelPlacement("Humanizer polish skills read", 36, 5)).toBe("inside");
+    const minW = minBarWidthPxForInsideLabel();
+    expect(minW).toBe(72);
+    expect(shouldRenderInsideTimelineLabel(minW, 20)).toBe(true);
+    expect(shouldRenderInsideTimelineLabel(minW - 1, 20)).toBe(false);
+    expect(chooseTimelineLabelPlacement("Humanizer polish skills read", minW, 5)).toBe("inside");
+    expect(chooseTimelineLabelPlacement("Humanizer polish skills read", 36, 5)).toBe("hidden");
   });
 
   it("requires outside labels to clear the next bar gap", () => {

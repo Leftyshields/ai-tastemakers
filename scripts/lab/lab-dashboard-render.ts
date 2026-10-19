@@ -26,6 +26,7 @@ import {
 } from "./lab-metric-progress.js";
 import { formatSurfaces } from "./lab-format.js";
 import { formatBacklogDependsOn } from "./lab-backlog-deps.js";
+import { minBarWidthPxForInsideLabel, TIMELINE_LABEL_MIN_CHARS } from "./lab-timeline-labels.js";
 
 export const SURFACE_LANE_ORDER: LabSurface[] = [
   "digest_ui",
@@ -589,7 +590,8 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePopover(); });
 })();
 (function(){
-  var MIN_CHARS = 8;
+  var MIN_CHARS = ${TIMELINE_LABEL_MIN_CHARS};
+  var MIN_INSIDE_W = ${minBarWidthPxForInsideLabel()};
   var GAP = 8;
   function lanesOverlap(a, b){
     var aTop = Number(a.getAttribute('data-lane-top') || '0');
@@ -629,7 +631,7 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
         outside.hidden = true;
         if(both && laneSpan >= 2) both.hidden = true;
         if(label.length < MIN_CHARS) return;
-        if(barW >= 24){
+        if(barW >= MIN_INSIDE_W){
           inside.textContent = label;
           return;
         }
@@ -641,7 +643,9 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
         if(outW + GAP <= gapNext && outW > 0){
           outside.textContent = label;
           outside.hidden = false;
+          return;
         }
+        inside.textContent = label;
       });
     });
   }
