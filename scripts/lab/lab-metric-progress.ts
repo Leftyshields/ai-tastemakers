@@ -98,7 +98,7 @@ export function renderReadWindowBarHtml(
 ): string {
   if (dayOfMinRead === null || minReadDays <= 0) return "";
   const pct = Math.max(0, Math.min(100, (dayOfMinRead / minReadDays) * 100));
-  return `<div class="mt-2 lab-read-window"><div class="flex justify-between text-xs text-stone-500"><span>Read window</span><span>Day ${dayOfMinRead} of ${minReadDays}</span></div><div class="mt-1 h-1 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-read-window-fill h-full rounded bg-blue-500 dark:bg-blue-400" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+  return `<div class="mt-2 lab-read-window"><div class="text-xs text-stone-500"><span>Read window</span></div><div class="mt-1 h-1 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-read-window-fill h-full rounded bg-blue-500 dark:bg-blue-400" style="width:${pct.toFixed(1)}%"></div></div></div>`;
 }
 
 export function trackBadgeClass(status: LabTrackStatus): string {

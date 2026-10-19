@@ -206,7 +206,8 @@ function renderLabDashboardStyles(): string {
 .lab-timeline-lane-track { position: relative; flex: 1; min-height: 28px; background: rgb(245 245 244); border-radius: 4px; }
 .dark .lab-timeline-lane-track { background: rgb(28 25 23); }
 .lab-timeline-tracks { overflow: visible; }
-.lab-timeline-item { position: absolute; overflow: visible; pointer-events: none; }
+.lab-timeline-item { position: absolute; overflow: visible; pointer-events: none; z-index: 4; }
+.lab-timeline-item[data-popover-open="true"] { z-index: 200; }
 .lab-timeline-bar { position: absolute; inset: 0; min-height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 0.75rem; font-weight: 600; overflow: visible; white-space: nowrap; pointer-events: auto; }
 .lab-timeline-label-outside { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; max-width: 8rem; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
 .lab-timeline-label-inside { overflow: hidden; text-overflow: ellipsis; }
@@ -218,7 +219,13 @@ function renderLabDashboardStyles(): string {
   .lab-timeline-mobile { display: block; }
   .lab-timeline-mobile-month { font-size: 0.75rem; font-weight: 700; color: rgb(87 83 78); margin: 12px 0 6px; }
   .lab-timeline-mobile-item { border: 1px solid rgb(231 229 228); border-radius: 8px; padding: 10px; margin-bottom: 8px; font-size: 0.8rem; }
+  .lab-backlog-table .lab-backlog-starts-short { display: none; }
+  .lab-backlog-table .lab-backlog-starts-long { display: block; text-align: left; }
+  .lab-backlog-table .lab-backlog-depends-short { display: none; }
+  .lab-backlog-table .lab-backlog-depends-long { display: block; text-align: left; }
+  .lab-backlog-table td.lab-num { text-align: left; }
 }
+.lab-backlog-starts-long, .lab-backlog-depends-long { display: none; }
 .lab-timeline-bar-running { background: rgb(37 99 235); color: white; }
 .lab-timeline-bar-planned { background: transparent; border: 2px solid rgb(37 99 235); color: rgb(30 64 175); }
 .dark .lab-timeline-bar-planned { color: rgb(191 219 254); }
@@ -238,7 +245,7 @@ function renderLabDashboardStyles(): string {
 .lab-how-to-read { font-size: 0.875rem; color: rgb(87 83 78); margin-bottom: 1.5rem; }
 .dark .lab-how-to-read { color: rgb(168 162 158); }
 .lab-timeline-bar { cursor: pointer; }
-.lab-timeline-popover { position: absolute; left: 0; top: calc(100% + 6px); z-index: 50; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 4px 12px rgb(0 0 0 / 0.08); white-space: normal; pointer-events: auto; }
+.lab-timeline-popover { position: fixed; z-index: 300; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 6px 20px rgb(0 0 0 / 0.15); white-space: normal; pointer-events: auto; }
 .dark .lab-timeline-popover { background: rgb(28 25 23); border-color: rgb(68 64 60); }
 .lab-timeline-popover[hidden] { display: none !important; }
 .lab-timeline-popover:not([hidden]) { display: block !important; }
@@ -461,7 +468,7 @@ function renderTimelineBarItem(
   const bothHtml = showBoth
     ? `<span class="lab-timeline-both-tag" data-lab-both-tag>Both</span>`
     : `<span class="lab-timeline-both-tag" data-lab-both-tag hidden>Both</span>`;
-  return `<div class="lab-timeline-item" style="left:${item.offset_pct.toFixed(2)}%;width:${item.width_pct.toFixed(2)}%;top:${top}px;height:${height}px;">
+  return `<div class="lab-timeline-item" data-lane-top="${top}" data-lane-height="${height}" data-offset-pct="${item.offset_pct.toFixed(4)}" data-width-pct="${item.width_pct.toFixed(4)}" style="left:${item.offset_pct.toFixed(2)}%;width:${item.width_pct.toFixed(2)}%;top:${top}px;height:${height}px;">
       <div class="lab-timeline-bar ${barStatusClass(item.status)}" data-lab-timeline-bar data-label="${escapeHtml(label)}" data-lane-span="${item.lane_span}" role="button" tabindex="0" aria-describedby="${escapeHtml(popId)}" aria-expanded="false">
         <span class="lab-timeline-label-inside" data-lab-label-inside></span>${bothHtml}
       </div>
@@ -524,8 +531,32 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
   var openPop = null;
   var openBar = null;
   function closePopover(){
-    if(openPop){ openPop.hidden = true; openPop = null; }
+    if(openPop){
+      openPop.hidden = true;
+      openPop.style.top = '';
+      openPop.style.left = '';
+      var item = openPop.closest('.lab-timeline-item');
+      if(item) item.removeAttribute('data-popover-open');
+      openPop = null;
+    }
     if(openBar){ openBar.setAttribute('aria-expanded','false'); openBar = null; }
+  }
+  function positionPopover(bar, pop){
+    pop.hidden = false;
+    pop.style.left = '-9999px';
+    pop.style.top = '0px';
+    var popRect = pop.getBoundingClientRect();
+    var barRect = bar.getBoundingClientRect();
+    var top = barRect.bottom + 8;
+    var left = barRect.left;
+    if(top + popRect.height > window.innerHeight - 8){
+      top = Math.max(8, barRect.top - popRect.height - 8);
+    }
+    if(left + popRect.width > window.innerWidth - 8){
+      left = Math.max(8, window.innerWidth - popRect.width - 8);
+    }
+    pop.style.top = top + 'px';
+    pop.style.left = left + 'px';
   }
   function openForBar(bar){
     var item = bar.closest('.lab-timeline-item');
@@ -533,7 +564,8 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
     var pop = item.querySelector('.lab-timeline-popover');
     if(!pop) return;
     closePopover();
-    pop.hidden = false;
+    item.setAttribute('data-popover-open','true');
+    positionPopover(bar, pop);
     openPop = pop;
     openBar = bar;
     bar.setAttribute('aria-expanded','true');
@@ -554,11 +586,30 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
 })();
 (function(){
   var MIN_CHARS = 8;
+  var GAP = 8;
+  function lanesOverlap(a, b){
+    var aTop = Number(a.getAttribute('data-lane-top') || '0');
+    var aH = Number(a.getAttribute('data-lane-height') || '0');
+    var bTop = Number(b.getAttribute('data-lane-top') || '0');
+    var bH = Number(b.getAttribute('data-lane-height') || '0');
+    return aTop < bTop + bH && aTop + aH > bTop;
+  }
+  function gapBeforeNextBar(item, track, itemRect){
+    var nextLeft = null;
+    track.querySelectorAll('.lab-timeline-item').forEach(function(other){
+      if(other === item) return;
+      if(!lanesOverlap(item, other)) return;
+      var oRect = other.getBoundingClientRect();
+      if(oRect.left <= itemRect.left + 1) return;
+      if(nextLeft === null || oRect.left < nextLeft) nextLeft = oRect.left;
+    });
+    if(nextLeft === null) return track.getBoundingClientRect().right - itemRect.right;
+    return nextLeft - itemRect.right;
+  }
   function layoutTimelineLabels(){
     document.querySelectorAll('.lab-timeline-tracks').forEach(function(track){
-      var trackW = track.clientWidth;
-      document.querySelectorAll('.lab-timeline-item').forEach(function(item){
-        if(!track.contains(item)) return;
+      var items = track.querySelectorAll('.lab-timeline-item');
+      items.forEach(function(item){
         var bar = item.querySelector('[data-lab-timeline-bar]');
         var inside = item.querySelector('[data-lab-label-inside]');
         var outside = item.querySelector('[data-lab-label-outside]');
@@ -566,10 +617,9 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
         if(!bar || !inside || !outside) return;
         var label = bar.getAttribute('data-label') || '';
         var laneSpan = Number(bar.getAttribute('data-lane-span') || '1');
-        var trackRect = track.getBoundingClientRect();
         var itemRect = item.getBoundingClientRect();
         var barW = bar.getBoundingClientRect().width;
-        var spaceAfter = trackRect.right - itemRect.right - 8;
+        var gapNext = gapBeforeNextBar(item, track, itemRect);
         inside.textContent = '';
         outside.textContent = '';
         outside.hidden = true;
@@ -580,17 +630,13 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
           inside.textContent = label;
           return;
         }
-        if(spaceAfter >= est){
+        outside.textContent = label;
+        outside.hidden = false;
+        var outW = outside.getBoundingClientRect().width;
+        outside.hidden = true;
+        outside.textContent = '';
+        if(outW + GAP <= gapNext && outW > 0){
           outside.textContent = label;
-          outside.hidden = false;
-          return;
-        }
-        if(barW >= MIN_CHARS * 7){
-          inside.textContent = label.slice(0, MIN_CHARS);
-          return;
-        }
-        if(spaceAfter >= MIN_CHARS * 7){
-          outside.textContent = label.slice(0, MIN_CHARS);
           outside.hidden = false;
         }
       });
@@ -621,14 +667,15 @@ function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
       const surfacesText = sanitizeVisibleCopy(formatSurfaces(b));
       const deps = formatBacklogDependsOn(b.depends_on, pub.experiments);
       const rowId = escapeHtml(b.id);
-      const dependsCell = deps.htmlNames
-        ? `${deps.htmlNames} <button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button>`
-        : `<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button>`;
+      const moreBtn = `<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button>`;
+      const dependsShort = deps.htmlNames ? `${deps.htmlNames} ${moreBtn}` : moreBtn;
+      const dependsLong = deps.plain ? `Depends on ${escapeHtml(deps.plain)} ${moreBtn}` : moreBtn;
+      const startsLong = b.start ? `Starts ${starts}` : "";
       parts.push(`<tr class="lab-data-row">
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(b.label))}</span></td>
         <td>${escapeHtml(surfacesText)}</td>
-        <td class="lab-num" title="${escapeHtml(isoTitleAttr(b.start))}">${escapeHtml(starts)}</td>
-        <td class="text-xs">${dependsCell}</td>
+        <td class="lab-num lab-backlog-starts" title="${escapeHtml(isoTitleAttr(b.start))}"><span class="lab-backlog-starts-short">${escapeHtml(starts)}</span><span class="lab-backlog-starts-long">${escapeHtml(startsLong)}</span></td>
+        <td class="text-xs lab-backlog-depends"><span class="lab-backlog-depends-short">${dependsShort}</span><span class="lab-backlog-depends-long">${dependsLong}</span></td>
       </tr>
       <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
         <p class="font-mono">${escapeHtml(b.id)}</p>

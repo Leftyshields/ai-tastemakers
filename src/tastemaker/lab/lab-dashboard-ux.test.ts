@@ -59,6 +59,8 @@ describe("Lab dashboard UX copy", () => {
     expect(panel).not.toContain("Monitoring only");
     expect(panel).not.toContain("Progress to target");
     expect(panel).toContain("Read window");
+    expect(panel.match(/lab-read-window[\s\S]*?Day 9 of 14/)).toBeNull();
+    expect(panel).toContain("Day 9 of 14");
   });
 
   it("UX3 details summary has no hardcoded aria-expanded", () => {
@@ -76,6 +78,16 @@ describe("Lab dashboard UX copy", () => {
     expect(html).toContain("lab-timeline-popover");
     expect(html).toContain("lab-timeline-mobile");
     expect(html).toContain("lab-timeline-tracks");
+    expect(html).toContain("z-index: 300");
+    expect(html).toContain("positionPopover");
+  });
+
+  it("UX6 round 3 mobile backlog field labels", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).toContain("lab-backlog-starts-long");
+    expect(html).toContain("Starts Oct 25, 2026");
+    expect(html).toContain("Depends on Less AI sounding briefs");
   });
 
   it("UX7 humanizer spans OSS and Skills lanes", () => {

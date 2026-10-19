@@ -16,8 +16,21 @@ export function chooseTimelineLabelPlacement(
   const need = estimateLabelWidthPx(label);
   const minNeed = TIMELINE_LABEL_MIN_CHARS * PX_PER_CHAR;
   if (barWidthPx >= need && label.length >= TIMELINE_LABEL_MIN_CHARS) return "inside";
-  if (spaceAfterBarPx >= need && label.length >= TIMELINE_LABEL_MIN_CHARS) return "outside";
+  if (
+    spaceAfterBarPx >= need + 8 &&
+    label.length >= TIMELINE_LABEL_MIN_CHARS &&
+    outsideLabelClearsNextBar(need, spaceAfterBarPx)
+  ) {
+    return "outside";
+  }
   if (barWidthPx >= minNeed && label.length >= TIMELINE_LABEL_MIN_CHARS) return "inside";
-  if (spaceAfterBarPx >= minNeed && label.length >= TIMELINE_LABEL_MIN_CHARS) return "outside";
   return "hidden";
+}
+
+/** Outside label allowed only when the full text box clears the next bar plus 8px. */
+export function outsideLabelClearsNextBar(
+  labelWidthPx: number,
+  gapBeforeNextBarPx: number,
+): boolean {
+  return gapBeforeNextBarPx >= labelWidthPx + 8;
 }

@@ -14,3 +14,7 @@ ts	phase	decision	why	evidence	result
 2026-10-19T23:15:31.178Z	qa	law:UX6-r2	Timeline label fit rules mobile month list popover visible	UX review gate round 2	accepted
 2026-10-19T23:15:31.178Z	qa	law:UX7-r2	Humanizer multi lane span with lane span metadata	UX review gate round 2	accepted
 2026-10-19T23:15:31.178Z	qa	law:UX8-r2	Backlog four columns depends plain names	UX review gate round 2	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX6-r3-labels	Outside label only if measured box clears next bar plus 8px	UX review gate round 3 final	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX6-r3-popover	Fixed popover z-index 300 viewport flip	UX review gate round 3 final	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX8-r3-mobile	Mobile backlog Starts and Depends on field labels	UX review gate round 3 final	accepted
+2026-10-19T23:18:57.606Z	qa	law:UX1-r3-read-window	Read window bar without duplicate day count	UX review gate round 3 final	accepted
