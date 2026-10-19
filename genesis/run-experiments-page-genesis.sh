@@ -8,6 +8,7 @@ GENESIS=(node scripts/genesis-run.js)
 
 bash genesis/verify-experiments-page.sh
 
+rm -f .ai/context/run_config.json
 "${GENESIS[@]}" init --autonomous
 
 steps=(
