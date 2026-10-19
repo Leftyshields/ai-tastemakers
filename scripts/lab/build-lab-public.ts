@@ -20,7 +20,12 @@ import {
   renderLabDashboardHtml,
   findForbiddenLabCopyViolations,
 } from "./lab-dashboard-render.js";
-export { renderLabDashboardHtml, findForbiddenLabCopyViolations, buildTimelineModel };
+export {
+  renderLabDashboardHtml,
+  findForbiddenLabCopyViolations,
+  buildTimelineModel,
+  formatAllNullReadStatusLine,
+} from "./lab-dashboard-render.js";
 export type { PublicTimelineModel };
 
 import type {

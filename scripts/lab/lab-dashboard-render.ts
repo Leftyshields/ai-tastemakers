@@ -9,6 +9,7 @@ import type {
 export type { PublicTimelineModel, PublicTimelineItem };
 import {
   formatDayHuman,
+  formatDayShort,
   formatSyncedAgoPt,
   formatWindowHuman,
   isoTitleAttr,
@@ -156,6 +157,21 @@ function metricValuesAllNull(run: PublicControlPanelRunning): boolean {
   );
 }
 
+/** UX1: read type plus window end date; never sync fallback. */
+export function formatAllNullReadStatusLine(
+  run: PublicControlPanelRunning,
+): string {
+  const metricType = run.success.metric.metric_type;
+  const readLabel = metricType === "editorial" ? "Editorial read" : "PostHog read";
+  const dateIso = run.end ?? latestReadDateIso(run.metric_daily);
+  if (!dateIso) return readLabel;
+  return `${readLabel}, ${formatDayShort(dateIso)}`;
+}
+
+function timelinePopoverId(itemId: string): string {
+  return `lab-timeline-pop-${itemId.replace(/[^a-zA-Z0-9]/g, "_")}`;
+}
+
 function renderDefinitionListRow(
   label: string,
   valueHtml: string,
@@ -205,6 +221,11 @@ function renderLabDashboardStyles(): string {
 }
 .lab-how-to-read { font-size: 0.875rem; color: rgb(87 83 78); margin-bottom: 1.5rem; }
 .dark .lab-how-to-read { color: rgb(168 162 158); }
+.lab-timeline-bar { cursor: pointer; }
+.lab-timeline-popover { position: absolute; left: 0; top: calc(100% + 4px); z-index: 20; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 4px 12px rgb(0 0 0 / 0.08); white-space: normal; }
+.dark .lab-timeline-popover { background: rgb(28 25 23); border-color: rgb(68 64 60); }
+.lab-timeline-popover[hidden] { display: none !important; }
+.lab-history-details-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 </style>`;
 }
 
@@ -246,13 +267,20 @@ export function renderLabDashboardHtml(
         ? `Day ${run.day_of_min_read} of ${run.min_read_days}`
         : "";
     const progress = renderProgressBarHtml(run.progress_pct);
-    const spark = renderSparklineSvg(run.metric_daily, 160, metricType === "editorial" ? 40 : 48);
+    const hasDaily = run.metric_daily.length > 0;
+    const spark = hasDaily
+      ? renderSparklineSvg(run.metric_daily, 160, metricType === "editorial" ? 40 : 48)
+      : "";
     const rubricHeadline = sanitizeVisibleCopy(run.success.metric.pass_threshold);
-    const headlineBlock =
-      metricType === "posthog"
-        ? `<div class="mb-2">${spark}</div>`
-        : `<p class="text-sm font-medium text-stone-800 dark:text-stone-100">${escapeHtml(rubricHeadline)}${readDate ? ` · ${escapeHtml(formatDayHuman(readDate))}` : ""}</p>
-           <div class="mt-2"><p class="text-xs text-stone-500">Monitoring only</p><div style="max-height:40px;overflow:hidden">${spark}</div></div>`;
+    let headlineBlock = "";
+    if (metricType === "posthog") {
+      if (hasDaily) headlineBlock = `<div class="mb-2">${spark}</div>`;
+    } else {
+      headlineBlock = `<p class="text-sm font-medium text-stone-800 dark:text-stone-100">${escapeHtml(rubricHeadline)}${readDate ? ` · ${escapeHtml(formatDayHuman(readDate))}` : ""}</p>`;
+      if (hasDaily) {
+        headlineBlock += `<div class="mt-2"><p class="text-xs text-stone-500">Monitoring only</p><div style="max-height:40px;overflow:hidden">${spark}</div></div>`;
+      }
+    }
 
     sections.push(`<h2 class="text-lg font-bold tracking-tight">${escapeHtml(title)}</h2>
       <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
@@ -263,16 +291,14 @@ export function renderLabDashboardHtml(
       ${progress}
       <p class="mt-2 font-mono text-xs text-stone-500">${escapeHtml(run.id)}</p>
       <details class="mt-3 text-sm text-stone-700 dark:text-stone-300">
-        <summary class="cursor-pointer font-medium" aria-expanded="false">Details</summary>
+        <summary class="cursor-pointer font-medium">Details</summary>
         <p class="mt-2">${escapeHtml(sanitizeVisibleCopy(run.success.success_criteria))}</p>
       </details>
       <div class="mt-4 rounded-lg border border-stone-200 p-4 dark:border-stone-700">${headlineBlock}`);
 
     if (allNull) {
-      const readLabel = metricType === "editorial" ? "Editorial read" : "PostHog read";
-      const when = readDate ? formatDayHuman(readDate) : formatSyncedAgoPt(pub.status_sync.generated_at);
       sections.push(
-        `<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">${escapeHtml(readLabel)} · ${escapeHtml(when)}</p>`,
+        `<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">${escapeHtml(formatAllNullReadStatusLine(run))}</p>`,
       );
     } else {
       const rows: string[] = [];
@@ -377,14 +403,20 @@ export function renderLabDashboardHtml(
           ${timeline.today_offset_pct != null ? `<div class="lab-timeline-today" style="left:${timeline.today_offset_pct.toFixed(2)}%;" title="Today"></div>` : ""}
           ${timeline.items
             .map((item) => {
-              const tip = `${item.id} · ${formatWindowHuman(item.start, item.end)} · ${item.status}`;
+              const popId = timelinePopoverId(item.id);
               const both = item.show_both_tag
                 ? `<span class="ml-1 rounded bg-stone-200 px-1 text-xs font-normal dark:bg-stone-700">Both</span>`
                 : "";
               const top = item.lane_start * laneBlock;
               const height = item.lane_span * 28 + (item.lane_span - 1) * 12;
-              return `<div class="lab-timeline-bar ${barStatusClass(item.status)}" style="left:${item.offset_pct.toFixed(2)}%;width:${item.width_pct.toFixed(2)}%;top:${top}px;height:${height}px;" tabindex="0" title="${escapeHtml(tip)}">
+              const win = formatWindowHuman(item.start, item.end);
+              return `<div class="lab-timeline-bar ${barStatusClass(item.status)}" data-lab-timeline-bar role="button" tabindex="0" aria-describedby="${escapeHtml(popId)}" style="left:${item.offset_pct.toFixed(2)}%;width:${item.width_pct.toFixed(2)}%;top:${top}px;height:${height}px;">
             <span>${escapeHtml(sanitizeVisibleCopy(item.label))}${both}</span>
+            <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
+              <p class="font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(item.id)}</p>
+              <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
+              <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
+            </div>
           </div>`;
             })
             .join("")}
@@ -396,8 +428,48 @@ export function renderLabDashboardHtml(
 
   sections.push(renderBacklogSection(pub, escapeHtml));
   sections.push(renderHistorySection(pub, escapeHtml));
+  sections.push(renderLabDashboardScripts());
 
   return sections.join("\n");
+}
+
+function renderLabDashboardScripts(): string {
+  return `<script>
+document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var id = btn.getAttribute('data-target');
+    var row = document.querySelector('.lab-expand-row[data-for="'+id+'"]');
+    if(!row) return;
+    var open = row.getAttribute('data-open') === 'true';
+    row.setAttribute('data-open', open ? 'false' : 'true');
+    btn.textContent = open ? 'More' : 'Less';
+  });
+});
+(function(){
+  var openPop = null;
+  function closePopover(){
+    if(openPop){ openPop.hidden = true; openPop = null; }
+  }
+  document.querySelectorAll('[data-lab-timeline-bar]').forEach(function(bar){
+    var pop = bar.querySelector('.lab-timeline-popover');
+    if(!pop) return;
+    function open(){
+      closePopover();
+      pop.hidden = false;
+      openPop = pop;
+    }
+    bar.addEventListener('click', function(e){ e.stopPropagation(); open(); });
+    bar.addEventListener('focus', function(){ open(); });
+    bar.addEventListener('keydown', function(e){
+      if(e.key === 'Escape'){ closePopover(); bar.blur(); }
+      if(e.key === 'Enter' || e.key === ' '){ e.preventDefault(); open(); }
+    });
+  });
+  document.addEventListener('click', function(){ closePopover(); });
+  document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePopover(); });
+})();
+</script>`;
 }
 
 function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: string) => string): string {
@@ -439,9 +511,9 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
   if (pub.history.length === 0) {
     parts.push(`<p class="text-sm text-stone-600 dark:text-stone-400">No completed experiments published yet.</p>`);
   } else {
-    parts.push(`<div class="lab-table-wrap"><table class="lab-table border border-stone-200 text-sm dark:border-stone-700">
+    parts.push(`<div class="lab-table-wrap"><table class="lab-table lab-history-table border border-stone-200 text-sm dark:border-stone-700">
       <thead class="bg-stone-50 dark:bg-stone-900"><tr>
-        <th>Name</th><th>Window</th><th>Result</th><th>Details</th><th></th>
+        <th>Name</th><th>Window</th><th>Result</th><th>Details</th>
       </tr></thead><tbody>`);
     for (const h of pub.history) {
       const win = formatWindowHuman(h.start, h.end);
@@ -451,30 +523,18 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
       parts.push(`<tr class="lab-data-row">
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(h.label))}</span></td>
         <td title="${escapeHtml(isoTitleAttr(h.start))} to ${escapeHtml(isoTitleAttr(h.end))}">${escapeHtml(win)}</td>
-        <td>${verdictChip}<span class="ml-1 text-xs text-stone-600 dark:text-stone-400">${escapeHtml(summary.slice(0, 80))}${summary.length > 80 ? "..." : ""}</span></td>
-        <td><a class="text-xs text-blue-800 dark:text-blue-400" href="posts/${rowId}.html">Write up</a></td>
-        <td><button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button></td>
+        <td>${verdictChip}</td>
+        <td><div class="lab-history-details-links"><a class="text-xs text-blue-800 dark:text-blue-400" href="posts/${rowId}.html">Write up</a><button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button></div></td>
       </tr>
-      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="5" class="text-xs">
+      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs">
         <p class="font-mono">${escapeHtml(h.id)}</p>
         <p>${escapeHtml(sanitizeVisibleCopy(h.metric))}</p>
+        ${summary ? `<p class="mt-1 text-stone-600 dark:text-stone-400">${escapeHtml(summary)}</p>` : ""}
       </td></tr>`);
     }
     parts.push(`</tbody></table></div>`);
   }
   parts.push(`</section>`);
-  parts.push(`<script>
-document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
-  btn.addEventListener('click', function(){
-    var id = btn.getAttribute('data-target');
-    var row = document.querySelector('.lab-expand-row[data-for="'+id+'"]');
-    if(!row) return;
-    var open = row.getAttribute('data-open') === 'true';
-    row.setAttribute('data-open', open ? 'false' : 'true');
-    btn.textContent = open ? 'More' : 'Less';
-  });
-});
-</script>`);
   return parts.join("\n");
 }
 

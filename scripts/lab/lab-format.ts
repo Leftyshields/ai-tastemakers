@@ -41,6 +41,12 @@ export function formatDayHuman(iso: string): string {
   return `${MONTH_SHORT[m - 1]!} ${d}, ${y}`;
 }
 
+/** Short calendar label for read status lines (example: Oct 24). */
+export function formatDayShort(iso: string): string {
+  const { m, d } = parseIsoDate(iso);
+  return `${MONTH_SHORT[m - 1]!} ${d}`;
+}
+
 export function formatMonthTick(iso: string): string {
   const { m } = parseIsoDate(iso);
   return MONTH_SHORT[m - 1]!;
