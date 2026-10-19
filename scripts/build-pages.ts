@@ -16,6 +16,7 @@ import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
 import { writeDefaultOgPng } from "./generate-brief-og.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import { renderGoRedirectPage } from "./digest-go-page.js";
+import { assertExperimentsValid } from "./lab/validate-experiments.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
@@ -355,6 +356,13 @@ async function buildUnsubscribePage(): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const experimentIssues = assertExperimentsValid(ROOT);
+  if (experimentIssues.length > 0) {
+    throw new Error(
+      `lab/experiments.json validation failed:\n${experimentIssues.map((i) => i.message).join("\n")}`,
+    );
+  }
+
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(path.join(SITE_DIR, ".nojekyll"), "");
   await writeDefaultOgPng(path.join(SITE_DIR, "assets", "og-card.png"));

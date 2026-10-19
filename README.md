@@ -37,7 +37,7 @@ A public **measure → experiment → report** loop for improving the digest pip
 | [/lab/](https://leftyshields.github.io/ai-tastemakers/lab/) | How we pick repos, run experiments, and publish results |
 | [/lab/tools.html](https://leftyshields.github.io/ai-tastemakers/lab/tools.html) | Tool inventory mined from past briefings (search, compaction, eval candidates) |
 | [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) | Public experiment record: what we changed, whether we kept it, and what is live today |
-| [/lab/calendar/](https://leftyshields.github.io/ai-tastemakers/lab/calendar/) | Experiment baseline/treatment timeline (Jantt Gantt, read-only) |
+| [/lab/calendar/](https://leftyshields.github.io/ai-tastemakers/lab/calendar/) | Running and completed experiment timeline (static table) |
 | [/lab/posts/](https://leftyshields.github.io/ai-tastemakers/lab/posts/) | Short write-ups when we try a digest-featured tool, or finish an experiment |
 
 **Site analytics:** PostHog pageviews + `outbound_repo_click` events on repo links (injected at Pages build when `POSTHOG_KEY` is set).
@@ -48,7 +48,9 @@ A public **measure → experiment → report** loop for improving the digest pip
 
 See [docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md](docs/EXPERIMENT_LIFECYCLE_PLAYBOOK.md) and [briefings/lab/shadow-rubric.md](briefings/lab/shadow-rubric.md).
 
-**Adding an experiment to the calendar:** Copy `data/experiments/_template.json` into `data/experiments/`, set baseline and treatment windows in the JSON record, then add matching **baseline** and **treatment** tasks to [lab/experiments.jantt.json](lab/experiments.jantt.json) (fields: `list`, `flag`, `metric`, `experiment_id`). Wire `dependsOn` when the playbook queues the experiment after another window. Use `status` `planned`, `running`, or `done`; mark unknown dates in `fields.date_notes` as `tbd` and use a clearly labelled placeholder end date only when the registry has no date yet. Run `npm run build:pages` to publish `/lab/calendar/`. Jantt assets live under [lab/vendor/jantt/](lab/vendor/jantt/) (MIT, Ahmad Hassan & Jantt Project Contributors).
+**Adding a Lab experiment window:** Register the change in `data/experiments/` and add one row to [lab/experiments.json](lab/experiments.json) (`id`, `surface`, `metric`, `start`, `end`, `min_read_days`, `depends_on`, `status`, `experiment_key` or `posthog_flag`). Use `null` for unknown dates plus a `note`. Run `npx tsx scripts/lab/validate-experiments.ts` locally; `npm run build:pages` publishes only **running** and **done** rows to `lab/experiments.public.json` and the timeline table. PostHog cross-check: scheduled workflow `lab-experiment-status.yml` with secret `POSTHOG_PERSONAL_API_KEY` (read only, project 489599).
+
+**Public repo note:** `lab/experiments.json` includes **planned** queue entries in git. To hide planned work from the public repo, keep planned rows in a private file or secret and merge at build time, or accept that planned experiments are visible in source.
 
 ### Editions
 

@@ -19,5 +19,8 @@ jobs:
 
       - run: npm install
 
+      - name: Validate lab experiments registry
+        run: npx tsx scripts/lab/validate-experiments.ts
+
       - name: Run tests
         run: npm test && npm run test:digest
