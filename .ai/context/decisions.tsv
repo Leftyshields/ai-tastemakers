@@ -18,3 +18,4 @@ ts	phase	decision	why	evidence	result
 2026-10-19T23:18:57.606Z	qa	law:UX6-r3-popover	Fixed popover z-index 300 viewport flip	UX review gate round 3 final	accepted
 2026-10-19T23:18:57.606Z	qa	law:UX8-r3-mobile	Mobile backlog Starts and Depends on field labels	UX review gate round 3 final	accepted
 2026-10-19T23:18:57.606Z	qa	law:UX1-r3-read-window	Read window bar without duplicate day count	UX review gate round 3 final	accepted
+2026-10-19T23:22:12.728Z	qa	law:UX6-r4-inside-labels	Inside labels restored with ellipsis collision rule outside only	UX review gate round 4 desktop	accepted

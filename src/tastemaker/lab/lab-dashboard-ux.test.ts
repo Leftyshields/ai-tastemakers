@@ -82,6 +82,17 @@ describe("Lab dashboard UX copy", () => {
     expect(html).toContain("positionPopover");
   });
 
+  it("UX6 round 4 timeline bars carry inside label data for key experiments", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).toContain('data-label="Less AI sounding briefs"');
+    expect(html).toContain('data-label="Shorter enrichment context"');
+    expect(html).toContain('data-label="Fresher Why now on repeats"');
+    expect(html).toContain('data-label="Smarter early ranking"');
+    expect(html).toContain("lab-timeline-bar-running .lab-timeline-label-inside");
+    expect(html).toContain("lab-timeline-bar-planned .lab-timeline-label-inside");
+  });
+
   it("UX6 round 3 mobile backlog field labels", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });

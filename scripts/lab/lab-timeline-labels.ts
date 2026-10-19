@@ -8,22 +8,31 @@ export function estimateLabelWidthPx(label: string): number {
 
 export type TimelineLabelPlacement = "inside" | "outside" | "hidden";
 
+/**
+ * Inside label when the label has at least MIN_CHARS and the bar has room for text
+ * (ellipsis handles overflow; collision rules apply to outside labels only).
+ */
+export function shouldRenderInsideTimelineLabel(
+  barWidthPx: number,
+  labelLength: number,
+): boolean {
+  if (labelLength < TIMELINE_LABEL_MIN_CHARS) return false;
+  return barWidthPx >= 24;
+}
+
 export function chooseTimelineLabelPlacement(
   label: string,
   barWidthPx: number,
   spaceAfterBarPx: number,
 ): TimelineLabelPlacement {
+  if (shouldRenderInsideTimelineLabel(barWidthPx, label.length)) return "inside";
   const need = estimateLabelWidthPx(label);
-  const minNeed = TIMELINE_LABEL_MIN_CHARS * PX_PER_CHAR;
-  if (barWidthPx >= need && label.length >= TIMELINE_LABEL_MIN_CHARS) return "inside";
   if (
-    spaceAfterBarPx >= need + 8 &&
     label.length >= TIMELINE_LABEL_MIN_CHARS &&
     outsideLabelClearsNextBar(need, spaceAfterBarPx)
   ) {
     return "outside";
   }
-  if (barWidthPx >= minNeed && label.length >= TIMELINE_LABEL_MIN_CHARS) return "inside";
   return "hidden";
 }
 

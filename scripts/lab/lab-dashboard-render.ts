@@ -208,9 +208,13 @@ function renderLabDashboardStyles(): string {
 .lab-timeline-tracks { overflow: visible; }
 .lab-timeline-item { position: absolute; overflow: visible; pointer-events: none; z-index: 4; }
 .lab-timeline-item[data-popover-open="true"] { z-index: 200; }
-.lab-timeline-bar { position: absolute; inset: 0; min-height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 0.75rem; font-weight: 600; overflow: visible; white-space: nowrap; pointer-events: auto; }
-.lab-timeline-label-outside { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; max-width: 8rem; overflow: hidden; text-overflow: ellipsis; pointer-events: none; }
-.lab-timeline-label-inside { overflow: hidden; text-overflow: ellipsis; }
+.lab-timeline-bar { position: absolute; inset: 0; min-height: 28px; border-radius: 4px; display: flex; align-items: center; padding: 0 8px; font-size: 0.75rem; font-weight: 600; overflow: hidden; white-space: nowrap; pointer-events: auto; }
+.lab-timeline-label-outside { position: absolute; left: 100%; top: 50%; transform: translateY(-50%); margin-left: 6px; font-size: 0.75rem; font-weight: 600; white-space: nowrap; max-width: 8rem; overflow: hidden; text-overflow: ellipsis; pointer-events: none; color: rgb(41 37 36); }
+.dark .lab-timeline-label-outside { color: rgb(231 229 228); }
+.lab-timeline-label-inside { overflow: hidden; text-overflow: ellipsis; min-width: 0; flex: 1 1 auto; }
+.lab-timeline-bar-running .lab-timeline-label-inside { color: white; }
+.lab-timeline-bar-planned .lab-timeline-label-inside { color: rgb(37 99 235); }
+.dark .lab-timeline-bar-planned .lab-timeline-label-inside { color: rgb(147 197 253); }
 .lab-timeline-both-tag { margin-left: 4px; border-radius: 4px; background: rgb(255 255 255 / 0.25); padding: 0 4px; font-size: 0.65rem; font-weight: 600; }
 .lab-timeline-desktop { display: block; }
 .lab-timeline-mobile { display: none; }
@@ -625,8 +629,7 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
         outside.hidden = true;
         if(both && laneSpan >= 2) both.hidden = true;
         if(label.length < MIN_CHARS) return;
-        var est = label.length * 7;
-        if(barW >= est){
+        if(barW >= 24){
           inside.textContent = label;
           return;
         }
@@ -648,6 +651,8 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
     layoutTimelineLabels();
   }
   window.addEventListener('resize', layoutTimelineLabels);
+  window.__labLayoutTimelineLabels = layoutTimelineLabels;
+  requestAnimationFrame(function(){ layoutTimelineLabels(); });
 })();
 </script>`;
 }
