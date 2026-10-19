@@ -5,6 +5,7 @@
 - Publish a governed Lab experiments dashboard on `/lab/` sourced from `lab/experiments.json`.
 - Validate experiment windows (surface overlap, dependency order, `min_read_days`, required `success` blocks).
 - Sync PostHog metric series from each row's `success.metric.posthog` into `lab/experiment-status.json`.
+- After a bot push of `lab/experiment-status.json`, workflow `.github/workflows/lab-experiment-status.yml` dispatches `pages.yml` on `main` (bot pushes do not match Pages `on.push` paths). Never dispatch or edit digest workflows.
 - Render control panel (running experiment with sparkline, progress bar, track badge), timeline, backlog, and history on the static site.
 
 ## Success Criteria

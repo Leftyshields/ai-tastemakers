@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: write
+  actions: write
 
 jobs:
   sync:
@@ -30,6 +31,7 @@ jobs:
         run: npx tsx scripts/lab/sync-posthog-experiment-status.ts
 
       - name: Commit status file when changed
+        id: commit
         run: |
           if git diff --quiet lab/experiment-status.json; then
             echo "No experiment-status changes."
@@ -40,3 +42,10 @@ jobs:
           git add lab/experiment-status.json
           git commit -m "chore(lab): refresh PostHog experiment status"
           git push
+          echo "changed=true" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy Pages only (never digest workflows)
+        if: steps.commit.outputs.changed == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run pages.yml --ref main
