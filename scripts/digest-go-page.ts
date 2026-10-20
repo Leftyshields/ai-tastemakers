@@ -51,12 +51,12 @@ export function renderGoRedirectPage(
   var HOME = '${safeHome}';
   var captured = false;
 
-  function captureOnce(props) {
+  function captureOnce(event, props) {
     if (captured) return;
     captured = true;
     if (typeof posthog !== "undefined" && posthog.capture) {
       try {
-        posthog.capture("repo_click", props, { transport: "sendBeacon", send_instantly: true });
+        posthog.capture(event, props, { transport: "sendBeacon", send_instantly: true });
       } catch (e) {}
     }
   }
@@ -66,22 +66,30 @@ export function renderGoRedirectPage(
   }
 
   var params = new URLSearchParams(window.location.search);
+  var eventName = params.get("event") || "";
   var parsed = {
     repo: params.get("repo"),
     section: params.get("section"),
     pos: params.get("pos"),
+    rank: params.get("rank"),
     target: params.get("target"),
-    d: params.get("d")
+    d: params.get("d"),
+    exp: params.get("exp"),
+    status: params.get("status"),
+    dest: params.get("dest"),
+    channel: params.get("channel")
   };
 
   var repo = parsed.repo;
   var section = parsed.section === "skills" ? "skills" : parsed.section === "oss" ? "oss" : "";
   var pos = parsed.pos ? parseInt(parsed.pos, 10) : NaN;
+  var rank = parsed.rank ? parseInt(parsed.rank, 10) : NaN;
   var target = parsed.target || "url";
   var digestCompact = parsed.d || "";
   var digestDate = digestCompact.length === 8
     ? digestCompact.slice(0, 4) + "-" + digestCompact.slice(4, 6) + "-" + digestCompact.slice(6, 8)
     : digestCompact;
+  var labDest = parsed.dest || "";
 
   function normalizeRepo(raw) {
     if (!raw) return "";
@@ -101,20 +109,34 @@ export function renderGoRedirectPage(
   }
 
   var destination = resolveUrl() || (window.location.origin + HOME);
+  if (eventName === "lab_badge_click" && labDest) {
+    destination = window.location.origin + labDest;
+  }
   var continueLink = document.getElementById("continue-link");
   if (continueLink) continueLink.href = destination;
 
-  var githubTarget = resolveUrl();
-  if (githubTarget && section && Number.isFinite(pos)) {
-    captureOnce({
-      repo: normalizeRepo(repo),
-      section: section,
-      channel: "email",
-      position: pos,
-      target: target,
-      digest_date: digestDate,
-      source: "email"
+  if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
+    captureOnce("lab_badge_click", {
+      exp_id: parsed.exp,
+      repo: normalizeRepo(repo) || repo || "",
+      status: parsed.status || "",
+      list: section,
+      rank: rank,
+      channel: parsed.channel || "email"
     });
+  } else {
+    var githubTarget = resolveUrl();
+    if (githubTarget && section && Number.isFinite(pos)) {
+      captureOnce("repo_click", {
+        repo: normalizeRepo(repo),
+        section: section,
+        channel: "email",
+        position: pos,
+        target: target,
+        digest_date: digestDate,
+        source: "email"
+      });
+    }
   }
 
   var done = false;
