@@ -56,3 +56,8 @@
 - **UX39**: Compact loop strip under intro with four steps (Featured in digest, Evaluated, Experiment, Result); numbered chips and chevrons, no dash characters; one row at 1280px; 2×2 grid at ~390px without horizontal scroll; About page replaces feedback loop prose with the same strip plus one sentence per step.
 - **UX40**: When sourceRepo is set, show muted From {Project} in hero, timeline popover (not on Gantt bar), and history name cells; link sourceUrl when present.
 - **UX41**: Optional source, sourceRepo, sourceUrl on lab/experiments.json and public export; backfill only from repo evidence; origin chip Proposed by pipeline or Picked by hand beside status when source is set; source filter only when more than eight rows have source.
+
+## Acceptance criteria (Brian approved Lab UX round 5)
+
+- **UX42**: Every site/lab HTML page ships the same PostHog snippet as the main site (project 489599 when POSTHOG_KEY is set). Delegated capture fires lab_link_click on anchors with data-lab-section and optional experiment_id and source_repo. Outbound repo links use the /go allowlist redirect. verify:genesis fails when any lab page lacks posthog.init, lab_link_click script, or data-lab-section on an anchor.
+- **UX43**: tools.html is a structured Evaluated page (queue table, top 10 with Show all, role matrix disclosures, operator notes behind More). Loop strip marks Evaluated as current. No literal backticks; Lab home body sizing; passes contrast, dash, spacing, and link checks at 390px and in dark mode.

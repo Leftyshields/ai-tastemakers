@@ -26,6 +26,32 @@ export function renderLabMoreButton(
   return `<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${escapeHtml(rowId)}">${escapeHtml(label)}</button>`;
 }
 
+/** Collapsed expand rows; only one lab-expand-row open at a time (UX43). */
+export function renderLabExpandRowScript(): string {
+  return `<script>
+document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var id = btn.getAttribute('data-target');
+    if(!id) return;
+    var row = document.querySelector('.lab-expand-row[data-for="'+id+'"]');
+    if(!row) return;
+    var open = row.getAttribute('data-open') === 'true';
+    if(!open){
+      document.querySelectorAll('.lab-expand-row[data-open="true"]').forEach(function(other){
+        other.setAttribute('data-open','false');
+      });
+      document.querySelectorAll('.lab-expand-toggle').forEach(function(otherBtn){
+        if(otherBtn.getAttribute('data-target') !== id) otherBtn.textContent = 'More';
+      });
+    }
+    row.setAttribute('data-open', open ? 'false' : 'true');
+    btn.textContent = open ? 'More' : 'Less';
+  });
+});
+</script>`;
+}
+
 export function experimentTechnicalMoreHtml(
   exp: LabExperimentSource,
   escapeHtml: (t: string) => string,
@@ -53,13 +79,14 @@ export type LabExperimentOrigin = Pick<
 export function renderFromProjectLine(
   exp: LabExperimentOrigin,
   escapeHtml: (t: string) => string,
+  section: "hero" | "timeline" | "history" = "hero",
 ): string {
   const name = exp.sourceRepo?.trim();
   if (!name) return "";
   const label = sanitizeVisibleCopy(name);
   const url = exp.sourceUrl?.trim();
   if (url) {
-    return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From <a href="${escapeHtml(url)}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(label)}</a></p>`;
+    return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From <a href="${escapeHtml(url)}" class="text-blue-800 hover:underline dark:text-blue-400" data-lab-section="${section}" data-lab-source-repo="${escapeHtml(name)}">${escapeHtml(label)}</a></p>`;
   }
   return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From ${escapeHtml(label)}</p>`;
 }
@@ -81,7 +108,7 @@ export function countExperimentsWithSource(experiments: LabExperimentEntry[]): n
 export function labPublishFooterHtml(escapeHtml: (t: string) => string): string {
   return `<p class="lab-publish-footer mt-10 border-t border-stone-200 pt-6 text-sm text-stone-600 dark:border-stone-700 dark:text-stone-400 font-sans">
     Everything here is safe to publish.
-    <a href="about.html" class="text-blue-800 underline dark:text-blue-400">About the Lab</a>.
-    <a href="${escapeHtml(GITHUB_ISSUES_URL)}" class="text-blue-800 underline dark:text-blue-400">Open an issue</a>.
+    <a href="about.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">About the Lab</a>.
+    <a href="${escapeHtml(GITHUB_ISSUES_URL)}" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">Open an issue</a>.
   </p>`;
 }
