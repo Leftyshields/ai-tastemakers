@@ -64,6 +64,12 @@
     @apply px-3 py-2 align-top;
   }
 
+  @media (min-width: 768px) {
+    .lab-main .lab-prose-capped {
+      max-width: 42rem;
+    }
+  }
+
   .archive-day {
     @apply flex aspect-square items-center justify-center rounded-sm font-sans text-[10px] leading-none;
   }

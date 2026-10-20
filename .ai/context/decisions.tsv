@@ -30,3 +30,7 @@ ts	phase	decision	why	evidence	result
 2026-10-20T00:55:00.000Z	design_decisions	law:UX20	Running row first Today line on top	Brian Lab UX round 2 approved 2026-10-19	accepted
 2026-10-20T00:55:00.000Z	design_decisions	law:UX21	Bold current month on axis	Brian Lab UX round 2 approved 2026-10-19	accepted
 2026-10-20T01:00:00.000Z	design_decisions	law:success-target-approval	Brian approved all ten guessed metric targets as recorded	lab/experiments.json approved_by Brian approved_on 2026-10-19	accepted
+2026-10-20T01:05:00.000Z	qa	law:UX3-r5-headline-no-status	Running control panel from experiments.json when status file absent day count from asOf PostHog optional	UX SIGN gate PR39	accepted
+2026-10-20T01:05:00.000Z	design_decisions	lab:shell-64rem	Desktop lab page shell max width 64rem prose capped 42rem	UX SIGN gate PR39	accepted
+2026-10-20T01:05:00.000Z	design_decisions	law:UX14-r5-row-order	Running recent done planned collapse row then Show all	UX SIGN gate PR39	accepted
+2026-10-20T01:05:00.000Z	design_decisions	law:UX6-r5-freeze-axis	Freeze label on month axis skip ticks narrower than 32px from window start	UX SIGN gate PR39	accepted

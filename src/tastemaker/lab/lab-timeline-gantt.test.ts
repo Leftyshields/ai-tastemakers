@@ -19,12 +19,21 @@ describe("Lab Gantt timeline model (UX13 UX14 UX20)", () => {
     expect(humanizer?.kind).toBe("experiment");
   });
 
-  it("pins running experiment first and collapses early done tests", () => {
+  it("orders running, recent done, planned, then collapsed history row", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const model = buildTimelineModel(pub.experiments, ["running", "done", "planned"], "2026-10-19");
     expect(model!.items[0]?.status).toBe("running");
+    const collapsedIdx = model!.items.findIndex((i) => i.kind === "collapsed");
+    const plannedIdx = model!.items.findIndex((i) => i.status === "planned");
+    const doneInWindowIdx = model!.items.findIndex(
+      (i) => i.kind === "experiment" && i.status === "done" && !i.hidden_until_show_all,
+    );
+    if (doneInWindowIdx >= 0 && plannedIdx >= 0) {
+      expect(doneInWindowIdx).toBeLessThan(plannedIdx);
+    }
     if (model!.collapsed_count > 0) {
-      const collapsed = model!.items.find((i) => i.kind === "collapsed");
+      expect(collapsedIdx).toBeGreaterThan(plannedIdx);
+      const collapsed = model!.items[collapsedIdx];
       expect(collapsed?.label).toMatch(/earlier tests, see History/);
     }
   });

@@ -29,6 +29,35 @@ describe("Lab dashboard UX copy", () => {
     expect(violations).toEqual([]);
   });
 
+  it("UX3 running headline renders without PostHog status sync", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const run = pub.control_panel.running!;
+    pub.control_panel.running = {
+      ...run,
+      metric_current: null,
+      metric_daily: [],
+      exposure_count: null,
+      sample_count: null,
+      metric_delta: null,
+      progress_pct: null,
+      track_status: null,
+    };
+    pub.status_sync = {
+      generated_at: null,
+      skipped: true,
+      skip_reason: "experiment-status.json missing",
+    };
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    const panel = html.match(/id="lab-control-panel"[\s\S]*?<\/section>/)?.[0] ?? "";
+    expect(panel).toMatch(/<h2[^>]*>Less AI sounding briefs<\/h2>/);
+    expect(panel).toContain("Running");
+    expect(panel).toContain("Day 9 of 14");
+    expect(panel).toContain("Read window");
+    expect(panel).toContain("EXP-20260913-humanizer-polish-skills");
+    expect(panel).toContain("<summary");
+    expect(panel).not.toMatch(/<summary[^>]*aria-expanded=/);
+  });
+
   it("UX17 control panel shows Testing, Next up, and Last result rows", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });

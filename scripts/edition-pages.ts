@@ -604,7 +604,7 @@ export function pageShell(
   const labLayout = options?.labLayout === true;
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
   const shellClass = labLayout
-    ? `mx-auto ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12`
+    ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
     : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12`;
   const mainHtml = labLayout ? `<main class="lab-main">${body}</main>` : body;
   const footerMt = labLayout ? "mt-10" : "mt-16";
@@ -1602,7 +1602,7 @@ export async function buildLabSite(
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
     const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
-    indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans mt-10">${html}</article>`;
+    indexBody += `<article class="brief-content lab-prose-capped prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans mt-10">${html}</article>`;
   } catch {
     indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">
       <p>Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>

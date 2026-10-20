@@ -20,6 +20,15 @@ import {
 import { renderLabStatusChip } from "./lab-dashboard-ui.js";
 import { formatSurfaces } from "./lab-format.js";
 import { formatBacklogDependsOn } from "./lab-backlog-deps.js";
+import {
+  computeTrackStatus,
+  renderProgressBarHtml,
+  renderReadWindowBarHtml,
+} from "./lab-metric-progress.js";
+
+/** Assumed desktop Gantt track width for month tick filtering (UX gate). */
+const GANTT_ASSUMED_TRACK_PX = 650;
+const GANTT_MIN_MONTH_LABEL_INSET_PX = 32;
 function parseIsoMs(iso: string): number {
   return Date.parse(`${iso}T00:00:00Z`);
 }
@@ -52,6 +61,7 @@ function buildMonthTicks(
 ): { label: string; offset_pct: number; current: boolean }[] {
   const totalMs = Math.max(parseIsoMs(rangeEnd) - parseIsoMs(rangeStart), 86_400_000);
   const currentMonth = asOfIsoDate.slice(0, 7);
+  const minOffsetPct = (GANTT_MIN_MONTH_LABEL_INSET_PX / GANTT_ASSUMED_TRACK_PX) * 100;
   const ticks: { label: string; offset_pct: number; current: boolean }[] = [];
   let cursor = new Date(`${rangeStart}T00:00:00Z`);
   const endDate = new Date(`${rangeEnd}T00:00:00Z`);
@@ -59,10 +69,16 @@ function buildMonthTicks(
   while (cursor <= endDate) {
     const iso = cursor.toISOString().slice(0, 10);
     const offsetMs = parseIsoMs(iso) - parseIsoMs(rangeStart);
+    const offset_pct = Math.max(0, Math.min(100, (offsetMs / totalMs) * 100));
+    const current = iso.slice(0, 7) === currentMonth;
+    if (offset_pct < minOffsetPct && !current) {
+      cursor.setUTCMonth(cursor.getUTCMonth() + 1);
+      continue;
+    }
     ticks.push({
       label: formatMonthTick(iso),
-      offset_pct: Math.max(0, Math.min(100, (offsetMs / totalMs) * 100)),
-      current: iso.slice(0, 7) === currentMonth,
+      offset_pct,
+      current,
     });
     cursor.setUTCMonth(cursor.getUTCMonth() + 1);
   }
@@ -177,16 +193,20 @@ export function buildTimelineModel(
     }
   }
 
-  const visibleExperiments = [...doneInWindow, ...active].sort(
-    (a, b) => a.start!.localeCompare(b.start!) || a.id.localeCompare(b.id),
-  );
-  const experimentItems = visibleExperiments.map((e) => buildItem(e, "experiment"));
-  const running = experimentItems.find((i) => i.status === "running");
-  const withoutRunning = experimentItems.filter((i) => i.status !== "running");
+  const runningEntry = dated.find((e) => e.status === "running");
+  const runningItem = runningEntry ? buildItem(runningEntry, "experiment") : null;
+  const doneItems = doneInWindow
+    .sort((a, b) => b.end!.localeCompare(a.end!) || a.id.localeCompare(b.id))
+    .map((e) => buildItem(e, "experiment"));
+  const plannedItems = dated
+    .filter((e) => e.status === "planned")
+    .sort((a, b) => a.start!.localeCompare(b.start!) || a.id.localeCompare(b.id))
+    .map((e) => buildItem(e, "experiment"));
   const items: PublicTimelineItem[] = [];
-  if (running) items.push(running);
+  if (runningItem) items.push(runningItem);
+  items.push(...doneItems, ...plannedItems);
   if (collapsedRow) items.push(collapsedRow);
-  items.push(...withoutRunning, ...hiddenItems);
+  items.push(...hiddenItems);
 
   return {
     range_start: rangeStart,
@@ -244,6 +264,84 @@ function renderDefinitionListRow(
   return `<div><dt class="text-stone-500">${escapeHtml(label)}</dt><dd>${valueHtml}</dd></div>`;
 }
 
+/** UX3 running experiment headline block; works without PostHog sync data. */
+export function renderRunningControlPanelBlock(
+  run: PublicControlPanelRunning,
+  pub: LabExperimentsPublicFile,
+  escapeHtml: (t: string) => string,
+): string {
+  const title = sanitizeVisibleCopy(run.label);
+  const track =
+    run.metric_current !== null && run.success.metric.target != null
+      ? computeTrackStatus(
+          run.metric_current,
+          run.success.metric,
+          run.metric_baseline,
+          run.day_of_min_read,
+          run.min_read_days,
+        )
+      : null;
+  const dayLine =
+    run.day_of_min_read !== null ? `Day ${run.day_of_min_read} of ${run.min_read_days}` : "";
+  const progress =
+    run.progress_pct !== null
+      ? renderProgressBarHtml(run.progress_pct)
+      : renderReadWindowBarHtml(run.day_of_min_read, run.min_read_days);
+
+  const parts: string[] = [];
+  parts.push(`<h2 class="text-lg font-bold tracking-tight">${escapeHtml(title)}</h2>
+    <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
+      ${renderLabStatusChip("experiment", "running", escapeHtml)}
+      ${track ? renderLabStatusChip("track", track, escapeHtml) : ""}
+      ${dayLine ? `<span class="text-stone-600 dark:text-stone-400">${escapeHtml(dayLine)}</span>` : ""}
+    </div>
+    ${progress}
+    <p class="mt-2 font-mono text-xs text-stone-500">${escapeHtml(run.id)}</p>
+    <details class="mt-3 text-sm text-stone-700 dark:text-stone-300">
+      <summary class="cursor-pointer font-medium">Details</summary>
+      <p class="mt-2">${escapeHtml(sanitizeVisibleCopy(run.success.success_criteria))}</p>
+    </details>`);
+
+  const allNull = metricValuesAllNull(run);
+  if (allNull) {
+    parts.push(
+      `<p class="mt-3 text-sm text-stone-600 dark:text-stone-400">${escapeHtml(formatAllNullReadStatusLine(run))}</p>`,
+    );
+  } else if (run.metric_daily.length > 0 || run.metric_current !== null) {
+    const rows: string[] = [];
+    rows.push(
+      renderDefinitionListRow("Surface", escapeHtml(sanitizeVisibleCopy(formatSurfaces(run))), escapeHtml),
+    );
+    rows.push(
+      renderDefinitionListRow(
+        "Series",
+        escapeHtml(sanitizeVisibleCopy(run.success.metric.metric_label)),
+        escapeHtml,
+      ),
+    );
+    if (run.metric_current !== null) {
+      rows.push(
+        renderDefinitionListRow("Current value", escapeHtml(String(run.metric_current)), escapeHtml),
+      );
+    }
+    if (run.success.metric.target != null) {
+      rows.push(renderDefinitionListRow("Target", escapeHtml(String(run.success.metric.target)), escapeHtml));
+    }
+    if (pub.status_sync.generated_at) {
+      rows.push(
+        renderDefinitionListRow(
+          "Sync",
+          escapeHtml(formatSyncedAgoPt(pub.status_sync.generated_at)),
+          escapeHtml,
+        ),
+      );
+    }
+    parts.push(`<dl class="mt-3 grid gap-2 text-sm sm:grid-cols-2">${rows.join("")}</dl>`);
+  }
+
+  return parts.join("\n");
+}
+
 function renderLabDashboardStyles(): string {
   return `<style>
 .lab-dashboard-section .lab-table-wrap { width: 100%; }
@@ -290,7 +388,8 @@ function renderLabDashboardStyles(): string {
 .lab-gantt-bar-planned { background: transparent; border: 2px solid rgb(37 99 235); box-sizing: border-box; }
 .lab-gantt-bar-done { background: rgb(168 162 158 / 0.55); display: flex; align-items: center; justify-content: center; }
 .lab-gantt-bar-done svg { width: 14px; height: 14px; opacity: 0.85; }
-.lab-gantt-freeze-band { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgb(120 113 108 / 0.15), rgb(120 113 108 / 0.15) 6px, transparent 6px, transparent 12px); pointer-events: none; z-index: 1; display: flex; align-items: flex-start; justify-content: center; padding-top: 2px; font-size: 0.6rem; font-weight: 600; color: rgb(87 83 78); }
+.lab-gantt-freeze-band { position: absolute; top: 0; bottom: 0; background: repeating-linear-gradient(135deg, rgb(120 113 108 / 0.15), rgb(120 113 108 / 0.15) 6px, transparent 6px, transparent 12px); pointer-events: none; z-index: 1; }
+.lab-gantt-freeze-axis-label { position: absolute; transform: translateX(-50%); font-size: 0.6rem; font-weight: 600; color: rgb(87 83 78); white-space: nowrap; }
 .lab-gantt-today { position: absolute; top: 0; bottom: 0; width: 2px; background: rgb(239 68 68); z-index: 5; pointer-events: none; }
 .lab-gantt-row-hidden { display: none !important; }
 .lab-gantt[data-show-all="true"] .lab-gantt-row-hidden { display: flex !important; }
@@ -354,7 +453,14 @@ export function renderLabDashboardHtml(
   </div>`);
 
   sections.push(`<section id="lab-control-panel" class="lab-dashboard-section mb-10 font-sans">`);
-  sections.push(`<h2 class="mb-3 text-lg font-bold tracking-tight">Control panel</h2>`);
+  const run = pub.control_panel.running;
+  if (run) {
+    sections.push(renderRunningControlPanelBlock(run, pub, escapeHtml));
+  } else {
+    sections.push(
+      `<p class="text-sm text-stone-600 dark:text-stone-400">No experiment is running on the public Lab calendar right now.</p>`,
+    );
+  }
   const summary = pub.control_panel.summary;
   const summaryRows: string[] = [];
   if (summary.testing) {
@@ -374,12 +480,8 @@ export function renderLabDashboardHtml(
       `<div><dt>Last result</dt><dd class="flex flex-wrap items-center gap-2">${escapeHtml(sanitizeVisibleCopy(lr.label))} ${renderLabStatusChip("verdict", lr.verdict, escapeHtml)} <a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(lr.id)}.html">Write up</a></dd></div>`,
     );
   }
-  if (summaryRows.length === 0) {
-    sections.push(
-      `<p class="text-sm text-stone-600 dark:text-stone-400">No active experiment summary to show right now.</p>`,
-    );
-  } else {
-    sections.push(`<dl class="lab-control-summary">${summaryRows.join("")}</dl>`);
+  if (summaryRows.length > 0) {
+    sections.push(`<dl class="lab-control-summary mt-8 border-t border-stone-200 pt-6 dark:border-stone-700">${summaryRows.join("")}</dl>`);
   }
   sections.push(`</section>`);
 
@@ -446,13 +548,17 @@ function renderTimelineDesktop(
     : "";
   const todayPct = timeline.today_offset_pct;
   const todayFull = timeline.today_offset_pct_full;
+  const freezeAxisLabel =
+    freeze != null
+      ? `<span class="lab-gantt-freeze-axis-label" style="left:${(freeze.offset_pct + freeze.width_pct / 2).toFixed(2)}%">${escapeHtml("Freeze")}</span>`
+      : "";
   const overlay = `<div class="lab-gantt-overlay" aria-hidden="true">
-      ${freeze ? `<div class="lab-gantt-freeze-band" data-lab-freeze data-style-default="${freezeDefault}" data-style-full="${freezeFull}" style="${freezeDefault}"><span>Freeze</span></div>` : ""}
+      ${freeze ? `<div class="lab-gantt-freeze-band" data-lab-freeze data-style-default="${freezeDefault}" data-style-full="${freezeFull}" style="${freezeDefault}"></div>` : ""}
       ${todayPct != null ? `<div class="lab-gantt-today" data-lab-today data-left-default="${todayPct.toFixed(2)}" data-left-full="${todayFull != null ? todayFull.toFixed(2) : ""}" style="left:${todayPct.toFixed(2)}%;"></div>` : ""}
     </div>`;
   return `<div class="lab-timeline-desktop lab-gantt" data-show-all="false">
     ${renderGanttLegend(escapeHtml)}
-    <div class="lab-gantt-axis" data-lab-gantt-axis aria-hidden="true">${renderGanttAxisTicks(timeline.month_ticks, escapeHtml)}</div>
+    <div class="lab-gantt-axis" data-lab-gantt-axis aria-hidden="true">${renderGanttAxisTicks(timeline.month_ticks, escapeHtml)}${freezeAxisLabel}</div>
     <div class="lab-gantt-rows" data-lab-gantt-rows>
       ${overlay}
       ${rows}
