@@ -54,9 +54,11 @@ describe("Lab dashboard UX copy", () => {
     expect(panel).toContain("Running");
     expect(panel).toContain("Day 9 of 14");
     expect(panel).toContain("Read window");
-    expect(panel).toContain("EXP-20260913-humanizer-polish-skills");
-    expect(panel).toContain("<summary");
-    expect(panel).not.toMatch(/<summary[^>]*aria-expanded=/);
+    expect(panel).toContain("lab-more-panel");
+    expect(panel).toContain('data-for="hero-EXP-20260913-humanizer-polish-skills"');
+    expect(panel).not.toContain("Do not gate on PostHog CTR");
+    expect(panel).not.toContain("editorial rubric");
+    expect(panel).not.toContain("<summary");
   });
 
   it("UX17 control panel shows Testing, Next up, and Last result rows", () => {
@@ -119,19 +121,17 @@ describe("Lab dashboard UX copy", () => {
         /lab-timeline-popover-name[^>]*>([^<]+)</,
       )?.[1]?.trim();
       expect(firstLine).toBe(plainName);
-      const idIdx = popoverBlock!.indexOf("font-mono");
-      const nameIdx = popoverBlock!.indexOf("lab-timeline-popover-name");
-      expect(nameIdx).toBeGreaterThan(-1);
-      expect(idIdx).toBeGreaterThan(nameIdx);
+      expect(popoverBlock).toContain("lab-more-panel");
+      expect(popoverBlock).toContain("lab-expand-toggle");
     }
   });
 
   it("UX6 round 3 mobile backlog field labels", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
-    expect(html).toContain("lab-backlog-starts-long");
-    expect(html).toContain("Starts Oct 25, 2026");
-    expect(html).toContain("Depends on Less AI sounding briefs");
+    expect(html).toContain("Oct 25, 2026");
+    expect(html).toContain("Less AI sounding briefs");
+    expect(html).not.toContain("Depends on Less AI sounding briefs");
   });
 
   it("UX13 humanizer is one Gantt row spanning OSS and Skills chips", () => {
@@ -193,6 +193,23 @@ describe("Lab dashboard UX copy", () => {
   it("UX22 OS color scheme script targets html.dark before paint", () => {
     expect(colorSchemeHeadScript).toContain("prefers-color-scheme: dark");
     expect(colorSchemeHeadScript).toContain('classList.add("dark")');
+  });
+
+  it("UX33 backlog includes Digest UI freeze row", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).toContain("lab-backlog-freeze-row");
+    expect(html).toContain("lab-freeze-swatch");
+    const backlog = html.match(/id="lab-backlog"[\s\S]*?<\/section>/)?.[0] ?? "";
+    expect(backlog).not.toMatch(/<tr class="lab-data-row">\s*<td>[\s\S]*POLICY-DIGEST-UI-FREEZE/);
+  });
+
+  it("UX34 history shows result line and Show all control", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).toContain("Overlap down to 37.5%");
+    expect(html).toContain("data-lab-history-toggle");
+    expect(html).toContain("lab-history-row-hidden");
   });
 
   it("UX21 marks current month on axis", () => {

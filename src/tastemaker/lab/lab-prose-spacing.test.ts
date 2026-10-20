@@ -44,6 +44,13 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(html).not.toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
   });
 
+  it("UX35 index intro is short and links About in nav", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const dash = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(dash).not.toContain("What this is");
+    expect(dash).not.toContain("Right now (Aug 16, 2026)");
+  });
+
   it("rendered lab dashboard prose has no inline spacing violations", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const dash = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });

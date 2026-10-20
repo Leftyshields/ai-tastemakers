@@ -191,7 +191,7 @@ export function buildLabPublicFile(
   }
 
   const backlog: PublicBacklogItem[] = all
-    .filter((e) => e.status === "planned")
+    .filter((e) => e.status === "planned" && e.id !== "POLICY-DIGEST-UI-FREEZE")
     .map((e) => ({
       id: e.id,
       label: e.label,

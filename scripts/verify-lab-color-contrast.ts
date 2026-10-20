@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const labHtml = path.join(repoRoot, "site/lab/index.html");
+const LAB_PAGES = ["site/lab/index.html", "site/lab/about.html"];
 const MIN_RATIO = 4.5;
 
 const CONTRAST_CHECK_JS = `
@@ -127,25 +127,28 @@ const CONTRAST_CHECK_JS = `
 `;
 
 async function main(): Promise<void> {
-  if (!fs.existsSync(labHtml)) {
-    console.error("missing site/lab/index.html (run npm run build:pages first)");
-    process.exit(1);
-  }
-  const fileUrl = `file://${labHtml}`;
   const browser = await chromium.launch();
   const allFailures: string[] = [];
 
-  for (const mode of ["light", "dark"] as const) {
-    const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
-    await page.goto(fileUrl, { waitUntil: "networkidle" });
-    await page.evaluate((dark) => {
-      document.documentElement.classList.toggle("dark", dark);
-    }, mode === "dark");
-    const failures = (await page.evaluate(
-      `${CONTRAST_CHECK_JS}(${MIN_RATIO})`,
-    )) as string[];
-    for (const f of failures) allFailures.push(`[${mode}] ${f}`);
-    await page.close();
+  for (const rel of LAB_PAGES) {
+    const labHtml = path.join(repoRoot, rel);
+    if (!fs.existsSync(labHtml)) {
+      console.error(`missing ${rel} (run npm run build:pages first)`);
+      process.exit(1);
+    }
+    const fileUrl = `file://${labHtml}`;
+    for (const mode of ["light", "dark"] as const) {
+      const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+      await page.goto(fileUrl, { waitUntil: "networkidle" });
+      await page.evaluate((dark) => {
+        document.documentElement.classList.toggle("dark", dark);
+      }, mode === "dark");
+      const failures = (await page.evaluate(
+        `${CONTRAST_CHECK_JS}(${MIN_RATIO})`,
+      )) as string[];
+      for (const f of failures) allFailures.push(`[${rel} ${mode}] ${f}`);
+      await page.close();
+    }
   }
 
   await browser.close();

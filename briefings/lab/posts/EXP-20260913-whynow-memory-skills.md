@@ -69,7 +69,7 @@ Spot-check repeat repos (Ponytail, Caveman, ECC) for hook variety vs baseline br
 ## References
 
 - Experiment ID: ``EXP-20260913-whynow-memory-skills``
-- Prior in queue: [Caveman compress](./`EXP-20260913-caveman-compress-skills`.md)
+- Prior in queue: [Caveman compress](./EXP-20260913-caveman-compress-skills.html)
 - Ranking complement: soft-dedup (``EXP-20260715-soft-dedup-diversity-skills``)
 - Tool inventory: [affaan-m/ECC](https://github.com/affaan-m/ECC), [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

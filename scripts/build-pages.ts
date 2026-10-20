@@ -403,7 +403,8 @@ async function main(): Promise<void> {
     renderGoRedirectPage(allowlist, siteHomePath),
     "utf8",
   );
-  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml);
+  const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || new Date().toISOString().slice(0, 10);
+  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate);
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);
