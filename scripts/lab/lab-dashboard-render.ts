@@ -33,6 +33,7 @@ import {
   renderLabMoreButton,
   renderLabSourceOriginChip,
 } from "./lab-dashboard-copy.js";
+import { renderExperimentRegistrySectionHtml } from "./lab-experiment-registry.js";
 
 /** Assumed desktop Gantt track width for month tick filtering (UX gate). */
 export const GANTT_ASSUMED_TRACK_PX = 650;
@@ -529,6 +530,9 @@ function renderLabDashboardStyles(): string {
 .dark .lab-hero-card { border-color: rgb(68 64 60); background: rgb(28 25 23); }
 .lab-more-panel { display: none; }
 .lab-more-panel[data-open="true"] { display: block; }
+.lab-exp-registry { width: 100%; max-width: 100%; }
+.lab-exp-registry-card { max-width: 100%; overflow-wrap: anywhere; }
+.lab-exp-registry-metric { overflow-wrap: anywhere; }
 .lab-freeze-swatch { display: inline-block; width: 1.25rem; height: 0.65rem; border-radius: 3px; vertical-align: middle; margin-right: 6px; background: repeating-linear-gradient(135deg, rgb(120 113 108 / 0.25), rgb(120 113 108 / 0.25) 4px, transparent 4px, transparent 8px); }
 .dark .lab-freeze-swatch { background: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.15), rgb(255 255 255 / 0.15) 4px, transparent 4px, transparent 8px); }
 .lab-history-row-hidden { display: none !important; }
@@ -548,6 +552,8 @@ export function renderLabDashboardHtml(
 ): string {
   const sections: string[] = [];
   sections.push(renderLabDashboardStyles());
+
+  sections.push(renderExperimentRegistrySectionHtml(pub, escapeHtml));
 
   sections.push(`<section id="lab-control-panel" class="lab-dashboard-section mb-10 font-sans lab-hero-card">`);
   const run = pub.control_panel.running;
