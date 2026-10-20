@@ -8,7 +8,7 @@ describe("renderGoRedirectPage", () => {
     expect(html).toContain("if (captured) return");
     expect(html).toContain('captureOnce("repo_click"');
     expect(html).toContain('captureOnce("lab_badge_click"');
-    expect(html).toContain("event=lab_badge_click");
+    expect(html).toContain('eventName === "lab_badge_click"');
     expect(html).toContain("<noscript>");
   });
 });
