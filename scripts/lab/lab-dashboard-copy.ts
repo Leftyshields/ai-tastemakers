@@ -26,6 +26,32 @@ export function renderLabMoreButton(
   return `<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${escapeHtml(rowId)}">${escapeHtml(label)}</button>`;
 }
 
+/** Collapsed expand rows; only one lab-expand-row open at a time (UX43). */
+export function renderLabExpandRowScript(): string {
+  return `<script>
+document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
+  btn.addEventListener('click', function(e){
+    e.stopPropagation();
+    var id = btn.getAttribute('data-target');
+    if(!id) return;
+    var row = document.querySelector('.lab-expand-row[data-for="'+id+'"]');
+    if(!row) return;
+    var open = row.getAttribute('data-open') === 'true';
+    if(!open){
+      document.querySelectorAll('.lab-expand-row[data-open="true"]').forEach(function(other){
+        other.setAttribute('data-open','false');
+      });
+      document.querySelectorAll('.lab-expand-toggle').forEach(function(otherBtn){
+        if(otherBtn.getAttribute('data-target') !== id) otherBtn.textContent = 'More';
+      });
+    }
+    row.setAttribute('data-open', open ? 'false' : 'true');
+    btn.textContent = open ? 'More' : 'Less';
+  });
+});
+</script>`;
+}
+
 export function experimentTechnicalMoreHtml(
   exp: LabExperimentSource,
   escapeHtml: (t: string) => string,

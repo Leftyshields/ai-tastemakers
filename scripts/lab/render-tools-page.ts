@@ -9,7 +9,11 @@ import {
   renderLabTrackedLink,
   type LabLinkSection,
 } from "./lab-analytics.js";
-import { renderLabMoreButton } from "./lab-dashboard-copy.js";
+import {
+  experimentTechnicalMoreHtml,
+  renderLabExpandRowScript,
+  renderLabMoreButton,
+} from "./lab-dashboard-copy.js";
 
 export interface ToolInventoryEntry {
   full_name: string;
@@ -117,7 +121,7 @@ export function renderToolsPageHtml(
   const queue = queueRows(inventory, experiments, ctx, escapeHtml);
   parts.push(`<section class="lab-tools-section mb-8 font-sans" aria-labelledby="lab-queue-heading">
     <h3 id="lab-queue-heading" class="mb-3 text-base font-bold">Lab queue</h3>
-    <div class="lab-table-wrap"><table class="lab-table lab-tools-queue border border-stone-200 text-sm dark:border-stone-700">
+    <div class="lab-table-wrap"><table class="lab-table lab-backlog-table lab-tools-queue border border-stone-200 text-sm dark:border-stone-700">
       <thead class="bg-stone-50 dark:bg-stone-900"><tr>
         <th>Tool</th><th>Role</th><th>Status</th><th>Linked experiment</th>
       </tr></thead><tbody>`);
@@ -151,16 +155,24 @@ export function renderToolsPageHtml(
         )
       : "";
     const moreBtn = renderLabMoreButton(rowId, escapeHtml);
+    const linkedCell = `<td class="lab-tools-linked-cell"><div class="lab-tools-linked-inner">${
+      expLink ? `<span class="lab-tools-exp-link">${expLink}</span>` : `<span class="lab-tools-exp-link"></span>`
+    }${moreBtn}</div></td>`;
+    const expandBits: string[] = [];
+    if (entry.notes?.trim()) {
+      expandBits.push(`<p>${escapeHtml(sanitizeVisibleCopy(entry.notes))}</p>`);
+    }
+    if (exp) {
+      expandBits.push(experimentTechnicalMoreHtml(exp, escapeHtml));
+    }
     parts.push(`<tr class="lab-data-row">
       <td>${toolLink}</td>
       <td>${escapeHtml(roles)}</td>
       <td>${statusChip(status, escapeHtml)}</td>
-      <td>${expLink ? expLink : ""} ${moreBtn}</td>
+      ${linkedCell}
     </tr>
     <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
-      ${entry.notes ? `<p>${escapeHtml(sanitizeVisibleCopy(entry.notes))}</p>` : ""}
-      ${exp?.note ? `<p>${escapeHtml(sanitizeVisibleCopy(exp.note))}</p>` : ""}
-      ${exp ? `<p class="font-mono text-xs">${escapeHtml(exp.id)}</p>` : ""}
+      ${expandBits.join("\n")}
     </td></tr>`);
   }
   parts.push(`</tbody></table></div></section>`);
@@ -170,10 +182,9 @@ export function renderToolsPageHtml(
   const showAll = top.length > 10;
   parts.push(`<section class="lab-tools-section mb-8 font-sans lab-tools-top" data-show-all="false" aria-labelledby="lab-top-heading">
     <h3 id="lab-top-heading" class="mb-3 text-base font-bold">Top candidates</h3>
-    ${showAll ? `<button type="button" class="lab-tools-show-all mb-3 text-sm text-blue-800 underline dark:text-blue-400" data-lab-tools-toggle aria-pressed="false">Show all</button>` : ""}
-    <div class="lab-table-wrap"><table class="lab-table border border-stone-200 text-sm dark:border-stone-700">
+    <div class="lab-table-wrap"><table class="lab-table lab-history-table lab-tools-top-candidates border border-stone-200 text-sm dark:border-stone-700">
       <thead class="bg-stone-50 dark:bg-stone-900"><tr>
-        <th>Tool</th><th>Role</th><th class="lab-num">Appearances</th><th>Last featured</th>
+        <th>Tool</th><th class="lab-tools-col-role">Role</th><th class="lab-num">Appearances</th><th class="lab-tools-last-desktop">Last featured</th>
       </tr></thead><tbody>`);
 
   top.forEach((entry, index) => {
@@ -181,15 +192,25 @@ export function renderToolsPageHtml(
     const chips = entry.pipeline_roles
       .slice(0, 3)
       .map((r) => `<span class="lab-gantt-chip">${escapeHtml(roleLabel(r))}</span>`)
-      .join(" ");
+      .join("");
+    const lastFeatured = escapeHtml(formatFeaturedDate(entry.last_seen));
+    const toolLink = renderLabTrackedLink(
+      entry.html_url,
+      toolDisplayName(entry.full_name),
+      ctx,
+      { section, sourceRepo: entry.full_name },
+      escapeHtml,
+    );
     parts.push(`<tr class="lab-data-row${hidden}">
-      <td>${renderLabTrackedLink(entry.html_url, toolDisplayName(entry.full_name), ctx, { section, sourceRepo: entry.full_name }, escapeHtml)}</td>
-      <td><div class="flex flex-wrap gap-1">${chips}</div></td>
+      <td class="lab-tools-tool-cell">${toolLink}<div class="lab-tools-last-mobile">Last featured ${lastFeatured}</div></td>
+      <td class="lab-tools-col-role"><div class="lab-tools-role-chips">${chips}</div></td>
       <td class="lab-num">${escapeHtml(String(entry.appearance_count))}</td>
-      <td>${escapeHtml(formatFeaturedDate(entry.last_seen))}</td>
+      <td class="lab-tools-last-desktop">${lastFeatured}</td>
     </tr>`);
   });
-  parts.push(`</tbody></table></div></section>`);
+  parts.push(`</tbody></table></div>
+    ${showAll ? `<button type="button" class="lab-tools-show-all mt-3 text-sm text-blue-800 underline dark:text-blue-400" data-lab-tools-toggle aria-pressed="false">Show all</button>` : ""}
+  </section>`);
 
   const byRole = new Map<string, ToolInventoryEntry[]>();
   for (const entry of inventory.entries) {
@@ -220,6 +241,7 @@ export function renderToolsPageHtml(
   }
   parts.push(`</section>`);
 
+  parts.push(renderLabExpandRowScript());
   parts.push(`<script>
 document.querySelectorAll('[data-lab-tools-toggle]').forEach(function(btn){
   btn.addEventListener('click', function(){

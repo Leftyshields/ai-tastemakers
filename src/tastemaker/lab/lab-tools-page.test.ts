@@ -19,6 +19,42 @@ describe("Lab UX43 tools page", () => {
     expect(html).toContain("Role matrix");
     expect(html).toContain("lab-loop-step--current");
     expect(html).not.toContain("`");
-    expect(html).toContain("data-lab-section=\"tools\"");
+    expect(html).toContain('data-lab-section="tools"');
+  });
+
+  it("keeps More rows collapsed by default and sets Evaluated aria-current", () => {
+    const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, {}, "2026-10-19"), escapeHtml);
+    expect(html).toContain('data-open="false"');
+    expect(html).not.toMatch(/<tr class="lab-expand-row"[^>]*data-open="true"/);
+    expect(html).toMatch(/lab-loop-step--current" aria-current="step"/);
+    expect(html).toContain(".lab-expand-toggle");
+  });
+
+  it("shows ten top candidate rows by default with toggle below the table", () => {
+    const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, {}, "2026-10-19"), escapeHtml);
+    const topSection = html.match(/lab-tools-top[\s\S]*?<\/section>/)?.[0] ?? "";
+    const dataRows = topSection.match(/class="lab-data-row/g) ?? [];
+    const hiddenRows = topSection.match(/lab-tools-row-hidden/g) ?? [];
+    expect(dataRows.length).toBeGreaterThan(10);
+    expect(hiddenRows.length).toBe(dataRows.length - 10);
+    const tableEnd = topSection.indexOf("</table>");
+    const togglePos = topSection.indexOf("data-lab-tools-toggle");
+    expect(togglePos).toBeGreaterThan(tableEnd);
+    expect(topSection).toContain('data-show-all="false"');
+  });
+
+  it("uses backlog and history table classes and spaced role chips", () => {
+    const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, {}, "2026-10-19"), escapeHtml);
+    expect(html).toContain("lab-backlog-table");
+    expect(html).toContain("lab-history-table");
+    expect(html).toContain("lab-tools-role-chips");
+    expect(html).toContain("lab-tools-linked-cell");
+  });
+
+  it("routes allowlisted queue tool links through go", () => {
+    const allowlist = { "NousResearch/hermes-agent": "https://github.com/NousResearch/hermes-agent" };
+    const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, allowlist, "2026-10-19"), escapeHtml);
+    expect(html).toContain("../go/index.html?");
+    expect(html).toContain("data-lab-source-repo=\"NousResearch/hermes-agent\"");
   });
 });

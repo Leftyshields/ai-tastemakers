@@ -117,7 +117,91 @@
   }
 
   .lab-loop-step--current {
-    @apply bg-blue-50 ring-1 ring-blue-200 dark:bg-blue-950/40 dark:ring-blue-800;
+    @apply bg-blue-700 text-white dark:bg-blue-600;
+  }
+
+  .lab-loop-step--current .lab-loop-num {
+    @apply bg-white text-blue-800 dark:bg-stone-900 dark:text-blue-200;
+  }
+
+  .lab-loop-step--current:hover {
+    @apply bg-blue-600 dark:bg-blue-500;
+  }
+
+  .lab-main .lab-table-wrap {
+    width: 100%;
+    max-width: 100%;
+    overflow-x: hidden;
+  }
+
+  .lab-main .lab-table {
+    width: 100%;
+    border-collapse: collapse;
+    table-layout: fixed;
+  }
+
+  .lab-main .lab-table th,
+  .lab-main .lab-table td {
+    padding: 12px 8px;
+    vertical-align: top;
+    text-align: left;
+    border-bottom: 1px solid rgb(231 229 228);
+  }
+
+  .dark .lab-main .lab-table th,
+  .dark .lab-main .lab-table td {
+    border-bottom-color: rgb(68 64 60);
+  }
+
+  .lab-main .lab-table th.lab-num,
+  .lab-main .lab-table td.lab-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .lab-main .lab-table tbody tr.lab-expand-row {
+    display: none;
+  }
+
+  .lab-main .lab-table tbody tr.lab-expand-row[data-open="true"] {
+    display: table-row;
+  }
+
+  .lab-tools-role-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+  }
+
+  .lab-tools-linked-cell {
+    max-width: 0;
+    width: 28%;
+  }
+
+  .lab-tools-linked-inner {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-width: 0;
+  }
+
+  .lab-tools-linked-inner .lab-tools-exp-link {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+    flex: 1 1 auto;
+  }
+
+  .lab-tools-last-mobile {
+    display: none;
+    margin-top: 0.25rem;
+    font-size: 0.75rem;
+    color: rgb(120 113 108);
+  }
+
+  .dark .lab-tools-last-mobile {
+    color: rgb(168 162 158);
   }
 
   .lab-tools-row-hidden {
@@ -132,11 +216,63 @@
     max-width: 42rem;
   }
 
+  @media (max-width: 767px) {
+    .lab-main .lab-table thead {
+      display: none;
+    }
+
+    .lab-main .lab-table tbody tr.lab-data-row {
+      display: block;
+      margin-bottom: 12px;
+      border: 1px solid rgb(231 229 228);
+      border-radius: 8px;
+      padding: 12px;
+    }
+
+    .dark .lab-main .lab-table tbody tr.lab-data-row {
+      border-color: rgb(68 64 60);
+    }
+
+    .lab-main .lab-table tbody tr.lab-data-row td {
+      display: block;
+      border: none;
+      padding: 4px 0;
+    }
+
+    .lab-main .lab-table tbody tr.lab-expand-row[data-open="true"] {
+      display: block;
+      margin-bottom: 12px;
+      padding: 12px;
+      border: 1px dashed rgb(231 229 228);
+      border-radius: 8px;
+    }
+
+    .dark .lab-main .lab-table tbody tr.lab-expand-row[data-open="true"] {
+      border-color: rgb(68 64 60);
+    }
+
+    .lab-tools-top-candidates .lab-tools-col-role,
+    .lab-tools-top-candidates .lab-tools-last-desktop {
+      display: none !important;
+    }
+
+    .lab-tools-top-candidates .lab-tools-last-mobile {
+      display: block;
+    }
+
+    .lab-tools-top[data-show-all="true"] .lab-tools-row-hidden {
+      display: block !important;
+    }
+
+    .lab-tools-linked-cell {
+      max-width: none;
+      width: auto;
+    }
+  }
+
   @media (max-width: 420px) {
-    .lab-tools-queue td,
-    .lab-tools-queue th,
-    .lab-table td,
-    .lab-table th {
+    .lab-main .lab-table td,
+    .lab-main .lab-table th {
       white-space: normal;
     }
   }

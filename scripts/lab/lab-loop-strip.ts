@@ -62,12 +62,14 @@ export function renderLabLoopStripHtml(
         index < steps.length - 1
           ? `<span class="lab-loop-chevron" aria-hidden="true">›</span>`
           : "";
-      const current = options?.activeStep === step.n ? " lab-loop-step--current" : "";
+      const isCurrent = options?.activeStep === step.n;
+      const current = isCurrent ? " lab-loop-step--current" : "";
+      const ariaCurrent = isCurrent ? ' aria-current="step"' : "";
       const inner = `<span class="lab-loop-num" aria-hidden="true">${step.n}</span>
         <span class="lab-loop-label">${escapeHtml(step.label)}</span>`;
       const href =
         options?.linkCtx != null ? resolveLabToolHref(step.href, options.linkCtx) : step.href;
-      return `<a href="${escapeHtml(href)}" class="lab-loop-step${current}" ${labLinkDataAttrs({ section: "loop" })}>${inner}</a>${chevron}`;
+      return `<a href="${escapeHtml(href)}" class="lab-loop-step${current}"${ariaCurrent} ${labLinkDataAttrs({ section: "loop" })}>${inner}</a>${chevron}`;
     })
     .join("");
   return `<nav class="lab-loop-strip" aria-label="Lab feedback loop">${items}</nav>`;
