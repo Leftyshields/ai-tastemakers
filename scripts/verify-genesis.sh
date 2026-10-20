@@ -20,7 +20,7 @@ echo "verify: site internal hrefs and anchors (UX30 link checker)"
 npx tsx scripts/verify-lab-internal-hrefs.ts
 echo "verify: lab tested badges on daily top 10 (UX45)"
 npx tsx scripts/verify-lab-tested-badges.ts
-echo "verify: lab badge mobile title layout (UX45)"
+echo "verify: lab badge action row layout (UX45)"
 npx tsx scripts/verify-lab-badge-mobile-layout.ts
 echo "verify: lab PostHog and link tracking (UX42)"
 POSTHOG_KEY="${POSTHOG_KEY:-phc_ci_lab_analytics_gate_only}" DIGEST_AS_OF_DATE="${DIGEST_AS_OF_DATE:-2026-10-19}" npm run build:pages >/dev/null

@@ -37,51 +37,26 @@
   }
 
   .digest-repo-card__body a,
-  .digest-repo-card__cta {
+  .digest-repo-card__cta,
+  .digest-repo-card__lab-badge {
     position: relative;
     z-index: 1;
   }
 
-  .digest-repo-card__heading--lab-badge {
-    padding-right: calc(var(--lab-tested-badge-slot, 6.75rem) + 0.5rem);
+  .digest-repo-card__actions {
+    @apply flex flex-wrap items-center gap-2;
   }
 
-  .digest-repo-card__title-row {
-    @apply inline-flex max-w-full min-w-0 flex-wrap items-baseline gap-x-1.5;
+  .lab-tested-badge--action {
+    @apply inline-flex min-h-11 shrink-0 items-center justify-center gap-1.5 rounded-lg border border-solid bg-transparent px-4 py-2.5 font-sans text-sm font-semibold leading-none no-underline whitespace-nowrap transition;
   }
 
-  .digest-repo-card__rank {
-    @apply text-stone-500;
+  .lab-tested-badge--action.lab-tested-badge--done {
+    @apply border-stone-300 text-stone-600 hover:border-stone-400 hover:bg-stone-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-stone-500 dark:border-stone-500 dark:text-stone-300 dark:hover:border-stone-400 dark:hover:bg-stone-900/50 dark:focus-visible:outline-stone-400;
   }
 
-  .digest-repo-card__title-link {
-    overflow-wrap: anywhere;
-  }
-
-  .digest-repo-card--has-lab-badge .lab-tested-badge--pinned {
-    position: absolute;
-    top: calc(1rem + (1.75rem - 1.25rem) / 2);
-    right: 1rem;
-    z-index: 1;
-  }
-
-  .lab-tested-badge {
-    @apply relative inline-flex h-5 shrink-0 items-center gap-1 rounded-full border px-2 font-sans text-xs font-semibold leading-none no-underline whitespace-nowrap;
-    min-height: 0;
-  }
-
-  .lab-tested-badge--pinned::before {
-    content: "";
-    position: absolute;
-    inset: -2px 0;
-  }
-
-  .lab-tested-badge--done {
-    @apply border-stone-300 bg-stone-50 text-stone-700 dark:border-stone-600 dark:bg-stone-900/60 dark:text-stone-300;
-  }
-
-  .lab-tested-badge--running {
-    @apply border-blue-800 bg-blue-50 text-blue-800 dark:border-blue-400 dark:bg-blue-950/40 dark:text-blue-300;
+  .lab-tested-badge--action.lab-tested-badge--running {
+    @apply border-blue-800 text-blue-800 hover:border-blue-700 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-blue-400 dark:text-blue-300 dark:hover:border-blue-300 dark:hover:bg-blue-950/50 dark:focus-visible:outline-blue-400;
   }
 
   .lab-tested-badge__icon {

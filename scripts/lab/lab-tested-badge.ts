@@ -111,6 +111,10 @@ export function loadLabWriteupPostIds(repoRoot: string): string[] {
 
 const FLASK_SVG = `<svg class="lab-tested-badge__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 3h6v7l4 9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2l4-9V3z"/><path d="M9 3h6"/><path d="M7 14h10"/></svg>`;
 
+/** Temporary gate fixture: Running badge beside Done Ponytail. */
+export const LAB_BADGE_RUNNING_FIXTURE_REPO = "PlaceholderOrg/humanizer-polish-skills";
+export const LAB_BADGE_RUNNING_FIXTURE_EXP_ID = "EXP-20260913-humanizer-polish-skills";
+
 function badgeVisibleLabel(status: LabBadgeStatus): string {
   return status === "running" ? "In the Lab" : "Lab tested";
 }
@@ -128,10 +132,32 @@ export function renderLabTestedBadgePagesHtml(
   const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
   const aria = escape(badgeAriaLabel(badge.status, badge.title));
   const titleAttr = escape(badge.title);
-  return `<a href="${escape(href)}" class="lab-tested-badge lab-tested-badge--pinned ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
+  return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
-/** Muted inline chip for digest email (text only, no image). */
+/** Outlined bulletproof button for digest email (paired with View on GitHub). */
+export function renderLabTestedBadgeEmailButtonHtml(
+  badge: LabBadgeInfo,
+  href: string,
+  escape: (t: string) => string,
+): string {
+  const label = badgeVisibleLabel(badge.status);
+  const isRunning = badge.status === "running";
+  const border = isRunning ? "#1e40af" : "#d6d3d1";
+  const color = isRunning ? "#1e40af" : "#57534e";
+  const bg = "transparent";
+  return `<td style="padding:0 0 0 8px;vertical-align:top;">
+      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
+        <tr>
+          <td style="border:1px solid ${border};border-radius:6px;background-color:${bg};">
+            <a href="${escape(href)}" style="display:inline-block;padding:10px 16px;color:${color};font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">&#9879; ${escape(label)}</a>
+          </td>
+        </tr>
+      </table>
+    </td>`;
+}
+
+/** Muted inline chip when email layout has no GitHub button row. */
 export function renderLabTestedBadgeEmailHtml(
   badge: LabBadgeInfo,
   href: string,
@@ -197,6 +223,63 @@ export function ponytailDoneFixturePresent(html: string): boolean {
     html.includes("DietrichGebert/ponytail") &&
     html.includes("lab-tested-badge") &&
     html.includes("data-lab-badge-exp=\"EXP-20260802-ponytail-narration-skills\"")
+  );
+}
+
+export function runningBadgeFixtureMarkupValid(html: string): boolean {
+  return (
+    html.includes(`data-lab-badge-exp="${LAB_BADGE_RUNNING_FIXTURE_EXP_ID}"`) &&
+    html.includes("lab-tested-badge--running") &&
+    html.includes("In the Lab") &&
+    html.includes("digest-repo-card__actions")
+  );
+}
+
+/** Build HTML snippet for verify gate Running fixture (not shipped on site). */
+export function renderRunningBadgeFixtureCard(
+  repoRoot: string,
+  escapeHtml: (t: string) => string,
+  renderCard: (
+    repo: {
+      rank: number;
+      full_name: string;
+      html_url: string;
+      stars: number;
+      stars_gained_7d: number;
+      topics: string[];
+      language: string;
+      brief: string;
+      pushed_at: string;
+    },
+    ctx: { lookup: Map<string, LabBadgeInfo>; labPrefix: string; writeupPostIds: string[] },
+  ) => string,
+): string {
+  const exp = loadExperimentsFile(repoRoot).experiments.find(
+    (e) => e.id === LAB_BADGE_RUNNING_FIXTURE_EXP_ID,
+  );
+  if (!exp) {
+    throw new Error("missing Humanizer experiment for Running fixture");
+  }
+  const lookup = loadLabBadgeLookup(repoRoot);
+  lookup.set(normalizeOwnerRepoKey(LAB_BADGE_RUNNING_FIXTURE_REPO), {
+    id: exp.id,
+    title: exp.label.trim(),
+    status: "running",
+    repoKey: normalizeOwnerRepoKey(LAB_BADGE_RUNNING_FIXTURE_REPO),
+  });
+  return renderCard(
+    {
+      rank: 2,
+      full_name: LAB_BADGE_RUNNING_FIXTURE_REPO,
+      html_url: "https://github.com/PlaceholderOrg/humanizer-polish-skills",
+      stars: 1,
+      stars_gained_7d: 1,
+      topics: [],
+      language: "TS",
+      brief: "Fixture",
+      pushed_at: "2026-10-19",
+    },
+    { lookup, labPrefix: "../lab/", writeupPostIds: [] },
   );
 }
 

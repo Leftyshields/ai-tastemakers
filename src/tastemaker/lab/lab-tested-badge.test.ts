@@ -5,17 +5,15 @@ import {
   buildLabBadgeLookup,
   labBadgeForRepo,
   normalizeOwnerRepoKey,
+  renderLabTestedBadgeEmailButtonHtml,
   renderLabTestedBadgePagesHtml,
+  renderRunningBadgeFixtureCard,
   resolveLabBadgeHref,
+  runningBadgeFixtureMarkupValid,
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { loadExperimentsFile } from "../../../scripts/lab/validate-experiments.js";
-import {
-  DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS,
-  DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS,
-  formatDigestRepoCardTitleHtml,
-  LAB_BADGE_LONG_NAME_FIXTURE,
-  renderDigestRepoCard,
-} from "../pages/brief-cards.js";
+import { renderDigestRepoCard } from "../pages/brief-cards.js";
+import { renderDigestEmailHtml } from "../email/html.js";
 import { labBadgeClickTrackingScript, digestRepoClickTrackingScript } from "../../../scripts/edition-pages.js";
 import { buildLabBadgeEmailGoUrl } from "../analytics/repo-click.js";
 
@@ -35,7 +33,7 @@ describe("UX45 lab tested badge", () => {
     expect(labBadgeForRepo(lookup, "Other/ponytail")).toBeNull();
   });
 
-  it("renders pill on top 10 repo cards only", () => {
+  it("renders badge in footer action row on top 10 repo cards only", () => {
     const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
     const ctx = { lookup, labPrefix: "../lab/", writeupPostIds: [] as string[] };
     const withBadge = renderDigestRepoCard(
@@ -56,8 +54,13 @@ describe("UX45 lab tested badge", () => {
       escapeHtml,
       ctx,
     );
-    expect(withBadge).toContain("lab-tested-badge");
+    expect(withBadge).toContain("lab-tested-badge--action");
+    expect(withBadge).toContain("digest-repo-card__actions");
     expect(withBadge).toContain("Lab tested");
+    expect(withBadge).not.toContain("lab-tested-badge--pinned");
+    const headingEnd = withBadge.indexOf("</h2>");
+    const badgeIdx = withBadge.indexOf("lab-tested-badge");
+    expect(badgeIdx).toBeGreaterThan(headingEnd);
 
     const rank11 = renderDigestRepoCard(
       {
@@ -80,42 +83,12 @@ describe("UX45 lab tested badge", () => {
     expect(rank11).not.toContain("lab-tested-badge");
   });
 
-  it("pins badge to card top right and reserves title padding", () => {
-    const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
-    const ctx = { lookup, labPrefix: "../lab/", writeupPostIds: [] as string[] };
-    const html = renderDigestRepoCard(
-      {
-        rank: 1,
-        full_name: "DietrichGebert/ponytail",
-        html_url: "https://github.com/DietrichGebert/ponytail",
-        stars: 1,
-        stars_gained_7d: 1,
-        topics: [],
-        language: "TS",
-        brief: "x",
-        pushed_at: "2026-01-01",
-      },
-      "oss",
-      "2026-08-22",
-      "delta_7d",
-      escapeHtml,
-      ctx,
+  it("Running fixture renders In the Lab beside GitHub CTA", () => {
+    const html = renderRunningBadgeFixtureCard(repoRoot, escapeHtml, (repo, ctx) =>
+      renderDigestRepoCard(repo, "oss", "2026-10-19", "delta_7d", escapeHtml, ctx),
     );
-    expect(html).toContain(DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS);
-    expect(html).toContain(DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS);
-    expect(html).toContain("lab-tested-badge--pinned");
-    expect(html).toContain("digest-repo-card__title-row");
-    expect(html).toContain("digest-repo-card__rank");
-    const badgeIdx = html.indexOf("lab-tested-badge--pinned");
-    const headingIdx = html.indexOf("digest-repo-card__heading");
-    expect(badgeIdx).toBeGreaterThan(-1);
-    expect(headingIdx).toBeGreaterThan(badgeIdx);
-  });
-
-  it("inserts wbr after owner slash for long repo names", () => {
-    const title = formatDigestRepoCardTitleHtml(LAB_BADGE_LONG_NAME_FIXTURE, escapeHtml);
-    expect(title).toContain("DietrichGebertExtendedOrganization/<wbr>");
-    expect(title).toContain("ponytail-narration-skills-for-agents");
+    expect(runningBadgeFixtureMarkupValid(html)).toBe(true);
+    expect(html).toContain("lab-tested-badge--running");
   });
 
   it("links done experiments to lab history anchor", () => {
@@ -149,5 +122,43 @@ describe("UX45 lab tested badge", () => {
     expect(url).toContain("event=lab_badge_click");
     expect(url).toContain("channel=email");
     expect(url).toContain("exp=EXP-20260802-ponytail-narration-skills");
+  });
+
+  it("renders outlined lab badge email button beside GitHub", () => {
+    const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
+    const badge = labBadgeForRepo(lookup, "DietrichGebert/ponytail")!;
+    const btn = renderLabTestedBadgeEmailButtonHtml(badge, "https://example.com/go", escapeHtml);
+    expect(btn).toContain("padding:0 0 0 8px");
+    expect(btn).toContain("Lab tested");
+    const emailHtml = renderDigestEmailHtml(
+      {
+        schema_version: 1,
+        run_id: "t",
+        generated_at: "2026-08-22T00:00:00Z",
+        ranking_mode: "delta_7d",
+        topic_queries: [],
+        repos: [
+          {
+            rank: 1,
+            full_name: "DietrichGebert/ponytail",
+            html_url: "https://github.com/DietrichGebert/ponytail",
+            stars: 1,
+            stars_gained_7d: 1,
+            topics: [],
+            language: "TS",
+            brief: "Brief",
+            pushed_at: "2026-08-22",
+          },
+        ],
+      },
+      "2026-08-22",
+      "https://example.com/app",
+      undefined,
+      "oss",
+      lookup,
+    );
+    expect(emailHtml).toContain("View on GitHub");
+    expect(emailHtml).toContain("event=lab_badge_click");
+    expect(emailHtml).not.toMatch(/DietrichGebert\/ponytail<\/a>[^<]*Lab tested/);
   });
 });

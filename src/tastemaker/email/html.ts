@@ -11,6 +11,7 @@ import {
   labBadgeForRepo,
   loadLabBadgeLookup,
   loadLabWriteupPostIds,
+  renderLabTestedBadgeEmailButtonHtml,
   renderLabTestedBadgeEmailHtml,
   renderLabTestedBadgePlainSuffix,
   resolveLabBadgeHref,
@@ -144,7 +145,9 @@ export function renderDigestEmailHtml(
       const topics = escapeHtml(formatTopics(repo.topics));
       const titleHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "title"));
       const buttonHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "button"));
-      let labBadge = "";
+      const showGithubButton = true;
+      let labBadgeTitleChip = "";
+      let labBadgeButtonCell = "";
       if (repo.rank <= 10) {
         const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
         if (match) {
@@ -157,25 +160,33 @@ export function renderDigestEmailHtml(
             digestDate: dateLabel,
             destPath: labBadgeSiteDestPath(siteUrl, match, badgeCtx.writeupPostIds),
           });
-          labBadge = renderLabTestedBadgeEmailHtml(match, badgeHref, escapeHtml);
+          if (showGithubButton) {
+            labBadgeButtonCell = renderLabTestedBadgeEmailButtonHtml(match, badgeHref, escapeHtml);
+          } else {
+            labBadgeTitleChip = renderLabTestedBadgeEmailHtml(match, badgeHref, escapeHtml);
+          }
         }
       }
 
+      const buttonRow = showGithubButton
+        ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
+          <tr>
+            <td bgcolor="${BRAND_BUTTON}" style="background-color:${BRAND_BUTTON};border-radius:6px;vertical-align:top;">
+              <a href="${buttonHref}" style="display:inline-block;padding:10px 16px;color:#ffffff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;">View on GitHub</a>
+            </td>${labBadgeButtonCell}
+          </tr>
+        </table>`
+        : "";
+
       return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e7e5e4;">
         <h2 style="margin:0 0 6px;font-family:system-ui,sans-serif;font-size:18px;font-weight:600;color:#1c1917;">
-          ${repo.rank}. <a href="${titleHref}" style="color:${BRAND_LINK};font-weight:700;text-decoration:underline;">${escapeHtml(repo.full_name)}</a>${labBadge}${newRepoEmailBadge(repo.is_new)}
+          ${repo.rank}. <a href="${titleHref}" style="color:${BRAND_LINK};font-weight:700;text-decoration:underline;">${escapeHtml(repo.full_name)}</a>${labBadgeTitleChip}${newRepoEmailBadge(repo.is_new)}
         </h2>
         <p style="margin:0 0 10px;font-family:system-ui,sans-serif;font-size:13px;color:#78716c;">
           ${formatStars(repo, digest.ranking_mode)} · ${topics}
         </p>
         <p style="margin:0 0 16px;font-family:Georgia,serif;font-size:16px;line-height:1.6;color:#292524;">${brief}</p>
-        <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
-          <tr>
-            <td bgcolor="${BRAND_BUTTON}" style="background-color:${BRAND_BUTTON};border-radius:6px;">
-              <a href="${buttonHref}" style="display:inline-block;padding:10px 16px;color:#ffffff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;">View on GitHub</a>
-            </td>
-          </tr>
-        </table>
+        ${buttonRow}
       </div>`;
     })
     .join("\n");
