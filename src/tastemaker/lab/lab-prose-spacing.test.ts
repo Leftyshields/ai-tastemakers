@@ -7,6 +7,7 @@ import {
   findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
+  normalizeLabWriteupMarkdown,
   prepareLabProseHtmlFromMarkdown,
   sanitizeLabVisibleHtml,
 } from "../../../scripts/lab/lab-format.js";
@@ -63,6 +64,16 @@ describe("Lab UX26 UX28 UX29", () => {
     const wrapped = `<article class="lab-prose-capped">${sample}</article>`;
     expect(findLabProseInlineSpacingViolations(wrapped)).toEqual([]);
     expect(findLabProseBacktickViolations(wrapped)).toEqual([]);
+  });
+
+  it("UX46 normalizes write up dates and about approximations", () => {
+    const md = "_**Kept (2026-08-29).** Cut ~18% with hook on 2026-08-17._";
+    const out = normalizeLabWriteupMarkdown(md);
+    expect(out).toContain("Kept on Aug 29, 2026");
+    expect(out).toContain("about 18%");
+    expect(out).toContain("Aug 17, 2026");
+    expect(out).not.toMatch(/~\s*\d/);
+    expect(out).not.toMatch(/\d{4}-\d{2}-\d{2}/);
   });
 
   it("UX37 buildIsoDatePt uses America/Los_Angeles calendar date", () => {

@@ -75,6 +75,37 @@
     @apply mt-0;
   }
 
+  .lab-nav--combined {
+    @apply relative flex flex-nowrap items-center gap-2 overflow-x-auto pb-1;
+    scroll-snap-type: x mandatory;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .lab-nav--combined::-webkit-scrollbar {
+    display: none;
+  }
+
+  .lab-nav--combined::after {
+    content: "";
+    position: sticky;
+    right: 0;
+    flex: 0 0 1.5rem;
+    align-self: stretch;
+    margin-left: -1.5rem;
+    pointer-events: none;
+    background: linear-gradient(to right, transparent, #fffcf8 85%);
+  }
+
+  :is(.dark, .dark *) .lab-nav--combined::after {
+    background: linear-gradient(to right, transparent, rgb(28 25 23 / 0.95) 85%);
+  }
+
+  .lab-nav__divider {
+    @apply mx-0.5 w-px self-stretch bg-stone-200 dark:bg-stone-600;
+    min-height: 2rem;
+  }
+
   .lab-main .prose table {
     @apply my-4 block w-full overflow-x-auto text-sm;
   }

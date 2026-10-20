@@ -17,6 +17,7 @@ import {
   buildIsoDatePt,
   formatLabLastUpdatedPt,
   prepareLabProseHtmlFromMarkdown,
+  prepareLabWriteupHtmlFromMarkdown,
   sanitizeLabVisibleHtml,
 } from "./lab/lab-format.js";
 import { LAB_FOOTER_ABOUT_LABEL, labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
@@ -335,25 +336,39 @@ function editionNavFor(siteSegment: string, depth: 0 | 1): EditionNav {
   return { ossHref: "../", skillsHref: "../skills/", active };
 }
 
+export type LabNavActive = "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts";
+
+function editionNavPill(
+  href: string,
+  label: string,
+  isActive: boolean,
+  escapeHtml: (t: string) => string,
+  extraClass = "",
+  trackAttr = "",
+): string {
+  const base =
+    "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
+  const active =
+    "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
+  const idle =
+    "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+  return `<a href="${href}" class="${base} ${isActive ? active : idle}${extraClass ? ` ${extraClass}` : ""}"${trackAttr}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+}
+
 export function editionNavHtml(
   nav: EditionNav,
   escapeHtml: (t: string) => string,
   labAnalytics = false,
+  options?: { desktopOnlyOnLab?: boolean },
 ): string {
   const track = labAnalytics ? ' data-lab-section="nav"' : "";
-  const pill = (href: string, label: string, isActive: boolean) => {
-    const base =
-      "inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
-    const active =
-      "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
-    const idle =
-      "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
-    return `<a href="${href}" class="${base} ${isActive ? active : idle}"${track}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
-  };
+  const layout = options?.desktopOnlyOnLab
+    ? "mt-4 hidden min-[640px]:flex flex-wrap gap-2"
+    : "mt-4 flex flex-wrap gap-2";
 
-  return `<nav aria-label="Tastemakers editions" class="mt-4 flex flex-wrap gap-2">
-      ${pill(nav.ossHref, "AI Tastemakers", nav.active === "oss")}
-      ${pill(nav.skillsHref, "Skill Tastemakers", nav.active === "skills")}
+  return `<nav aria-label="Tastemakers editions" class="${layout}">
+      ${editionNavPill(nav.ossHref, "AI Tastemakers", nav.active === "oss", escapeHtml, "", track)}
+      ${editionNavPill(nav.skillsHref, "Skill Tastemakers", nav.active === "skills", escapeHtml, "", track)}
     </nav>`;
 }
 
@@ -389,34 +404,56 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
   };
 }
 
-export function labNavHtml(
-  active: "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts",
+function labNavPillsHtml(
+  active: LabNavActive,
   escapeHtml: (t: string) => string,
-  depth: 0 | 1 | 2 = 0,
+  depth: 0 | 1 | 2,
 ): string {
-  const pill = (href: string, label: string, isActive: boolean) => {
-    const base =
-      "inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
-    const activeCls =
-      "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
-    const idle =
-      "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
-    return `<a href="${href}" class="${base} ${isActive ? activeCls : idle}" data-lab-section="nav"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
-  };
-
   const prefix = depth === 0 ? "" : "../";
   const labHomeHref = depth === 0 ? "./" : "../";
   const methodologyHref = depth === 0 ? "methodology.html" : "../methodology.html";
   const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
-  return `<nav aria-label="Lab section" class="mb-8 flex flex-wrap gap-2">
-      ${pill(labHomeHref, "Lab home", active === "home")}
-      ${pill(methodologyHref, "Methodology", active === "methodology")}
-      ${pill(`${prefix}tools.html`, "Evaluated", active === "tools")}
-      ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
-      ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
-      ${pill(postsHref, "Posts", active === "posts")}
+  const pill = (href: string, label: string, isActive: boolean) =>
+    editionNavPill(href, label, isActive, escapeHtml, "", ' data-lab-section="nav"');
+
+  return [
+    pill(labHomeHref, "Lab home", active === "home"),
+    pill(methodologyHref, "Methodology", active === "methodology"),
+    pill(`${prefix}tools.html`, "Evaluated", active === "tools"),
+    pill(`${prefix}experiments.html`, "Experiments", active === "experiments"),
+    pill(`${prefix}token-usage.html`, "Tokens", active === "tokens"),
+    pill(postsHref, "Posts", active === "posts"),
+  ].join("");
+}
+
+export function labNavHtml(
+  active: LabNavActive,
+  escapeHtml: (t: string) => string,
+  depth: 0 | 1 | 2 = 0,
+): string {
+  return `<nav aria-label="Lab section" class="lab-nav lab-nav--section mb-8 hidden min-[640px]:flex flex-wrap gap-2">
+      ${labNavPillsHtml(active, escapeHtml, depth)}
     </nav>`;
+}
+
+export function labMobileCombinedNavHtml(
+  active: LabNavActive,
+  editionNav: EditionNav,
+  escapeHtml: (t: string) => string,
+  depth: 0 | 1 | 2 = 0,
+): string {
+  const track = ' data-lab-section="nav"';
+  return `<nav aria-label="Lab and editions" class="lab-nav lab-nav--combined mt-4 min-[640px]:hidden">
+      ${labNavPillsHtml(active, escapeHtml, depth)}
+      <span class="lab-nav__divider shrink-0" aria-hidden="true"></span>
+      ${editionNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, "", track)}
+      ${editionNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, "", track)}
+    </nav>`;
+}
+
+export function labNavScrollScript(): string {
+  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}})();</script>`;
 }
 
 export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
@@ -596,6 +633,7 @@ async function buildLabMarkdownPage(
       path.join(labSiteDir, htmlName),
       pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, {
         ...labShell,
+        labNavActive: navActive,
         labFallbackSection: "about",
         seo,
       }),
@@ -618,6 +656,7 @@ async function writeLabAboutRedirectPage(
     path.join(labSiteDir, "about.html"),
     pageShell("About · Tastemakers", body, paths, brand, undefined, escapeHtml, {
       ...labShell,
+      labNavActive: "methodology",
       labFallbackSection: "about",
       metaRefresh: "methodology.html",
     }),
@@ -673,7 +712,7 @@ async function buildShadowPages(
           brand,
           "Side-by-side control vs treatment blurbs from a digest pipeline shadow run.",
           escapeHtml,
-          labShell,
+          { ...labShell, labNavActive: "experiments", labNavDepth: 2 },
         ),
       );
       count++;
@@ -733,6 +772,8 @@ export function pageShell(
   escapeHtml: (t: string) => string = (t) => t,
   options?: {
     labLayout?: boolean;
+    labNavActive?: LabNavActive;
+    labNavDepth?: 0 | 1 | 2;
     wideIndex?: boolean;
     seo?: PageSeoOptions;
     labFallbackSection?: LabLinkSection;
@@ -745,7 +786,18 @@ export function pageShell(
     ? `<meta http-equiv="refresh" content="0;url=${escapeHtml(options.metaRefresh)}">`
     : "";
   const labLayout = options?.labLayout === true;
-  const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout);
+  const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout, {
+    desktopOnlyOnLab: labLayout,
+  });
+  const mobileLabNav =
+    labLayout && options?.labNavActive
+      ? labMobileCombinedNavHtml(
+          options.labNavActive,
+          paths.editionNav,
+          escapeHtml,
+          options.labNavDepth ?? 0,
+        )
+      : "";
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
   const shellClass = labLayout
     ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
@@ -775,6 +827,7 @@ export function pageShell(
       </h1>
       <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brand.tagline)}</p>
       ${nav}
+      ${mobileLabNav}
     </header>
     ${mainHtml}
     <footer class="site-footer ${footerMt}">
@@ -782,7 +835,7 @@ export function pageShell(
       <p class="site-footer__meta">Updated daily &middot; Automated pipeline</p>
     </footer>
   </div>
-  ${labLayout ? labLinkClickScript() : ""}
+  ${labLayout ? `${labLinkClickScript()}${labNavScrollScript()}` : ""}
 </body>
 </html>`;
 }
@@ -1804,6 +1857,7 @@ export async function buildLabSite(
     path.join(labSiteDir, "index.html"),
     pageShell("Lab · Tastemakers", indexBody, paths, brand, labIndexDescription, escapeHtml, {
       ...labShell,
+      labNavActive: "home",
       labFallbackSection: "hero",
     }),
   );
@@ -1814,6 +1868,7 @@ export async function buildLabSite(
     path.join(labSiteDir, "tools.html"),
     pageShell("Evaluated tools · Lab", toolsBody, paths, brand, undefined, escapeHtml, {
       ...labShell,
+      labNavActive: "tools",
       labFallbackSection: "tools",
     }),
   );
@@ -1852,7 +1907,7 @@ export async function buildLabSite(
       brand,
       "Public record of digest and homepage experiments: what we changed, whether we kept it, and what is live today.",
       escapeHtml,
-      labShell,
+      { ...labShell, labNavActive: "experiments" },
     ),
   );
 
@@ -1871,7 +1926,7 @@ export async function buildLabSite(
       brand,
       "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
       escapeHtml,
-      labShell,
+      { ...labShell, labNavActive: "tokens" },
     ),
   );
 
@@ -1902,16 +1957,20 @@ export async function buildLabSite(
       const listings: string[] = [];
       for (const file of postFiles) {
         const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
-        const html = renderSafeMarkdown(markdown);
+        const html = prepareLabWriteupHtmlFromMarkdown(markdown);
         const slug = file.replace(/\.md$/, "");
         const title = markdownH1(markdown, slug);
         listings.push(
           `<li class="mb-2"><a href="${slug}.html" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(title)}</a></li>`,
         );
-        const postBody = `${labNavHtml("posts", escapeHtml, 1)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
+        const postBody = `${labNavHtml("posts", escapeHtml, 1)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
-          pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
+          pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, {
+            ...labShell,
+            labNavActive: "posts",
+            labNavDepth: 1,
+          }),
         );
       }
       postsBody += `<ul class="font-sans text-sm leading-relaxed">${listings.join("")}</ul>`;
@@ -1921,7 +1980,11 @@ export async function buildLabSite(
   }
   await fs.writeFile(
     path.join(labSiteDir, "posts", "index.html"),
-    pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, labShell),
+    pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, {
+      ...labShell,
+      labNavActive: "posts",
+      labNavDepth: 1,
+    }),
   );
 
   return 5 + shadowCount + 1;
