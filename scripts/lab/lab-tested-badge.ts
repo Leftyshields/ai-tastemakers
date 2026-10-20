@@ -150,7 +150,7 @@ export function renderLabTestedBadgeEmailButtonHtml(
       <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
         <tr>
           <td style="border:1px solid ${border};border-radius:6px;background-color:${bg};">
-            <a href="${escape(href)}" style="display:inline-block;padding:10px 16px;color:${color};font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">&#9879; ${escape(label)}</a>
+            <a href="${escape(href)}" style="display:inline-block;padding:10px 16px;color:${color};font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">${escape(label)}</a>
           </td>
         </tr>
       </table>

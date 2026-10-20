@@ -130,6 +130,7 @@ describe("UX45 lab tested badge", () => {
     const btn = renderLabTestedBadgeEmailButtonHtml(badge, "https://example.com/go", escapeHtml);
     expect(btn).toContain("padding:0 0 0 8px");
     expect(btn).toContain("Lab tested");
+    expect(btn).not.toContain("&#9879;");
     const emailHtml = renderDigestEmailHtml(
       {
         schema_version: 1,
