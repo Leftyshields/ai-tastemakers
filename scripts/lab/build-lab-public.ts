@@ -20,6 +20,7 @@ import {
   renderLabDashboardHtml,
   findForbiddenLabCopyViolations,
 } from "./lab-dashboard-render.js";
+import { listLabWriteupPostIds } from "./lab-format.js";
 export {
   renderLabDashboardHtml,
   findForbiddenLabCopyViolations,
@@ -239,6 +240,7 @@ export function buildLabPublicFile(
     timeline,
     backlog,
     history,
+    writeup_post_ids: listLabWriteupPostIds(repoRoot),
   };
 }
 

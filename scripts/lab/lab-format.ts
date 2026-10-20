@@ -1,5 +1,7 @@
 /** Display formatting for public Lab dashboard (no raw ISO in visible text). */
 
+import fs from "node:fs";
+import path from "node:path";
 import type { LabSurface } from "./validate-experiments.js";
 
 const PT = "America/Los_Angeles";
@@ -136,6 +138,30 @@ export function sanitizeLabVisibleHtml(html: string): string {
 }
 
 /** Inline tag glued to letter/number with no whitespace (Lab prose QA, UX26). */
+/** Experiment ids with a markdown post under briefings/lab/posts/ (UX29). */
+export function listLabWriteupPostIds(repoRoot: string): string[] {
+  const dir = path.join(repoRoot, "briefings/lab/posts");
+  if (!fs.existsSync(dir)) return [];
+  return fs
+    .readdirSync(dir)
+    .filter((f) => f.endsWith(".md") && !f.startsWith("_"))
+    .map((f) => f.slice(0, -3))
+    .sort();
+}
+
+export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?: Set<string>): boolean {
+  const ids = cache ?? new Set(listLabWriteupPostIds(repoRoot));
+  return ids.has(experimentId);
+}
+
+/** UX28: sanitizer drops empty `<a id>`, so anchor the explainer heading instead. */
+export function applyLabExplainerHeadingAnchor(html: string): string {
+  return html.replace(
+    /<h2>How to read an experiment<\/h2>/i,
+    '<h2 id="how-to-read-an-experiment" class="scroll-mt-20">How to read an experiment</h2>',
+  );
+}
+
 export function findLabProseInlineSpacingViolations(html: string): string[] {
   const article = html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
   const violations: string[] = [];

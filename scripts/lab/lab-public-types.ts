@@ -133,4 +133,6 @@ export interface LabExperimentsPublicFile {
   timeline: PublicTimelineModel | null;
   backlog: PublicBacklogItem[];
   history: PublicHistoryItem[];
+  /** Experiment ids with a built write up under briefings/lab/posts/*.md */
+  writeup_post_ids: string[];
 }

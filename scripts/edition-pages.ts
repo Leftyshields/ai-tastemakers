@@ -12,7 +12,7 @@ import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experi
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import { renderTokenUsagePage } from "./lab/render-token-usage.js";
 import { renderLabDashboardHtml, writeLabPublicArtifacts } from "./lab/build-lab-public.js";
-import { sanitizeLabVisibleHtml } from "./lab/lab-format.js";
+import { applyLabExplainerHeadingAnchor, sanitizeLabVisibleHtml } from "./lab/lab-format.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -1605,7 +1605,9 @@ export async function buildLabSite(
     ${dashboardHtml}`;
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
+    const html = applyLabExplainerHeadingAnchor(
+      sanitizeLabVisibleHtml(renderSafeMarkdown(markdown)),
+    );
     indexBody += `<article class="brief-content lab-prose-capped prose prose-stone max-w-none font-sans dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-p:font-sans prose-li:font-sans mt-10">${html}</article>`;
   } catch {
     indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">

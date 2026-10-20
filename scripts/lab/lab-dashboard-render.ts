@@ -389,6 +389,15 @@ export function renderRunningControlPanelBlock(
   return parts.join("\n");
 }
 
+function renderWriteUpLink(
+  experimentId: string,
+  writeupPostIds: readonly string[],
+  escapeHtml: (t: string) => string,
+): string {
+  if (!writeupPostIds.includes(experimentId)) return "";
+  return `<a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(experimentId)}.html">Write up</a>`;
+}
+
 function renderLabDashboardStyles(): string {
   return `<style>
 .lab-dashboard-section .lab-table-wrap { width: 100%; }
@@ -543,7 +552,7 @@ export function renderLabDashboardHtml(
   if (summary.last_result) {
     const lr = summary.last_result;
     summaryRows.push(
-      `<div><dt>Last result</dt><dd class="flex flex-wrap items-center gap-2">${escapeHtml(sanitizeVisibleCopy(lr.label))} ${renderLabStatusChip("verdict", lr.verdict, escapeHtml)} <a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(lr.id)}.html">Write up</a></dd></div>`,
+      `<div><dt>Last result</dt><dd class="flex flex-wrap items-center gap-2">${escapeHtml(sanitizeVisibleCopy(lr.label))} ${renderLabStatusChip("verdict", lr.verdict, escapeHtml)} ${renderWriteUpLink(lr.id, pub.writeup_post_ids, escapeHtml)}</dd></div>`,
     );
   }
   if (summaryRows.length > 0) {
@@ -868,7 +877,7 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(h.label))}</span></td>
         <td title="${escapeHtml(isoTitleAttr(h.start))} to ${escapeHtml(isoTitleAttr(h.end))}">${escapeHtml(win)}</td>
         <td>${verdictChip}</td>
-        <td><div class="lab-history-details-links"><a class="text-xs text-blue-800 dark:text-blue-400" href="posts/${rowId}.html">Write up</a><button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button></div></td>
+        <td><div class="lab-history-details-links">${renderWriteUpLink(h.id, pub.writeup_post_ids, escapeHtml)}<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button></div></td>
       </tr>
       <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs">
         <p class="font-mono">${escapeHtml(h.id)}</p>
