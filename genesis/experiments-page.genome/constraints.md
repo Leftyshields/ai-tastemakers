@@ -20,3 +20,15 @@
 - **UX10**: How to read this summary (max two sentences) under the dashboard title with link to full explainer.
 - **UX11**: Under `prefers-reduced-motion: reduce`, progress bar and sparkline do not animate.
 - **UX12**: One shared status chip component shape and color per status across control panel, timeline, backlog, and history.
+
+## Acceptance criteria (Brian approved Lab UX round 2)
+
+- **UX13**: Desktop timeline is Gantt rows, one per experiment. Fixed left column about 14rem with full plain name (wrapping allowed, no ellipsis) and surface chips (OSS, Skills, Digest). Bar track on the right. Bars hold no text. Rows are at least 32px tall. Multi surface experiments get one row with several chips.
+- **UX14**: Default window runs from one month before today to the latest planned end. Done experiments that end before the window collapse into one row, N earlier tests see History, linking to #lab-history. Show all toggle. No horizontal scroll at any width.
+- **UX15**: Done is muted solid fill with check icon, running is brand solid fill, planned is brand outline, freeze is hatched band across all rows labeled Freeze. Legend row above the axis.
+- **UX16**: No hyphen, en dash, em dash or ASCII arrow anywhere in visible text on the Lab page, the explainer from briefings/lab/index.md, or Lab subpages. Rewrite phrases like pipeline scan. Prose dates read like Aug 8, 2026, never ISO. Verify script checks the whole rendered page (monospace id spans exempt) and fails CI on a match.
+- **UX17**: Control panel gets three rows from experiments.json only. Testing from short_hypothesis at most 120 characters on every entry with validation. Next up is the next planned experiment name and start date. Last result is the latest history name, verdict chip, and write up link. Hide a row when its source is empty.
+- **UX18**: Every Gantt row is keyboard focusable and opens the popover (name first, id below). The whole row is the tap target.
+- **UX19**: Below 768px, keep the month grouped list. From 768 to 1024px, name column is 10rem and chips sit under the name.
+- **UX20**: Pin the running experiment as the first row, with the Today line on top.
+- **UX21**: Bold the current month label on the axis.

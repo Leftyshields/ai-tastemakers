@@ -61,7 +61,7 @@ Thirteen Skills digests in repo through **2026-09-25** (`2026-09-26` digest miss
 Flags enabled on the **Skills digest command** in `.github/workflows/digest.yml` as of 2026-09-13 (still on after close):
 
 | Flag | Value | Default |
-|------|-------|---------|
+|------|-------|         |
 | `DIGEST_SOFT_DEDUP_BRIEFINGS` | `14` | `5` |
 | `DIGEST_SOFT_DEDUP_PENALTY` | `0.15` | `0.5` |
 
@@ -89,7 +89,7 @@ Links go to live Skills digest pages from the baseline window.
 Two soft-dedup flags on the Skills command only. Ranking, discovery, enrichment, and narration rules are unchanged except dedup memory and penalty.
 
 ```yaml
-EXPERIMENT_ID=EXP-20260715-soft-dedup-diversity-skills \
+EXPERIMENT_ID=`EXP-20260715-soft-dedup-diversity-skills` \
 DIGEST_SOFT_DEDUP_BRIEFINGS=14 \
 DIGEST_SOFT_DEDUP_PENALTY=0.15 \
 DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
@@ -106,7 +106,7 @@ Import snapshots after each window: `npm run experiment -- snapshot`.
 
 ## References
 
-- Experiment ID: `EXP-20260715-soft-dedup-diversity-skills`
+- Experiment ID: ``EXP-20260715-soft-dedup-diversity-skills``
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Prior write-ups: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.md) · [Richer Skills briefs](./EXP-20260628-web-enrich-skills.md)
+- Prior write-ups: [Shorter Skills briefs](./`EXP-20260802-ponytail-narration-skills`.md) · [Richer Skills briefs](./`EXP-20260628-web-enrich-skills`.md)
 - Backlog: [RANK-2](../../docs/PRODUCT_BACKLOG.md)

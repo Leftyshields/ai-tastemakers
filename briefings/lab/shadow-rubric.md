@@ -2,10 +2,10 @@
 
 Use when reviewing `data/experiments/runs/{run_id}/shadow.json` before enabling treatment (`DIGEST_ENRICH_WEB=1` without shadow).
 
-Score each ranked repo **1–5** on:
+Score each ranked repo **1 to 5** on:
 
 | Criterion | 1 (poor) | 5 (strong) |
-|-----------|----------|------------|
+|-----------|----------|            |
 | **Accuracy** | Treatment adds false claims vs README | Treatment matches repo capabilities |
 | **Specificity** | Generic hype; could apply to any repo | Concrete names, features, or use cases |
 | **Why now** | No timely hook | Clear momentum signal (launch, HN, trend) |
@@ -15,39 +15,39 @@ Score each ranked repo **1–5** on:
 ## Pass bar
 
 - **Go:** median ≥ 4 on accuracy + specificity; no repo below 3 on accuracy
-- **No-go:** any accuracy ≤ 2, or median specificity < 3
+- **No go:** any accuracy ≤ 2, or median specificity < 3
 
 Record scores in experiment `notes` or commit `data/experiments/runs/{run_id}/rubric.json`:
 
 ```json
 {
-  "reviewed_at": "2026-06-28",
-  "reviewer": "operator",
-  "repos": [
-    {
-      "full_name": "owner/repo",
-      "accuracy": 4,
-      "specificity": 4,
-      "why_now": 5,
-      "build_with_it": 4,
-      "noise": 4,
-      "comment": "HN thread correctly cited launch week."
-    }
-  ],
-  "decision": "go"
+ "reviewed_at": "2026-06-28",
+ "reviewer": "operator",
+ "repos": [
+ {
+ "full_name": "owner/repo",
+ "accuracy": 4,
+ "specificity": 4,
+ "why_now": 5,
+ "build_with_it": 4,
+ "noise": 4,
+ "comment": "HN thread correctly cited launch week."
+ }
+ ],
+ "decision": "go"
 }
 ```
 
-## Side-by-side fields
+## Side by side fields
 
 When `enrich_web_requested` is true, each repo entry includes:
 
-- `brief_control` — README-only narration (enrichment shadow), **or** default prompt with enrichment (narration shadow when `narrate_ponytail_requested` is true)
-- `brief_treatment` — README + web/HN snippets (enrichment shadow), **or** structured + ponytail prompt with enrichment (narration shadow)
-- `enrichment_bundle_ref` — `{owner-repo}.json` in the same run directory
+- `brief_control` README only narration (enrichment shadow), **or** default prompt with enrichment (narration shadow when `narrate_ponytail_requested` is true)
+- `brief_treatment` README + web/HN snippets (enrichment shadow), **or** structured + ponytail prompt with enrichment (narration shadow)
+- `enrichment_bundle_ref` `{owner repo}.json` in the same run directory
 
 ### Narration shadow (EXP-20260802)
 
-When `narrate_ponytail_requested` is true, both control and treatment received the same enriched context. Control uses the default narration prompt; treatment uses `DIGEST_NARRATE_STRUCTURED_CONTEXT` + `DIGEST_NARRATE_PONYTAIL` flags. Score treatment against control — not against README-only baselines.
+When `narrate_ponytail_requested` is true, both control and treatment received the same enriched context. Control uses the default narration prompt; treatment uses `DIGEST_NARRATE_STRUCTURED_CONTEXT` + `DIGEST_NARRATE_PONYTAIL` flags. Score treatment against control not against README only baselines.
 
-Compare control vs treatment before scoring treatment-only repos.
+Compare control vs treatment before scoring treatment only repos.

@@ -35,7 +35,7 @@ Primary metrics come from `digest.json` ranking fields. PostHog is secondary.
 
 ## Recommendation
 
-**Not started.** Confirm bootstrap cap after baseline digest.json review; then enable tuned flags on the Skills digest command only. Keep status `draft` until Why-now memory closes.
+**Not started.** Confirm bootstrap cap after baseline digest.json review; then enable tuned flags on the Skills digest command only. Keep status `draft` until Why now memory closes.
 
 ---
 
@@ -44,7 +44,7 @@ Primary metrics come from `digest.json` ranking fields. PostHog is secondary.
 Planned treatment flags (placeholder; confirm at treatment start):
 
 | Flag | Planned value | Notes |
-|------|---------------|-------|
+|------|---------------|       |
 | `DIGEST_SKILLS_MAX_STARS_BOOTSTRAP` | `20000` (placeholder) | Baseline default today 25000; adjust after baseline analysis |
 
 Do **not** enable in `digest.yml` until treatment start.
@@ -52,7 +52,7 @@ Do **not** enable in `digest.yml` until treatment start.
 ### Optional local preview (after implementation)
 
 ```bash
-EXPERIMENT_ID=EXP-20260913-rank-bootstrap-skills \
+EXPERIMENT_ID=`EXP-20260913-rank-bootstrap-skills` \
 DIGEST_SKILLS_MAX_STARS_BOOTSTRAP=20000 \
 npm run digest -- --edition skills
 ```
@@ -61,7 +61,7 @@ Compare top-10 stability across consecutive days in `briefings/skills/*/digest.j
 
 ## References
 
-- Experiment ID: `EXP-20260913-rank-bootstrap-skills`
+- Experiment ID: ``EXP-20260913-rank-bootstrap-skills``
 - Product backlog: [RANK-1](../../../docs/PRODUCT_BACKLOG.md)
-- Prior in queue: [Why-now memory](./EXP-20260913-whynow-memory-skills.md)
+- Prior in queue: [Why now memory](./`EXP-20260913-whynow-memory-skills`.md)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

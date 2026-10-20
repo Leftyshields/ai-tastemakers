@@ -38,6 +38,8 @@ export interface PostHogEndSnapshot {
 export interface LabExperimentEntry {
   id: string;
   label: string;
+  /** Plain language hypothesis for the control panel (max 120 chars). */
+  short_hypothesis: string;
   surface: LabSurface | LabSurface[];
   metric: string;
   start: string | null;
@@ -211,6 +213,19 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
       issues.push({
         code: "schema",
         message: `Missing label on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (!exp.short_hypothesis?.trim()) {
+      issues.push({
+        code: "schema",
+        message: `Missing short_hypothesis on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    } else if (exp.short_hypothesis.length > 120) {
+      issues.push({
+        code: "schema",
+        message: `short_hypothesis on '${exp.id}' exceeds 120 characters.`,
         experiment_ids: [exp.id],
       });
     }

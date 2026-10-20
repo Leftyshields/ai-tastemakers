@@ -12,6 +12,7 @@ import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experi
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import { renderTokenUsagePage } from "./lab/render-token-usage.js";
 import { renderLabDashboardHtml, writeLabPublicArtifacts } from "./lab/build-lab-public.js";
+import { sanitizeLabVisibleHtml } from "./lab/lab-format.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -513,7 +514,7 @@ async function buildLabMarkdownPage(
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
-    const html = renderSafeMarkdown(markdown);
+    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>`;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
@@ -581,7 +582,7 @@ function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string):
     paths.crossEdition
       ? link(paths.crossEdition.href, escapeHtml(paths.crossEdition.label))
       : "",
-    link(paths.lab, "Lab — how we measure improvements"),
+    link(paths.lab, "Lab: how we measure improvements"),
     link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
   ].filter(Boolean);
 
@@ -1600,7 +1601,7 @@ export async function buildLabSite(
     ${dashboardHtml}`;
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = renderSafeMarkdown(markdown);
+    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
     indexBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans mt-10">${html}</article>`;
   } catch {
     indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">
@@ -1620,7 +1621,7 @@ export async function buildLabSite(
   let toolsBody = `${labNavHtml("tools", escapeHtml)}`;
   try {
     const markdown = await fs.readFile(inventoryMd, "utf8");
-    const html = renderSafeMarkdown(markdown);
+    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
     toolsBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-table:text-sm">${html}</article>`;
   } catch {
     toolsBody += `<p class="font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run inventory:tools</code> to generate the inventory.</p>`;
@@ -1635,8 +1636,8 @@ export async function buildLabSite(
     ${labNavHtml("experiments", escapeHtml)}
     <header class="lab-lede">
       <h2>What we're testing</h2>
-      <p>We change one thing at a time — how daily briefs are written, how the homepage is laid out, or which repos show up in the list — then we say whether we kept it. This page is the public record, not a live A/B dashboard.</p>
-      <p><strong>Before</strong> is the site as it was. <strong>After</strong> is the site with the change turned on. Pages rebuild once a day, so these are calendar windows, not coin-flip tests.</p>
+      <p>We change one thing at a time in how daily briefs are written, how the homepage is laid out, or which repos show up in the list, then we say whether we kept it. This page is the public record, not a live split test dashboard.</p>
+      <p><strong>Before</strong> is the site as it was. <strong>After</strong> is the site with the change turned on. Pages rebuild once a day, so these are calendar windows, not random assignment tests.</p>
     </header>
     <div id="experiments-root" class="font-sans text-sm">
       <div id="experiments-table-wrap" class="space-y-3"></div>
@@ -1644,7 +1645,7 @@ export async function buildLabSite(
         <button type="button" id="detail-back" class="mb-6 text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; All experiments</button>
         <h2 id="detail-title" class="mb-4 font-sans text-lg font-bold tracking-tight"></h2>
         <div id="detail-body" class="prose prose-stone max-w-none dark:prose-invert prose-sm prose-headings:font-sans"></div>
-        <button type="button" id="export-markdown">Download this write-up</button>
+        <button type="button" id="export-markdown">Download this write up</button>
       </div>
     </div>
     <noscript><p class="experiment-muted">Turn on JavaScript to browse the experiment cards. Records also live in the GitHub repo under <code>data/experiments/</code>.</p></noscript>

@@ -6,7 +6,7 @@ _**Active (#1).** Baseline **2026-09-27** through **2026-10-10** (snapshot impor
 
 Skills and OSS blurbs already go through Ponytail (short sections, one try-this step) and Firecrawl enrichment. They can still read like generic AI copy: stock phrases, filler transitions, and "in today's fast-paced landscape" energy.
 
-After Claude writes each blurb, we want a **light polish pass** that strips those tells without changing facts or the Why-now hook, and adds a plain-language line when a repo name assumes specialist knowledge.
+After Claude writes each blurb, we want a **light polish pass** that strips those tells without changing facts or the Why now hook, and adds a plain-language line when a repo name assumes specialist knowledge.
 
 That is the whole test. Humanizer is *where the idea came from*, not a tool we installed.
 
@@ -16,7 +16,7 @@ That is the whole test. Humanizer is *where the idea came from*, not a tool we i
 
 We are **not** installing Humanizer on the digest pipeline.
 
-We copied the habit: **one post-narration batch edit** per digest run on **both** editions. README-grounded specifics stay. Why-now hooks stay. Filler and stock AI phrasing go.
+We copied the habit: **one post-narration batch edit** per digest run on **both** editions. README-grounded specifics stay. Why now hooks stay. Filler and stock AI phrasing go.
 
 ## How we'll know
 
@@ -24,7 +24,7 @@ We copied the habit: **one post-narration batch edit** per digest run on **both*
 |---------|------------------------|
 | Less AI-sounding | Editorial spot-check: fewer stock phrases and filler transitions |
 | Still accurate | Rank-1 rubric pass rate holds (specificity, accuracy) |
-| Still timely | Why-now rubric score does not regress |
+| Still timely | Why now rubric score does not regress |
 | Cost | Token log includes one extra batch call per edition per run |
 
 PostHog CTR is **out of scope** for this experiment. We gate on editorial rubric and human-sounding spot-checks.
@@ -46,14 +46,14 @@ PostHog CTR is **out of scope** for this experiment. We gate on editorial rubric
 
 | Flag | What it does |
 |------|----------------|
-| `DIGEST_HUMANIZER_POLISH=1` | One batch post-narrate polish pass per digest run (strip AI-writing tells; no new facts; plain-language gloss for jargon) |
+| `DIGEST_HUMANIZER_POLISH=1` | One batch post narrate polish pass per digest run (strip AI-writing tells; no new facts; plain-language gloss for jargon) |
 
 Flags go on **both** OSS and Skills digest commands. GitHub Actions turns the flag on only when `steps.gate.outputs.date` is **2026-10-11** or later (Pacific).
 
 ### Optional side-by-side preview
 
 ```bash
-EXPERIMENT_ID=EXP-20260913-humanizer-polish-skills \
+EXPERIMENT_ID=`EXP-20260913-humanizer-polish-skills` \
 DIGEST_ENRICH_WEB=1 \
 DIGEST_ENRICH_WEB_PROVIDER=firecrawl \
 DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
@@ -67,8 +67,8 @@ Output: `data/experiments/runs/{run_id}/`. Score with the [shadow rubric](../sha
 
 ## References
 
-- Experiment ID: `EXP-20260913-humanizer-polish-skills`
-- Prior in queue: soft-dedup diversity (`EXP-20260715-soft-dedup-diversity-skills`)
-- Prior narration experiment: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.md)
+- Experiment ID: ``EXP-20260913-humanizer-polish-skills``
+- Prior in queue: soft-dedup diversity (``EXP-20260715-soft-dedup-diversity-skills``)
+- Prior narration experiment: [Shorter Skills briefs](./`EXP-20260802-ponytail-narration-skills`.md)
 - Tool inventory: [blader/humanizer](https://github.com/blader/humanizer) (featured on Skills list; habit borrowed, not installed)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

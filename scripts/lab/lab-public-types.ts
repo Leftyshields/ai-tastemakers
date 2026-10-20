@@ -17,20 +17,38 @@ export interface PublicTimelineItem {
   surfaces: LabSurface[];
   offset_pct: number;
   width_pct: number;
-  lane_start: number;
-  lane_span: number;
-  show_both_tag: boolean;
+  offset_pct_full: number;
+  width_pct_full: number;
+  kind: "experiment" | "collapsed";
+  collapsed_count?: number;
+  hidden_until_show_all?: boolean;
 }
 
 export interface PublicTimelineModel {
   range_start: string;
   range_end: string;
+  full_range_start: string;
   today_iso: string;
   today_offset_pct: number | null;
-  month_ticks: { label: string; offset_pct: number }[];
-  freeze: { start: string; end: string; offset_pct: number; width_pct: number } | null;
-  lanes: LabSurface[];
+  today_offset_pct_full: number | null;
+  month_ticks: { label: string; offset_pct: number; current: boolean }[];
+  month_ticks_full: { label: string; offset_pct: number; current: boolean }[];
+  freeze: {
+    start: string;
+    end: string;
+    offset_pct: number;
+    width_pct: number;
+    offset_pct_full: number;
+    width_pct_full: number;
+  } | null;
   items: PublicTimelineItem[];
+  collapsed_count: number;
+}
+
+export interface PublicControlPanelSummary {
+  testing: { hypothesis: string } | null;
+  next_up: { label: string; start: string } | null;
+  last_result: { id: string; label: string; verdict: LabVerdict } | null;
 }
 
 export interface PostHogEndSnapshot {
@@ -108,7 +126,10 @@ export interface LabExperimentsPublicFile {
     skip_reason?: string | null;
   };
   experiments: LabExperimentSource[];
-  control_panel: { running: PublicControlPanelRunning | null };
+  control_panel: {
+    running: PublicControlPanelRunning | null;
+    summary: PublicControlPanelSummary;
+  };
   timeline: PublicTimelineModel | null;
   backlog: PublicBacklogItem[];
   history: PublicHistoryItem[];

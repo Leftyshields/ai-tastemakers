@@ -73,6 +73,7 @@ describe("validateSuccessBlock", () => {
   const base: LabExperimentEntry = {
     id: "EXP-test",
     label: "Test",
+    short_hypothesis: "We expect a measurable lift on the primary metric during the treatment window.",
     surface: "narration_skills",
     metric: "m",
     start: "2026-01-01",
