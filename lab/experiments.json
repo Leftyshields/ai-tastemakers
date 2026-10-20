@@ -35,7 +35,8 @@
           "metric_type": "posthog",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Post rank web enrich lifts Skills outbound repo clicks during the treatment window."
     },
@@ -66,7 +67,8 @@
           "metric_type": "posthog",
           "metric_label": "Homepage brief clicks"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Homepage layout v2 raises brief and archive clicks without hurting bounce."
     },
@@ -97,7 +99,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Firecrawl enrich matches or beats shadow rubric on Skills briefs."
     },
@@ -128,7 +131,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Stronger soft dedup cuts repeat top picks while keeping weekly diversity."
     },
@@ -159,7 +163,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Tighter Skills narration cuts tokens about 15 percent with rubric pass held."
     },
@@ -192,7 +197,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Humanizer polish makes OSS and Skills blurbs sound more human without losing accuracy."
     },
@@ -222,7 +228,8 @@
           "metric_type": "editorial",
           "metric_label": "Homepage brief clicks"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "No digest UI changes during the freeze so caveman reads stay unbiased."
     },
@@ -255,7 +262,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Enrich compression lowers token use without dropping rubric pass or Why now quality."
     },
@@ -287,7 +295,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Why now memory freshens repeat repo hooks while keeping rubric scores up."
     },
@@ -320,7 +329,8 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
       },
       "short_hypothesis": "Bootstrap ranking guards improve early list stability without hiding momentum picks."
     }

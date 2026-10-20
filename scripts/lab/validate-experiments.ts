@@ -23,7 +23,10 @@ export interface LabSuccessMetric {
 export interface LabSuccess {
   success_criteria: string;
   metric: LabSuccessMetric;
+  /** @deprecated Unapproved proxy targets only; must not be true once approved. */
   guessed?: boolean;
+  approved_by?: string;
+  approved_on?: string;
 }
 
 export interface PostHogEndSnapshot {
@@ -144,6 +147,29 @@ export function validateSuccessBlock(exp: LabExperimentEntry): ValidationIssue[]
       message: `Missing success.metric.metric_label on '${exp.id}'.`,
       experiment_ids: [exp.id],
     });
+  }
+  if (success.guessed === true) {
+    issues.push({
+      code: "success",
+      message: `success.guessed must not be true on '${exp.id}'; remove guessed or record approval.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (success.approved_on != null && success.approved_on !== "") {
+    if (!ISO_DATE.test(success.approved_on)) {
+      issues.push({
+        code: "success",
+        message: `Invalid success.approved_on on '${exp.id}' (use YYYY-MM-DD).`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (!success.approved_by?.trim()) {
+      issues.push({
+        code: "success",
+        message: `success.approved_by required when approved_on is set on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
   }
   return issues;
 }
