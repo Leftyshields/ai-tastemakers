@@ -30,5 +30,3 @@ We use **before and after calendar windows** rather than live A/B tests because 
 ## Transparency boundaries
 
 Everything in `/lab/` is safe to publish: no API keys, no subscriber data, no unpublished digest drafts. Pipeline source lives on [GitHub](https://github.com/Leftyshields/ai-tastemakers); Lab is the human readable layer on top.
-
-If you have questions or spot something that looks off, open an issue. We would rather fix a misleading chart than hide the methodology.
