@@ -4,8 +4,11 @@ import { fileURLToPath, pathToFileURL } from "node:url";
 import {
   findLabTestedBadgeViolations,
   ponytailDoneFixturePresent,
+  renderRunningBadgeFixtureCard,
   resolveBadgeHrefForBuiltPage,
+  runningBadgeFixtureMarkupValid,
 } from "./lab/lab-tested-badge.js";
+import { renderDigestRepoCard } from "../src/tastemaker/pages/brief-cards.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteRoot = path.join(repoRoot, "site");
@@ -55,8 +58,26 @@ function main(): void {
     );
   }
 
+  function escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  }
+
+  const runningFixtureHtml = renderRunningBadgeFixtureCard(repoRoot, escapeHtml, (repo, ctx) =>
+    renderDigestRepoCard(repo, "oss", "2026-10-19", "delta_7d", escapeHtml, ctx),
+  );
+  if (!runningBadgeFixtureMarkupValid(runningFixtureHtml)) {
+    failed = true;
+    console.error("Running lab badge fixture markup invalid (expected In the Lab action row)");
+  }
+
   if (failed) process.exit(1);
-  console.log(`verify: lab tested badges ok (${badgePages} page(s) with badges; Ponytail fixture present)`);
+  console.log(
+    `verify: lab tested badges ok (${badgePages} page(s) with badges; Ponytail Done + Running fixtures)`,
+  );
 }
 
 const isMain =

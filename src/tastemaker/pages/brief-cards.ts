@@ -84,17 +84,19 @@ export function renderDigestRepoCard(
     }
   }
 
-  const titleGroup = `<span class="digest-repo-card__title-group inline-flex max-w-full flex-wrap items-baseline gap-1.5">${labBadgeHtml ? `<span class="digest-repo-card__name-line inline-flex min-w-0 max-w-full flex-wrap items-baseline gap-1.5"><a href="${githubUrl}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>${labBadgeHtml}</span>` : `<a href="${githubUrl}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>`}${newBadgeHtml(repo.is_new)}</span>`;
+  const actionsRow = labBadgeHtml
+    ? `<div class="digest-repo-card__actions flex flex-wrap items-center gap-2">${`<a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`}${labBadgeHtml}</div>`
+    : `<a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`;
 
   return `<article class="digest-repo-card group relative mb-8 cursor-pointer rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-stone-700 dark:bg-stone-950/40 dark:hover:border-blue-600" data-repo="${escape(repo.full_name)}" data-section="${section}" data-position="${repo.rank}" data-digest-date="${escape(digestDate)}">
   <h2 class="digest-repo-card__heading mb-2 scroll-mt-20 font-sans text-lg font-semibold tracking-tight">
-    <span class="mr-1.5 text-stone-500">${repo.rank}.</span>
-    ${titleGroup}
+    <span class="mr-1 text-stone-500">${repo.rank}.</span>
+    <a href="${githubUrl}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>${newBadgeHtml(repo.is_new)}
   </h2>
-  <p class="digest-repo-card__meta mb-3 mt-1.5 font-sans text-sm text-stone-500 dark:text-stone-400">${meta}</p>
+  <p class="digest-repo-card__meta mb-3 font-sans text-sm text-stone-500 dark:text-stone-400">${meta}</p>
   ${briefHtml}
   <footer class="digest-repo-card__footer relative z-[1] mt-4">
-    <a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="ml-1.5" aria-hidden="true">↗</span></a>
+    ${actionsRow}
   </footer>
 </article>`;
 }
