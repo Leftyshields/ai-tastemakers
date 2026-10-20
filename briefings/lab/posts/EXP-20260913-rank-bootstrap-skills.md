@@ -63,5 +63,5 @@ Compare top-10 stability across consecutive days in `briefings/skills/*/digest.j
 
 - Experiment ID: ``EXP-20260913-rank-bootstrap-skills``
 - Product backlog: [RANK-1](../../../docs/PRODUCT_BACKLOG.md)
-- Prior in queue: [Why now memory](./EXP-20260913-whynow-memory-skills.html)
+- Prior in queue: [Why now memory](./`EXP-20260913-whynow-memory-skills`.md)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

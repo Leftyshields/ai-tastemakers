@@ -108,5 +108,5 @@ Import snapshots after each window: `npm run experiment -- snapshot`.
 
 - Experiment ID: ``EXP-20260715-soft-dedup-diversity-skills``
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Prior write-ups: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.html) · [Richer Skills briefs](./EXP-20260628-web-enrich-skills.html)
+- Prior write-ups: [Shorter Skills briefs](./`EXP-20260802-ponytail-narration-skills`.md) · [Richer Skills briefs](./`EXP-20260628-web-enrich-skills`.md)
 - Backlog: [RANK-2](../../docs/PRODUCT_BACKLOG.md)
