@@ -14,6 +14,9 @@ import {
   renderLabExpandRowScript,
   renderLabMoreButton,
 } from "./lab-dashboard-copy.js";
+import { renderDigestLearnedSectionHtml, renderEditionTopicChip } from "./digest-learned.js";
+
+const LAB_TOOLS_LINK_CLASS = "lab-tools-tracked-link";
 
 export interface ToolInventoryEntry {
   full_name: string;
@@ -118,6 +121,8 @@ export function renderToolsPageHtml(
     <p class="mt-2 text-sm text-stone-700 dark:text-stone-300">Tools we've featured, and how they scored as candidates to improve our pipeline.</p>
   </header>`);
 
+  parts.push(renderDigestLearnedSectionHtml(repoRoot, ctx, escapeHtml));
+
   const queue = queueRows(inventory, experiments, ctx, escapeHtml);
   parts.push(`<section class="lab-tools-section mb-8 font-sans" aria-labelledby="lab-queue-heading">
     <h3 id="lab-queue-heading" class="mb-3 text-base font-bold">Lab queue</h3>
@@ -135,7 +140,7 @@ export function renderToolsPageHtml(
       entry.html_url,
       toolDisplayName(entry.full_name),
       ctx,
-      { section, sourceRepo: entry.full_name },
+      { section, sourceRepo: entry.full_name, className: LAB_TOOLS_LINK_CLASS },
       escapeHtml,
     );
     const expHref = exp
@@ -150,7 +155,7 @@ export function renderToolsPageHtml(
           expHref,
           sanitizeVisibleCopy(exp.label),
           ctx,
-          { section, experimentId: exp.id },
+          { section, experimentId: exp.id, className: LAB_TOOLS_LINK_CLASS },
           escapeHtml,
         )
       : "";
@@ -191,14 +196,14 @@ export function renderToolsPageHtml(
     const hidden = index >= 10 ? " lab-tools-row-hidden" : "";
     const chips = entry.pipeline_roles
       .slice(0, 3)
-      .map((r) => `<span class="lab-gantt-chip">${escapeHtml(roleLabel(r))}</span>`)
+      .map((r) => renderEditionTopicChip(roleLabel(r), escapeHtml))
       .join("");
     const lastFeatured = escapeHtml(formatFeaturedDate(entry.last_seen));
     const toolLink = renderLabTrackedLink(
       entry.html_url,
       toolDisplayName(entry.full_name),
       ctx,
-      { section, sourceRepo: entry.full_name },
+      { section, sourceRepo: entry.full_name, className: LAB_TOOLS_LINK_CLASS },
       escapeHtml,
     );
     parts.push(`<tr class="lab-data-row${hidden}">
@@ -231,7 +236,7 @@ export function renderToolsPageHtml(
       .slice(0, 12)
       .map(
         (e) =>
-          `<li>${renderLabTrackedLink(e.html_url, toolDisplayName(e.full_name), ctx, { section, sourceRepo: e.full_name }, escapeHtml)} (${escapeHtml(String(e.appearance_count))})</li>`,
+          `<li>${renderLabTrackedLink(e.html_url, toolDisplayName(e.full_name), ctx, { section, sourceRepo: e.full_name, className: LAB_TOOLS_LINK_CLASS }, escapeHtml)} (${escapeHtml(String(e.appearance_count))})</li>`,
       )
       .join("");
     parts.push(`<details class="lab-tools-role mb-2 rounded-lg border border-stone-200 dark:border-stone-700">
