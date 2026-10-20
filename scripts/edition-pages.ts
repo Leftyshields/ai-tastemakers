@@ -19,7 +19,7 @@ import {
   prepareLabProseHtmlFromMarkdown,
   sanitizeLabVisibleHtml,
 } from "./lab/lab-format.js";
-import { labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
+import { LAB_FOOTER_ABOUT_LABEL, labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
 import {
   applyLabIntroVonRestorff,
   renderLabLoopAboutBlockHtml,
@@ -608,12 +608,12 @@ async function buildShadowPages(
   return count;
 }
 
-function labAboutFooterHref(paths: SitePaths): string {
+export function labAboutFooterHref(paths: SitePaths): string {
   const base = paths.lab.endsWith("/") ? paths.lab : `${paths.lab}/`;
   return `${base}about.html`;
 }
 
-function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string): string {
+export function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string): string {
   const link = (href: string, label: string) =>
     `<a href="${href}" class="site-footer__link" data-lab-section="footer">${label}</a>`;
 
@@ -622,7 +622,7 @@ function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string):
     paths.crossEdition
       ? link(paths.crossEdition.href, escapeHtml(paths.crossEdition.label))
       : "",
-    link(labAboutFooterHref(paths), "About the Lab"),
+    link(labAboutFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
     link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
   ].filter(Boolean);
 
