@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 
@@ -87,4 +87,7 @@ function main(): void {
   console.log("verify: lab internal hrefs ok");
 }
 
-main();
+const isMain =
+  typeof process.argv[1] === "string" &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+if (isMain) main();
