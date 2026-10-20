@@ -52,6 +52,13 @@ describe("Lab UX43 tools page", () => {
     expect(html).toContain("lab-tools-linked-cell");
   });
 
+  it("renders lab queue role column as edition topic chips", () => {
+    const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, {}, "2026-10-19"), escapeHtml);
+    const queueBlock = html.match(/lab-tools-queue[\s\S]*?<\/table>/)?.[0] ?? "";
+    expect(queueBlock).toContain("lab-edition-topic-chip");
+    expect(queueBlock).toContain("lab-tools-role-chips");
+  });
+
   it("routes allowlisted queue tool links through go", () => {
     const allowlist = { "NousResearch/hermes-agent": "https://github.com/NousResearch/hermes-agent" };
     const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, allowlist, "2026-10-19"), escapeHtml);

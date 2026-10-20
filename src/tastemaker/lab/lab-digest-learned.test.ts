@@ -24,6 +24,14 @@ describe("Lab UX44 digest learned section", () => {
     expect(section).toContain("Queued next");
     const errors = verifyDigestLearnedClaims(section, repoRoot);
     expect(errors).toEqual([]);
+    const withoutSourcesPanel = section.replace(
+      /data-for="learned-sources"[\s\S]*?<\/div>\s*<\/div>/,
+      "",
+    );
+    expect(withoutSourcesPanel).not.toContain("lab/experiments.json");
+    expect(withoutSourcesPanel).not.toContain("data/tool-inventory.json");
+    expect(section).toContain('data-for="learned-sources"');
+    expect(section).toContain("lab/experiments.json");
   });
 
   it("includes shipped Firecrawl and Ponytail habits with inventory tools when present", () => {
