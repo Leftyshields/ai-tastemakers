@@ -154,14 +154,6 @@ export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?
   return ids.has(experimentId);
 }
 
-/** UX28: sanitizer drops empty `<a id>`, so anchor the explainer heading instead. */
-export function applyLabExplainerHeadingAnchor(html: string): string {
-  return html.replace(
-    /<h2>How to read an experiment<\/h2>/i,
-    '<h2 id="how-to-read-an-experiment" class="scroll-mt-20">How to read an experiment</h2>',
-  );
-}
-
 export function findLabProseInlineSpacingViolations(html: string): string[] {
   const article = html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
   const violations: string[] = [];

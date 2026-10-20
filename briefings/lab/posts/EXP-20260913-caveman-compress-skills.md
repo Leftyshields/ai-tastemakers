@@ -70,7 +70,7 @@ Compare token lines on the [Token dashboard](../token-usage.html) and rank-1 rub
 ## References
 
 - Experiment ID: ``EXP-20260913-caveman-compress-skills``
-- Prior in queue: [Humanizer polish](./`EXP-20260913-humanizer-polish-skills`.md)
-- Enrichment layer: [Richer Skills briefs](./`EXP-20260628-web-enrich-skills`.md)
+- Prior in queue: [Humanizer polish](./EXP-20260913-humanizer-polish-skills.html)
+- Enrichment layer: [Richer Skills briefs](./EXP-20260628-web-enrich-skills.html)
 - Tool inventory: [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) (habit borrowed, not installed)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

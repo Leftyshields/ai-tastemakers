@@ -38,6 +38,6 @@
 - **UX25**: Timeline popover is `position: absolute` under its Gantt row (not fixed). One open at a time. Dismiss on scroll, Escape, and outside click.
 - **UX26**: Lab markdown preserves whitespace beside inline tags; inline code renders without visible backticks. Prose uses sans. `verify:genesis` fails when a letter touches an inline tag boundary in the prose block.
 - **UX27**: Remove stale Right now paragraph from `briefings/lab/index.md`; control panel covers running state.
-- **UX28**: Full explainer links to `#how-to-read-an-experiment` on the explainer `h2` with scroll margin top.
+- **UX28**: No How to read this summary row above the control panel (prose explainer below remains).
 - **UX29**: Omit history and control panel Write up links when no `briefings/lab/posts/{id}.md` exists.
-- **UX30**: `verify:genesis` fails on unresolved internal Lab hrefs (files and `#` anchors).
+- **UX30**: `verify:genesis` fails on unresolved internal hrefs across all of `site/` (files and `#` anchors).

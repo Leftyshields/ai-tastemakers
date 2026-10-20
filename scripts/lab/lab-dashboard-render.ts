@@ -498,9 +498,6 @@ function renderLabDashboardStyles(): string {
   .lab-sparkline-animate polyline { animation: none; stroke-dasharray: none; }
   .lab-progress-fill { transition: none; }
 }
-.lab-how-to-read { font-size: 0.875rem; color: rgb(87 83 78); margin-bottom: 1.5rem; }
-.dark .lab-how-to-read { color: rgb(168 162 158); }
-.dark .lab-how-to-read strong { color: rgb(231 229 228); }
 .lab-timeline-popover { position: absolute; top: calc(100% + 8px); left: 0; z-index: 300; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 6px 20px rgb(0 0 0 / 0.15); white-space: normal; pointer-events: auto; }
 .dark .lab-timeline-popover { background: rgb(28 25 23); border-color: rgb(68 64 60); color: rgb(231 229 228); }
 .lab-timeline-popover[hidden] { display: none !important; }
@@ -522,10 +519,6 @@ export function renderLabDashboardHtml(
 ): string {
   const sections: string[] = [];
   sections.push(renderLabDashboardStyles());
-
-  sections.push(`<div class="lab-how-to-read font-sans">
-    <p><strong>How to read this.</strong> Each row is one change to the public site or digest pipeline with a before window and an after window. <a href="#how-to-read-an-experiment" class="text-blue-800 underline dark:text-blue-400">Full explainer</a></p>
-  </div>`);
 
   sections.push(`<section id="lab-control-panel" class="lab-dashboard-section mb-10 font-sans">`);
   const run = pub.control_panel.running;

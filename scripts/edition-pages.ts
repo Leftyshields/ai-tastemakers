@@ -12,7 +12,7 @@ import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experi
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import { renderTokenUsagePage } from "./lab/render-token-usage.js";
 import { renderLabDashboardHtml, writeLabPublicArtifacts } from "./lab/build-lab-public.js";
-import { applyLabExplainerHeadingAnchor, sanitizeLabVisibleHtml } from "./lab/lab-format.js";
+import { sanitizeLabVisibleHtml } from "./lab/lab-format.js";
 import {
   articleJsonLd,
   briefMetaDescription,
@@ -331,7 +331,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
 export function labNavHtml(
   active: "home" | "tools" | "experiments" | "tokens" | "posts",
   escapeHtml: (t: string) => string,
-  depth: 0 | 1 = 0,
+  depth: 0 | 1 | 2 = 0,
 ): string {
   const pill = (href: string, label: string, isActive: boolean) => {
     const base =
@@ -344,10 +344,11 @@ export function labNavHtml(
   };
 
   const prefix = depth === 0 ? "" : "../";
-  const postsHref = depth === 0 ? "posts/" : "./";
+  const labHomeHref = depth === 0 ? "./" : "../";
+  const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
   return `<nav aria-label="Lab section" class="mb-8 flex flex-wrap gap-2">
-      ${pill(`${prefix}${depth === 0 ? "./" : ""}`, "Lab home", active === "home")}
+      ${pill(labHomeHref, "Lab home", active === "home")}
       ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
       ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
@@ -490,7 +491,7 @@ export function renderShadowCompareBody(
     .map((repo) => renderShadowRepoSection(repo, escapeHtml, shadow.narrate_ponytail_requested))
     .join("");
 
-  return `${labNavHtml("experiments", escapeHtml, 1)}
+  return `${labNavHtml("experiments", escapeHtml, 2)}
     <p class="mb-2"><a href="../experiments.html" class="text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; Experiments</a></p>
     <h2 class="font-mono text-lg font-bold">${escapeHtml(shadow.run_id)}</h2>
     <p class="text-sm text-stone-500 dark:text-stone-400">${escapeHtml(shadow.date)} · ${escapeHtml(shadow.edition)} · ${escapeHtml(shadow.ranking_mode)}</p>
@@ -1307,6 +1308,7 @@ function monthlyPagePaths(): SitePaths {
     css: "../assets/style.css",
     home: "../",
     subscribe: "../subscribe.html",
+    lab: "../lab/",
     brief: () => "../",
     editionNav: { ossHref: "../", skillsHref: "../skills/", active: undefined },
   };
@@ -1366,6 +1368,7 @@ function weeklyPagePaths(): SitePaths {
     css: "../assets/style.css",
     home: "../",
     subscribe: "../subscribe.html",
+    lab: "../lab/",
     brief: () => "../",
     editionNav: { ossHref: "../", skillsHref: "../skills/", active: undefined },
   };
@@ -1605,9 +1608,7 @@ export async function buildLabSite(
     ${dashboardHtml}`;
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = applyLabExplainerHeadingAnchor(
-      sanitizeLabVisibleHtml(renderSafeMarkdown(markdown)),
-    );
+    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
     indexBody += `<article class="brief-content lab-prose-capped prose prose-stone max-w-none font-sans dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-p:font-sans prose-li:font-sans mt-10">${html}</article>`;
   } catch {
     indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">

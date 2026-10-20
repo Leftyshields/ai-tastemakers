@@ -3,12 +3,15 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
-  applyLabExplainerHeadingAnchor,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
   sanitizeLabVisibleHtml,
 } from "../../../scripts/lab/lab-format.js";
-import { findLabInternalHrefViolations } from "../../../scripts/verify-lab-internal-hrefs.js";
+import {
+  findInternalHrefViolations,
+  resolveInternalHrefTarget,
+  SITE_PUBLISH_PREFIX,
+} from "../../../scripts/verify-lab-internal-hrefs.js";
 import { buildLabPublicFile, renderLabDashboardHtml } from "../../../scripts/lab/build-lab-public.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -29,12 +32,12 @@ describe("Lab prose spacing (UX26 UX27)", () => {
     expect(findLabProseInlineSpacingViolations(`<article class="lab-prose-capped">${html}</article>`)).toEqual([]);
   });
 
-  it("UX28 explainer heading exposes how-to-read-an-experiment id", () => {
-    const html = applyLabExplainerHeadingAnchor(
-      sanitizeLabVisibleHtml(renderSafeMarkdown("## How to read an experiment\n\nBody.")),
-    );
-    expect(html).toContain('id="how-to-read-an-experiment"');
-    expect(html).toContain("scroll-mt-20");
+  it("UX28 dashboard omits How to read this summary above control panel", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).not.toContain("How to read this.");
+    expect(html).not.toContain("Full explainer");
+    expect(html).not.toContain("lab-how-to-read");
   });
 
   it("UX29 hides Write up links when post markdown is missing", () => {
@@ -46,15 +49,24 @@ describe("Lab prose spacing (UX26 UX27)", () => {
     expect(html).not.toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
   });
 
+  it("UX30 resolves publish prefix and directory hrefs", () => {
+    const home = path.join(repoRoot, "site/index.html");
+    expect(resolveInternalHrefTarget(home, `${SITE_PUBLISH_PREFIX}/`)).toBe(home);
+    expect(resolveInternalHrefTarget(home, "skills/")).toBe(
+      path.join(repoRoot, "site/skills/index.html"),
+    );
+  });
+
   it("UX30 flags broken same page anchors", () => {
-    const bad = findLabInternalHrefViolations(
-      '<a href="#how-to-read-an-experiment">Full explainer</a>',
-      "site/lab/index.html",
+    const page = path.join(repoRoot, "site/lab/index.html");
+    const bad = findInternalHrefViolations(
+      '<a href="#missing-section">Jump</a>',
+      page,
     );
     expect(bad.length).toBeGreaterThan(0);
-    const ok = findLabInternalHrefViolations(
-      '<h2 id="how-to-read-an-experiment">How to read</h2><a href="#how-to-read-an-experiment">Full explainer</a>',
-      "site/lab/index.html",
+    const ok = findInternalHrefViolations(
+      '<h2 id="section-a">A</h2><a href="#section-a">Jump</a>',
+      page,
     );
     expect(ok).toEqual([]);
   });

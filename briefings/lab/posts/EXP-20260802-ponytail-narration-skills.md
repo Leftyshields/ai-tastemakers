@@ -126,5 +126,5 @@ Output: `data/experiments/runs/{run_id}/`. Score with the [shadow rubric](../sha
 
 - Experiment ID: ``EXP-20260802-ponytail-narration-skills``
 - W31 takeaway: [weekly/2026-W31](../../weekly/2026-W31/weekly_review.md)
-- Prior experiment: [Richer Skills briefs](./`EXP-20260628-web-enrich-skills`.md) (the enrichment layer this sits on)
+- Prior experiment: [Richer Skills briefs](./EXP-20260628-web-enrich-skills.html) (the enrichment layer this sits on)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
