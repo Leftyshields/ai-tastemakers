@@ -7,7 +7,7 @@ import {
   renderLabDashboardHtml,
 } from "../../../scripts/lab/build-lab-public.js";
 import { labAboutRedirectScript } from "../../../scripts/lab/lab-about-redirect.js";
-import { labNavHtml, renderLabHomeIntroBlock } from "../../../scripts/edition-pages.js";
+import { labNavHtml, labSitePaths, pageShell, renderLabHomeIntroBlock } from "../../../scripts/edition-pages.js";
 import { prepareLabProseHtmlFromMarkdown } from "../../../scripts/lab/lab-format.js";
 import { applyLabIntroVonRestorff } from "../../../scripts/lab/lab-loop-strip.js";
 
@@ -36,17 +36,18 @@ describe("Lab methodology layout (round 7 revised)", () => {
     expect(nav).not.toContain("about.html");
   });
 
-  it("places Methodology link beside the Lab home intro before the loop strip", () => {
+  it("places How we run experiments link after the loop strip with PostHog section", () => {
     const article = applyLabIntroVonRestorff(
       prepareLabProseHtmlFromMarkdown(fs.readFileSync(path.join(repoRoot, "briefings/lab/index.md"), "utf8")),
     );
     const block = renderLabHomeIntroBlock(article, "<nav>loop</nav>", "2026-10-19", escapeHtml);
-    const articleEnd = block.indexOf("</article>");
+    const loopEnd = block.indexOf("</nav>") + "</nav>".length;
     const methodologyPos = block.indexOf('href="methodology.html"');
-    const loopPos = block.indexOf("<nav>loop</nav>");
-    expect(articleEnd).toBeGreaterThan(-1);
-    expect(methodologyPos).toBeGreaterThan(articleEnd);
-    expect(methodologyPos).toBeLessThan(loopPos);
+    expect(loopEnd).toBeGreaterThan(-1);
+    expect(methodologyPos).toBeGreaterThan(loopEnd);
+    expect(block).toContain("lab-experiments-how");
+    expect(block).toContain("How we run experiments");
+    expect(block).toContain('data-lab-section="about"');
     expect(block).toContain("evaluates them");
     expect(block).toContain("almost automatically");
   });
@@ -62,5 +63,22 @@ describe("Lab methodology layout (round 7 revised)", () => {
     expect(script).toContain("methodology.html");
     expect(script).toContain("location.hash");
     expect(script).toContain("location.replace");
+  });
+
+  it("methodology page shell includes canonical URL when site base is set", () => {
+    const html = pageShell(
+      "Methodology · Tastemakers",
+      "<p>x</p>",
+      labSitePaths(),
+      { name: "Tastemakers", tagline: "Lab" },
+      undefined,
+      escapeHtml,
+      {
+        labLayout: true,
+        seo: { siteBaseUrl: "https://leftyshields.github.io/ai-tastemakers", canonicalPath: "lab/methodology.html" },
+      },
+    );
+    expect(html).toContain('rel="canonical"');
+    expect(html).toContain("https://leftyshields.github.io/ai-tastemakers/lab/methodology.html");
   });
 });

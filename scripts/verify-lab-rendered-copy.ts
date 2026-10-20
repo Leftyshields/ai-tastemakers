@@ -31,6 +31,12 @@ function main(): void {
       console.error(`forbidden copy in ${rel}:`);
       for (const v of violations) console.error(`  …${v}…`);
     }
+    if (rel === "site/lab/methodology.html") {
+      if (!html.includes('rel="canonical"') || !html.includes("/lab/methodology.html")) {
+        failed = true;
+        console.error(`missing canonical link in ${rel}`);
+      }
+    }
   }
   if (failed) process.exit(1);
   console.log("verify: lab rendered pages copy ok");

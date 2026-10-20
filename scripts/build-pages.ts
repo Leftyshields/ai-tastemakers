@@ -405,7 +405,7 @@ async function main(): Promise<void> {
     "utf8",
   );
   const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
-  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate);
+  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl);
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);

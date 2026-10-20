@@ -1,6 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { LAB_FOOTER_ABOUT_LABEL, labPublishFooterHtml } from "../../../scripts/lab/lab-dashboard-copy.js";
-import { footerLinkRowHtml, labHomeFooterHref } from "../../../scripts/edition-pages.js";
+import {
+  footerLinkRowHtml,
+  labHomeFooterHref,
+  labMethodologyFooterHref,
+} from "../../../scripts/edition-pages.js";
 
 function escapeHtml(t: string): string {
   return t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
@@ -30,5 +34,8 @@ describe("Lab footer About link label", () => {
     expect(row).toContain("lab/index.html");
     expect(row).not.toContain("About the Lab");
     expect(row).not.toContain("about.html");
+    expect(row).toContain(">Methodology<");
+    expect(row).toContain(labMethodologyFooterHref(paths));
+    expect(row).toContain('data-lab-section="footer"');
   });
 });

@@ -537,6 +537,7 @@ async function buildLabMarkdownPage(
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
   navActive: "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts" = "home",
+  siteBaseUrl?: string,
 ): Promise<boolean> {
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
@@ -550,11 +551,16 @@ async function buildLabMarkdownPage(
       html = `<h2 class="mb-6 font-sans text-lg font-bold tracking-tight">Methodology</h2>${html}`;
     }
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
+    const seo =
+      siteBaseUrl && htmlName === "methodology.html"
+        ? { siteBaseUrl, canonicalPath: "lab/methodology.html" }
+        : undefined;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
       pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, {
         ...labShell,
         labFallbackSection: "about",
+        seo,
       }),
     );
     return true;
@@ -589,8 +595,8 @@ export function renderLabHomeIntroBlock(
 ): string {
   return `<div class="lab-intro mb-8 font-sans">
       <article class="${LAB_PROSE_ARTICLE_CLASS}">${articleHtml}</article>
-      <p class="lab-intro-methodology mt-3 text-sm"><a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a></p>
       ${loopStripHtml}
+      ${renderLabExperimentsHowLink(escapeHtml)}
       <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
     </div>`;
 }
@@ -647,6 +653,15 @@ export function labHomeFooterHref(paths: SitePaths): string {
   return `${base}index.html`;
 }
 
+export function labMethodologyFooterHref(paths: SitePaths): string {
+  const base = paths.lab.endsWith("/") ? paths.lab : `${paths.lab}/`;
+  return `${base}methodology.html`;
+}
+
+export function renderLabExperimentsHowLink(escapeHtml: (t: string) => string): string {
+  return `<p class="lab-experiments-how mt-2 text-sm text-stone-600 dark:text-stone-400"><a href="methodology.html" class="underline decoration-stone-400 hover:text-blue-800 dark:text-stone-400 dark:decoration-stone-500 dark:hover:text-blue-400" data-lab-section="about">${escapeHtml("How we run experiments")}</a></p>`;
+}
+
 /** @deprecated Use labHomeFooterHref */
 export function labAboutFooterHref(paths: SitePaths): string {
   return labHomeFooterHref(paths);
@@ -662,6 +677,7 @@ export function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => s
       ? link(paths.crossEdition.href, escapeHtml(paths.crossEdition.label))
       : "",
     link(labHomeFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
+    link(labMethodologyFooterHref(paths), "Methodology"),
     link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
   ].filter(Boolean);
 
@@ -1680,6 +1696,7 @@ export async function buildLabSite(
   siteDir: string,
   escapeHtml: (t: string) => string,
   asOfIsoDate: string = buildIsoDatePt(),
+  siteBaseUrl?: string,
 ): Promise<number> {
   const labSiteDir = path.join(siteDir, "lab");
   await fs.mkdir(labSiteDir, { recursive: true });
@@ -1726,6 +1743,7 @@ export async function buildLabSite(
     escapeHtml,
     labShell,
     "methodology",
+    siteBaseUrl,
   );
 
   await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell);
