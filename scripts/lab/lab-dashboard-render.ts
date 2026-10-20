@@ -25,6 +25,12 @@ import {
   renderProgressBarHtml,
   renderReadWindowBarHtml,
 } from "./lab-metric-progress.js";
+import {
+  experimentTechnicalMoreHtml,
+  historyResultLine,
+  plainHypothesisSentence,
+  renderLabMoreButton,
+} from "./lab-dashboard-copy.js";
 
 /** Assumed desktop Gantt track width for month tick filtering (UX gate). */
 export const GANTT_ASSUMED_TRACK_PX = 650;
@@ -311,12 +317,13 @@ function renderDefinitionListRow(
   return `<div><dt class="text-stone-500">${escapeHtml(label)}</dt><dd>${valueHtml}</dd></div>`;
 }
 
-/** UX3 running experiment headline block; works without PostHog sync data. */
+/** UX3 UX30 running experiment headline block; works without PostHog sync data. */
 export function renderRunningControlPanelBlock(
   run: PublicControlPanelRunning,
   pub: LabExperimentsPublicFile,
   escapeHtml: (t: string) => string,
 ): string {
+  const source = pub.experiments.find((e) => e.id === run.id);
   const title = sanitizeVisibleCopy(run.label);
   const track =
     run.metric_current !== null && run.success.metric.target != null
@@ -334,6 +341,7 @@ export function renderRunningControlPanelBlock(
     run.progress_pct !== null
       ? renderProgressBarHtml(run.progress_pct)
       : renderReadWindowBarHtml(run.day_of_min_read, run.min_read_days);
+  const moreId = escapeHtml(`hero-${run.id}`);
 
   const parts: string[] = [];
   parts.push(`<h2 class="text-lg font-bold tracking-tight">${escapeHtml(title)}</h2>
@@ -343,11 +351,10 @@ export function renderRunningControlPanelBlock(
       ${dayLine ? `<span class="text-stone-600 dark:text-stone-400">${escapeHtml(dayLine)}</span>` : ""}
     </div>
     ${progress}
-    <p class="mt-2 font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(run.id)}</p>
-    <details class="mt-3 text-sm text-stone-700 dark:text-stone-300">
-      <summary class="cursor-pointer font-medium">Details</summary>
-      <p class="mt-2">${escapeHtml(sanitizeVisibleCopy(run.success.success_criteria))}</p>
-    </details>`);
+    <div class="mt-2">${renderLabMoreButton(moreId, escapeHtml)}</div>
+    <div class="lab-more-panel mt-2 text-xs text-stone-600 dark:text-stone-400" data-for="${moreId}" data-open="false">
+      ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(run.id)}</p>`}
+    </div>`);
 
   const allNull = metricValuesAllNull(run);
   if (allNull) {
@@ -387,6 +394,15 @@ export function renderRunningControlPanelBlock(
   }
 
   return parts.join("\n");
+}
+
+function renderWriteUpLink(
+  experimentId: string,
+  writeupPostIds: readonly string[],
+  escapeHtml: (t: string) => string,
+): string {
+  if (!writeupPostIds.includes(experimentId)) return "";
+  return `<a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(experimentId)}.html">Write up</a>`;
 }
 
 function renderLabDashboardStyles(): string {
@@ -430,9 +446,9 @@ function renderLabDashboardStyles(): string {
 @media (min-width: 768px) and (max-width: 1024px) {
   .lab-gantt-overlay { left: calc(10rem + 8px); }
 }
-.lab-gantt-row { display: flex; align-items: stretch; gap: 8px; min-height: 32px; margin-bottom: 8px; cursor: pointer; border-radius: 4px; outline-offset: 2px; }
+.lab-gantt-row { display: flex; align-items: stretch; gap: 8px; min-height: 32px; margin-bottom: 8px; cursor: pointer; border-radius: 4px; outline-offset: 2px; position: relative; }
 .lab-gantt-row:focus-visible { outline: 2px solid rgb(37 99 235); }
-.lab-gantt-row[data-popover-open="true"] { z-index: 50; position: relative; }
+.lab-gantt-row[data-popover-open="true"] { z-index: 50; }
 .lab-gantt-name-col { width: 14rem; flex-shrink: 0; font-size: 0.75rem; line-height: 1.25; padding-top: 6px; }
 .lab-gantt-name { font-weight: 600; word-wrap: break-word; overflow-wrap: anywhere; }
 .lab-gantt-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
@@ -489,10 +505,7 @@ function renderLabDashboardStyles(): string {
   .lab-sparkline-animate polyline { animation: none; stroke-dasharray: none; }
   .lab-progress-fill { transition: none; }
 }
-.lab-how-to-read { font-size: 0.875rem; color: rgb(87 83 78); margin-bottom: 1.5rem; }
-.dark .lab-how-to-read { color: rgb(168 162 158); }
-.dark .lab-how-to-read strong { color: rgb(231 229 228); }
-.lab-timeline-popover { position: fixed; z-index: 300; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 6px 20px rgb(0 0 0 / 0.15); white-space: normal; pointer-events: auto; }
+.lab-timeline-popover { position: absolute; top: calc(100% + 8px); left: 0; z-index: 300; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 6px 20px rgb(0 0 0 / 0.15); white-space: normal; pointer-events: auto; }
 .dark .lab-timeline-popover { background: rgb(28 25 23); border-color: rgb(68 64 60); color: rgb(231 229 228); }
 .lab-timeline-popover[hidden] { display: none !important; }
 .lab-timeline-popover:not([hidden]) { display: block !important; }
@@ -503,6 +516,19 @@ function renderLabDashboardStyles(): string {
 .lab-read-window-fill { transition: width 0.6s ease; }
 @media (prefers-reduced-motion: reduce) { .lab-read-window-fill { transition: none; } }
 .lab-history-details-links { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.lab-hero-card { border: 1px solid rgb(231 229 228); border-radius: 12px; padding: 16px 18px; background: rgb(255 252 248); }
+.dark .lab-hero-card { border-color: rgb(68 64 60); background: rgb(28 25 23); }
+.lab-more-panel { display: none; }
+.lab-more-panel[data-open="true"] { display: block; }
+.lab-freeze-swatch { display: inline-block; width: 1.25rem; height: 0.65rem; border-radius: 3px; vertical-align: middle; margin-right: 6px; background: repeating-linear-gradient(135deg, rgb(120 113 108 / 0.25), rgb(120 113 108 / 0.25) 4px, transparent 4px, transparent 8px); }
+.dark .lab-freeze-swatch { background: repeating-linear-gradient(135deg, rgb(255 255 255 / 0.15), rgb(255 255 255 / 0.15) 4px, transparent 4px, transparent 8px); }
+.lab-history-row-hidden { display: none !important; }
+.lab-history[data-show-all="true"] .lab-history-row-hidden { display: table-row !important; }
+@media (max-width: 767px) {
+  .lab-history[data-show-all="true"] .lab-history-row-hidden { display: block !important; }
+}
+.lab-last-updated { font-size: 0.75rem; color: rgb(120 113 108); margin-top: 8px; }
+.dark .lab-last-updated { color: rgb(168 162 158); }
 </style>`;
 }
 
@@ -514,11 +540,7 @@ export function renderLabDashboardHtml(
   const sections: string[] = [];
   sections.push(renderLabDashboardStyles());
 
-  sections.push(`<div class="lab-how-to-read font-sans">
-    <p><strong>How to read this.</strong> Each row is one change to the public site or digest pipeline with a before window and an after window. <a href="#how-to-read-an-experiment" class="text-blue-800 underline dark:text-blue-400">Full explainer</a></p>
-  </div>`);
-
-  sections.push(`<section id="lab-control-panel" class="lab-dashboard-section mb-10 font-sans">`);
+  sections.push(`<section id="lab-control-panel" class="lab-dashboard-section mb-10 font-sans lab-hero-card">`);
   const run = pub.control_panel.running;
   if (run) {
     sections.push(renderRunningControlPanelBlock(run, pub, escapeHtml));
@@ -531,7 +553,7 @@ export function renderLabDashboardHtml(
   const summaryRows: string[] = [];
   if (summary.testing) {
     summaryRows.push(
-      `<div><dt>Testing</dt><dd>${escapeHtml(sanitizeVisibleCopy(summary.testing.hypothesis))}</dd></div>`,
+      `<div><dt>Testing</dt><dd>${escapeHtml(plainHypothesisSentence(summary.testing.hypothesis))}</dd></div>`,
     );
   }
   if (summary.next_up) {
@@ -543,7 +565,7 @@ export function renderLabDashboardHtml(
   if (summary.last_result) {
     const lr = summary.last_result;
     summaryRows.push(
-      `<div><dt>Last result</dt><dd class="flex flex-wrap items-center gap-2">${escapeHtml(sanitizeVisibleCopy(lr.label))} ${renderLabStatusChip("verdict", lr.verdict, escapeHtml)} <a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(lr.id)}.html">Write up</a></dd></div>`,
+      `<div><dt>Last result</dt><dd class="flex flex-wrap items-center gap-2">${escapeHtml(sanitizeVisibleCopy(lr.label))} ${renderLabStatusChip("verdict", lr.verdict, escapeHtml)} ${renderWriteUpLink(lr.id, pub.writeup_post_ids, escapeHtml)}</dd></div>`,
     );
   }
   if (summaryRows.length > 0) {
@@ -670,9 +692,12 @@ function renderGanttRow(item: PublicTimelineItem, escapeHtml: (t: string) => str
     </div>
     <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
       <p class="lab-timeline-popover-name font-bold text-stone-900 dark:text-stone-100">${escapeHtml(label)}</p>
-      <p class="mt-1 font-mono text-xs text-stone-600 dark:text-stone-400">${escapeHtml(item.id)}</p>
       <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
       <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
+      <div class="mt-2">${renderLabMoreButton(popId, escapeHtml)}</div>
+      <div class="lab-more-panel mt-1 text-xs text-stone-600 dark:text-stone-400" data-for="${escapeHtml(popId)}" data-open="false">
+        <p class="font-mono">${escapeHtml(item.id)}</p>
+      </div>
     </div>
   </div>`;
 }
@@ -717,7 +742,7 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
   btn.addEventListener('click', function(e){
     e.stopPropagation();
     var id = btn.getAttribute('data-target');
-    var row = document.querySelector('.lab-expand-row[data-for="'+id+'"]');
+    var row = document.querySelector('.lab-expand-row[data-for="'+id+'"], .lab-more-panel[data-for="'+id+'"]');
     if(!row) return;
     var open = row.getAttribute('data-open') === 'true';
     row.setAttribute('data-open', open ? 'false' : 'true');
@@ -725,13 +750,23 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
   });
 });
 (function(){
+  document.querySelectorAll('[data-lab-history-toggle]').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var root = btn.closest('.lab-history');
+      if(!root) return;
+      var showing = root.getAttribute('data-show-all') === 'true';
+      root.setAttribute('data-show-all', showing ? 'false' : 'true');
+      btn.setAttribute('aria-pressed', showing ? 'false' : 'true');
+      btn.textContent = showing ? 'Show all' : 'Show latest 5';
+    });
+  });
+})();
+(function(){
   var openPop = null;
   var openRow = null;
   function closePopover(){
     if(openPop){
       openPop.hidden = true;
-      openPop.style.top = '';
-      openPop.style.left = '';
       openPop = null;
     }
     if(openRow){
@@ -740,30 +775,13 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
       openRow = null;
     }
   }
-  function positionPopover(row, pop){
-    pop.hidden = false;
-    pop.style.left = '-9999px';
-    pop.style.top = '0px';
-    var popRect = pop.getBoundingClientRect();
-    var rowRect = row.getBoundingClientRect();
-    var top = rowRect.bottom + 8;
-    var left = rowRect.left;
-    if(top + popRect.height > window.innerHeight - 8){
-      top = Math.max(8, rowRect.top - popRect.height - 8);
-    }
-    if(left + popRect.width > window.innerWidth - 8){
-      left = Math.max(8, window.innerWidth - popRect.width - 8);
-    }
-    pop.style.top = top + 'px';
-    pop.style.left = left + 'px';
-  }
   function openForRow(row){
     if(row.classList.contains('lab-gantt-collapsed-row')) return;
     var pop = row.querySelector('.lab-timeline-popover');
     if(!pop) return;
     closePopover();
     row.setAttribute('data-popover-open','true');
-    positionPopover(row, pop);
+    pop.hidden = false;
     openPop = pop;
     openRow = row;
     row.setAttribute('aria-expanded','true');
@@ -785,6 +803,7 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
     closePopover();
   });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePopover(); });
+  window.addEventListener('scroll', function(){ closePopover(); }, true);
 })();
 (function(){
   document.querySelectorAll('[data-lab-gantt-axis]').forEach(function(axis){
@@ -831,34 +850,44 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
 }
 
 function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: string) => string): string {
+  const freezePolicy = pub.experiments.find((e) => e.id === "POLICY-DIGEST-UI-FREEZE");
   const parts = [`<section id="lab-backlog" class="lab-dashboard-section mb-10 font-sans">
     <h2 class="mb-3 text-lg font-bold tracking-tight">Backlog</h2>`];
-  if (pub.backlog.length === 0) {
+  if (pub.backlog.length === 0 && !freezePolicy) {
     parts.push(`<p class="text-sm text-stone-600 dark:text-stone-400">Nothing queued for publication.</p>`);
   } else {
     parts.push(`<div class="lab-table-wrap"><table class="lab-table lab-backlog-table border border-stone-200 text-sm dark:border-stone-700">
       <thead class="bg-stone-50 dark:bg-stone-900"><tr>
         <th>Name</th><th>Surface</th><th class="lab-num">Starts</th><th>Depends on</th>
       </tr></thead><tbody>`);
+    if (freezePolicy?.start) {
+      const freezeId = escapeHtml("POLICY-DIGEST-UI-FREEZE");
+      const freezeStart = formatDayHuman(freezePolicy.start);
+      parts.push(`<tr class="lab-data-row lab-backlog-freeze-row">
+        <td><span class="lab-freeze-swatch" aria-hidden="true"></span><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(freezePolicy.label))}</span> <span class="inline-flex shrink-0 items-center rounded-full px-2.5 py-0.5 text-xs font-semibold leading-none border border-stone-400 bg-transparent text-stone-800 dark:border-stone-500 dark:text-stone-200">Freeze</span></td>
+        <td>${escapeHtml(sanitizeVisibleCopy(formatSurfaces(freezePolicy)))}</td>
+        <td class="lab-num lab-backlog-starts" title="${escapeHtml(isoTitleAttr(freezePolicy.start))}">${escapeHtml(freezeStart)}</td>
+        <td class="text-xs">${renderLabMoreButton(freezeId, escapeHtml)}</td>
+      </tr>
+      <tr class="lab-expand-row" data-for="${freezeId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
+        ${experimentTechnicalMoreHtml(freezePolicy, escapeHtml)}
+      </td></tr>`);
+    }
     for (const b of pub.backlog) {
       const starts = b.start ? formatDayHuman(b.start) : "";
       const surfacesText = sanitizeVisibleCopy(formatSurfaces(b));
       const deps = formatBacklogDependsOn(b.depends_on, pub.experiments);
       const rowId = escapeHtml(b.id);
-      const moreBtn = `<button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button>`;
-      const dependsShort = deps.htmlNames ? `${deps.htmlNames} ${moreBtn}` : moreBtn;
-      const dependsLong = deps.plain ? `Depends on ${escapeHtml(deps.plain)} ${moreBtn}` : moreBtn;
-      const startsLong = b.start ? `Starts ${starts}` : "";
+      const moreBtn = renderLabMoreButton(rowId, escapeHtml);
+      const source = pub.experiments.find((e) => e.id === b.id);
       parts.push(`<tr class="lab-data-row">
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(b.label))}</span></td>
         <td>${escapeHtml(surfacesText)}</td>
-        <td class="lab-num lab-backlog-starts" title="${escapeHtml(isoTitleAttr(b.start))}"><span class="lab-backlog-starts-short">${escapeHtml(starts)}</span><span class="lab-backlog-starts-long">${escapeHtml(startsLong)}</span></td>
-        <td class="text-xs lab-backlog-depends"><span class="lab-backlog-depends-short">${dependsShort}</span><span class="lab-backlog-depends-long">${dependsLong}</span></td>
+        <td class="lab-num lab-backlog-starts" title="${escapeHtml(isoTitleAttr(b.start))}">${escapeHtml(starts)}</td>
+        <td class="text-xs lab-backlog-depends">${deps.htmlNames ? deps.htmlNames : ""} ${moreBtn}</td>
       </tr>
       <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
-        <p class="font-mono">${escapeHtml(b.id)}</p>
-        <p>${escapeHtml(sanitizeVisibleCopy(b.metric))}</p>
-        ${b.note ? `<p>${escapeHtml(sanitizeVisibleCopy(b.note))}</p>` : ""}
+        ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(b.id)}</p>`}
       </td></tr>`);
     }
     parts.push(`</tbody></table></div>`);
@@ -868,32 +897,40 @@ function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
 }
 
 function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: string) => string): string {
-  const parts = [`<section id="lab-history" class="lab-dashboard-section mb-10 font-sans">
+  const parts = [`<section id="lab-history" class="lab-dashboard-section mb-10 font-sans lab-history" data-show-all="false">
     <h2 class="mb-3 text-lg font-bold tracking-tight">History</h2>`];
   if (pub.history.length === 0) {
     parts.push(`<p class="text-sm text-stone-600 dark:text-stone-400">No completed experiments published yet.</p>`);
   } else {
+    const showAllBtn =
+      pub.history.length > 5
+        ? `<button type="button" class="lab-history-show-all mb-3 text-sm text-blue-800 underline dark:text-blue-400" data-lab-history-toggle aria-pressed="false">Show all</button>`
+        : "";
+    parts.push(showAllBtn);
     parts.push(`<div class="lab-table-wrap"><table class="lab-table lab-history-table border border-stone-200 text-sm dark:border-stone-700">
       <thead class="bg-stone-50 dark:bg-stone-900"><tr>
         <th>Name</th><th>Window</th><th>Result</th><th>Details</th>
       </tr></thead><tbody>`);
-    for (const h of pub.history) {
+    pub.history.forEach((h, index) => {
       const win = formatWindowHuman(h.start, h.end);
       const rowId = escapeHtml(h.id);
+      const resultLine = historyResultLine(h);
       const verdictChip = h.verdict ? renderLabStatusChip("verdict", h.verdict, escapeHtml) : "";
-      const summary = h.result_summary ? sanitizeVisibleCopy(h.result_summary) : "";
-      parts.push(`<tr class="lab-data-row">
+      const resultCell = resultLine
+        ? `<span class="text-stone-700 dark:text-stone-300">${escapeHtml(resultLine)}</span>`
+        : verdictChip;
+      const hiddenClass = index >= 5 ? " lab-history-row-hidden" : "";
+      const source = pub.experiments.find((e) => e.id === h.id);
+      parts.push(`<tr class="lab-data-row${hiddenClass}">
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(h.label))}</span></td>
         <td title="${escapeHtml(isoTitleAttr(h.start))} to ${escapeHtml(isoTitleAttr(h.end))}">${escapeHtml(win)}</td>
-        <td>${verdictChip}</td>
-        <td><div class="lab-history-details-links"><a class="text-xs text-blue-800 dark:text-blue-400" href="posts/${rowId}.html">Write up</a><button type="button" class="text-xs text-blue-800 dark:text-blue-400 lab-expand-toggle" data-target="${rowId}">More</button></div></td>
+        <td>${resultCell}</td>
+        <td><div class="lab-history-details-links">${renderWriteUpLink(h.id, pub.writeup_post_ids, escapeHtml)} ${renderLabMoreButton(rowId, escapeHtml)}</div></td>
       </tr>
-      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs">
-        <p class="font-mono">${escapeHtml(h.id)}</p>
-        <p>${escapeHtml(sanitizeVisibleCopy(h.metric))}</p>
-        ${summary ? `<p class="mt-1 text-stone-600 dark:text-stone-400">${escapeHtml(summary)}</p>` : ""}
+      <tr class="lab-expand-row${hiddenClass}" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs">
+        ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(h.id)}</p>`}
       </td></tr>`);
-    }
+    });
     parts.push(`</tbody></table></div>`);
   }
   parts.push(`</section>`);

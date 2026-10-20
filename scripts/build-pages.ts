@@ -17,6 +17,7 @@ import { writeDefaultOgPng } from "./generate-brief-og.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import { renderGoRedirectPage } from "./digest-go-page.js";
 import { assertExperimentsValid } from "./lab/validate-experiments.js";
+import { buildIsoDatePt } from "./lab/lab-format.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
@@ -403,7 +404,8 @@ async function main(): Promise<void> {
     renderGoRedirectPage(allowlist, siteHomePath),
     "utf8",
   );
-  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml);
+  const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
+  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate);
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);

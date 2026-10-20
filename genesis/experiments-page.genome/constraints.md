@@ -35,3 +35,17 @@
 - **UX22**: Dark mode follows OS `prefers-color-scheme` by default. Inline head script adds `dark` on `html` before first paint. No theme toggle.
 - **UX23**: With `html.dark`, Lab surfaces use stone 950 page, stone 900 cards and tables, stone 700 borders, stone 200 body text and stone 400 muted text. Running stays brand blue. Planned outline uses blue 400. Done uses stone 600 fill and stone 200 check. Freeze hatch uses white at 15 percent. Today line stays red 500. All visible text meets WCAG AA 4.5 to 1.
 - **UX24**: `verify:genesis` runs Lab index contrast in explicit light and dark and fails below 4.5 to 1.
+- **UX25**: Timeline popover is `position: absolute` under its Gantt row (not fixed). One open at a time. Dismiss on scroll, Escape, and outside click.
+- **UX26**: Lab markdown preserves whitespace beside inline tags; inline code renders without visible backticks. Prose uses sans. `verify:genesis` fails when a letter touches an inline tag boundary in the prose block.
+- **UX27**: Remove stale Right now paragraph from `briefings/lab/index.md`; control panel covers running state.
+- **UX28**: No How to read this summary row above the control panel (prose explainer below remains).
+- **UX29**: Omit history and control panel Write up links when no `briefings/lab/posts/{id}.md` exists.
+- **UX30 (hero)**: Within ten seconds the hero card states what is being tested, what is next, and what we learned; hypothesis is one plain sentence; no PostHog CTR gate copy or editorial rubric jargon in visible hero or Details; EXP id behind More.
+- **UX30 (link checker)**: `verify:genesis` fails on unresolved internal hrefs across all of `site/` (files and `#` anchors).
+- **UX31**: EXP ids, PR numbers, flag names, and policy notes live behind More on hero, timeline popover, backlog, and history.
+- **UX32**: Timeline row labels match `lab/experiments.json`; Oct 25 to Nov 21 caveman row reads Shorter enrichment context; Nov 1 freeze band stays visible.
+- **UX33**: Backlog columns Name, Surface, Starts, Depends on without repeating column labels in cells; Digest UI freeze is its own row with hatch swatch and Freeze chip.
+- **UX34**: History shows one plain result line from data; verdict when no metric; Write up only when post exists; latest five rows with Show all.
+- **UX35**: `lab/about.html` holds long form Lab copy; Lab home keeps two sentence intro; header nav About; Right now paragraph removed.
+- **UX36**: Lab footer line: Everything here is safe to publish. About the Lab. Open an issue.
+- **UX37 (should)**: Last updated {build date PT} under intro in muted small text.

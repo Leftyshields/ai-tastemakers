@@ -72,6 +72,10 @@
     }
   }
 
+  .lab-main .lab-prose-capped {
+    font-family: var(--font-sans);
+  }
+
   .archive-day {
     @apply flex aspect-square items-center justify-center rounded-sm font-sans text-[10px] leading-none;
   }

@@ -39,3 +39,22 @@ ts	phase	decision	why	evidence	result
 2026-10-20T01:10:00.000Z	qa	law:UX24	verify genesis lab contrast light and dark min 4.5 to 1	UX dark gate PR39	accepted
 2026-10-20T01:12:00.000Z	qa	law:UX18-r6-focus-popover	QA every Gantt row tabindex 0 popover first line plain name	UX18 gate PR39	accepted
 2026-10-20T01:12:00.000Z	design_decisions	law:UX6-r6-freeze-gap	Offset Freeze axis label 8px from colliding month tick	axis Nov collision PR39	accepted
+2026-10-20T02:30:00.000Z	design_decisions	law:UX25	Popover absolute under row dismiss scroll escape outside click	production Lab fix post merge	accepted
+2026-10-20T02:30:00.000Z	design_decisions	lab:UX26-prose-spacing	Preserve inline whitespace sans prose verify genesis spacing check	production Lab fix post merge	accepted
+2026-10-20T02:30:00.000Z	design_decisions	lab:UX27	Remove stale Right now paragraph from lab index	production Lab fix post merge	accepted
+2026-10-20T02:35:00.000Z	design_decisions	law:UX28-r2	Remove How to read this row above control panel no Full explainer link	Brian Lab fix PR40	accepted
+2026-10-20T02:35:00.000Z	design_decisions	law:UX29	Omit Write up when no briefings lab posts md	production Lab fix PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX30-hero	Hick hero card plain hypothesis jargon behind More	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX30-links	verify genesis site wide href and anchor resolution	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX31	Tesler More toggle hides ids flags policy on all surfaces	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX32	Timeline label must match experiments json id	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX33	Backlog freeze row hatch chip no column label repeat	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX34	History plain result line five row Show all	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX35	Jakob About page split long form from Lab home	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX36	Lab publish footer About and Open an issue links	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	law:UX37-should	Last updated build date PT under intro	Brian Lab round 3 PR40	accepted
+2026-10-20T03:00:00.000Z	design_decisions	principle:Occam-Pareto	Lab round 3 scope minimal diff per law	Brian Lab round 3 PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:UX30-gate	Hero hypothesis only under Testing not under read window	Brian Lab gate PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:UX37-gate	Last updated build date America Los Angeles with test	Brian Lab gate PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:UX26-UX35-gate	Lab prose sans font inline backticks to code verify genesis	Brian Lab gate PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:footer-about	Site footer About the Lab links lab about html	Brian Lab gate PR40	accepted

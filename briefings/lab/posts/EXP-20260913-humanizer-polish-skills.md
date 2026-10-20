@@ -69,6 +69,6 @@ Output: `data/experiments/runs/{run_id}/`. Score with the [shadow rubric](../sha
 
 - Experiment ID: ``EXP-20260913-humanizer-polish-skills``
 - Prior in queue: soft-dedup diversity (``EXP-20260715-soft-dedup-diversity-skills``)
-- Prior narration experiment: [Shorter Skills briefs](./`EXP-20260802-ponytail-narration-skills`.md)
+- Prior narration experiment: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.html)
 - Tool inventory: [blader/humanizer](https://github.com/blader/humanizer) (featured on Skills list; habit borrowed, not installed)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

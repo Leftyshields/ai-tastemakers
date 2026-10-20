@@ -14,4 +14,8 @@ sh scripts/verify-lab-dashboard-copy.sh
 echo "verify: lab color contrast light and dark (UX24)"
 npx --yes playwright@1.49.0 install chromium >/dev/null 2>&1 || true
 npx tsx scripts/verify-lab-color-contrast.ts
+echo "verify: lab prose inline spacing (UX26)"
+npx tsx scripts/verify-lab-prose-inline-spacing.ts
+echo "verify: site internal hrefs and anchors (UX30 link checker)"
+npx tsx scripts/verify-lab-internal-hrefs.ts
 echo "verify: ok"

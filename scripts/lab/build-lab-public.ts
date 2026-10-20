@@ -20,6 +20,7 @@ import {
   renderLabDashboardHtml,
   findForbiddenLabCopyViolations,
 } from "./lab-dashboard-render.js";
+import { listLabWriteupPostIds } from "./lab-format.js";
 export {
   renderLabDashboardHtml,
   findForbiddenLabCopyViolations,
@@ -190,7 +191,7 @@ export function buildLabPublicFile(
   }
 
   const backlog: PublicBacklogItem[] = all
-    .filter((e) => e.status === "planned")
+    .filter((e) => e.status === "planned" && e.id !== "POLICY-DIGEST-UI-FREEZE")
     .map((e) => ({
       id: e.id,
       label: e.label,
@@ -239,6 +240,7 @@ export function buildLabPublicFile(
     timeline,
     backlog,
     history,
+    writeup_post_ids: listLabWriteupPostIds(repoRoot),
   };
 }
 

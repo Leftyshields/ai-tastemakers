@@ -106,7 +106,7 @@
     },
     {
       "id": "EXP-20260715-soft-dedup-diversity-skills",
-      "label": "Less-repeated Skills picks",
+      "label": "Less repeated Skills picks",
       "surface": "narration_skills",
       "metric": "consecutive-day top-10 overlap, unique repos, NEW share",
       "start": "2026-09-13",
