@@ -128,7 +128,7 @@ export function renderLabTestedBadgePagesHtml(
   const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
   const aria = escape(badgeAriaLabel(badge.status, badge.title));
   const titleAttr = escape(badge.title);
-  return `<a href="${escape(href)}" class="lab-tested-badge ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
+  return `<a href="${escape(href)}" class="lab-tested-badge lab-tested-badge--pinned ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
 /** Muted inline chip for digest email (text only, no image). */

@@ -37,24 +37,20 @@
   }
 
   .digest-repo-card__body a,
-  .digest-repo-card__cta,
-  .lab-tested-badge {
+  .digest-repo-card__cta {
     position: relative;
     z-index: 1;
   }
 
-  .digest-repo-card__title-group {
-    @apply inline-flex max-w-full flex-wrap items-baseline gap-1.5;
+  .digest-repo-card__heading--lab-badge {
+    padding-right: calc(var(--lab-tested-badge-slot, 6.75rem) + 0.5rem);
   }
 
-  .digest-repo-card__name-line {
-    @apply inline-flex max-w-full flex-wrap items-baseline gap-1.5;
-  }
-
-  @media (max-width: 390px) {
-    .digest-repo-card__name-line {
-      @apply flex-col items-start;
-    }
+  .digest-repo-card--has-lab-badge .lab-tested-badge--pinned {
+    position: absolute;
+    top: calc(1rem + (1.75rem - 1.5rem) / 2);
+    right: 1rem;
+    z-index: 1;
   }
 
   .lab-tested-badge {

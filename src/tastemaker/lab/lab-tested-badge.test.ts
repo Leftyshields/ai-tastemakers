@@ -9,7 +9,11 @@ import {
   resolveLabBadgeHref,
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { loadExperimentsFile } from "../../../scripts/lab/validate-experiments.js";
-import { renderDigestRepoCard } from "../pages/brief-cards.js";
+import {
+  DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS,
+  DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS,
+  renderDigestRepoCard,
+} from "../pages/brief-cards.js";
 import { labBadgeClickTrackingScript, digestRepoClickTrackingScript } from "../../../scripts/edition-pages.js";
 import { buildLabBadgeEmailGoUrl } from "../analytics/repo-click.js";
 
@@ -72,6 +76,37 @@ describe("UX45 lab tested badge", () => {
       ctx,
     );
     expect(rank11).not.toContain("lab-tested-badge");
+  });
+
+  it("pins badge to card top right and reserves title padding", () => {
+    const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
+    const ctx = { lookup, labPrefix: "../lab/", writeupPostIds: [] as string[] };
+    const html = renderDigestRepoCard(
+      {
+        rank: 1,
+        full_name: "DietrichGebert/ponytail",
+        html_url: "https://github.com/DietrichGebert/ponytail",
+        stars: 1,
+        stars_gained_7d: 1,
+        topics: [],
+        language: "TS",
+        brief: "x",
+        pushed_at: "2026-01-01",
+      },
+      "oss",
+      "2026-08-22",
+      "delta_7d",
+      escapeHtml,
+      ctx,
+    );
+    expect(html).toContain(DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS);
+    expect(html).toContain(DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS);
+    expect(html).toContain("lab-tested-badge--pinned");
+    expect(html).not.toContain("digest-repo-card__name-line");
+    const badgeIdx = html.indexOf("lab-tested-badge--pinned");
+    const headingIdx = html.indexOf("digest-repo-card__heading");
+    expect(badgeIdx).toBeGreaterThan(-1);
+    expect(headingIdx).toBeGreaterThan(badgeIdx);
   });
 
   it("links done experiments to lab history anchor", () => {
