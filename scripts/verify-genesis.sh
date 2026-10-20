@@ -11,4 +11,7 @@ echo "verify: experiments-page genome run-path"
 GENOME_DIR=genesis/experiments-page.genome node scripts/run-path.js genesis/experiments-page.genome/mission.md
 echo "verify: lab dashboard copy QA"
 sh scripts/verify-lab-dashboard-copy.sh
+echo "verify: lab color contrast light and dark (UX24)"
+npx --yes playwright@1.49.0 install chromium >/dev/null 2>&1 || true
+npx tsx scripts/verify-lab-color-contrast.ts
 echo "verify: ok"

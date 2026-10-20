@@ -34,3 +34,6 @@ ts	phase	decision	why	evidence	result
 2026-10-20T01:05:00.000Z	design_decisions	lab:shell-64rem	Desktop lab page shell max width 64rem prose capped 42rem	UX SIGN gate PR39	accepted
 2026-10-20T01:05:00.000Z	design_decisions	law:UX14-r5-row-order	Running recent done planned collapse row then Show all	UX SIGN gate PR39	accepted
 2026-10-20T01:05:00.000Z	design_decisions	law:UX6-r5-freeze-axis	Freeze label on month axis skip ticks narrower than 32px from window start	UX SIGN gate PR39	accepted
+2026-10-20T01:10:00.000Z	design_decisions	law:UX22	os prefers color scheme adds dark class on html before first paint no toggle	UX dark gate PR39	accepted
+2026-10-20T01:10:00.000Z	design_decisions	law:UX23	unified stone dark surfaces timeline tokens WCAG AA text	UX dark gate PR39	accepted
+2026-10-20T01:10:00.000Z	qa	law:UX24	verify genesis lab contrast light and dark min 4.5 to 1	UX dark gate PR39	accepted

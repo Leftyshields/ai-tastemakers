@@ -589,6 +589,9 @@ function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string):
   return items.join('<span class="site-footer__sep" aria-hidden="true">&middot;</span>');
 }
 
+/** Sync in head before CSS so Tailwind dark: tokens apply on first paint (UX22). */
+export const colorSchemeHeadScript = `<script>(function(){try{var m=window.matchMedia("(prefers-color-scheme: dark)");if(m.matches)document.documentElement.classList.add("dark");}catch(e){}})();</script>`;
+
 export function pageShell(
   title: string,
   body: string,
@@ -604,8 +607,8 @@ export function pageShell(
   const labLayout = options?.labLayout === true;
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
   const shellClass = labLayout
-    ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
-    : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 dark:border-stone-800 dark:bg-stone-900 md:border-x md:px-8 md:py-12`;
+    ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
+    : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12`;
   const mainHtml = labLayout ? `<main class="lab-main">${body}</main>` : body;
   const footerMt = labLayout ? "mt-10" : "mt-16";
 
@@ -613,15 +616,16 @@ export function pageShell(
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  ${colorSchemeHeadScript}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${safeTitle}</title>
   ${headMeta}
   <link rel="stylesheet" href="${paths.css}">
   ${posthogScriptHtml()}
 </head>
-<body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-100 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
+<body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="${shellClass}">
-    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-800">
+    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-700">
       <h1 class="font-sans text-2xl font-bold tracking-tight">
         <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">${escapeHtml(brand.name)}</a>
       </h1>

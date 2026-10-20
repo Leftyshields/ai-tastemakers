@@ -32,9 +32,9 @@ export function labStatusChipClass(
   }
   switch (value as LabExperimentStatus) {
     case "running":
-      return `${base} bg-blue-600 text-white dark:bg-blue-500`;
+      return `${base} bg-blue-700 text-white dark:bg-blue-600`;
     case "planned":
-      return `${base} border border-stone-400 bg-transparent text-stone-800 dark:border-stone-500 dark:text-stone-100`;
+      return `${base} border border-stone-400 bg-transparent text-stone-800 dark:border-blue-400 dark:text-stone-200`;
     default:
       return `${base} bg-stone-300/80 text-stone-800 dark:bg-stone-600 dark:text-stone-100`;
   }

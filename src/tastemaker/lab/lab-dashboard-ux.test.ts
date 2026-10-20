@@ -9,6 +9,7 @@ import {
   buildControlPanelSummary,
 } from "../../../scripts/lab/build-lab-public.js";
 import { formatBacklogDependsOn } from "../../../scripts/lab/lab-backlog-deps.js";
+import { colorSchemeHeadScript } from "../../../scripts/edition-pages.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -160,6 +161,11 @@ describe("Lab dashboard UX copy", () => {
       expect(html).toContain("data-lab-gantt-toggle");
       expect(html).toContain("#lab-history");
     }
+  });
+
+  it("UX22 OS color scheme script targets html.dark before paint", () => {
+    expect(colorSchemeHeadScript).toContain("prefers-color-scheme: dark");
+    expect(colorSchemeHeadScript).toContain('classList.add("dark")');
   });
 
   it("UX21 marks current month on axis", () => {
