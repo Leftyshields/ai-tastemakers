@@ -21,6 +21,11 @@ import {
 } from "./lab/lab-format.js";
 import { labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
 import {
+  applyLabIntroVonRestorff,
+  renderLabLoopAboutBlockHtml,
+  renderLabLoopStripHtml,
+} from "./lab/lab-loop-strip.js";
+import {
   articleJsonLd,
   briefMetaDescription,
   briefSocialDescription,
@@ -524,7 +529,13 @@ async function buildLabMarkdownPage(
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
-    const html = prepareLabProseHtmlFromMarkdown(markdown);
+    let html = prepareLabProseHtmlFromMarkdown(markdown);
+    if (htmlName === "about.html") {
+      html = html.replace(
+        /<p>LAB_LOOP_ABOUT_PLACEHOLDER<\/p>/,
+        renderLabLoopAboutBlockHtml(escapeHtml),
+      );
+    }
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
@@ -1622,9 +1633,10 @@ export async function buildLabSite(
   let introBlock = "";
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = prepareLabProseHtmlFromMarkdown(markdown);
+    const html = applyLabIntroVonRestorff(prepareLabProseHtmlFromMarkdown(markdown));
     introBlock = `<div class="lab-intro mb-8 font-sans">
       <article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>
+      ${renderLabLoopStripHtml("lab-home", escapeHtml)}
       <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
     </div>`;
   } catch {

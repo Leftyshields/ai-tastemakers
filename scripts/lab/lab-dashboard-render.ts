@@ -29,7 +29,9 @@ import {
   experimentTechnicalMoreHtml,
   historyResultLine,
   plainHypothesisSentence,
+  renderFromProjectLine,
   renderLabMoreButton,
+  renderLabSourceOriginChip,
 } from "./lab-dashboard-copy.js";
 
 /** Assumed desktop Gantt track width for month tick filtering (UX gate). */
@@ -342,11 +344,18 @@ export function renderRunningControlPanelBlock(
       ? renderProgressBarHtml(run.progress_pct)
       : renderReadWindowBarHtml(run.day_of_min_read, run.min_read_days);
   const moreId = escapeHtml(`hero-${run.id}`);
+  const originChip =
+    source?.source === "auto" || source?.source === "hand"
+      ? renderLabSourceOriginChip(source.source, escapeHtml)
+      : "";
+  const fromLine = source ? renderFromProjectLine(source, escapeHtml) : "";
 
   const parts: string[] = [];
   parts.push(`<h2 class="text-lg font-bold tracking-tight">${escapeHtml(title)}</h2>
+    ${fromLine}
     <div class="mt-1 flex flex-wrap items-center gap-2 text-sm">
       ${renderLabStatusChip("experiment", "running", escapeHtml)}
+      ${originChip}
       ${track ? renderLabStatusChip("track", track, escapeHtml) : ""}
       ${dayLine ? `<span class="text-stone-600 dark:text-stone-400">${escapeHtml(dayLine)}</span>` : ""}
     </div>
@@ -582,7 +591,7 @@ export function renderLabDashboardHtml(
   if (!timeline) {
     sections.push(`<p class="text-sm text-stone-600 dark:text-stone-400">No dated experiments to show.</p>`);
   } else {
-    sections.push(renderTimelineDesktop(timeline, escapeHtml));
+    sections.push(renderTimelineDesktop(timeline, pub.experiments, escapeHtml));
     sections.push(renderTimelineMobile(timeline, escapeHtml));
   }
   sections.push(`</section>`);
@@ -620,13 +629,17 @@ function renderGanttAxisTicks(
 
 function renderTimelineDesktop(
   timeline: PublicTimelineModel,
+  experiments: LabExperimentSource[],
   escapeHtml: (t: string) => string,
 ): string {
+  const byId = new Map(experiments.map((e) => [e.id, e]));
   const showAllBtn =
     timeline.collapsed_count > 0
       ? `<button type="button" class="lab-gantt-show-all text-blue-800 underline dark:text-blue-400" data-lab-gantt-toggle aria-pressed="false">Show all</button>`
       : "";
-  const rows = timeline.items.map((item) => renderGanttRow(item, escapeHtml)).join("");
+  const rows = timeline.items
+    .map((item) => renderGanttRow(item, byId.get(item.id), escapeHtml))
+    .join("");
   const freeze = timeline.freeze;
   const freezeDefault = freeze
     ? `left:${freeze.offset_pct.toFixed(2)}%;width:${freeze.width_pct.toFixed(2)}%;`
@@ -658,7 +671,11 @@ function renderTimelineDesktop(
   </div>`;
 }
 
-function renderGanttRow(item: PublicTimelineItem, escapeHtml: (t: string) => string): string {
+function renderGanttRow(
+  item: PublicTimelineItem,
+  exp: LabExperimentSource | undefined,
+  escapeHtml: (t: string) => string,
+): string {
   if (item.kind === "collapsed") {
     return `<div class="lab-gantt-row lab-gantt-collapsed-row" tabindex="0">
       <div class="lab-gantt-name-col"><a class="lab-gantt-collapsed-link" href="#lab-history">${escapeHtml(sanitizeVisibleCopy(item.label))}</a></div>
@@ -692,6 +709,7 @@ function renderGanttRow(item: PublicTimelineItem, escapeHtml: (t: string) => str
     </div>
     <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
       <p class="lab-timeline-popover-name font-bold text-stone-900 dark:text-stone-100">${escapeHtml(label)}</p>
+      ${exp ? renderFromProjectLine(exp, escapeHtml) : ""}
       <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
       <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
       <div class="mt-2">${renderLabMoreButton(popId, escapeHtml)}</div>
@@ -921,8 +939,9 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         : verdictChip;
       const hiddenClass = index >= 5 ? " lab-history-row-hidden" : "";
       const source = pub.experiments.find((e) => e.id === h.id);
+      const fromLine = source ? renderFromProjectLine(source, escapeHtml) : "";
       parts.push(`<tr class="lab-data-row${hiddenClass}">
-        <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(h.label))}</span></td>
+        <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(h.label))}</span>${fromLine}</td>
         <td title="${escapeHtml(isoTitleAttr(h.start))} to ${escapeHtml(isoTitleAttr(h.end))}">${escapeHtml(win)}</td>
         <td>${resultCell}</td>
         <td><div class="lab-history-details-links">${renderWriteUpLink(h.id, pub.writeup_post_ids, escapeHtml)} ${renderLabMoreButton(rowId, escapeHtml)}</div></td>

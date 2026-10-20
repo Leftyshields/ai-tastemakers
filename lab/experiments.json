@@ -70,7 +70,8 @@
         "approved_by": "Brian",
         "approved_on": "2026-10-19"
       },
-      "short_hypothesis": "Homepage layout v2 raises brief and archive clicks without hurting bounce."
+      "short_hypothesis": "Homepage layout v2 raises brief and archive clicks without hurting bounce.",
+      "source": "hand"
     },
     {
       "id": "EXP-20260716-firecrawl-enrich-skills",
@@ -102,7 +103,10 @@
         "approved_by": "Brian",
         "approved_on": "2026-10-19"
       },
-      "short_hypothesis": "Firecrawl enrich matches or beats shadow rubric on Skills briefs."
+      "short_hypothesis": "Firecrawl enrich matches or beats shadow rubric on Skills briefs.",
+      "source": "auto",
+      "sourceRepo": "Firecrawl",
+      "sourceUrl": "../briefings/2026-08-01.html"
     },
     {
       "id": "EXP-20260715-soft-dedup-diversity-skills",
@@ -166,7 +170,10 @@
         "approved_by": "Brian",
         "approved_on": "2026-10-19"
       },
-      "short_hypothesis": "Tighter Skills narration cuts tokens about 15 percent with rubric pass held."
+      "short_hypothesis": "Tighter Skills narration cuts tokens about 15 percent with rubric pass held.",
+      "source": "auto",
+      "sourceRepo": "Ponytail",
+      "sourceUrl": "../skills/briefings/2026-07-24.html"
     },
     {
       "id": "EXP-20260913-humanizer-polish-skills",
@@ -200,7 +207,10 @@
         "approved_by": "Brian",
         "approved_on": "2026-10-19"
       },
-      "short_hypothesis": "Humanizer polish makes OSS and Skills blurbs sound more human without losing accuracy."
+      "short_hypothesis": "Humanizer polish makes OSS and Skills blurbs sound more human without losing accuracy.",
+      "source": "auto",
+      "sourceRepo": "Humanizer",
+      "sourceUrl": "../skills/briefings/2026-08-05.html"
     },
     {
       "id": "POLICY-DIGEST-UI-FREEZE",
@@ -265,7 +275,10 @@
         "approved_by": "Brian",
         "approved_on": "2026-10-19"
       },
-      "short_hypothesis": "Enrich compression lowers token use without dropping rubric pass or Why now quality."
+      "short_hypothesis": "Enrich compression lowers token use without dropping rubric pass or Why now quality.",
+      "source": "auto",
+      "sourceRepo": "Caveman",
+      "sourceUrl": "../skills/briefings/2026-08-04.html"
     },
     {
       "id": "EXP-20260913-whynow-memory-skills",

@@ -8,12 +8,7 @@ This is not a product roadmap or a marketing page. It is an open notebook for op
 
 ## The feedback loop
 
-We run the same cycle for every meaningful pipeline or site change:
-
-1. **Inventory** scans past briefings for tools we might adopt (search APIs, indexers, eval harnesses, analytics).
-2. **Measure** tracks pageviews and outbound repo clicks on the public site so we know what people read and click, not just what we think is interesting.
-3. **Experiment** registers a hypothesis, collects a baseline window, runs the change (often on the Skills edition first), compares metrics, and records a verdict.
-4. **Report** publishes the experiment record and, when we dogfood a tool, a short write up of what we tried and whether we kept it.
+LAB_LOOP_ABOUT_PLACEHOLDER
 
 Shadow runs let us preview enriched blurbs side by side with production output before anything ships to subscribers.
 

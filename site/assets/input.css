@@ -76,6 +76,46 @@
     font-family: var(--font-sans);
   }
 
+  .lab-main .prose :where(code):not(:where(pre *))::before,
+  .lab-main .prose :where(code):not(:where(pre *))::after {
+    content: none;
+  }
+
+  .lab-loop-strip {
+    @apply mb-4 mt-4 flex flex-wrap items-center gap-2 rounded-xl border border-stone-200 bg-stone-50 px-3 py-2 font-sans text-xs dark:border-stone-700 dark:bg-stone-900/60;
+  }
+
+  @media (min-width: 1280px) {
+    .lab-loop-strip {
+      @apply flex-nowrap gap-1 py-2.5;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .lab-loop-strip {
+      @apply grid grid-cols-2 gap-2;
+    }
+    .lab-loop-chevron {
+      @apply hidden;
+    }
+  }
+
+  .lab-loop-step {
+    @apply inline-flex min-w-0 flex-1 items-center gap-1.5 rounded-lg px-1 py-0.5 no-underline text-stone-800 transition hover:bg-stone-100 dark:text-stone-200 dark:hover:bg-stone-800;
+  }
+
+  .lab-loop-num {
+    @apply inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-blue-700 text-[10px] font-bold text-white dark:bg-blue-600;
+  }
+
+  .lab-loop-label {
+    @apply truncate font-medium;
+  }
+
+  .lab-loop-chevron {
+    @apply shrink-0 px-0.5 text-sm text-stone-600 dark:text-stone-300;
+  }
+
   .archive-day {
     @apply flex aspect-square items-center justify-center rounded-sm font-sans text-[10px] leading-none;
   }
