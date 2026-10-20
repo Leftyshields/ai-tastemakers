@@ -37,3 +37,5 @@ ts	phase	decision	why	evidence	result
 2026-10-20T01:10:00.000Z	design_decisions	law:UX22	os prefers color scheme adds dark class on html before first paint no toggle	UX dark gate PR39	accepted
 2026-10-20T01:10:00.000Z	design_decisions	law:UX23	unified stone dark surfaces timeline tokens WCAG AA text	UX dark gate PR39	accepted
 2026-10-20T01:10:00.000Z	qa	law:UX24	verify genesis lab contrast light and dark min 4.5 to 1	UX dark gate PR39	accepted
+2026-10-20T01:12:00.000Z	qa	law:UX18-r6-focus-popover	QA every Gantt row tabindex 0 popover first line plain name	UX18 gate PR39	accepted
+2026-10-20T01:12:00.000Z	design_decisions	law:UX6-r6-freeze-gap	Offset Freeze axis label 8px from colliding month tick	axis Nov collision PR39	accepted

@@ -27,8 +27,55 @@ import {
 } from "./lab-metric-progress.js";
 
 /** Assumed desktop Gantt track width for month tick filtering (UX gate). */
-const GANTT_ASSUMED_TRACK_PX = 650;
+export const GANTT_ASSUMED_TRACK_PX = 650;
 const GANTT_MIN_MONTH_LABEL_INSET_PX = 32;
+const GANTT_MIN_AXIS_LABEL_GAP_PX = 8;
+const GANTT_AXIS_MONTH_FONT_REM = 0.65;
+const GANTT_AXIS_FREEZE_FONT_REM = 0.6;
+
+function estimateAxisLabelHalfWidthPx(text: string, fontRem: number): number {
+  return (text.length * fontRem * 16 * 0.58) / 2;
+}
+
+/** Gap in px between a month tick's right edge and the Freeze label's left edge (negative if overlap). */
+export function measureAxisLabelGapPx(
+  labelCenterPct: number,
+  labelText: string,
+  labelFontRem: number,
+  tick: { label: string; offset_pct: number },
+  tickFontRem: number,
+): number {
+  const track = GANTT_ASSUMED_TRACK_PX;
+  const labelHalf = estimateAxisLabelHalfWidthPx(labelText, labelFontRem);
+  const tickHalf = estimateAxisLabelHalfWidthPx(tick.label, tickFontRem);
+  const labelCenterPx = (labelCenterPct / 100) * track;
+  const tickCenterPx = (tick.offset_pct / 100) * track;
+  const labelLeftPx = labelCenterPx - labelHalf;
+  const tickRightPx = tickCenterPx + tickHalf;
+  return labelLeftPx - tickRightPx;
+}
+
+/** Nudge Freeze axis label right so it clears month ticks by at least 8px. */
+export function resolveFreezeAxisLabelPct(
+  freeze: { offset_pct: number; width_pct: number },
+  monthTicks: { label: string; offset_pct: number }[],
+): number {
+  const defaultCenter = freeze.offset_pct + freeze.width_pct / 2;
+  const track = GANTT_ASSUMED_TRACK_PX;
+  const freezeHalf = estimateAxisLabelHalfWidthPx("Freeze", GANTT_AXIS_FREEZE_FONT_REM);
+  let centerPx = (defaultCenter / 100) * track;
+
+  for (const tick of monthTicks) {
+    const tickHalf = estimateAxisLabelHalfWidthPx(tick.label, GANTT_AXIS_MONTH_FONT_REM);
+    const tickCenterPx = (tick.offset_pct / 100) * track;
+    const tickRightPx = tickCenterPx + tickHalf;
+    const freezeLeftPx = centerPx - freezeHalf;
+    if (tickCenterPx <= centerPx && freezeLeftPx < tickRightPx + GANTT_MIN_AXIS_LABEL_GAP_PX) {
+      centerPx = tickRightPx + GANTT_MIN_AXIS_LABEL_GAP_PX + freezeHalf + 0.5;
+    }
+  }
+  return Math.min(100, (centerPx / track) * 100);
+}
 function parseIsoMs(iso: string): number {
   return Date.parse(`${iso}T00:00:00Z`);
 }
@@ -567,9 +614,11 @@ function renderTimelineDesktop(
     : "";
   const todayPct = timeline.today_offset_pct;
   const todayFull = timeline.today_offset_pct_full;
+  const freezeLabelPct =
+    freeze != null ? resolveFreezeAxisLabelPct(freeze, timeline.month_ticks) : null;
   const freezeAxisLabel =
-    freeze != null
-      ? `<span class="lab-gantt-freeze-axis-label" style="left:${(freeze.offset_pct + freeze.width_pct / 2).toFixed(2)}%">${escapeHtml("Freeze")}</span>`
+    freeze != null && freezeLabelPct != null
+      ? `<span class="lab-gantt-freeze-axis-label" style="left:${freezeLabelPct.toFixed(2)}%">${escapeHtml("Freeze")}</span>`
       : "";
   const overlay = `<div class="lab-gantt-overlay" aria-hidden="true">
       ${freeze ? `<div class="lab-gantt-freeze-band" data-lab-freeze data-style-default="${freezeDefault}" data-style-full="${freezeFull}" style="${freezeDefault}"></div>` : ""}

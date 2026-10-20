@@ -95,18 +95,35 @@ describe("Lab dashboard UX copy", () => {
     expect(html).toContain("lab-timeline-mobile");
   });
 
-  it("UX18 popover shows bold name above muted id", () => {
+  it("UX18 every timeline row is focusable and popover leads with plain experiment name", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
-    expect(html).toContain('class="lab-timeline-popover-name font-bold');
-    const pop = html.match(
-      /id="lab-timeline-pop-EXP_20260913_humanizer_polish_skills"[\s\S]*?<\/div>\s*<\/div>/,
-    )?.[0];
-    expect(pop).toBeTruthy();
-    const nameIdx = pop!.indexOf("lab-timeline-popover-name");
-    const idIdx = pop!.indexOf("EXP-20260913-humanizer-polish-skills");
-    expect(nameIdx).toBeGreaterThan(-1);
-    expect(idIdx).toBeGreaterThan(nameIdx);
+    const timeline = html.match(/id="lab-timeline"[\s\S]*?<\/section>/)?.[0] ?? "";
+    const rowTags = timeline.match(/<div class="lab-gantt-row(?:\s|")[^>]*>/g) ?? [];
+    expect(rowTags.length).toBeGreaterThan(0);
+    for (const tag of rowTags) {
+      expect(tag).toContain('tabindex="0"');
+    }
+    const experimentRows =
+      timeline.match(
+        /<div class="lab-gantt-row[^"]*"[^>]*data-lab-gantt-row[\s\S]*?<\/div>\s*<\/div>\s*<\/div>/g,
+      ) ?? [];
+    expect(experimentRows.length).toBeGreaterThan(0);
+    for (const row of experimentRows) {
+      const plainName = row.match(/class="lab-gantt-name">([^<]+)</)?.[1]?.trim();
+      expect(plainName).toBeTruthy();
+      expect(plainName).not.toMatch(/^EXP-/);
+      const popoverBlock = row.match(/class="lab-timeline-popover"[\s\S]*?<\/div>\s*<\/div>/)?.[0];
+      expect(popoverBlock).toBeTruthy();
+      const firstLine = popoverBlock!.match(
+        /lab-timeline-popover-name[^>]*>([^<]+)</,
+      )?.[1]?.trim();
+      expect(firstLine).toBe(plainName);
+      const idIdx = popoverBlock!.indexOf("font-mono");
+      const nameIdx = popoverBlock!.indexOf("lab-timeline-popover-name");
+      expect(nameIdx).toBeGreaterThan(-1);
+      expect(idIdx).toBeGreaterThan(nameIdx);
+    }
   });
 
   it("UX6 round 3 mobile backlog field labels", () => {

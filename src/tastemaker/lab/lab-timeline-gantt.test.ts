@@ -5,6 +5,10 @@ import {
   buildLabPublicFile,
   buildTimelineModel,
 } from "../../../scripts/lab/build-lab-public.js";
+import {
+  measureAxisLabelGapPx,
+  resolveFreezeAxisLabelPct,
+} from "../../../scripts/lab/lab-dashboard-render.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -42,5 +46,18 @@ describe("Lab Gantt timeline model (UX13 UX14 UX20)", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const model = buildTimelineModel(pub.experiments, ["running", "done", "planned"], "2026-10-19");
     expect(model!.range_start).toBe("2026-09-19");
+  });
+
+  it("Freeze axis label sits at least 8px right of Nov month tick", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const model = buildTimelineModel(pub.experiments, ["running", "done", "planned"], "2026-10-19");
+    expect(model?.freeze).toBeTruthy();
+    const nov = model!.month_ticks.find((t) => t.label === "Nov");
+    expect(nov).toBeTruthy();
+    const rawCenter = model!.freeze!.offset_pct + model!.freeze!.width_pct / 2;
+    const resolved = resolveFreezeAxisLabelPct(model!.freeze!, model!.month_ticks);
+    expect(resolved).toBeGreaterThanOrEqual(rawCenter - 0.01);
+    const gap = measureAxisLabelGapPx(resolved, "Freeze", 0.6, nov!, 0.65);
+    expect(gap).toBeGreaterThanOrEqual(8);
   });
 });
