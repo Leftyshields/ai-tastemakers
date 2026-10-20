@@ -430,9 +430,9 @@ function renderLabDashboardStyles(): string {
 @media (min-width: 768px) and (max-width: 1024px) {
   .lab-gantt-overlay { left: calc(10rem + 8px); }
 }
-.lab-gantt-row { display: flex; align-items: stretch; gap: 8px; min-height: 32px; margin-bottom: 8px; cursor: pointer; border-radius: 4px; outline-offset: 2px; }
+.lab-gantt-row { display: flex; align-items: stretch; gap: 8px; min-height: 32px; margin-bottom: 8px; cursor: pointer; border-radius: 4px; outline-offset: 2px; position: relative; }
 .lab-gantt-row:focus-visible { outline: 2px solid rgb(37 99 235); }
-.lab-gantt-row[data-popover-open="true"] { z-index: 50; position: relative; }
+.lab-gantt-row[data-popover-open="true"] { z-index: 50; }
 .lab-gantt-name-col { width: 14rem; flex-shrink: 0; font-size: 0.75rem; line-height: 1.25; padding-top: 6px; }
 .lab-gantt-name { font-weight: 600; word-wrap: break-word; overflow-wrap: anywhere; }
 .lab-gantt-chips { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
@@ -492,7 +492,7 @@ function renderLabDashboardStyles(): string {
 .lab-how-to-read { font-size: 0.875rem; color: rgb(87 83 78); margin-bottom: 1.5rem; }
 .dark .lab-how-to-read { color: rgb(168 162 158); }
 .dark .lab-how-to-read strong { color: rgb(231 229 228); }
-.lab-timeline-popover { position: fixed; z-index: 300; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 6px 20px rgb(0 0 0 / 0.15); white-space: normal; pointer-events: auto; }
+.lab-timeline-popover { position: absolute; top: calc(100% + 8px); left: 0; z-index: 300; min-width: 12rem; max-width: 18rem; padding: 8px 10px; border-radius: 6px; border: 1px solid rgb(231 229 228); background: white; font-size: 0.75rem; font-weight: 400; box-shadow: 0 6px 20px rgb(0 0 0 / 0.15); white-space: normal; pointer-events: auto; }
 .dark .lab-timeline-popover { background: rgb(28 25 23); border-color: rgb(68 64 60); color: rgb(231 229 228); }
 .lab-timeline-popover[hidden] { display: none !important; }
 .lab-timeline-popover:not([hidden]) { display: block !important; }
@@ -730,8 +730,6 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
   function closePopover(){
     if(openPop){
       openPop.hidden = true;
-      openPop.style.top = '';
-      openPop.style.left = '';
       openPop = null;
     }
     if(openRow){
@@ -740,30 +738,13 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
       openRow = null;
     }
   }
-  function positionPopover(row, pop){
-    pop.hidden = false;
-    pop.style.left = '-9999px';
-    pop.style.top = '0px';
-    var popRect = pop.getBoundingClientRect();
-    var rowRect = row.getBoundingClientRect();
-    var top = rowRect.bottom + 8;
-    var left = rowRect.left;
-    if(top + popRect.height > window.innerHeight - 8){
-      top = Math.max(8, rowRect.top - popRect.height - 8);
-    }
-    if(left + popRect.width > window.innerWidth - 8){
-      left = Math.max(8, window.innerWidth - popRect.width - 8);
-    }
-    pop.style.top = top + 'px';
-    pop.style.left = left + 'px';
-  }
   function openForRow(row){
     if(row.classList.contains('lab-gantt-collapsed-row')) return;
     var pop = row.querySelector('.lab-timeline-popover');
     if(!pop) return;
     closePopover();
     row.setAttribute('data-popover-open','true');
-    positionPopover(row, pop);
+    pop.hidden = false;
     openPop = pop;
     openRow = row;
     row.setAttribute('aria-expanded','true');
@@ -785,6 +766,7 @@ document.querySelectorAll('.lab-expand-toggle').forEach(function(btn){
     closePopover();
   });
   document.addEventListener('keydown', function(e){ if(e.key === 'Escape') closePopover(); });
+  window.addEventListener('scroll', function(){ closePopover(); }, true);
 })();
 (function(){
   document.querySelectorAll('[data-lab-gantt-axis]').forEach(function(axis){

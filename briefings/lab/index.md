@@ -34,8 +34,6 @@ Each experiment states a **question** (what we expect to improve), **what we cha
 
 We use **before and after calendar windows** rather than live A/B tests because the site is static HTML rebuilt daily. Slower feedback, but easy to audit.
 
-**Right now (Aug 16, 2026):** We are testing **[shorter Skills briefs](posts/`EXP-20260802-ponytail-narration-skills`.html)**. Today's Skills digest still uses the old writing style. Starting **Aug 17, 2026** through **Aug 29, 2026**, new Skills briefs use tighter rules (one “try this” step). OSS is unchanged. Cost and quality live on the [Token dashboard](token-usage.html). Next in line: less repeated Skills picks, after this window ends.
-
 ## Transparency boundaries
 
 Everything in `/lab/` is safe to publish: no API keys, no subscriber data, no unpublished digest drafts. Pipeline source lives on [GitHub](https://github.com/Leftyshields/ai-tastemakers); Lab is the human readable layer on top.

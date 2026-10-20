@@ -180,6 +180,16 @@ describe("Lab dashboard UX copy", () => {
     }
   });
 
+  it("UX25 popover is row anchored and closes on scroll", () => {
+    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
+    const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
+    expect(html).toMatch(/\.lab-timeline-popover \{ position: absolute/);
+    expect(html).not.toMatch(/\.lab-timeline-popover \{ position: fixed/);
+    expect(html).toContain("window.addEventListener('scroll'");
+    expect(html).toContain("closePopover");
+    expect(html).not.toContain("getBoundingClientRect");
+  });
+
   it("UX22 OS color scheme script targets html.dark before paint", () => {
     expect(colorSchemeHeadScript).toContain("prefers-color-scheme: dark");
     expect(colorSchemeHeadScript).toContain('classList.add("dark")');

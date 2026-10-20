@@ -1606,7 +1606,7 @@ export async function buildLabSite(
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
     const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
-    indexBody += `<article class="brief-content lab-prose-capped prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans mt-10">${html}</article>`;
+    indexBody += `<article class="brief-content lab-prose-capped prose prose-stone max-w-none font-sans dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-p:font-sans prose-li:font-sans mt-10">${html}</article>`;
   } catch {
     indexBody += `<section class="prose prose-stone max-w-none dark:prose-invert prose-headings:font-sans mt-10">
       <p>Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>

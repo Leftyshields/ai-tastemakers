@@ -127,8 +127,28 @@ export function sanitizeVisibleCopy(text: string): string {
 export function sanitizeLabVisibleHtml(html: string): string {
   return html.replace(/>([^<]+)</g, (match, text: string) => {
     if (!text.trim()) return match;
-    return `>${sanitizeVisibleCopy(text)}<`;
+    const leading = text.match(/^\s*/)?.[0] ?? "";
+    const trailing = text.match(/\s*$/)?.[0] ?? "";
+    const core = sanitizeVisibleCopy(text.trim());
+    if (!core) return match;
+    return `>${leading}${core}${trailing}<`;
   });
+}
+
+/** Inline tag glued to letter/number with no whitespace (Lab prose QA, UX26). */
+export function findLabProseInlineSpacingViolations(html: string): string[] {
+  const article = html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  const violations: string[] = [];
+  const afterInline = /<\/(?:a|strong|em|b|i|code)>([A-Za-z0-9])/g;
+  const beforeInline = /([A-Za-z0-9])<(?:a|strong|em|b|i|code)\b/g;
+  let m: RegExpExecArray | null;
+  while ((m = afterInline.exec(article)) !== null) {
+    violations.push(`…${m[0]}…`);
+  }
+  while ((m = beforeInline.exec(article)) !== null) {
+    violations.push(`…${m[0]}…`);
+  }
+  return violations;
 }
 
 export function isoTitleAttr(iso: string | null): string {
