@@ -116,6 +116,31 @@
     @apply shrink-0 px-0.5 text-sm text-stone-600 dark:text-stone-300;
   }
 
+  .lab-loop-step--current {
+    @apply bg-blue-50 ring-1 ring-blue-200 dark:bg-blue-950/40 dark:ring-blue-800;
+  }
+
+  .lab-tools-row-hidden {
+    display: none !important;
+  }
+
+  .lab-tools-top[data-show-all="true"] .lab-tools-row-hidden {
+    display: table-row !important;
+  }
+
+  .lab-tools-lede {
+    max-width: 42rem;
+  }
+
+  @media (max-width: 420px) {
+    .lab-tools-queue td,
+    .lab-tools-queue th,
+    .lab-table td,
+    .lab-table th {
+      white-space: normal;
+    }
+  }
+
   .archive-day {
     @apply flex aspect-square items-center justify-center rounded-sm font-sans text-[10px] leading-none;
   }

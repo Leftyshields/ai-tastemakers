@@ -53,13 +53,14 @@ export type LabExperimentOrigin = Pick<
 export function renderFromProjectLine(
   exp: LabExperimentOrigin,
   escapeHtml: (t: string) => string,
+  section: "hero" | "timeline" | "history" = "hero",
 ): string {
   const name = exp.sourceRepo?.trim();
   if (!name) return "";
   const label = sanitizeVisibleCopy(name);
   const url = exp.sourceUrl?.trim();
   if (url) {
-    return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From <a href="${escapeHtml(url)}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(label)}</a></p>`;
+    return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From <a href="${escapeHtml(url)}" class="text-blue-800 hover:underline dark:text-blue-400" data-lab-section="${section}" data-lab-source-repo="${escapeHtml(name)}">${escapeHtml(label)}</a></p>`;
   }
   return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From ${escapeHtml(label)}</p>`;
 }
@@ -81,7 +82,7 @@ export function countExperimentsWithSource(experiments: LabExperimentEntry[]): n
 export function labPublishFooterHtml(escapeHtml: (t: string) => string): string {
   return `<p class="lab-publish-footer mt-10 border-t border-stone-200 pt-6 text-sm text-stone-600 dark:border-stone-700 dark:text-stone-400 font-sans">
     Everything here is safe to publish.
-    <a href="about.html" class="text-blue-800 underline dark:text-blue-400">About the Lab</a>.
-    <a href="${escapeHtml(GITHUB_ISSUES_URL)}" class="text-blue-800 underline dark:text-blue-400">Open an issue</a>.
+    <a href="about.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">About the Lab</a>.
+    <a href="${escapeHtml(GITHUB_ISSUES_URL)}" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">Open an issue</a>.
   </p>`;
 }

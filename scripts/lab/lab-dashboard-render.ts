@@ -348,7 +348,7 @@ export function renderRunningControlPanelBlock(
     source?.source === "auto" || source?.source === "hand"
       ? renderLabSourceOriginChip(source.source, escapeHtml)
       : "";
-  const fromLine = source ? renderFromProjectLine(source, escapeHtml) : "";
+  const fromLine = source ? renderFromProjectLine(source, escapeHtml, "hero") : "";
 
   const parts: string[] = [];
   parts.push(`<h2 class="text-lg font-bold tracking-tight">${escapeHtml(title)}</h2>
@@ -411,7 +411,7 @@ function renderWriteUpLink(
   escapeHtml: (t: string) => string,
 ): string {
   if (!writeupPostIds.includes(experimentId)) return "";
-  return `<a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(experimentId)}.html">Write up</a>`;
+  return `<a class="text-xs text-blue-800 underline dark:text-blue-400" href="posts/${escapeHtml(experimentId)}.html" data-lab-section="history" data-lab-experiment-id="${escapeHtml(experimentId)}">Write up</a>`;
 }
 
 function renderLabDashboardStyles(): string {
@@ -678,7 +678,7 @@ function renderGanttRow(
 ): string {
   if (item.kind === "collapsed") {
     return `<div class="lab-gantt-row lab-gantt-collapsed-row" tabindex="0">
-      <div class="lab-gantt-name-col"><a class="lab-gantt-collapsed-link" href="#lab-history">${escapeHtml(sanitizeVisibleCopy(item.label))}</a></div>
+      <div class="lab-gantt-name-col"><a class="lab-gantt-collapsed-link" href="#lab-history" data-lab-section="timeline">${escapeHtml(sanitizeVisibleCopy(item.label))}</a></div>
       <div class="lab-gantt-track-wrap" aria-hidden="true"></div>
     </div>`;
   }
@@ -709,7 +709,7 @@ function renderGanttRow(
     </div>
     <div id="${escapeHtml(popId)}" class="lab-timeline-popover" role="tooltip" hidden>
       <p class="lab-timeline-popover-name font-bold text-stone-900 dark:text-stone-100">${escapeHtml(label)}</p>
-      ${exp ? renderFromProjectLine(exp, escapeHtml) : ""}
+      ${exp ? renderFromProjectLine(exp, escapeHtml, "timeline") : ""}
       <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
       <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
       <div class="mt-2">${renderLabMoreButton(popId, escapeHtml)}</div>
@@ -939,8 +939,8 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         : verdictChip;
       const hiddenClass = index >= 5 ? " lab-history-row-hidden" : "";
       const source = pub.experiments.find((e) => e.id === h.id);
-      const fromLine = source ? renderFromProjectLine(source, escapeHtml) : "";
-      parts.push(`<tr class="lab-data-row${hiddenClass}">
+      const fromLine = source ? renderFromProjectLine(source, escapeHtml, "history") : "";
+      parts.push(`<tr class="lab-data-row${hiddenClass}" id="lab-exp-${h.id}">
         <td><span class="font-semibold">${escapeHtml(sanitizeVisibleCopy(h.label))}</span>${fromLine}</td>
         <td title="${escapeHtml(isoTitleAttr(h.start))} to ${escapeHtml(isoTitleAttr(h.end))}">${escapeHtml(win)}</td>
         <td>${resultCell}</td>

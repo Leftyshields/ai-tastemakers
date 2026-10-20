@@ -1,5 +1,8 @@
 /** UX39 Gestalt loop strip (Featured → Evaluated → Experiment → Result). */
 
+import type { LabLinkContext } from "./lab-analytics.js";
+import { labLinkDataAttrs, resolveLabToolHref } from "./lab-analytics.js";
+
 export type LabLoopHrefMode = "lab-home" | "about";
 
 export interface LabLoopStep {
@@ -50,6 +53,7 @@ export function labLoopSteps(mode: LabLoopHrefMode): LabLoopStep[] {
 export function renderLabLoopStripHtml(
   mode: LabLoopHrefMode,
   escapeHtml: (t: string) => string,
+  options?: { activeStep?: number; linkCtx?: LabLinkContext },
 ): string {
   const steps = labLoopSteps(mode);
   const items = steps
@@ -58,10 +62,12 @@ export function renderLabLoopStripHtml(
         index < steps.length - 1
           ? `<span class="lab-loop-chevron" aria-hidden="true">›</span>`
           : "";
-      return `<a href="${escapeHtml(step.href)}" class="lab-loop-step">
-        <span class="lab-loop-num" aria-hidden="true">${step.n}</span>
-        <span class="lab-loop-label">${escapeHtml(step.label)}</span>
-      </a>${chevron}`;
+      const current = options?.activeStep === step.n ? " lab-loop-step--current" : "";
+      const inner = `<span class="lab-loop-num" aria-hidden="true">${step.n}</span>
+        <span class="lab-loop-label">${escapeHtml(step.label)}</span>`;
+      const href =
+        options?.linkCtx != null ? resolveLabToolHref(step.href, options.linkCtx) : step.href;
+      return `<a href="${escapeHtml(href)}" class="lab-loop-step${current}" ${labLinkDataAttrs({ section: "loop" })}>${inner}</a>${chevron}`;
     })
     .join("");
   return `<nav class="lab-loop-strip" aria-label="Lab feedback loop">${items}</nav>`;

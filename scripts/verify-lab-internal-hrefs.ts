@@ -82,10 +82,14 @@ export function findInternalHrefViolations(html: string, pageAbsPath: string): s
   const ids = extractElementIds(html);
   const hrefs = extractAnchorHrefs(html);
 
-  for (const raw of hrefs) {
+  for (const rawHref of hrefs) {
+    const raw = rawHref.replace(/&amp;/g, "&");
     if (isExternalHref(raw)) continue;
+    const qIdx = raw.indexOf("?");
     const hashIdx = raw.indexOf("#");
-    const pathPart = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
+    let pathPart = raw;
+    if (hashIdx >= 0) pathPart = raw.slice(0, hashIdx);
+    if (pathPart.includes("?")) pathPart = pathPart.slice(0, pathPart.indexOf("?"));
     const frag = hashIdx >= 0 ? raw.slice(hashIdx + 1) : "";
     const needsFile = pathPart.length > 0;
     const targetPath = needsFile ? resolveInternalHrefTarget(pageAbsPath, pathPart) : pageAbsPath;

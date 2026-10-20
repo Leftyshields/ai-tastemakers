@@ -26,6 +26,15 @@ import {
   renderLabLoopStripHtml,
 } from "./lab/lab-loop-strip.js";
 import {
+  defaultLabLinkContext,
+  ensureLabLinkSections,
+  labLinkClickScript,
+  type LabLinkContext,
+  type LabLinkSection,
+} from "./lab/lab-analytics.js";
+import { renderToolsPageHtml } from "./lab/render-tools-page.js";
+import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
+import {
   articleJsonLd,
   briefMetaDescription,
   briefSocialDescription,
@@ -291,7 +300,9 @@ function editionNavFor(siteSegment: string, depth: 0 | 1): EditionNav {
 export function editionNavHtml(
   nav: EditionNav,
   escapeHtml: (t: string) => string,
+  labAnalytics = false,
 ): string {
+  const track = labAnalytics ? ' data-lab-section="nav"' : "";
   const pill = (href: string, label: string, isActive: boolean) => {
     const base =
       "inline-block rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
@@ -299,7 +310,7 @@ export function editionNavHtml(
       "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
     const idle =
       "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
-    return `<a href="${href}" class="${base} ${isActive ? active : idle}"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+    return `<a href="${href}" class="${base} ${isActive ? active : idle}"${track}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
   };
 
   return `<nav aria-label="Tastemakers editions" class="mt-4 flex flex-wrap gap-2">
@@ -352,7 +363,7 @@ export function labNavHtml(
       "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
     const idle =
       "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
-    return `<a href="${href}" class="${base} ${isActive ? activeCls : idle}"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+    return `<a href="${href}" class="${base} ${isActive ? activeCls : idle}" data-lab-section="nav"${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
   };
 
   const prefix = depth === 0 ? "" : "../";
@@ -539,7 +550,10 @@ async function buildLabMarkdownPage(
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
-      pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, labShell),
+      pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, {
+        ...labShell,
+        labFallbackSection: navActive === "about" ? "about" : "about",
+      }),
     );
     return true;
   } catch {
@@ -601,7 +615,7 @@ function labAboutFooterHref(paths: SitePaths): string {
 
 function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string): string {
   const link = (href: string, label: string) =>
-    `<a href="${href}" class="site-footer__link">${label}</a>`;
+    `<a href="${href}" class="site-footer__link" data-lab-section="footer">${label}</a>`;
 
   const items = [
     link(paths.subscribe, "Subscribe"),
@@ -625,17 +639,24 @@ export function pageShell(
   brand: { name: string; tagline: string },
   description?: string,
   escapeHtml: (t: string) => string = (t) => t,
-  options?: { labLayout?: boolean; wideIndex?: boolean; seo?: PageSeoOptions },
+  options?: {
+    labLayout?: boolean;
+    wideIndex?: boolean;
+    seo?: PageSeoOptions;
+    labFallbackSection?: LabLinkSection;
+  },
 ): string {
   const safeTitle = escapeHtml(title);
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
-  const nav = editionNavHtml(paths.editionNav, escapeHtml);
   const labLayout = options?.labLayout === true;
+  const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout);
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
   const shellClass = labLayout
     ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
     : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12`;
-  const mainHtml = labLayout ? `<main class="lab-main">${body}</main>` : body;
+  const labFallback = options?.labFallbackSection ?? "about";
+  const labBody = labLayout ? ensureLabLinkSections(body, labFallback) : body;
+  const mainHtml = labLayout ? `<main class="lab-main">${labBody}</main>` : body;
   const footerMt = labLayout ? "mt-10" : "mt-16";
 
   return `<!DOCTYPE html>
@@ -653,7 +674,7 @@ export function pageShell(
   <div class="${shellClass}">
     <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-700">
       <h1 class="font-sans text-2xl font-bold tracking-tight">
-        <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400">${escapeHtml(brand.name)}</a>
+        <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400"${labLayout ? ' data-lab-section="nav"' : ""}>${escapeHtml(brand.name)}</a>
       </h1>
       <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brand.tagline)}</p>
       ${nav}
@@ -664,6 +685,7 @@ export function pageShell(
       <p class="site-footer__meta">Updated daily &middot; Automated pipeline</p>
     </footer>
   </div>
+  ${labLayout ? labLinkClickScript() : ""}
 </body>
 </html>`;
 }
@@ -1624,7 +1646,9 @@ export async function buildLabSite(
       "Public notes on how we pick repos, test pipeline changes, and measure what readers engage with.",
   };
 
-  const labShell = { labLayout: true as const };
+  const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };
+  const allowlist = await collectDigestRepoAllowlist(repoRoot);
+  const linkCtx = defaultLabLinkContext(0, allowlist, asOfIsoDate);
 
   const labPublic = writeLabPublicArtifacts(repoRoot, labSiteDir);
   const dashboardHtml = renderLabDashboardHtml(labPublic, escapeHtml, { asOfIsoDate });
@@ -1636,7 +1660,7 @@ export async function buildLabSite(
     const html = applyLabIntroVonRestorff(prepareLabProseHtmlFromMarkdown(markdown));
     introBlock = `<div class="lab-intro mb-8 font-sans">
       <article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>
-      ${renderLabLoopStripHtml("lab-home", escapeHtml)}
+      ${renderLabLoopStripHtml("lab-home", escapeHtml, { linkCtx })}
       <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
     </div>`;
   } catch {
@@ -1664,22 +1688,20 @@ export async function buildLabSite(
 
   await fs.writeFile(
     path.join(labSiteDir, "index.html"),
-    pageShell("Lab · Tastemakers", indexBody, paths, brand, labIndexDescription, escapeHtml, labShell),
+    pageShell("Lab · Tastemakers", indexBody, paths, brand, labIndexDescription, escapeHtml, {
+      ...labShell,
+      labFallbackSection: "hero",
+    }),
   );
 
-  const inventoryMd = path.join(repoRoot, "briefings", "lab", "tool-inventory.md");
-  let toolsBody = `${labNavHtml("tools", escapeHtml)}`;
-  try {
-    const markdown = await fs.readFile(inventoryMd, "utf8");
-    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
-    toolsBody += `<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-table:text-sm">${html}</article>`;
-  } catch {
-    toolsBody += `<p class="font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run inventory:tools</code> to generate the inventory.</p>`;
-  }
+  const toolsBody = `${labNavHtml("tools", escapeHtml)}${renderToolsPageHtml(repoRoot, linkCtx, escapeHtml)}${labPublishFooterHtml(escapeHtml)}`;
 
   await fs.writeFile(
     path.join(labSiteDir, "tools.html"),
-    pageShell("Tool inventory · Lab", toolsBody, paths, brand, undefined, escapeHtml, labShell),
+    pageShell("Evaluated tools · Lab", toolsBody, paths, brand, undefined, escapeHtml, {
+      ...labShell,
+      labFallbackSection: "tools",
+    }),
   );
 
   const experimentsBody = `
