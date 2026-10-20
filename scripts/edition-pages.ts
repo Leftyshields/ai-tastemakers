@@ -374,7 +374,7 @@ export function labNavHtml(
   return `<nav aria-label="Lab section" class="mb-8 flex flex-wrap gap-2">
       ${pill(labHomeHref, "Lab home", active === "home")}
       ${pill(aboutHref, "About", active === "about")}
-      ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
+      ${pill(`${prefix}tools.html`, "Evaluated", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
       ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
       ${pill(postsHref, "Posts", active === "posts")}
