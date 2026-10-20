@@ -153,7 +153,18 @@ export function renderLabTestedBadgeEmailPillHtml(
   const color = isRunning ? "#1e40af" : "#44403c";
   const bg = isRunning ? "transparent" : "#f5f5f4";
   const img = escape(labBadgeEmailFlaskSrc(siteUrl));
-  return `<a href="${escape(href)}" style="display:inline-block;margin-left:8px;padding:2px 10px;border:1px solid ${border};border-radius:9999px;background-color:${bg};color:${color};font-family:system-ui,sans-serif;font-size:12px;font-weight:600;line-height:20px;text-decoration:none;vertical-align:middle;white-space:nowrap;"><img src="${img}" alt="" width="12" height="12" style="display:inline-block;vertical-align:middle;margin-right:4px;border:0;" />${escape(label)}</a>`;
+  return `<a href="${escape(href)}" style="display:inline-block;padding:2px 10px;border:1px solid ${border};border-radius:9999px;background-color:${bg};color:${color};font-family:system-ui,sans-serif;font-size:12px;font-weight:600;line-height:20px;text-decoration:none;vertical-align:middle;white-space:nowrap;"><img src="${img}" alt="" width="12" height="12" style="display:inline-block;vertical-align:middle;margin-right:4px;border:0;" />${escape(label)}</a>`;
+}
+
+/** Sibling table cell for digest email button row (transparent, 8px left gap). */
+export function renderLabTestedBadgeEmailPillCellHtml(
+  badge: LabBadgeInfo,
+  href: string,
+  siteUrl: string,
+  escape: (t: string) => string,
+): string {
+  const pill = renderLabTestedBadgeEmailPillHtml(badge, href, siteUrl, escape);
+  return `<td style="padding:0 0 0 8px;vertical-align:middle;background-color:transparent;">${pill}</td>`;
 }
 
 /** @deprecated Use renderLabTestedBadgeEmailPillHtml */

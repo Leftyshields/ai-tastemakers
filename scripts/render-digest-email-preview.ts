@@ -4,6 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { digestSiteUrlFromEnv } from "../src/tastemaker/config.js";
 import { renderDigestEmailHtml } from "../src/tastemaker/email/html.js";
 import type { Digest } from "../src/tastemaker/types.js";
 
@@ -29,7 +30,7 @@ function main(): void {
   const digest = loadDigestFromJson(digestPath);
   const dateLabel = path.basename(path.dirname(digestPath));
   const section = digestPath.includes(`${path.sep}skills${path.sep}`) ? "skills" : "oss";
-  const siteUrl = process.env.SITE_URL ?? "https://example.com/app";
+  const siteUrl = digestSiteUrlFromEnv();
   const html = renderDigestEmailHtml(digest, dateLabel, siteUrl, undefined, section);
 
   const outDir = path.join(repoRoot, ".cache", "digest-email");

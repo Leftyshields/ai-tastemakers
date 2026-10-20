@@ -11,7 +11,7 @@ import {
   labBadgeForRepo,
   loadLabBadgeLookup,
   loadLabWriteupPostIds,
-  renderLabTestedBadgeEmailPillHtml,
+  renderLabTestedBadgeEmailPillCellHtml,
   renderLabTestedBadgeEmailHtml,
   renderLabTestedBadgePlainSuffix,
   resolveLabBadgeHref,
@@ -147,7 +147,7 @@ export function renderDigestEmailHtml(
       const buttonHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "button"));
       const showGithubButton = true;
       let labBadgeTitleChip = "";
-      let labBadgePillInline = "";
+      let labBadgePillCell = "";
       if (repo.rank <= 10) {
         const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
         if (match) {
@@ -161,7 +161,7 @@ export function renderDigestEmailHtml(
             destPath: labBadgeSiteDestPath(siteUrl, match, badgeCtx.writeupPostIds),
           });
           if (showGithubButton) {
-            labBadgePillInline = renderLabTestedBadgeEmailPillHtml(
+            labBadgePillCell = renderLabTestedBadgeEmailPillCellHtml(
               match,
               badgeHref,
               siteUrl,
@@ -177,8 +177,8 @@ export function renderDigestEmailHtml(
         ? `<table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
           <tr>
             <td bgcolor="${BRAND_BUTTON}" style="background-color:${BRAND_BUTTON};border-radius:6px;vertical-align:middle;">
-              <a href="${buttonHref}" style="display:inline-block;padding:10px 16px;color:#ffffff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;vertical-align:middle;">View on GitHub</a>${labBadgePillInline}
-            </td>
+              <a href="${buttonHref}" style="display:inline-block;padding:10px 16px;color:#ffffff;font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;vertical-align:middle;">View on GitHub</a>
+            </td>${labBadgePillCell}
           </tr>
         </table>`
         : "";

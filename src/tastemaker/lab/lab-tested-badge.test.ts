@@ -6,6 +6,7 @@ import {
   labBadgeForRepo,
   normalizeOwnerRepoKey,
   labBadgeEmailFlaskSrc,
+  renderLabTestedBadgeEmailPillCellHtml,
   renderLabTestedBadgeEmailPillHtml,
   renderLabTestedBadgePagesHtml,
   renderRunningBadgeFixtureCard,
@@ -14,6 +15,7 @@ import {
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { loadExperimentsFile } from "../../../scripts/lab/validate-experiments.js";
 import { renderDigestRepoCard } from "../pages/brief-cards.js";
+import { DEFAULT_DIGEST_SITE_URL, digestSiteUrlFromEnv } from "../config.js";
 import { renderDigestEmailHtml } from "../email/html.js";
 import { labBadgeClickTrackingScript, digestRepoClickTrackingScript } from "../../../scripts/edition-pages.js";
 import { buildLabBadgeEmailGoUrl } from "../analytics/repo-click.js";
@@ -130,7 +132,8 @@ describe("UX45 lab tested badge", () => {
     const badge = labBadgeForRepo(lookup, "DietrichGebert/ponytail")!;
     const siteUrl = "https://example.com/app";
     const pill = renderLabTestedBadgeEmailPillHtml(badge, "https://example.com/go", siteUrl, escapeHtml);
-    expect(pill).toContain("margin-left:8px");
+    const cell = renderLabTestedBadgeEmailPillCellHtml(badge, "https://example.com/go", siteUrl, escapeHtml);
+    expect(cell).toContain("padding:0 0 0 8px");
     expect(pill).toContain("border-radius:9999px");
     expect(pill).toContain("Lab tested");
     expect(pill).toContain(labBadgeEmailFlaskSrc(siteUrl));
@@ -157,7 +160,7 @@ describe("UX45 lab tested badge", () => {
         ],
       },
       "2026-08-22",
-      "https://example.com/app",
+      DEFAULT_DIGEST_SITE_URL,
       undefined,
       "oss",
       lookup,
@@ -165,5 +168,27 @@ describe("UX45 lab tested badge", () => {
     expect(emailHtml).toContain("View on GitHub");
     expect(emailHtml).toContain("event=lab_badge_click");
     expect(emailHtml).not.toMatch(/DietrichGebert\/ponytail<\/a>[^<]*Lab tested/);
+    expect(emailHtml).toContain(labBadgeEmailFlaskSrc(DEFAULT_DIGEST_SITE_URL));
+
+    const buttonTd = emailHtml.match(
+      /<td[^>]*background-color:\s*#1e40af[^>]*>([\s\S]*?)<\/td>/i,
+    )?.[1];
+    expect(buttonTd).toBeDefined();
+    expect(buttonTd).toContain("View on GitHub");
+    expect(buttonTd).not.toContain("Lab tested");
+    expect(emailHtml).toMatch(
+      /background-color:\s*#1e40af[\s\S]*?<\/td>\s*<td[^>]*>[\s\S]*Lab tested/,
+    );
+  });
+
+  it("uses production digest site URL from env defaults for flask src", () => {
+    const prevDigest = process.env.DIGEST_SITE_URL;
+    const prevSite = process.env.SITE_URL;
+    delete process.env.DIGEST_SITE_URL;
+    delete process.env.SITE_URL;
+    expect(digestSiteUrlFromEnv()).toBe(DEFAULT_DIGEST_SITE_URL);
+    expect(digestSiteUrlFromEnv()).not.toContain("example.com");
+    process.env.DIGEST_SITE_URL = prevDigest;
+    process.env.SITE_URL = prevSite;
   });
 });

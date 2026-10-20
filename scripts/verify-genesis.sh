@@ -20,6 +20,8 @@ echo "verify: lab write up reader copy (UX46)"
 npx tsx scripts/verify-lab-writeup-reader-copy.ts
 echo "verify: lab post title above fold (UX46)"
 npx tsx scripts/verify-lab-post-title-fold.ts
+echo "verify: lab email flask asset (UX46)"
+npx tsx scripts/verify-lab-email-flask-asset.ts
 echo "verify: site internal hrefs and anchors (UX30 link checker)"
 npx tsx scripts/verify-lab-internal-hrefs.ts
 echo "verify: lab tested badges on daily top 10 (UX45)"
