@@ -1,4 +1,5 @@
 import type { LabExperimentSource, PublicHistoryItem } from "./lab-public-types.js";
+import type { LabExperimentEntry } from "./validate-experiments.js";
 import { sanitizeVisibleCopy } from "./lab-format.js";
 
 const GITHUB_ISSUES_URL = "https://github.com/Leftyshields/ai-tastemakers/issues";
@@ -41,6 +42,40 @@ export function experimentTechnicalMoreHtml(
     lines.push(`<p class="text-xs">${escapeHtml(sanitizeVisibleCopy(exp.note))}</p>`);
   }
   return lines.join("\n");
+}
+
+export type LabExperimentOrigin = Pick<
+  LabExperimentEntry,
+  "source" | "sourceRepo" | "sourceUrl"
+>;
+
+/** UX40 muted From project line when sourceRepo is set. */
+export function renderFromProjectLine(
+  exp: LabExperimentOrigin,
+  escapeHtml: (t: string) => string,
+): string {
+  const name = exp.sourceRepo?.trim();
+  if (!name) return "";
+  const label = sanitizeVisibleCopy(name);
+  const url = exp.sourceUrl?.trim();
+  if (url) {
+    return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From <a href="${escapeHtml(url)}" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(label)}</a></p>`;
+  }
+  return `<p class="lab-from-project mt-1 text-xs text-stone-500 dark:text-stone-400">From ${escapeHtml(label)}</p>`;
+}
+
+/** UX41 neutral origin chip (no brand orange). */
+export function renderLabSourceOriginChip(
+  source: NonNullable<LabExperimentEntry["source"]>,
+  escapeHtml: (t: string) => string,
+): string {
+  const label =
+    source === "auto" ? sanitizeVisibleCopy("Proposed by pipeline") : sanitizeVisibleCopy("Picked by hand");
+  return `<span class="inline-flex shrink-0 items-center rounded-full bg-stone-200 px-2.5 py-0.5 text-xs font-medium leading-none text-stone-800 dark:bg-stone-700 dark:text-stone-200">${escapeHtml(label)}</span>`;
+}
+
+export function countExperimentsWithSource(experiments: LabExperimentEntry[]): number {
+  return experiments.filter((e) => e.source === "auto" || e.source === "hand").length;
 }
 
 export function labPublishFooterHtml(escapeHtml: (t: string) => string): string {

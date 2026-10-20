@@ -1,1 +1,1 @@
-Tastemakers Lab is our open notebook on how the daily digest is built and tested. We publish what we tried, what changed, and what we measured.
+Tastemakers reports on new open source tools every day. We adopt the promising ones and test them on our own pipeline, then publish what happened.

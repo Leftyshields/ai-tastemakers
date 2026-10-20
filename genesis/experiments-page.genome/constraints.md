@@ -49,3 +49,10 @@
 - **UX35**: `lab/about.html` holds long form Lab copy; Lab home keeps two sentence intro; header nav About; Right now paragraph removed.
 - **UX36**: Lab footer line: Everything here is safe to publish. About the Lab. Open an issue.
 - **UX37 (should)**: Last updated {build date PT} under intro in muted small text.
+
+## Acceptance criteria (Brian approved Lab UX round 4)
+
+- **UX38**: Lab home intro is exactly two sentences (Tastemakers reports… / We adopt…); first sentence uses Von Restorff emphasis; Last updated stays below the loop strip.
+- **UX39**: Compact loop strip under intro with four steps (Featured in digest, Evaluated, Experiment, Result); numbered chips and chevrons, no dash characters; one row at 1280px; 2×2 grid at ~390px without horizontal scroll; About page replaces feedback loop prose with the same strip plus one sentence per step.
+- **UX40**: When sourceRepo is set, show muted From {Project} in hero, timeline popover (not on Gantt bar), and history name cells; link sourceUrl when present.
+- **UX41**: Optional source, sourceRepo, sourceUrl on lab/experiments.json and public export; backfill only from repo evidence; origin chip Proposed by pipeline or Picked by hand beside status when source is set; source filter only when more than eight rows have source.

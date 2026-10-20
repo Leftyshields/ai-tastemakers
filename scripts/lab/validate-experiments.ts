@@ -38,11 +38,19 @@ export interface PostHogEndSnapshot {
   raw?: Record<string, unknown>;
 }
 
+export type LabExperimentSourceKind = "auto" | "hand";
+
 export interface LabExperimentEntry {
   id: string;
   label: string;
   /** Plain language hypothesis for the control panel (max 120 chars). */
   short_hypothesis: string;
+  /** UX41 how the experiment entered the registry (optional). */
+  source?: LabExperimentSourceKind | null;
+  /** UX40 display name for featured repo origin (optional). */
+  sourceRepo?: string | null;
+  /** UX40 link to digest entry or repo (optional). */
+  sourceUrl?: string | null;
   surface: LabSurface | LabSurface[];
   metric: string;
   start: string | null;
@@ -252,6 +260,27 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
       issues.push({
         code: "schema",
         message: `short_hypothesis on '${exp.id}' exceeds 120 characters.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (exp.source != null && exp.source !== "auto" && exp.source !== "hand") {
+      issues.push({
+        code: "schema",
+        message: `Invalid source on '${exp.id}' (use auto or hand).`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (typeof exp.sourceRepo === "string" && !exp.sourceRepo.trim()) {
+      issues.push({
+        code: "schema",
+        message: `Empty sourceRepo on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (exp.sourceRepo?.trim() && !exp.source) {
+      issues.push({
+        code: "schema",
+        message: `sourceRepo set without source on '${exp.id}'.`,
         experiment_ids: [exp.id],
       });
     }

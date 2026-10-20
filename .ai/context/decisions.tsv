@@ -58,3 +58,8 @@ ts	phase	decision	why	evidence	result
 2026-10-20T04:00:00.000Z	design_decisions	law:UX37-gate	Last updated build date America Los Angeles with test	Brian Lab gate PR40	accepted
 2026-10-20T04:00:00.000Z	design_decisions	law:UX26-UX35-gate	Lab prose sans font inline backticks to code verify genesis	Brian Lab gate PR40	accepted
 2026-10-20T04:00:00.000Z	design_decisions	law:footer-about	Site footer About the Lab links lab about html	Brian Lab gate PR40	accepted
+2026-10-20T04:15:00.000Z	design_decisions	law:UX38-Von-Restorff	Two sentence Lab intro first sentence emphasized	Brian Lab round 4	accepted
+2026-10-20T04:15:00.000Z	design_decisions	law:UX39-Gestalt	Loop strip common region four steps chevrons no dashes	Brian Lab round 4	accepted
+2026-10-20T04:15:00.000Z	design_decisions	law:UX40-Jakob	From project line links digest or repo when sourceRepo set	Brian Lab round 4	accepted
+2026-10-20T04:15:00.000Z	design_decisions	law:UX41-Tesler	source auto hand fields backfill evidence only no filter under 8	Brian Lab round 4	accepted
+2026-10-20T04:15:00.000Z	design_decisions	lab:prose-code-ticks	Disable typography pseudo ticks on lab inline code dark About	Brian Lab round 4	accepted
