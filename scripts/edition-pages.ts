@@ -52,6 +52,10 @@ import {
   loadTopRepoMetaMap,
 } from "./index-layout-helpers.js";
 import {
+  loadLabBadgeLookup,
+  loadLabWriteupPostIds,
+} from "./lab/lab-tested-badge.js";
+import {
   renderDigestBriefArticle,
   splitDailyBriefMarkdown,
 } from "../src/tastemaker/pages/brief-cards.js";
@@ -133,6 +137,38 @@ export function posthogScriptHtml(): string {
   </script>`;
 }
 
+export function labBadgeClickTrackingScript(): string {
+  if (!posthogAnalyticsEnabled()) return "";
+  return `<script>
+(function () {
+  document.addEventListener("click", function (event) {
+    var targetEl = event.target;
+    if (!targetEl || !targetEl.closest) return;
+    var badge = targetEl.closest("a.lab-tested-badge");
+    if (!badge) return;
+    if (typeof posthog === "undefined" || !posthog.capture) return;
+    var card = badge.closest(".digest-repo-card");
+    if (!card) return;
+    var repo = card.getAttribute("data-repo") || "";
+    var list = card.getAttribute("data-section") || "";
+    var rankRaw = card.getAttribute("data-position") || "";
+    var rank = parseInt(rankRaw, 10);
+    var expId = badge.getAttribute("data-lab-badge-exp") || "";
+    var status = badge.getAttribute("data-lab-badge-status") || "";
+    if (!repo || (list !== "oss" && list !== "skills") || !Number.isFinite(rank) || !expId) return;
+    posthog.capture("lab_badge_click", {
+      exp_id: expId,
+      repo: repo,
+      status: status,
+      list: list,
+      rank: rank,
+      channel: "pages"
+    }, { transport: "sendBeacon", send_instantly: true });
+  }, true);
+})();
+</script>`;
+}
+
 export function digestRepoClickTrackingScript(): string {
   if (!posthogAnalyticsEnabled()) return "";
   return `<script>
@@ -169,6 +205,7 @@ export function digestRepoClickTrackingScript(): string {
   document.addEventListener("click", function (event) {
     var targetEl = event.target;
     if (!targetEl || !targetEl.closest) return;
+    if (targetEl.closest("a.lab-tested-badge")) return;
     var card = targetEl.closest(".digest-repo-card");
     if (!card) return;
     var link = targetEl.closest("a[href]");
@@ -1538,6 +1575,10 @@ export async function buildEditionSite(
   siteBaseUrl?: string,
 ): Promise<number> {
   const briefingsDir = briefingsDirForEdition(repoRoot, edition);
+  const badgeLookup = loadLabBadgeLookup(repoRoot);
+  const writeupPostIds = loadLabWriteupPostIds(repoRoot);
+  const labPrefix = edition.id === "skills" ? "../../lab/" : "../lab/";
+  const badgeContext = { lookup: badgeLookup, labPrefix, writeupPostIds };
   const dates = await listBriefingDates(briefingsDir);
   const siteRoot = edition.siteSegment
     ? path.join(siteDir, edition.siteSegment)
@@ -1562,7 +1603,14 @@ export async function buildEditionSite(
       const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
       const digest = JSON.parse(digestRaw) as Digest;
       const { headerMarkdown } = splitDailyBriefMarkdown(markdown);
-      html = renderDigestBriefArticle(digest, date, edition.id, headerMarkdown, escapeHtml);
+      html = renderDigestBriefArticle(
+        digest,
+        date,
+        edition.id,
+        headerMarkdown,
+        escapeHtml,
+        badgeContext,
+      );
     } catch {
       /* fall back to markdown-only body */
     }
@@ -1633,7 +1681,8 @@ export async function buildEditionSite(
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${siblingHref}">${siblingLabel} &rarr;</a>
       </nav>
       ${html}
-      ${digestRepoClickTrackingScript()}`;
+      ${digestRepoClickTrackingScript()}
+      ${labBadgeClickTrackingScript()}`;
     await fs.writeFile(
       path.join(briefOutDir, `${date}.html`),
       pageShell(pageTitle, body, paths, brand, description, escapeHtml, {

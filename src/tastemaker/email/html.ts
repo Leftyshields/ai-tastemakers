@@ -3,9 +3,20 @@ import type { Digest, RankingMode } from "../types.js";
 import {
   buildEmailGoUrl,
   buildFullDigestPagesUrl,
+  buildLabBadgeEmailGoUrl,
 } from "../analytics/repo-click.js";
 import { newRepoEmailBadge, newRepoPlainLabel } from "../writers/new-badge.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
+import {
+  labBadgeForRepo,
+  loadLabBadgeLookup,
+  loadLabWriteupPostIds,
+  renderLabTestedBadgeEmailHtml,
+  renderLabTestedBadgePlainSuffix,
+  resolveLabBadgeHref,
+  labBadgeSiteDestPath,
+  type LabBadgeInfo,
+} from "../../../scripts/lab/lab-tested-badge.js";
 
 const EMAIL_TOPIC_LIMIT = 5;
 const BRAND_LINK = "#1e40af";
@@ -102,16 +113,28 @@ function emailGoLink(
   });
 }
 
+function labBadgeEmailContext(badgeLookup?: ReadonlyMap<string, LabBadgeInfo>): {
+  lookup: ReadonlyMap<string, LabBadgeInfo>;
+  writeupPostIds: string[];
+} {
+  const lookup = badgeLookup ?? loadLabBadgeLookup(process.cwd());
+  const writeupPostIds = loadLabWriteupPostIds(process.cwd());
+  return { lookup, writeupPostIds };
+}
+
 export function renderDigestEmailHtml(
   digest: Digest,
   dateLabel: string,
   siteUrl: string,
   unsubscribeUrlOverride?: string,
   section: EditionId = "oss",
+  badgeLookup?: ReadonlyMap<string, LabBadgeInfo>,
 ): string {
   const bootstrapNote = digest.ranking_mode === "delta_7d" ? "" : bootstrapNoteHtml();
   const preheader = escapeHtml(digestEmailPreheader(digest));
   const metaLine = `${digest.repos.length} repos · ${rankingModeLabel(digest.ranking_mode)}`;
+
+  const badgeCtx = labBadgeEmailContext(badgeLookup);
 
   const repoBlocks = digest.repos
     .map((repo) => {
@@ -121,10 +144,26 @@ export function renderDigestEmailHtml(
       const topics = escapeHtml(formatTopics(repo.topics));
       const titleHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "title"));
       const buttonHref = escapeHtml(emailGoLink(siteUrl, section, dateLabel, repo, "button"));
+      let labBadge = "";
+      if (repo.rank <= 10) {
+        const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
+        if (match) {
+          const badgeHref = buildLabBadgeEmailGoUrl(siteUrl, {
+            repo: repo.full_name,
+            section,
+            rank: repo.rank,
+            expId: match.id,
+            status: match.status,
+            digestDate: dateLabel,
+            destPath: labBadgeSiteDestPath(siteUrl, match, badgeCtx.writeupPostIds),
+          });
+          labBadge = renderLabTestedBadgeEmailHtml(match, badgeHref, escapeHtml);
+        }
+      }
 
       return `<div style="margin-bottom:28px;padding-bottom:28px;border-bottom:1px solid #e7e5e4;">
         <h2 style="margin:0 0 6px;font-family:system-ui,sans-serif;font-size:18px;font-weight:600;color:#1c1917;">
-          ${repo.rank}. <a href="${titleHref}" style="color:${BRAND_LINK};font-weight:700;text-decoration:underline;">${escapeHtml(repo.full_name)}</a>${newRepoEmailBadge(repo.is_new)}
+          ${repo.rank}. <a href="${titleHref}" style="color:${BRAND_LINK};font-weight:700;text-decoration:underline;">${escapeHtml(repo.full_name)}</a>${labBadge}${newRepoEmailBadge(repo.is_new)}
         </h2>
         <p style="margin:0 0 10px;font-family:system-ui,sans-serif;font-size:13px;color:#78716c;">
           ${formatStars(repo, digest.ranking_mode)} · ${topics}
@@ -184,6 +223,7 @@ export function renderDigestEmailText(
   siteUrl: string,
   unsubscribeUrlOverride?: string,
   section: EditionId = "oss",
+  badgeLookup?: ReadonlyMap<string, LabBadgeInfo>,
 ): string {
   const lines: string[] = [
     `AI TASTEMAKERS — Daily Brief — ${dateLabel}`,
@@ -195,13 +235,20 @@ export function renderDigestEmailText(
     lines.push(bootstrapNotePlain().trimEnd(), "");
   }
 
+  const badgeCtx = labBadgeEmailContext(badgeLookup);
+
   for (const repo of digest.repos) {
     const brief = repo.brief
       ? renderBriefForPlainText(repo.brief)
       : "[brief unavailable]";
     const topics = formatTopics(repo.topics);
+    let labSuffix = "";
+    if (repo.rank <= 10) {
+      const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
+      if (match) labSuffix = renderLabTestedBadgePlainSuffix(match);
+    }
     lines.push(
-      `${repo.rank}. ${repo.full_name}${newRepoPlainLabel(repo.is_new)}`,
+      `${repo.rank}. ${repo.full_name}${labSuffix}${newRepoPlainLabel(repo.is_new)}`,
       `${repo.full_name}  ${repo.html_url}`,
       `${formatStars(repo, digest.ranking_mode)} · ${topics}`,
       brief,

@@ -91,6 +91,33 @@ export function parseGoRedirectQuery(search: string): Partial<GoRedirectQuery> {
   return { repo, section, pos: Number.isFinite(pos) ? pos : undefined, target, d };
 }
 
+export interface LabBadgeEmailGoQuery {
+  repo: string;
+  section: EditionId;
+  rank: number;
+  expId: string;
+  status: "done" | "running";
+  digestDate: string;
+  /** Site path from origin, e.g. /ai-tastemakers/lab/index.html#lab-exp-EXP-… */
+  destPath: string;
+}
+
+export function buildLabBadgeEmailGoUrl(siteBaseUrl: string, query: LabBadgeEmailGoQuery): string {
+  const base = siteBaseUrl.replace(/\/+$/, "");
+  const params = new URLSearchParams({
+    channel: "email",
+    event: "lab_badge_click",
+    exp: query.expId,
+    repo: query.repo,
+    section: query.section,
+    rank: String(query.rank),
+    status: query.status,
+    d: digestDateCompact(query.digestDate),
+    dest: query.destPath.startsWith("/") ? query.destPath : `/${query.destPath}`,
+  });
+  return `${base}/go/?${params.toString()}`;
+}
+
 export function buildEmailGoUrl(
   siteBaseUrl: string,
   query: {

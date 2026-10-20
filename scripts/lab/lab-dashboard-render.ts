@@ -551,7 +551,9 @@ export function renderLabDashboardHtml(
   sections.push(`<section id="lab-control-panel" class="lab-dashboard-section mb-10 font-sans lab-hero-card">`);
   const run = pub.control_panel.running;
   if (run) {
-    sections.push(renderRunningControlPanelBlock(run, pub, escapeHtml));
+    sections.push(
+      `<div id="${escapeHtml(run.id)}">${renderRunningControlPanelBlock(run, pub, escapeHtml)}</div>`,
+    );
   } else {
     sections.push(
       `<p class="text-sm text-stone-600 dark:text-stone-400">No experiment is running on the public Lab calendar right now.</p>`,
