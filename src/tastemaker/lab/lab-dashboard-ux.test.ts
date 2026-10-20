@@ -54,6 +54,7 @@ describe("Lab dashboard UX copy", () => {
     expect(panel).toContain("Running");
     expect(panel).toContain("Day 9 of 14");
     expect(panel).toContain("Read window");
+    expect(panel).not.toMatch(/Read window[\s\S]*?<p class="mt-3 text-sm leading-relaxed/);
     expect(panel).toContain("lab-more-panel");
     expect(panel).toContain('data-for="hero-EXP-20260913-humanizer-polish-skills"');
     expect(panel).not.toContain("Do not gate on PostHog CTR");

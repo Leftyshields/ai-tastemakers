@@ -2,6 +2,7 @@
 
 import fs from "node:fs";
 import path from "node:path";
+import { renderSafeMarkdown } from "../safe-markdown.js";
 import type { LabSurface } from "./validate-experiments.js";
 
 const PT = "America/Los_Angeles";
@@ -41,6 +42,47 @@ export function formatWindowHuman(start: string | null, end: string | null): str
 export function formatDayHuman(iso: string): string {
   const { y, m, d } = parseIsoDate(iso);
   return `${MONTH_SHORT[m - 1]!} ${d}, ${y}`;
+}
+
+/** Calendar date (YYYY-MM-DD) for the build in America/Los_Angeles (UX37). */
+export function buildIsoDatePt(now: Date = new Date()): string {
+  const fmt = new Intl.DateTimeFormat("en-CA", {
+    timeZone: PT,
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  });
+  return fmt.format(now);
+}
+
+export function formatLabLastUpdatedPt(isoDate: string): string {
+  return formatDayHuman(isoDate);
+}
+
+export const LAB_PROSE_ARTICLE_CLASS =
+  "brief-content lab-prose-capped prose prose-stone max-w-none font-sans dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-p:font-sans prose-li:font-sans prose-code:font-sans prose-strong:font-sans";
+
+/** Turn leftover `inline` markers in text nodes into <code> (UX26). */
+export function stripLiteralBackticksToCode(html: string): string {
+  return html.replace(/>([^<]*`[^`\n]+`[^<]*)</g, (_match, text: string) => {
+    const converted = text.replace(
+      /`([^`\n]+)`/g,
+      '<code class="rounded bg-stone-100 px-1 py-0.5 text-sm font-sans dark:bg-stone-800">$1</code>',
+    );
+    return `>${converted}<`;
+  });
+}
+
+export function findLabProseBacktickViolations(html: string): string[] {
+  const article =
+    html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  const withoutCode = article.replace(/<code[\s\S]*?<\/code>/gi, "");
+  const text = withoutCode.replace(/<[^>]+>/g, " ");
+  const idx = text.indexOf("`");
+  if (idx >= 0) {
+    return [`literal backtick in lab prose …${text.slice(Math.max(0, idx - 12), idx + 12)}…`];
+  }
+  return [];
 }
 
 /** Short calendar label for read status lines (example: Oct 24). */
@@ -151,6 +193,10 @@ export function listLabWriteupPostIds(repoRoot: string): string[] {
 export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?: Set<string>): boolean {
   const ids = cache ?? new Set(listLabWriteupPostIds(repoRoot));
   return ids.has(experimentId);
+}
+
+export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
+  return sanitizeLabVisibleHtml(stripLiteralBackticksToCode(renderSafeMarkdown(markdown)));
 }
 
 export function findLabProseInlineSpacingViolations(html: string): string[] {

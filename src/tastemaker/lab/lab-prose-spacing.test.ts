@@ -3,8 +3,11 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
+  buildIsoDatePt,
+  findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
+  prepareLabProseHtmlFromMarkdown,
   sanitizeLabVisibleHtml,
 } from "../../../scripts/lab/lab-format.js";
 import { buildLabPublicFile, renderLabDashboardHtml } from "../../../scripts/lab/build-lab-public.js";
@@ -51,16 +54,19 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(dash).not.toContain("Right now (Aug 16, 2026)");
   });
 
-  it("rendered lab dashboard prose has no inline spacing violations", () => {
-    const pub = buildLabPublicFile(repoRoot, "2026-10-19");
-    const dash = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
-    expect(dash).not.toContain("Right now (Aug 16, 2026)");
-    const sample = sanitizeLabVisibleHtml(
-      renderSafeMarkdown(
-        "Everything in `/lab/` is safe. See `lab/experiments.json` for data.",
-      ),
+  it("UX26 UX35 inline backticks become code elements without literal backticks", () => {
+    const sample = prepareLabProseHtmlFromMarkdown(
+      "Everything in `/lab/` is safe. See `lab/experiments.public.json` for data.",
     );
+    expect(sample).toContain("<code");
+    expect(sample).not.toContain("`");
     const wrapped = `<article class="lab-prose-capped">${sample}</article>`;
     expect(findLabProseInlineSpacingViolations(wrapped)).toEqual([]);
+    expect(findLabProseBacktickViolations(wrapped)).toEqual([]);
+  });
+
+  it("UX37 buildIsoDatePt uses America/Los_Angeles calendar date", () => {
+    expect(buildIsoDatePt(new Date("2026-10-20T06:59:59.000Z"))).toBe("2026-10-19");
+    expect(buildIsoDatePt(new Date("2026-10-20T07:00:00.000Z"))).toBe("2026-10-20");
   });
 });

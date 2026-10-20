@@ -12,7 +12,13 @@ import { loadAllExperiments, writeExperimentsData } from "./lab/aggregate-experi
 import { writeTokenUsageData } from "./lab/aggregate-token-usage.js";
 import { renderTokenUsagePage } from "./lab/render-token-usage.js";
 import { renderLabDashboardHtml, writeLabPublicArtifacts } from "./lab/build-lab-public.js";
-import { sanitizeLabVisibleHtml, formatDayHuman } from "./lab/lab-format.js";
+import {
+  LAB_PROSE_ARTICLE_CLASS,
+  buildIsoDatePt,
+  formatLabLastUpdatedPt,
+  prepareLabProseHtmlFromMarkdown,
+  sanitizeLabVisibleHtml,
+} from "./lab/lab-format.js";
 import { labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
 import {
   articleJsonLd,
@@ -518,8 +524,8 @@ async function buildLabMarkdownPage(
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
-    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
-    const body = `${labNavHtml(navActive, escapeHtml)}<article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
+    const html = prepareLabProseHtmlFromMarkdown(markdown);
+    const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
       pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, labShell),
@@ -577,6 +583,11 @@ async function buildShadowPages(
   return count;
 }
 
+function labAboutFooterHref(paths: SitePaths): string {
+  const base = paths.lab.endsWith("/") ? paths.lab : `${paths.lab}/`;
+  return `${base}about.html`;
+}
+
 function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string): string {
   const link = (href: string, label: string) =>
     `<a href="${href}" class="site-footer__link">${label}</a>`;
@@ -586,7 +597,7 @@ function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string):
     paths.crossEdition
       ? link(paths.crossEdition.href, escapeHtml(paths.crossEdition.label))
       : "",
-    link(paths.lab, "Lab: how we measure improvements"),
+    link(labAboutFooterHref(paths), "About the Lab"),
     link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
   ].filter(Boolean);
 
@@ -1591,7 +1602,7 @@ export async function buildLabSite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
-  asOfIsoDate: string = new Date().toISOString().slice(0, 10),
+  asOfIsoDate: string = buildIsoDatePt(),
 ): Promise<number> {
   const labSiteDir = path.join(siteDir, "lab");
   await fs.mkdir(labSiteDir, { recursive: true });
@@ -1611,10 +1622,10 @@ export async function buildLabSite(
   let introBlock = "";
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = sanitizeLabVisibleHtml(renderSafeMarkdown(markdown));
+    const html = prepareLabProseHtmlFromMarkdown(markdown);
     introBlock = `<div class="lab-intro mb-8 font-sans">
-      <article class="brief-content lab-prose-capped prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-p:font-sans prose-li:font-sans">${html}</article>
-      <p class="lab-last-updated">Last updated ${escapeHtml(formatDayHuman(asOfIsoDate))}</p>
+      <article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>
+      <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
     </div>`;
   } catch {
     introBlock = `<p class="mb-8 font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>`;

@@ -325,7 +325,6 @@ export function renderRunningControlPanelBlock(
 ): string {
   const source = pub.experiments.find((e) => e.id === run.id);
   const title = sanitizeVisibleCopy(run.label);
-  const hypothesis = plainHypothesisSentence(source?.short_hypothesis);
   const track =
     run.metric_current !== null && run.success.metric.target != null
       ? computeTrackStatus(
@@ -352,7 +351,6 @@ export function renderRunningControlPanelBlock(
       ${dayLine ? `<span class="text-stone-600 dark:text-stone-400">${escapeHtml(dayLine)}</span>` : ""}
     </div>
     ${progress}
-    ${hypothesis ? `<p class="mt-3 text-sm leading-relaxed text-stone-700 dark:text-stone-300">${escapeHtml(hypothesis)}</p>` : ""}
     <div class="mt-2">${renderLabMoreButton(moreId, escapeHtml)}</div>
     <div class="lab-more-panel mt-2 text-xs text-stone-600 dark:text-stone-400" data-for="${moreId}" data-open="false">
       ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(run.id)}</p>`}

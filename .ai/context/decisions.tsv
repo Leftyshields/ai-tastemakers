@@ -54,3 +54,7 @@ ts	phase	decision	why	evidence	result
 2026-10-20T03:00:00.000Z	design_decisions	law:UX36	Lab publish footer About and Open an issue links	Brian Lab round 3 PR40	accepted
 2026-10-20T03:00:00.000Z	design_decisions	law:UX37-should	Last updated build date PT under intro	Brian Lab round 3 PR40	accepted
 2026-10-20T03:00:00.000Z	design_decisions	principle:Occam-Pareto	Lab round 3 scope minimal diff per law	Brian Lab round 3 PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:UX30-gate	Hero hypothesis only under Testing not under read window	Brian Lab gate PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:UX37-gate	Last updated build date America Los Angeles with test	Brian Lab gate PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:UX26-UX35-gate	Lab prose sans font inline backticks to code verify genesis	Brian Lab gate PR40	accepted
+2026-10-20T04:00:00.000Z	design_decisions	law:footer-about	Site footer About the Lab links lab about html	Brian Lab gate PR40	accepted
