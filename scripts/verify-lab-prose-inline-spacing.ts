@@ -7,7 +7,7 @@ import {
 } from "./lab/lab-format.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const LAB_PROSE_PAGES = ["site/lab/index.html", "site/lab/about.html"];
+const LAB_PROSE_PAGES = ["site/lab/index.html", "site/lab/methodology.html"];
 
 function main(): void {
   let failed = false;

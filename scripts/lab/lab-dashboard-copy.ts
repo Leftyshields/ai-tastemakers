@@ -6,7 +6,7 @@ const GITHUB_ISSUES_URL = "https://github.com/Leftyshields/ai-tastemakers/issues
 
 export { GITHUB_ISSUES_URL };
 
-/** Site-wide footer link to lab/about.html (round 7 label). */
+/** Site-wide footer link to Lab home (round 7 label). */
 export const LAB_FOOTER_ABOUT_LABEL = "Tastemaker Lab";
 
 export function plainHypothesisSentence(raw: string | null | undefined): string {
@@ -111,7 +111,7 @@ export function countExperimentsWithSource(experiments: LabExperimentEntry[]): n
 export function labPublishFooterHtml(escapeHtml: (t: string) => string): string {
   return `<p class="lab-publish-footer mt-10 border-t border-stone-200 pt-6 text-sm text-stone-600 dark:border-stone-700 dark:text-stone-400 font-sans">
     Everything here is safe to publish.
-    <a href="about.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">${escapeHtml(LAB_FOOTER_ABOUT_LABEL)}</a>.
+    <a href="index.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">${escapeHtml(LAB_FOOTER_ABOUT_LABEL)}</a>.
     <a href="${escapeHtml(GITHUB_ISSUES_URL)}" class="text-blue-800 underline dark:text-blue-400" data-lab-section="footer">Open an issue</a>.
   </p>`;
 }

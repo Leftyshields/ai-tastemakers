@@ -66,3 +66,4 @@ ts	phase	decision	why	evidence	result
 2026-10-20T05:05:00.000Z	design_decisions	law:UX42	PostHog and lab_link_click on all lab pages go redirect verify gate	Brian Lab round 5	accepted
 2026-10-20T05:05:00.000Z	design_decisions	law:UX43	Structured Evaluated tools page queue top roles matrix	Brian Lab round 5	accepted
 2026-10-20T05:12:00.000Z	design_decisions	law:UX44	Digest learned section evidence from experiments and inventory only	Brian Lab round 6	accepted
+2026-10-20T12:50:00.000Z	design_decisions	law:UX45-revised	Methodology subpage footer Lab home revert experiment registry	Brian Lab round 7 revised	accepted

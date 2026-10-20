@@ -352,7 +352,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
 }
 
 export function labNavHtml(
-  active: "home" | "about" | "tools" | "experiments" | "tokens" | "posts",
+  active: "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts",
   escapeHtml: (t: string) => string,
   depth: 0 | 1 | 2 = 0,
 ): string {
@@ -368,12 +368,12 @@ export function labNavHtml(
 
   const prefix = depth === 0 ? "" : "../";
   const labHomeHref = depth === 0 ? "./" : "../";
-  const aboutHref = depth === 0 ? "about.html" : "../about.html";
+  const methodologyHref = depth === 0 ? "methodology.html" : "../methodology.html";
   const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
   return `<nav aria-label="Lab section" class="mb-8 flex flex-wrap gap-2">
       ${pill(labHomeHref, "Lab home", active === "home")}
-      ${pill(aboutHref, "About", active === "about")}
+      ${pill(methodologyHref, "Methodology", active === "methodology")}
       ${pill(`${prefix}tools.html`, "Evaluated", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
       ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
@@ -535,30 +535,49 @@ async function buildLabMarkdownPage(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
-  navActive: "home" | "about" | "tools" | "experiments" | "tokens" | "posts" = "home",
+  navActive: "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts" = "home",
 ): Promise<boolean> {
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
     let html = prepareLabProseHtmlFromMarkdown(markdown);
-    if (htmlName === "about.html") {
+    if (htmlName === "methodology.html") {
       html = html.replace(
         /<p>LAB_LOOP_ABOUT_PLACEHOLDER<\/p>/,
         renderLabLoopAboutBlockHtml(escapeHtml),
       );
+      html = `<h2 class="mb-6 font-sans text-lg font-bold tracking-tight">Methodology</h2>${html}`;
     }
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
       pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, {
         ...labShell,
-        labFallbackSection: navActive === "about" ? "about" : "about",
+        labFallbackSection: "about",
       }),
     );
     return true;
   } catch {
     return false;
   }
+}
+
+async function writeLabAboutRedirectPage(
+  labSiteDir: string,
+  paths: SitePaths,
+  brand: { name: string; tagline: string },
+  escapeHtml: (t: string) => string,
+  labShell: { labLayout: true },
+): Promise<void> {
+  const body = `${labNavHtml("methodology", escapeHtml)}<p class="font-sans text-sm text-stone-700 dark:text-stone-300">This page moved to <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a>.</p>${labPublishFooterHtml(escapeHtml)}`;
+  await fs.writeFile(
+    path.join(labSiteDir, "about.html"),
+    pageShell("About · Tastemakers", body, paths, brand, undefined, escapeHtml, {
+      ...labShell,
+      labFallbackSection: "about",
+      metaRefresh: "methodology.html",
+    }),
+  );
 }
 
 async function buildShadowPages(
@@ -608,9 +627,14 @@ async function buildShadowPages(
   return count;
 }
 
-export function labAboutFooterHref(paths: SitePaths): string {
+export function labHomeFooterHref(paths: SitePaths): string {
   const base = paths.lab.endsWith("/") ? paths.lab : `${paths.lab}/`;
-  return `${base}about.html`;
+  return `${base}index.html`;
+}
+
+/** @deprecated Use labHomeFooterHref */
+export function labAboutFooterHref(paths: SitePaths): string {
+  return labHomeFooterHref(paths);
 }
 
 export function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string): string {
@@ -622,7 +646,7 @@ export function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => s
     paths.crossEdition
       ? link(paths.crossEdition.href, escapeHtml(paths.crossEdition.label))
       : "",
-    link(labAboutFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
+    link(labHomeFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
     link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
   ].filter(Boolean);
 
@@ -644,10 +668,14 @@ export function pageShell(
     wideIndex?: boolean;
     seo?: PageSeoOptions;
     labFallbackSection?: LabLinkSection;
+    metaRefresh?: string;
   },
 ): string {
   const safeTitle = escapeHtml(title);
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
+  const refreshMeta = options?.metaRefresh
+    ? `<meta http-equiv="refresh" content="0;url=${escapeHtml(options.metaRefresh)}">`
+    : "";
   const labLayout = options?.labLayout === true;
   const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout);
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
@@ -666,6 +694,7 @@ export function pageShell(
   ${colorSchemeHeadScript}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${safeTitle}</title>
+  ${refreshMeta}
   ${headMeta}
   <link rel="stylesheet" href="${paths.css}">
   ${posthogScriptHtml()}
@@ -1661,7 +1690,7 @@ export async function buildLabSite(
     introBlock = `<div class="lab-intro mb-8 font-sans">
       <article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>
       ${renderLabLoopStripHtml("lab-home", escapeHtml, { linkCtx })}
-      <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
+      <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))} · <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a></p>
     </div>`;
   } catch {
     introBlock = `<p class="mb-8 font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>`;
@@ -1675,13 +1704,15 @@ export async function buildLabSite(
     repoRoot,
     labSiteDir,
     path.join("briefings", "lab", "about.md"),
-    "about.html",
-    "About the Lab",
+    "methodology.html",
+    "Methodology · Tastemakers",
     brand,
     escapeHtml,
     labShell,
-    "about",
+    "methodology",
   );
+
+  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell);
 
   const labIndexDescription =
     "How AI Tastemakers measures site engagement, runs digest pipeline experiments, and publishes results openly.";

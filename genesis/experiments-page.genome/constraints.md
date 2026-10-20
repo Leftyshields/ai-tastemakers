@@ -46,8 +46,8 @@
 - **UX32**: Timeline row labels match `lab/experiments.json`; Oct 25 to Nov 21 caveman row reads Shorter enrichment context; Nov 1 freeze band stays visible.
 - **UX33**: Backlog columns Name, Surface, Starts, Depends on without repeating column labels in cells; Digest UI freeze is its own row with hatch swatch and Freeze chip.
 - **UX34**: History shows one plain result line from data; verdict when no metric; Write up only when post exists; latest five rows with Show all.
-- **UX35**: `lab/about.html` holds long form Lab copy; Lab home keeps two sentence intro; header nav About; Right now paragraph removed.
-- **UX36**: Lab footer line: Everything here is safe to publish. Tastemaker Lab. Open an issue.
+- **UX35**: `lab/methodology.html` holds long form Lab copy with Methodology heading; `lab/about.html` redirects to it; Lab home keeps two sentence intro; header nav Methodology; Right now paragraph removed.
+- **UX36**: Lab footer line: Everything here is safe to publish. Tastemaker Lab links Lab home. Open an issue.
 - **UX37 (should)**: Last updated {build date PT} under intro in muted small text.
 
 ## Acceptance criteria (Brian approved Lab UX round 4)
@@ -62,4 +62,3 @@
 - **UX42**: Every site/lab HTML page ships the same PostHog snippet as the main site (project 489599 when POSTHOG_KEY is set). Delegated capture fires lab_link_click on anchors with data-lab-section and optional experiment_id and source_repo. Outbound repo links use the /go allowlist redirect. verify:genesis fails when any lab page lacks posthog.init, lab_link_click script, or data-lab-section on an anchor.
 - **UX43**: tools.html is a structured Evaluated page (queue table, top 10 with Show all, role matrix disclosures, operator notes behind More). Loop strip marks Evaluated as current. No literal backticks; Lab home body sizing; passes contrast, dash, spacing, and link checks at 390px and in dark mode.
 - **UX44**: tools.html includes What the digest has learned built at page generation from lab/experiments.json and data/tool-inventory.json only; each list item carries data-lab-claim and data-lab-evidence; vitest verifies claims map to repo data. Lab nav pill reads Evaluated. Tool and experiment links use blue in dark mode with underline on hover. Pipeline roles use OSS or Skills edition topic chip styling.
-- **UX45**: Lab home lists every experiment in a registry section directly under the intro and loop strip and above timeline, backlog, and history. Each card shows name, status, verdict when present, a visible metric headline versus target from experiments.json only, result_summary when present, Write up when built, and operator ids behind More only. No horizontal scroll at 390px.

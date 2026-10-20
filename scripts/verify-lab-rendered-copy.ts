@@ -7,6 +7,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 
 const LAB_HTML = [
   "site/lab/index.html",
+  "site/lab/methodology.html",
   "site/lab/about.html",
   "site/lab/tools.html",
   "site/lab/experiments.html",

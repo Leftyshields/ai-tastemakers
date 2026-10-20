@@ -8,7 +8,7 @@ import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const LAB_PAGES = ["site/lab/index.html", "site/lab/about.html"];
+const LAB_PAGES = ["site/lab/index.html", "site/lab/methodology.html"];
 const MIN_RATIO = 4.5;
 
 const CONTRAST_CHECK_JS = `
