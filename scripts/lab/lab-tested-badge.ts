@@ -135,26 +135,45 @@ export function renderLabTestedBadgePagesHtml(
   return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
-/** Outlined bulletproof button for digest email (paired with View on GitHub). */
-export function renderLabTestedBadgeEmailButtonHtml(
+export function labBadgeEmailFlaskSrc(siteUrl: string): string {
+  const trimmed = siteUrl.replace(/\/+$/, "");
+  return `${trimmed}/assets/lab-flask-email.png`;
+}
+
+/** Status pill beside View on GitHub in digest email (not a primary action). */
+export function renderLabTestedBadgeEmailPillHtml(
   badge: LabBadgeInfo,
   href: string,
+  siteUrl: string,
   escape: (t: string) => string,
 ): string {
   const label = badgeVisibleLabel(badge.status);
   const isRunning = badge.status === "running";
   const border = isRunning ? "#1e40af" : "#d6d3d1";
-  const color = isRunning ? "#1e40af" : "#57534e";
-  const bg = "transparent";
-  return `<td style="padding:0 0 0 8px;vertical-align:top;">
-      <table role="presentation" cellspacing="0" cellpadding="0" border="0" style="margin:0;">
-        <tr>
-          <td style="border:1px solid ${border};border-radius:6px;background-color:${bg};">
-            <a href="${escape(href)}" style="display:inline-block;padding:10px 16px;color:${color};font-family:system-ui,sans-serif;font-size:14px;font-weight:600;text-decoration:none;white-space:nowrap;">${escape(label)}</a>
-          </td>
-        </tr>
-      </table>
-    </td>`;
+  const color = isRunning ? "#1e40af" : "#44403c";
+  const bg = isRunning ? "transparent" : "#f5f5f4";
+  const img = escape(labBadgeEmailFlaskSrc(siteUrl));
+  return `<a href="${escape(href)}" style="display:inline-block;padding:2px 10px;border:1px solid ${border};border-radius:9999px;background-color:${bg};color:${color};font-family:system-ui,sans-serif;font-size:12px;font-weight:600;line-height:20px;text-decoration:none;vertical-align:middle;white-space:nowrap;"><img src="${img}" alt="" width="12" height="12" style="display:inline-block;vertical-align:middle;margin-right:4px;border:0;" />${escape(label)}</a>`;
+}
+
+/** Sibling table cell for digest email button row (transparent, 8px left gap). */
+export function renderLabTestedBadgeEmailPillCellHtml(
+  badge: LabBadgeInfo,
+  href: string,
+  siteUrl: string,
+  escape: (t: string) => string,
+): string {
+  const pill = renderLabTestedBadgeEmailPillHtml(badge, href, siteUrl, escape);
+  return `<td style="padding:0 0 0 8px;vertical-align:middle;background-color:transparent;">${pill}</td>`;
+}
+
+/** @deprecated Use renderLabTestedBadgeEmailPillHtml */
+export function renderLabTestedBadgeEmailButtonHtml(
+  badge: LabBadgeInfo,
+  href: string,
+  escape: (t: string) => string,
+): string {
+  return renderLabTestedBadgeEmailPillHtml(badge, href, "https://example.com", escape);
 }
 
 /** Muted inline chip when email layout has no GitHub button row. */

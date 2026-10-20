@@ -44,6 +44,33 @@ export function formatDayHuman(iso: string): string {
   return `${MONTH_SHORT[m - 1]!} ${d}, ${y}`;
 }
 
+/** Reader facing calendar dates on Lab write ups (America/Los_Angeles calendar day). */
+export function formatReaderDatePt(iso: string): string {
+  const trimmed = iso.trim();
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(trimmed)) return trimmed;
+  const noonPt = new Date(`${trimmed}T12:00:00`);
+  const fmt = new Intl.DateTimeFormat("en-US", {
+    timeZone: PT,
+    month: "short",
+    day: "numeric",
+    year: "numeric",
+  });
+  return fmt.format(noonPt);
+}
+
+/** Normalize write up markdown before render (dates, approximations). */
+export function normalizeLabWriteupMarkdown(markdown: string): string {
+  let s = markdown;
+  s = s.replace(/\bKept\s*\(\s*(\d{4}-\d{2}-\d{2})\s*\)/gi, (_, iso: string) => `Kept on ${formatReaderDatePt(iso)}`);
+  s = s.replace(/~\s*(?=\d)/g, "about ");
+  s = s.replace(/\b(\d{4}-\d{2}-\d{2})\b/g, (_, iso: string) => formatReaderDatePt(iso));
+  return s;
+}
+
+export function prepareLabWriteupHtmlFromMarkdown(markdown: string): string {
+  return prepareLabProseHtmlFromMarkdown(normalizeLabWriteupMarkdown(markdown));
+}
+
 /** Calendar date (YYYY-MM-DD) for the build in America/Los_Angeles (UX37). */
 export function buildIsoDatePt(now: Date = new Date()): string {
   const fmt = new Intl.DateTimeFormat("en-CA", {
@@ -202,6 +229,41 @@ export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?
 
 export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
   return sanitizeLabVisibleHtml(stripLiteralBackticksToCode(renderSafeMarkdown(markdown)));
+}
+
+const ISO_DATE_RE = /\b\d{4}-\d{2}-\d{2}\b/;
+const TILDE_APPROX_RE = /~\s*\d/;
+
+/** Reader facing copy must not contain raw ISO dates or ~ approximations. */
+export function findLabReaderCopyViolations(html: string, pageRel: string): string[] {
+  const withoutDatetime = html.replace(/\sdatetime="[^"]*"/gi, "");
+  const main =
+    withoutDatetime.match(/<main[\s\S]*?<\/main>/i)?.[0] ??
+    withoutDatetime.match(/<article[\s\S]*?<\/article>/i)?.[0] ??
+    withoutDatetime;
+  const text = main.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<[^>]+>/g, " ");
+  const violations: string[] = [];
+  if (ISO_DATE_RE.test(text)) {
+    violations.push(`${pageRel}: reader facing ISO date in visible text`);
+  }
+  if (TILDE_APPROX_RE.test(text)) {
+    violations.push(`${pageRel}: reader facing ~ approximation in visible text`);
+  }
+  return violations;
+}
+
+export function findLabProseFontViolations(html: string, pageRel: string): string[] {
+  const violations: string[] = [];
+  for (const m of html.matchAll(/<article\b[^>]*class="([^"]*)"[^>]*>/gi)) {
+    const cls = m[1] ?? "";
+    if (!cls.includes("font-sans")) {
+      violations.push(`${pageRel}: lab article missing font-sans on prose wrapper`);
+    }
+    if (!cls.includes("prose-p:font-sans") && !cls.includes("lab-prose-capped")) {
+      violations.push(`${pageRel}: lab article missing sans body typography utilities`);
+    }
+  }
+  return violations;
 }
 
 export function findLabProseInlineSpacingViolations(html: string): string[] {

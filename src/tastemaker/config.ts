@@ -16,6 +16,17 @@ export function findRepoRoot(): string {
   return path.resolve(here, "../..");
 }
 
+export const DEFAULT_DIGEST_SITE_URL = "https://leftyshields.github.io/ai-tastemakers";
+
+/** Production Pages base URL for digest email links and assets (not example.com). */
+export function digestSiteUrlFromEnv(): string {
+  return (
+    process.env.DIGEST_SITE_URL?.trim() ||
+    process.env.SITE_URL?.trim() ||
+    DEFAULT_DIGEST_SITE_URL
+  );
+}
+
 function parseEnvInt(name: string, fallback: string): number {
   const raw = process.env[name]?.trim() || fallback;
   const n = parseInt(raw, 10);
@@ -112,9 +123,7 @@ export function loadConfig(options?: {
     resendApiKey: process.env.RESEND_API_KEY?.trim() || undefined,
     digestEmailFrom: process.env.DIGEST_EMAIL_FROM?.trim() || undefined,
     experimentReminderTo: process.env.EXPERIMENT_REMINDER_TO?.trim() || undefined,
-    digestSiteUrl:
-      process.env.DIGEST_SITE_URL?.trim() ||
-      "https://leftyshields.github.io/ai-tastemakers",
+    digestSiteUrl: digestSiteUrlFromEnv(),
     firebaseProjectId: process.env.FIREBASE_PROJECT_ID?.trim() || undefined,
     firebaseClientEmail: process.env.FIREBASE_CLIENT_EMAIL?.trim() || undefined,
     firebasePrivateKey: process.env.FIREBASE_PRIVATE_KEY?.trim() || undefined,
