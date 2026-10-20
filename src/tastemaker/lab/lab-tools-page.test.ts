@@ -59,6 +59,17 @@ describe("Lab UX43 tools page", () => {
     expect(queueBlock).toContain("lab-tools-role-chips");
   });
 
+  it("role chips use plain words without dashes or file names", () => {
+    const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, {}, "2026-10-19"), escapeHtml);
+    const chips = html.match(/lab-edition-topic-chip[^>]*>([^<]+)</g) ?? [];
+    expect(chips.length).toBeGreaterThan(0);
+    for (const chip of chips) {
+      const label = chip.replace(/.*>/, "").replace(/<.*/, "");
+      expect(label).not.toMatch(/\.json|\.html|\/|_/);
+      expect(label).not.toMatch(/-/);
+    }
+  });
+
   it("routes allowlisted queue tool links through go", () => {
     const allowlist = { "NousResearch/hermes-agent": "https://github.com/NousResearch/hermes-agent" };
     const html = renderToolsPageHtml(repoRoot, defaultLabLinkContext(0, allowlist, "2026-10-19"), escapeHtml);

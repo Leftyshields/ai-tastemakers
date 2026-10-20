@@ -1,1 +1,1 @@
-Tastemakers reports on new open source tools every day. We adopt the promising ones and test them on our own pipeline, then publish what happened.
+Tastemakers reports on tools every day, evaluates them, and picks ones that could improve its own pipeline. It experiments with those choices almost automatically and publishes what happened.

@@ -25,10 +25,10 @@ function escapeHtml(t: string): string {
 describe("Lab UX38 UX39 UX40 UX41", () => {
   it("UX38 intro emphasizes first sentence", () => {
     const html = applyLabIntroVonRestorff(
-      "<p>Tastemakers reports on new open source tools every day. We adopt the promising ones.</p>",
+      "<p>Tastemakers reports on tools every day, evaluates them, and picks ones that could improve its own pipeline. It experiments almost automatically.</p>",
     );
     expect(html).toContain("<strong");
-    expect(html).toContain("Tastemakers reports on new open source tools every day.");
+    expect(html).toContain("Tastemakers reports on tools every day, evaluates them, and picks ones that could improve its own pipeline.");
   });
 
   it("UX39 loop strip has four steps and no dash characters", () => {

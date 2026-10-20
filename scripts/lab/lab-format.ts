@@ -138,8 +138,13 @@ export function surfaceChipLabel(surface: string): string {
     case "email":
       return "Email";
     default:
-      return sanitizeVisibleCopy(surface.replace(/_/g, " "));
+      return sanitizeVisibleCopy(surface.replace(/_/g, " ").replace(/-/g, " "));
   }
+}
+
+/** Pipeline role tags for visible chips (plain words, no file like tokens). */
+export function pipelineRoleChipLabel(role: string): string {
+  return sanitizeVisibleCopy(role.replace(/_/g, " ").replace(/-/g, " "));
 }
 
 export function surfaceChipLabels(entry: { surface: LabSurface | LabSurface[] }): string[] {

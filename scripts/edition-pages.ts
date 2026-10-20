@@ -33,6 +33,7 @@ import {
   type LabLinkSection,
 } from "./lab/lab-analytics.js";
 import { renderToolsPageHtml } from "./lab/render-tools-page.js";
+import { labAboutRedirectScript } from "./lab/lab-about-redirect.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import {
   articleJsonLd,
@@ -569,7 +570,7 @@ async function writeLabAboutRedirectPage(
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
 ): Promise<void> {
-  const body = `${labNavHtml("methodology", escapeHtml)}<p class="font-sans text-sm text-stone-700 dark:text-stone-300">This page moved to <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a>.</p>${labPublishFooterHtml(escapeHtml)}`;
+  const body = `${labNavHtml("methodology", escapeHtml)}<p class="font-sans text-sm text-stone-700 dark:text-stone-300">This page moved to <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a>.</p>${labAboutRedirectScript()}${labPublishFooterHtml(escapeHtml)}`;
   await fs.writeFile(
     path.join(labSiteDir, "about.html"),
     pageShell("About · Tastemakers", body, paths, brand, undefined, escapeHtml, {
@@ -578,6 +579,20 @@ async function writeLabAboutRedirectPage(
       metaRefresh: "methodology.html",
     }),
   );
+}
+
+export function renderLabHomeIntroBlock(
+  articleHtml: string,
+  loopStripHtml: string,
+  asOfIsoDate: string,
+  escapeHtml: (t: string) => string,
+): string {
+  return `<div class="lab-intro mb-8 font-sans">
+      <article class="${LAB_PROSE_ARTICLE_CLASS}">${articleHtml}</article>
+      <p class="lab-intro-methodology mt-3 text-sm"><a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a></p>
+      ${loopStripHtml}
+      <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
+    </div>`;
 }
 
 async function buildShadowPages(
@@ -1687,11 +1702,12 @@ export async function buildLabSite(
   try {
     const markdown = await fs.readFile(labIndexMd, "utf8");
     const html = applyLabIntroVonRestorff(prepareLabProseHtmlFromMarkdown(markdown));
-    introBlock = `<div class="lab-intro mb-8 font-sans">
-      <article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>
-      ${renderLabLoopStripHtml("lab-home", escapeHtml, { linkCtx })}
-      <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))} · <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a></p>
-    </div>`;
+    introBlock = renderLabHomeIntroBlock(
+      html,
+      renderLabLoopStripHtml("lab-home", escapeHtml, { linkCtx }),
+      asOfIsoDate,
+      escapeHtml,
+    );
   } catch {
     introBlock = `<p class="mb-8 font-sans text-sm text-stone-600 dark:text-stone-400">Run <code>npm run build:pages</code> after adding <code>briefings/lab/index.md</code>.</p>`;
   }

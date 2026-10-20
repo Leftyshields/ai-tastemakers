@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { LabExperimentEntry } from "./validate-experiments.js";
 import { loadExperimentsFile } from "./validate-experiments.js";
-import { sanitizeVisibleCopy } from "./lab-format.js";
+import { pipelineRoleChipLabel, sanitizeVisibleCopy } from "./lab-format.js";
 import type { LabLinkContext } from "./lab-analytics.js";
 import { renderLabTrackedLink } from "./lab-analytics.js";
 import { renderLabMoreButton } from "./lab-dashboard-copy.js";
@@ -257,7 +257,7 @@ export function renderDigestLearnedSectionHtml(
     const topRoles = [...new Set(inventory.entries.flatMap((e) => e.pipeline_roles ?? []))].sort();
     const chips = topRoles
       .slice(0, 9)
-      .map((r) => renderEditionTopicChip(sanitizeVisibleCopy(r.replace(/_/g, " ")), escapeHtml))
+      .map((r) => renderEditionTopicChip(pipelineRoleChipLabel(r), escapeHtml))
       .join(" ");
     parts.push(`<h4 class="mb-2 text-sm font-semibold text-stone-900 dark:text-stone-100">Pipeline roles in the inventory</h4>
       <p class="mb-2 text-sm text-stone-700 dark:text-stone-300" ${renderClaimAttrs(model.roleGrowth, escapeHtml)}>

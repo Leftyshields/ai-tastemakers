@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { LabExperimentEntry } from "./validate-experiments.js";
 import { loadExperimentsFile } from "./validate-experiments.js";
-import { sanitizeVisibleCopy } from "./lab-format.js";
+import { pipelineRoleChipLabel, sanitizeVisibleCopy } from "./lab-format.js";
 import { renderLabLoopStripHtml } from "./lab-loop-strip.js";
 import {
   type LabLinkContext,
@@ -41,7 +41,7 @@ function loadInventory(repoRoot: string): ToolInventoryFile {
 }
 
 function roleLabel(role: string): string {
-  return sanitizeVisibleCopy(role.replace(/_/g, " "));
+  return pipelineRoleChipLabel(role);
 }
 
 function toolDisplayName(fullName: string): string {
