@@ -331,7 +331,7 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
 export function labNavHtml(
   active: "home" | "tools" | "experiments" | "tokens" | "posts",
   escapeHtml: (t: string) => string,
-  depth: 0 | 1 | 2 = 0,
+  depth: 0 | 1 = 0,
 ): string {
   const pill = (href: string, label: string, isActive: boolean) => {
     const base =
@@ -344,11 +344,10 @@ export function labNavHtml(
   };
 
   const prefix = depth === 0 ? "" : "../";
-  const labHomeHref = depth === 0 ? "./" : "../";
-  const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
+  const postsHref = depth === 0 ? "posts/" : "./";
 
   return `<nav aria-label="Lab section" class="mb-8 flex flex-wrap gap-2">
-      ${pill(labHomeHref, "Lab home", active === "home")}
+      ${pill(`${prefix}${depth === 0 ? "./" : ""}`, "Lab home", active === "home")}
       ${pill(`${prefix}tools.html`, "Tools", active === "tools")}
       ${pill(`${prefix}experiments.html`, "Experiments", active === "experiments")}
       ${pill(`${prefix}token-usage.html`, "Tokens", active === "tokens")}
@@ -491,7 +490,7 @@ export function renderShadowCompareBody(
     .map((repo) => renderShadowRepoSection(repo, escapeHtml, shadow.narrate_ponytail_requested))
     .join("");
 
-  return `${labNavHtml("experiments", escapeHtml, 2)}
+  return `${labNavHtml("experiments", escapeHtml, 1)}
     <p class="mb-2"><a href="../experiments.html" class="text-sm text-blue-800 hover:underline dark:text-blue-400">&larr; Experiments</a></p>
     <h2 class="font-mono text-lg font-bold">${escapeHtml(shadow.run_id)}</h2>
     <p class="text-sm text-stone-500 dark:text-stone-400">${escapeHtml(shadow.date)} · ${escapeHtml(shadow.edition)} · ${escapeHtml(shadow.ranking_mode)}</p>
@@ -1308,7 +1307,6 @@ function monthlyPagePaths(): SitePaths {
     css: "../assets/style.css",
     home: "../",
     subscribe: "../subscribe.html",
-    lab: "../lab/",
     brief: () => "../",
     editionNav: { ossHref: "../", skillsHref: "../skills/", active: undefined },
   };
@@ -1368,7 +1366,6 @@ function weeklyPagePaths(): SitePaths {
     css: "../assets/style.css",
     home: "../",
     subscribe: "../subscribe.html",
-    lab: "../lab/",
     brief: () => "../",
     editionNav: { ossHref: "../", skillsHref: "../skills/", active: undefined },
   };

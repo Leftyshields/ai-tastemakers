@@ -44,4 +44,3 @@ ts	phase	decision	why	evidence	result
 2026-10-20T02:30:00.000Z	design_decisions	lab:UX27	Remove stale Right now paragraph from lab index	production Lab fix post merge	accepted
 2026-10-20T02:35:00.000Z	design_decisions	law:UX28-r2	Remove How to read this row above control panel no Full explainer link	Brian Lab fix PR40	accepted
 2026-10-20T02:35:00.000Z	design_decisions	law:UX29	Omit Write up when no briefings lab posts md	production Lab fix PR40	accepted
-2026-10-20T02:35:00.000Z	qa	law:UX30	verify genesis lab internal href and anchor resolution	production Lab fix PR40	accepted

@@ -137,7 +137,6 @@ export function sanitizeLabVisibleHtml(html: string): string {
   });
 }
 
-/** Inline tag glued to letter/number with no whitespace (Lab prose QA, UX26). */
 /** Experiment ids with a markdown post under briefings/lab/posts/ (UX29). */
 export function listLabWriteupPostIds(repoRoot: string): string[] {
   const dir = path.join(repoRoot, "briefings/lab/posts");

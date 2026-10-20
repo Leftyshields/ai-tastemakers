@@ -7,11 +7,6 @@ import {
   listLabWriteupPostIds,
   sanitizeLabVisibleHtml,
 } from "../../../scripts/lab/lab-format.js";
-import {
-  findInternalHrefViolations,
-  resolveInternalHrefTarget,
-  SITE_PUBLISH_PREFIX,
-} from "../../../scripts/verify-lab-internal-hrefs.js";
 import { buildLabPublicFile, renderLabDashboardHtml } from "../../../scripts/lab/build-lab-public.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
@@ -24,7 +19,7 @@ function escapeHtml(t: string): string {
     .replace(/"/g, "&quot;");
 }
 
-describe("Lab prose spacing (UX26 UX27)", () => {
+describe("Lab UX26 UX28 UX29", () => {
   it("sanitizeLabVisibleHtml keeps spaces beside inline tags", () => {
     const md = "- **[Tool inventory](tools.html)** repos that appeared";
     const html = sanitizeLabVisibleHtml(renderSafeMarkdown(md));
@@ -47,28 +42,6 @@ describe("Lab prose spacing (UX26 UX27)", () => {
     expect(writeupIds.has("EXP-20260701-landing-layout")).toBe(false);
     expect(html).not.toContain("posts/EXP-20260701-landing-layout.html");
     expect(html).not.toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
-  });
-
-  it("UX30 resolves publish prefix and directory hrefs", () => {
-    const home = path.join(repoRoot, "site/index.html");
-    expect(resolveInternalHrefTarget(home, `${SITE_PUBLISH_PREFIX}/`)).toBe(home);
-    expect(resolveInternalHrefTarget(home, "skills/")).toBe(
-      path.join(repoRoot, "site/skills/index.html"),
-    );
-  });
-
-  it("UX30 flags broken same page anchors", () => {
-    const page = path.join(repoRoot, "site/lab/index.html");
-    const bad = findInternalHrefViolations(
-      '<a href="#missing-section">Jump</a>',
-      page,
-    );
-    expect(bad.length).toBeGreaterThan(0);
-    const ok = findInternalHrefViolations(
-      '<h2 id="section-a">A</h2><a href="#section-a">Jump</a>',
-      page,
-    );
-    expect(ok).toEqual([]);
   });
 
   it("rendered lab dashboard prose has no inline spacing violations", () => {

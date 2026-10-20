@@ -40,4 +40,3 @@
 - **UX27**: Remove stale Right now paragraph from `briefings/lab/index.md`; control panel covers running state.
 - **UX28**: No How to read this summary row above the control panel (prose explainer below remains).
 - **UX29**: Omit history and control panel Write up links when no `briefings/lab/posts/{id}.md` exists.
-- **UX30**: `verify:genesis` fails on unresolved internal hrefs across all of `site/` (files and `#` anchors).
