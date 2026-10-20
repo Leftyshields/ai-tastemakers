@@ -33,7 +33,6 @@ import {
   renderLabMoreButton,
   renderLabSourceOriginChip,
 } from "./lab-dashboard-copy.js";
-
 /** Assumed desktop Gantt track width for month tick filtering (UX gate). */
 export const GANTT_ASSUMED_TRACK_PX = 650;
 const GANTT_MIN_MONTH_LABEL_INSET_PX = 32;

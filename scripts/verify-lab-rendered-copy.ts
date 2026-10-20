@@ -7,6 +7,7 @@ const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), ".."
 
 const LAB_HTML = [
   "site/lab/index.html",
+  "site/lab/methodology.html",
   "site/lab/about.html",
   "site/lab/tools.html",
   "site/lab/experiments.html",
@@ -29,6 +30,12 @@ function main(): void {
       failed = true;
       console.error(`forbidden copy in ${rel}:`);
       for (const v of violations) console.error(`  …${v}…`);
+    }
+    if (rel === "site/lab/methodology.html") {
+      if (!html.includes('rel="canonical"') || !html.includes("/lab/methodology.html")) {
+        failed = true;
+        console.error(`missing canonical link in ${rel}`);
+      }
     }
   }
   if (failed) process.exit(1);

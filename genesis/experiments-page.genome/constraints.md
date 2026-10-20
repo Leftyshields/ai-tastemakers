@@ -46,8 +46,8 @@
 - **UX32**: Timeline row labels match `lab/experiments.json`; Oct 25 to Nov 21 caveman row reads Shorter enrichment context; Nov 1 freeze band stays visible.
 - **UX33**: Backlog columns Name, Surface, Starts, Depends on without repeating column labels in cells; Digest UI freeze is its own row with hatch swatch and Freeze chip.
 - **UX34**: History shows one plain result line from data; verdict when no metric; Write up only when post exists; latest five rows with Show all.
-- **UX35**: `lab/about.html` holds long form Lab copy; Lab home keeps two sentence intro; header nav About; Right now paragraph removed.
-- **UX36**: Lab footer line: Everything here is safe to publish. About the Lab. Open an issue.
+- **UX35**: `lab/methodology.html` holds long form Lab copy with Methodology heading; `lab/about.html` redirects to it; Lab home keeps two sentence intro; header nav Methodology; Right now paragraph removed.
+- **UX36**: Lab footer line: Everything here is safe to publish. Tastemaker Lab links Lab home. Open an issue.
 - **UX37 (should)**: Last updated {build date PT} under intro in muted small text.
 
 ## Acceptance criteria (Brian approved Lab UX round 4)

@@ -2,9 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import type { LabExperimentEntry } from "./validate-experiments.js";
 import { loadExperimentsFile } from "./validate-experiments.js";
-import { sanitizeVisibleCopy } from "./lab-format.js";
+import { pipelineRoleChipLabel, sanitizeVisibleCopy } from "./lab-format.js";
 import type { LabLinkContext } from "./lab-analytics.js";
 import { renderLabTrackedLink } from "./lab-analytics.js";
+import { renderLabMoreButton } from "./lab-dashboard-copy.js";
 interface ToolInventoryEntry {
   full_name: string;
   html_url: string;
@@ -182,7 +183,7 @@ export function renderDigestLearnedSectionHtml(
   parts.push(`<section class="lab-tools-section lab-tools-learned mb-8 font-sans" aria-labelledby="lab-learned-heading">
     <h3 id="lab-learned-heading" class="mb-3 text-base font-bold">What the digest has learned</h3>
     <p class="mb-4 text-sm text-stone-700 dark:text-stone-300" ${renderClaimAttrs(model.introClaim, escapeHtml)}>
-      The daily briefings feed a tool inventory and Lab experiments. So far ${escapeHtml(String(shipped.length))} shipped habits are on the record and ${escapeHtml(String(queuedExps.length))} more are queued in <code class="font-mono text-xs">lab/experiments.json</code>.
+      The daily briefings feed a tool inventory and Lab experiments. So far ${escapeHtml(String(shipped.length))} shipped habits are on the record and ${escapeHtml(String(queuedExps.length))} more are queued for the Lab calendar.
     </p>`);
 
   if (model.adopted.length > 0) {
@@ -256,14 +257,23 @@ export function renderDigestLearnedSectionHtml(
     const topRoles = [...new Set(inventory.entries.flatMap((e) => e.pipeline_roles ?? []))].sort();
     const chips = topRoles
       .slice(0, 9)
-      .map((r) => renderEditionTopicChip(sanitizeVisibleCopy(r.replace(/_/g, " ")), escapeHtml))
+      .map((r) => renderEditionTopicChip(pipelineRoleChipLabel(r), escapeHtml))
       .join(" ");
     parts.push(`<h4 class="mb-2 text-sm font-semibold text-stone-900 dark:text-stone-100">Pipeline roles in the inventory</h4>
       <p class="mb-2 text-sm text-stone-700 dark:text-stone-300" ${renderClaimAttrs(model.roleGrowth, escapeHtml)}>
-        Tagged pipeline roles rose from ${escapeHtml(String(first.cumulativeTags))} in ${escapeHtml(monthLabel(first.month))} to ${escapeHtml(String(last.cumulativeTags))} in ${escapeHtml(monthLabel(last.month))} as newly featured tools picked up roles in <code class="font-mono text-xs">data/tool-inventory.json</code>.
+        Tagged pipeline roles rose from ${escapeHtml(String(first.cumulativeTags))} in ${escapeHtml(monthLabel(first.month))} to ${escapeHtml(String(last.cumulativeTags))} in ${escapeHtml(monthLabel(last.month))} as newly featured tools picked up roles over time.
       </p>
       <div class="lab-tools-role-chips flex flex-wrap gap-1">${chips}</div>`);
   }
+
+  const sourcesId = "learned-sources";
+  parts.push(`<div class="mt-3 text-xs text-stone-600 dark:text-stone-400">
+      ${renderLabMoreButton(sourcesId, escapeHtml, "More")}
+      <div class="lab-expand-row lab-learned-source-panel" data-for="${sourcesId}" data-open="false">
+        <p class="mt-2 font-mono text-xs">lab/experiments.json</p>
+        <p class="font-mono text-xs">data/tool-inventory.json</p>
+      </div>
+    </div>`);
 
   parts.push(`</section>`);
   return parts.join("\n");

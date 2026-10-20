@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { LabExperimentEntry } from "./validate-experiments.js";
 import { loadExperimentsFile } from "./validate-experiments.js";
-import { sanitizeVisibleCopy } from "./lab-format.js";
+import { pipelineRoleChipLabel, sanitizeVisibleCopy } from "./lab-format.js";
 import { renderLabLoopStripHtml } from "./lab-loop-strip.js";
 import {
   type LabLinkContext,
@@ -41,7 +41,7 @@ function loadInventory(repoRoot: string): ToolInventoryFile {
 }
 
 function roleLabel(role: string): string {
-  return sanitizeVisibleCopy(role.replace(/_/g, " "));
+  return pipelineRoleChipLabel(role);
 }
 
 function toolDisplayName(fullName: string): string {
@@ -134,7 +134,10 @@ export function renderToolsPageHtml(
   for (const entry of queue) {
     const exp = experimentForTool(entry.full_name, experiments);
     const status = queueStatus(entry, exp);
-    const roles = entry.pipeline_roles.slice(0, 2).map((r) => roleLabel(r)).join(", ");
+    const roleChips = entry.pipeline_roles
+      .slice(0, 2)
+      .map((r) => renderEditionTopicChip(roleLabel(r), escapeHtml))
+      .join("");
     const rowId = escapeHtml(`tool-${entry.full_name.replace(/\//g, "-")}`);
     const toolLink = renderLabTrackedLink(
       entry.html_url,
@@ -172,7 +175,7 @@ export function renderToolsPageHtml(
     }
     parts.push(`<tr class="lab-data-row">
       <td>${toolLink}</td>
-      <td>${escapeHtml(roles)}</td>
+      <td><div class="lab-tools-role-chips">${roleChips}</div></td>
       <td>${statusChip(status, escapeHtml)}</td>
       ${linkedCell}
     </tr>

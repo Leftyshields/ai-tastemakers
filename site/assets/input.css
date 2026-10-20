@@ -220,6 +220,22 @@
     max-width: 42rem;
   }
 
+  .lab-tools-learned .lab-learned-source-panel {
+    display: none;
+  }
+
+  .lab-tools-learned .lab-learned-source-panel[data-open="true"] {
+    display: block;
+    margin-top: 0.5rem;
+    padding: 0.75rem;
+    border: 1px dashed rgb(231 229 228);
+    border-radius: 8px;
+  }
+
+  .dark .lab-tools-learned .lab-learned-source-panel[data-open="true"] {
+    border-color: rgb(68 64 60);
+  }
+
   @media (max-width: 767px) {
     .lab-main .lab-table thead {
       display: none;
