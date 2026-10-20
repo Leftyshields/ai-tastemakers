@@ -46,15 +46,34 @@
     padding-right: calc(var(--lab-tested-badge-slot, 6.75rem) + 0.5rem);
   }
 
+  .digest-repo-card__title-row {
+    @apply inline-flex max-w-full min-w-0 flex-wrap items-baseline gap-x-1.5;
+  }
+
+  .digest-repo-card__rank {
+    @apply text-stone-500;
+  }
+
+  .digest-repo-card__title-link {
+    overflow-wrap: anywhere;
+  }
+
   .digest-repo-card--has-lab-badge .lab-tested-badge--pinned {
     position: absolute;
-    top: calc(1rem + (1.75rem - 1.5rem) / 2);
+    top: calc(1rem + (1.75rem - 1.25rem) / 2);
     right: 1rem;
     z-index: 1;
   }
 
   .lab-tested-badge {
-    @apply inline-flex h-5 min-h-6 shrink-0 items-center gap-1 rounded-full border px-2 font-sans text-xs font-semibold leading-none no-underline whitespace-nowrap;
+    @apply relative inline-flex h-5 shrink-0 items-center gap-1 rounded-full border px-2 font-sans text-xs font-semibold leading-none no-underline whitespace-nowrap;
+    min-height: 0;
+  }
+
+  .lab-tested-badge--pinned::before {
+    content: "";
+    position: absolute;
+    inset: -2px 0;
   }
 
   .lab-tested-badge--done {

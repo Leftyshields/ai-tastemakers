@@ -12,6 +12,8 @@ import { loadExperimentsFile } from "../../../scripts/lab/validate-experiments.j
 import {
   DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS,
   DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS,
+  formatDigestRepoCardTitleHtml,
+  LAB_BADGE_LONG_NAME_FIXTURE,
   renderDigestRepoCard,
 } from "../pages/brief-cards.js";
 import { labBadgeClickTrackingScript, digestRepoClickTrackingScript } from "../../../scripts/edition-pages.js";
@@ -102,11 +104,18 @@ describe("UX45 lab tested badge", () => {
     expect(html).toContain(DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS);
     expect(html).toContain(DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS);
     expect(html).toContain("lab-tested-badge--pinned");
-    expect(html).not.toContain("digest-repo-card__name-line");
+    expect(html).toContain("digest-repo-card__title-row");
+    expect(html).toContain("digest-repo-card__rank");
     const badgeIdx = html.indexOf("lab-tested-badge--pinned");
     const headingIdx = html.indexOf("digest-repo-card__heading");
     expect(badgeIdx).toBeGreaterThan(-1);
     expect(headingIdx).toBeGreaterThan(badgeIdx);
+  });
+
+  it("inserts wbr after owner slash for long repo names", () => {
+    const title = formatDigestRepoCardTitleHtml(LAB_BADGE_LONG_NAME_FIXTURE, escapeHtml);
+    expect(title).toContain("DietrichGebertExtendedOrganization/<wbr>");
+    expect(title).toContain("ponytail-narration-skills-for-agents");
   });
 
   it("links done experiments to lab history anchor", () => {

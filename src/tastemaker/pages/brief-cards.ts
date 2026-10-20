@@ -66,6 +66,18 @@ export const DIGEST_REPO_CARD_HAS_LAB_BADGE_CLASS = "digest-repo-card--has-lab-b
 /** Heading modifier: reserves space for pinned badge (width + 8px) via CSS. */
 export const DIGEST_REPO_CARD_LAB_BADGE_HEADING_CLASS = "digest-repo-card__heading--lab-badge";
 
+/** UX45 mobile layout gate: long repo name with badge reserved padding. */
+export const LAB_BADGE_LONG_NAME_FIXTURE = "DietrichGebertExtendedOrganization/ponytail-narration-skills-for-agents";
+
+export function formatDigestRepoCardTitleHtml(
+  fullName: string,
+  escape: (t: string) => string = escapeHtml,
+): string {
+  const slash = fullName.indexOf("/");
+  if (slash <= 0) return escape(fullName);
+  return `${escape(fullName.slice(0, slash + 1))}<wbr>${escape(fullName.slice(slash + 1))}`;
+}
+
 export function renderDigestRepoCard(
   repo: DigestRepo,
   section: EditionId,
@@ -102,8 +114,7 @@ export function renderDigestRepoCard(
   return `<article class="${cardClass}" data-repo="${escape(repo.full_name)}" data-section="${section}" data-position="${repo.rank}" data-digest-date="${escape(digestDate)}">
   ${labBadgeHtml}
   <h2 class="${headingClass}">
-    <span class="mr-1.5 text-stone-500">${repo.rank}.</span>
-    <a href="${githubUrl}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>${newBadgeHtml(repo.is_new)}
+    <span class="digest-repo-card__title-row"><span class="digest-repo-card__rank shrink-0">${repo.rank}.</span><a href="${githubUrl}" class="digest-repo-card__title-link min-w-0 text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${formatDigestRepoCardTitleHtml(repo.full_name, escape)}</a></span>${newBadgeHtml(repo.is_new)}
   </h2>
   <p class="digest-repo-card__meta mb-3 mt-1.5 font-sans text-sm text-stone-500 dark:text-stone-400">${meta}</p>
   ${briefHtml}
