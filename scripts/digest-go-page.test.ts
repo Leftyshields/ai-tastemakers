@@ -6,7 +6,9 @@ describe("renderGoRedirectPage", () => {
     const html = renderGoRedirectPage({ "acme/demo": "https://github.com/acme/demo" });
     expect(html).toContain("Continue to GitHub");
     expect(html).toContain("if (captured) return");
-    expect(html).toContain('posthog.capture("repo_click"');
+    expect(html).toContain('captureOnce("repo_click"');
+    expect(html).toContain('captureOnce("lab_badge_click"');
+    expect(html).toContain("event=lab_badge_click");
     expect(html).toContain("<noscript>");
   });
 });
