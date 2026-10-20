@@ -4,7 +4,7 @@
   "genome_dir": "genesis/experiments-page.genome",
   "workflow": "project-genesis nine-step",
   "verify": "npm run genesis:verify-experiments-page",
-  "acceptance_criteria": "UX1 UX2 UX3 UX4 UX5 UX6 UX7 UX8 UX10 UX11 UX12",
+  "acceptance_criteria": "UX1 UX2 UX3 UX4 UX5 UX6 UX7 UX8 UX10 UX11 UX12 UX13 UX14 UX15 UX16 UX17 UX18 UX19 UX20 UX21",
   "pipeline": "bash genesis/run-experiments-page-genesis.sh",
   "runtime": {
     "loadGenome": "GENOME_DIR=genesis/experiments-page.genome node -e \"require('./lib/loadGenome').loadGenome({ genomeDir: process.env.GENOME_DIR })\"",

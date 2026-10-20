@@ -1,6 +1,8 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
+@custom-variant dark (&:where(.dark, .dark *));
+
 @source "../**/*.html";
 
 @theme {
@@ -62,6 +64,12 @@
 
   .lab-main .prose tbody td {
     @apply px-3 py-2 align-top;
+  }
+
+  @media (min-width: 768px) {
+    .lab-main .lab-prose-capped {
+      max-width: 42rem;
+    }
   }
 
   .archive-day {

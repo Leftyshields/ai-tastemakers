@@ -1,10 +1,10 @@
 {
   "issue_id": "EPH-20261019-LAB-EXP-PAGE-UX",
   "genome": "genesis/experiments-page.genome",
-  "completed_at": "2026-10-19T23:08:00.000Z",
-  "resync_completed_at": "2026-10-19T23:30:00.000Z",
+  "completed_at": "2026-10-20T00:45:00.000Z",
+  "resync_completed_at": "2026-10-20T00:45:00.000Z",
   "mode": "autonomous",
-  "change_summary": "Lab dashboard UX genesis pass; merged main lab-experiment-status Pages dispatch and bot-synced experiment-status.json",
+  "change_summary": "Lab dashboard UX round 2 Gantt timeline, control panel summary rows, short_hypothesis validation, rendered copy verify",
   "genesis_sync": {
     "previous_clone_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
     "current_main_sha": "a7d548d0319f3df2142c4444bd726b298e219a84",
@@ -19,9 +19,9 @@
     { "name": "design_decisions", "gate": "pass", "artifact": ".ai/context/design_decisions.md,.ai/context/decisions.tsv" },
     { "name": "create_plan", "gate": "pass", "artifact": ".ai/context/last_plan.md" },
     { "name": "pre_implementation_checklist", "gate": "pass", "artifact": ".ai/context/pre_implementation_result.md" },
-    { "name": "execute_plan", "gate": "pass", "artifact": "cursor/lab-ux-genesis-effa,.github/workflows/lab-experiment-status.yml" },
+    { "name": "execute_plan", "gate": "pass", "artifact": "cursor/lab-ux-round2-c05f,scripts/lab/lab-dashboard-render.ts" },
     { "name": "code_review", "gate": "pass", "artifact": ".ai/context/code_review_changelog.md" },
-    { "name": "qa", "gate": "pass", "artifact": ".ai/context/test_results.json,scripts/verify-lab-dashboard-copy.sh" },
+    { "name": "qa", "gate": "pass", "artifact": ".ai/context/test_results.json,scripts/verify-lab-dashboard-copy.sh,scripts/verify-lab-rendered-copy.ts" },
     { "name": "postmortem", "gate": "pass", "artifact": "docs/CLOSURE_EPH-20261019-LAB-EXP-PAGE.md" }
   ],
   "verify_command": "npm run genesis:verify-experiments-page"

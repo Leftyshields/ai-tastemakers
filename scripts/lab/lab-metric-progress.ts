@@ -89,7 +89,7 @@ export function renderSparklineSvg(
 export function renderProgressBarHtml(progressPct: number | null): string {
   if (progressPct === null) return "";
   const pct = Math.max(0, Math.min(100, progressPct));
-  return `<div class="mt-2 lab-progress"><div class="flex justify-between text-xs text-stone-500"><span>Progress to target</span><span>${pct.toFixed(0)}%</span></div><div class="mt-1 h-2 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-progress-fill h-full rounded bg-emerald-600 dark:bg-emerald-500" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+  return `<div class="mt-2 lab-progress"><div class="flex justify-between text-xs text-stone-600 dark:text-stone-400"><span>Progress to target</span><span>${pct.toFixed(0)}%</span></div><div class="mt-1 h-2 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-progress-fill h-full rounded bg-emerald-600 dark:bg-emerald-500" style="width:${pct.toFixed(1)}%"></div></div></div>`;
 }
 
 export function renderReadWindowBarHtml(
@@ -98,7 +98,7 @@ export function renderReadWindowBarHtml(
 ): string {
   if (dayOfMinRead === null || minReadDays <= 0) return "";
   const pct = Math.max(0, Math.min(100, (dayOfMinRead / minReadDays) * 100));
-  return `<div class="mt-2 lab-read-window"><div class="text-xs text-stone-500"><span>Read window</span></div><div class="mt-1 h-1 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-read-window-fill h-full rounded bg-blue-500 dark:bg-blue-400" style="width:${pct.toFixed(1)}%"></div></div></div>`;
+  return `<div class="mt-2 lab-read-window"><div class="text-xs text-stone-600 dark:text-stone-400"><span>Read window</span></div><div class="mt-1 h-1 w-full overflow-hidden rounded bg-stone-200 dark:bg-stone-800"><div class="lab-read-window-fill h-full rounded bg-blue-600 dark:bg-blue-600" style="width:${pct.toFixed(1)}%"></div></div></div>`;
 }
 
 export function trackBadgeClass(status: LabTrackStatus): string {

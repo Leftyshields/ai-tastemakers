@@ -10,7 +10,6 @@ ts	phase	decision	why	evidence	result
 2026-10-19T23:07:18.254Z	design_decisions	law:UX10	how to read summary	Brian Lab UX approved 2026-10-19	accepted
 2026-10-19T23:07:18.254Z	design_decisions	law:UX11	reduced motion	Brian Lab UX approved 2026-10-19	accepted
 2026-10-19T23:07:18.254Z	design_decisions	law:UX12	unified status chips	Brian Lab UX approved 2026-10-19	accepted
-2026-10-19T23:15:31.178Z	qa	law:UX1-r2	Hide target progress when null add read window bar	UX review gate round 2	accepted
 2026-10-19T23:15:31.178Z	qa	law:UX6-r2	Timeline label fit rules mobile month list popover visible	UX review gate round 2	accepted
 2026-10-19T23:15:31.178Z	qa	law:UX7-r2	Humanizer multi lane span with lane span metadata	UX review gate round 2	accepted
 2026-10-19T23:15:31.178Z	qa	law:UX8-r2	Backlog four columns depends plain names	UX review gate round 2	accepted
@@ -21,3 +20,22 @@ ts	phase	decision	why	evidence	result
 2026-10-19T23:22:12.728Z	qa	law:UX6-r4-inside-labels	Inside labels restored with ellipsis collision rule outside only	UX review gate round 4 desktop	accepted
 2026-10-19T23:27:10.170Z	qa	law:UX6-final-inside-no-stub	No inside label when fewer than eight characters fit no truncated fallback	Final UX conditions	accepted
 2026-10-19T23:27:10.170Z	qa	law:UX6-final-popover-name	Popover first line bold plain experiment name above muted id	Final UX conditions	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX13	Gantt row per experiment name column and surface chips	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX14	Default window collapse row Show all toggle	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX15	Status bar fills legend freeze band	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX16	No dash copy rendered page verify	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX17	Control panel three summary rows short_hypothesis	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX18	Keyboard focus whole Gantt row popover	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX19	768 mobile list 768 to 1024 name column	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX20	Running row first Today line on top	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T00:55:00.000Z	design_decisions	law:UX21	Bold current month on axis	Brian Lab UX round 2 approved 2026-10-19	accepted
+2026-10-20T01:00:00.000Z	design_decisions	law:success-target-approval	Brian approved all ten guessed metric targets as recorded	lab/experiments.json approved_by Brian approved_on 2026-10-19	accepted
+2026-10-20T01:05:00.000Z	qa	law:UX3-r5-headline-no-status	Running control panel from experiments.json when status file absent day count from asOf PostHog optional	UX SIGN gate PR39	accepted
+2026-10-20T01:05:00.000Z	design_decisions	lab:shell-64rem	Desktop lab page shell max width 64rem prose capped 42rem	UX SIGN gate PR39	accepted
+2026-10-20T01:05:00.000Z	design_decisions	law:UX14-r5-row-order	Running recent done planned collapse row then Show all	UX SIGN gate PR39	accepted
+2026-10-20T01:05:00.000Z	design_decisions	law:UX6-r5-freeze-axis	Freeze label on month axis skip ticks narrower than 32px from window start	UX SIGN gate PR39	accepted
+2026-10-20T01:10:00.000Z	design_decisions	law:UX22	os prefers color scheme adds dark class on html before first paint no toggle	UX dark gate PR39	accepted
+2026-10-20T01:10:00.000Z	design_decisions	law:UX23	unified stone dark surfaces timeline tokens WCAG AA text	UX dark gate PR39	accepted
+2026-10-20T01:10:00.000Z	qa	law:UX24	verify genesis lab contrast light and dark min 4.5 to 1	UX dark gate PR39	accepted
+2026-10-20T01:12:00.000Z	qa	law:UX18-r6-focus-popover	QA every Gantt row tabindex 0 popover first line plain name	UX18 gate PR39	accepted
+2026-10-20T01:12:00.000Z	design_decisions	law:UX6-r6-freeze-gap	Offset Freeze axis label 8px from colliding month tick	axis Nov collision PR39	accepted

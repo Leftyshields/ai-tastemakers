@@ -82,6 +82,36 @@ export function surfaceLabel(surface: string): string {
   }
 }
 
+/** Compact chip labels for Gantt rows (UX13). */
+export function surfaceChipLabel(surface: string): string {
+  switch (surface) {
+    case "digest_ui":
+      return "Digest";
+    case "narration_oss":
+      return "OSS";
+    case "narration_skills":
+      return "Skills";
+    case "email":
+      return "Email";
+    default:
+      return sanitizeVisibleCopy(surface.replace(/_/g, " "));
+  }
+}
+
+export function surfaceChipLabels(entry: { surface: LabSurface | LabSurface[] }): string[] {
+  const list = Array.isArray(entry.surface) ? entry.surface : [entry.surface];
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const s of list) {
+    const chip = surfaceChipLabel(s);
+    if (!seen.has(chip)) {
+      seen.add(chip);
+      out.push(chip);
+    }
+  }
+  return out;
+}
+
 /** Strip hyphen, en dash, em dash, and ASCII arrow from visible copy (not ids). */
 export function sanitizeVisibleCopy(text: string): string {
   return text
@@ -91,6 +121,14 @@ export function sanitizeVisibleCopy(text: string): string {
     .replace(/-/g, " ")
     .replace(/\s+/g, " ")
     .trim();
+}
+
+/** Sanitize visible text nodes in static Lab markdown HTML (preserves tag structure). */
+export function sanitizeLabVisibleHtml(html: string): string {
+  return html.replace(/>([^<]+)</g, (match, text: string) => {
+    if (!text.trim()) return match;
+    return `>${sanitizeVisibleCopy(text)}<`;
+  });
 }
 
 export function isoTitleAttr(iso: string | null): string {

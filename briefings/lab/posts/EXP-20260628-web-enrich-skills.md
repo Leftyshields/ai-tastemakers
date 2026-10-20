@@ -4,7 +4,7 @@ _We kept extra web and Hacker News context on Skills write-ups. Closed 2026-07-1
 
 ## In plain English
 
-Before Claude writes a Skills blurb, it can now read a bit more than the README: a cleaned web page plus recent Hacker News mentions. The list of repos is unchanged — only the write-up gets richer.
+Before Claude writes a Skills blurb, it can now read a bit more than the README: a cleaned web page plus recent Hacker News mentions. The list of repos is unchanged only the write-up gets richer.
 
 We hoped that would raise clicks out to GitHub. Traffic was too low to tell. What we could see: “Why now” lines cited timely hooks more often, and the blurbs stayed accurate. So we kept the extra context.
 
@@ -16,12 +16,12 @@ The rest of this page is the operator record.
 
 We added **post-rank, pre-narrate enrichment** to the Skills digest pipeline. After GitHub discovery and README fetch, the top three ranked repos can receive extra context from:
 
-- **Jina Reader** — plain-text fetch of the repo’s GitHub page
-- **Hacker News Algolia** — recent story hits for the repo name
+- **Jina Reader** plain-text fetch of the repo’s GitHub page
+- **Hacker News Algolia** recent story hits for the repo name
 
 That context is merged, truncated (`DIGEST_ENRICH_MAX_CHARS`), and passed to Claude as an optional block after the README excerpt. Ranking and discovery are unchanged.
 
-**Shadow mode** (`DIGEST_ENRICH_SHADOW=1`) narrates twice — control (README only) vs treatment (README + external) — and writes side-by-side diffs under `data/experiments/runs/{run_id}/` without touching published briefings.
+**Shadow mode** (`DIGEST_ENRICH_SHADOW=1`) narrates twice control (README only) vs treatment (README + external) and writes side-by-side diffs under `data/experiments/runs/{run_id}/` without touching published briefings.
 
 ## Expected outcome
 
@@ -32,7 +32,7 @@ We expected treatment blurbs to cite timely hooks (launches, HN threads) more of
 ## What happened
 
 | Phase | Window (PT) | Outcome |
-|-------|-------------|---------|
+|-------|-------------|         |
 | Baseline | 2026-06-28 → 2026-07-11 | 4 briefing pageviews, 0 outbound repo clicks |
 | Treatment | 2026-07-12 → 2026-07-18 | `DIGEST_ENRICH_WEB=1` in production; 7 Skills digests shipped |
 | Verdict | Closed 2026-07-18 | **Keep enrichment on Skills** |
@@ -46,13 +46,13 @@ We expected treatment blurbs to cite timely hooks (launches, HN threads) more of
 | Skills briefing pageviews | 4 (2 paths: 2026-07-07 ×3, 2026-07-09 ×1) |
 | Outbound repo clicks | 0 |
 
-**Treatment window:** Production enrichment ran, but click volume remained too low for a meaningful before/after CTR comparison. We did not import a separate treatment snapshot for the same reason — ad-blockers and sparse traffic under-count both windows.
+**Treatment window:** Production enrichment ran, but click volume remained too low for a meaningful before/after CTR comparison. We did not import a separate treatment snapshot for the same reason ad-blockers and sparse traffic under-count both windows.
 
 ### Qualitative review
 
 Editorial pass on treatment briefings (2026-07-12 through 2026-07-18) found:
 
-- “Why now” lines often referenced **GitHub Trending** or **Hacker News** placement — consistent with enrichment attaching external context.
+- “Why now” lines often referenced **GitHub Trending** or **Hacker News** placement consistent with enrichment attaching external context.
 - Blurbs stayed grounded in README facts; no obvious hallucinated launch claims.
 - No subscriber-facing quality incidents during the treatment window.
 
@@ -62,16 +62,16 @@ The pre-module shadow run (`bfb156a9-…`) validated plumbing only; side-by-side
 
 **Keep the change on Skills.**
 
-- **Quality:** Passed — enrichment adds timely hooks without visible digest regressions.
-- **CTR:** Inconclusive — zero baseline clicks and single-digit pageviews cannot support a statistical verdict either way.
+- **Quality:** Passed enrichment adds timely hooks without visible digest regressions.
+- **CTR:** Inconclusive zero baseline clicks and single-digit pageviews cannot support a statistical verdict either way.
 - **Next step:** Firecrawl replaced Jina as the Skills web provider on 2026-08-01. Formal follow-up is the shorter-briefs narration test (EXP-20260802), not another enrich-provider A/B.
 
 Do **not** revert enrichment flags unless a future experiment or rubric review fails quality.
 
 ## References
 
-- Experiment ID: `EXP-20260628-web-enrich-skills`
+- Experiment ID: ``EXP-20260628-web-enrich-skills``
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Side-by-side shadow view: [/lab/shadow/{run_id}.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html)
+- Side by side shadow view: [/lab/shadow/{run_id}.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html)
 - Shadow rubric: [/lab/shadow-rubric.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow-rubric.html)
 - Pipeline flags: `DIGEST_ENRICH_WEB`, `DIGEST_ENRICH_SHADOW`, `DIGEST_ENRICH_MAX_REPOS`, `DIGEST_ENRICH_MAX_CHARS`

@@ -35,8 +35,10 @@
           "metric_type": "posthog",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Post rank web enrich lifts Skills outbound repo clicks during the treatment window."
     },
     {
       "id": "EXP-20260701-landing-layout",
@@ -65,8 +67,10 @@
           "metric_type": "posthog",
           "metric_label": "Homepage brief clicks"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Homepage layout v2 raises brief and archive clicks without hurting bounce."
     },
     {
       "id": "EXP-20260716-firecrawl-enrich-skills",
@@ -95,8 +99,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Firecrawl enrich matches or beats shadow rubric on Skills briefs."
     },
     {
       "id": "EXP-20260715-soft-dedup-diversity-skills",
@@ -125,8 +131,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Stronger soft dedup cuts repeat top picks while keeping weekly diversity."
     },
     {
       "id": "EXP-20260802-ponytail-narration-skills",
@@ -155,8 +163,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Tighter Skills narration cuts tokens about 15 percent with rubric pass held."
     },
     {
       "id": "EXP-20260913-humanizer-polish-skills",
@@ -187,8 +197,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Humanizer polish makes OSS and Skills blurbs sound more human without losing accuracy."
     },
     {
       "id": "POLICY-DIGEST-UI-FREEZE",
@@ -216,8 +228,10 @@
           "metric_type": "editorial",
           "metric_label": "Homepage brief clicks"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "No digest UI changes during the freeze so caveman reads stay unbiased."
     },
     {
       "id": "EXP-20260913-caveman-compress-skills",
@@ -248,8 +262,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Enrich compression lowers token use without dropping rubric pass or Why now quality."
     },
     {
       "id": "EXP-20260913-whynow-memory-skills",
@@ -279,8 +295,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Why now memory freshens repeat repo hooks while keeping rubric scores up."
     },
     {
       "id": "EXP-20260913-rank-bootstrap-skills",
@@ -311,8 +329,10 @@
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
-        "guessed": true
-      }
+        "approved_by": "Brian",
+        "approved_on": "2026-10-19"
+      },
+      "short_hypothesis": "Bootstrap ranking guards improve early list stability without hiding momentum picks."
     }
   ]
 }

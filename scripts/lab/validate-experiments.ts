@@ -23,7 +23,10 @@ export interface LabSuccessMetric {
 export interface LabSuccess {
   success_criteria: string;
   metric: LabSuccessMetric;
+  /** @deprecated Unapproved proxy targets only; must not be true once approved. */
   guessed?: boolean;
+  approved_by?: string;
+  approved_on?: string;
 }
 
 export interface PostHogEndSnapshot {
@@ -38,6 +41,8 @@ export interface PostHogEndSnapshot {
 export interface LabExperimentEntry {
   id: string;
   label: string;
+  /** Plain language hypothesis for the control panel (max 120 chars). */
+  short_hypothesis: string;
   surface: LabSurface | LabSurface[];
   metric: string;
   start: string | null;
@@ -143,6 +148,29 @@ export function validateSuccessBlock(exp: LabExperimentEntry): ValidationIssue[]
       experiment_ids: [exp.id],
     });
   }
+  if (success.guessed === true) {
+    issues.push({
+      code: "success",
+      message: `success.guessed must not be true on '${exp.id}'; remove guessed or record approval.`,
+      experiment_ids: [exp.id],
+    });
+  }
+  if (success.approved_on != null && success.approved_on !== "") {
+    if (!ISO_DATE.test(success.approved_on)) {
+      issues.push({
+        code: "success",
+        message: `Invalid success.approved_on on '${exp.id}' (use YYYY-MM-DD).`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (!success.approved_by?.trim()) {
+      issues.push({
+        code: "success",
+        message: `success.approved_by required when approved_on is set on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+  }
   return issues;
 }
 
@@ -211,6 +239,19 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
       issues.push({
         code: "schema",
         message: `Missing label on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (!exp.short_hypothesis?.trim()) {
+      issues.push({
+        code: "schema",
+        message: `Missing short_hypothesis on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    } else if (exp.short_hypothesis.length > 120) {
+      issues.push({
+        code: "schema",
+        message: `short_hypothesis on '${exp.id}' exceeds 120 characters.`,
         experiment_ids: [exp.id],
       });
     }

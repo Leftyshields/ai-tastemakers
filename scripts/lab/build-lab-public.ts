@@ -32,9 +32,11 @@ import type {
   LabExperimentSource,
   LabExperimentsPublicFile,
   PublicBacklogItem,
+  PublicControlPanelSummary,
   PublicHistoryItem,
   PublicTimelineModel,
 } from "./lab-public-types.js";
+import { sanitizeVisibleCopy } from "./lab-format.js";
 
 export type {
   LabVerdict,
@@ -104,6 +106,36 @@ export function buildTimelineGroups(
   asOfIsoDate: string = new Date().toISOString().slice(0, 10),
 ): PublicTimelineModel | null {
   return buildTimelineModel(entries, statuses, asOfIsoDate);
+}
+
+export function buildControlPanelSummary(
+  all: LabExperimentSource[],
+): PublicControlPanelSummary {
+  const running = all.find((e) => e.status === "running");
+  const testing =
+    running?.short_hypothesis?.trim()
+      ? { hypothesis: sanitizeVisibleCopy(running.short_hypothesis.trim()) }
+      : null;
+
+  const planned = all
+    .filter((e) => e.status === "planned" && e.start)
+    .sort((a, b) => (a.start ?? "").localeCompare(b.start ?? ""));
+  const next = planned[0];
+  const next_up =
+    next?.start != null
+      ? { label: next.label, start: next.start }
+      : null;
+
+  const done = all
+    .filter((e) => e.status === "done" && e.verdict)
+    .sort((a, b) => (b.end ?? "").localeCompare(a.end ?? ""));
+  const last = done[0];
+  const last_result =
+    last?.verdict != null
+      ? { id: last.id, label: last.label, verdict: last.verdict }
+      : null;
+
+  return { testing, next_up, last_result };
 }
 
 export function buildLabPublicFile(
@@ -192,6 +224,8 @@ export function buildLabPublicFile(
 
   const timeline = buildTimelineModel(all, ["running", "done", "planned"], asOfIsoDate);
 
+  const summary = buildControlPanelSummary(all);
+
   return {
     schema_version: 2,
     generated_at: new Date().toISOString(),
@@ -201,7 +235,7 @@ export function buildLabPublicFile(
       skip_reason: status?.skip_reason ?? "experiment-status.json missing",
     },
     experiments: all,
-    control_panel: { running: control },
+    control_panel: { running: control, summary },
     timeline,
     backlog,
     history,

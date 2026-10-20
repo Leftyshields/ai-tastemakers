@@ -56,6 +56,14 @@ describe("lab/experiments.json", () => {
     expect(validateExperimentsFile(plan)).toEqual([]);
   });
 
+  it("has Brian approved success targets without guessed flag", () => {
+    for (const task of tasks) {
+      expect(task.success.guessed).not.toBe(true);
+      expect(task.success.approved_by).toBe("Brian");
+      expect(task.success.approved_on).toBe("2026-10-19");
+    }
+  });
+
   it("builds public file with full experiment registry", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     expect(pub.experiments.length).toBe(tasks.length);
@@ -73,6 +81,7 @@ describe("validateSuccessBlock", () => {
   const base: LabExperimentEntry = {
     id: "EXP-test",
     label: "Test",
+    short_hypothesis: "We expect a measurable lift on the primary metric during the treatment window.",
     surface: "narration_skills",
     metric: "m",
     start: "2026-01-01",
@@ -91,6 +100,8 @@ describe("validateSuccessBlock", () => {
         metric_type: "posthog",
         metric_label: "Repo clicks, Skills",
       },
+      approved_by: "Brian",
+      approved_on: "2026-10-19",
     },
   };
 

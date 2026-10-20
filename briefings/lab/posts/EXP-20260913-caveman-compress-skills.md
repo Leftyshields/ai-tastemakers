@@ -27,7 +27,7 @@ We copied the habit: **compress enrichment bundles** before the narrator sees th
 | Cheaper inputs | Lower enrichment/input tokens per Skills run vs baseline |
 | Shorter outputs | Output tokens down or flat (less context to parrot) |
 | Quality holds | Rank-1 rubric pass rate unchanged |
-| Timely hooks | Why-now rubric score does not regress |
+| Timely hooks | Why now rubric score does not regress |
 
 PostHog is secondary. Firecrawl enrich must stay on during this test.
 
@@ -55,7 +55,7 @@ Flags go on the **Skills digest command only**. Requires existing Firecrawl enri
 ### Optional side-by-side preview (after implementation)
 
 ```bash
-EXPERIMENT_ID=EXP-20260913-caveman-compress-skills \
+EXPERIMENT_ID=`EXP-20260913-caveman-compress-skills` \
 DIGEST_ENRICH_WEB=1 \
 DIGEST_ENRICH_WEB_PROVIDER=firecrawl \
 DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
@@ -69,8 +69,8 @@ Compare token lines on the [Token dashboard](../token-usage.html) and rank-1 rub
 
 ## References
 
-- Experiment ID: `EXP-20260913-caveman-compress-skills`
-- Prior in queue: [Humanizer polish](./EXP-20260913-humanizer-polish-skills.md)
-- Enrichment layer: [Richer Skills briefs](./EXP-20260628-web-enrich-skills.md)
+- Experiment ID: ``EXP-20260913-caveman-compress-skills``
+- Prior in queue: [Humanizer polish](./`EXP-20260913-humanizer-polish-skills`.md)
+- Enrichment layer: [Richer Skills briefs](./`EXP-20260628-web-enrich-skills`.md)
 - Tool inventory: [JuliusBrussee/caveman](https://github.com/JuliusBrussee/caveman) (habit borrowed, not installed)
 - Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
