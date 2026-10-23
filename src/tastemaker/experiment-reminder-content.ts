@@ -23,8 +23,8 @@ function metricsHints(record: ExperimentRecord): MetricsHints {
   if (flags.DIGEST_ENRICH_WEB || record.id.includes("web-enrich") || record.id.includes("firecrawl")) {
     return {
       pageviews: "Skills briefing pages (/briefings/skills/YYYY-MM-DD.html)",
-      event: "outbound_repo_click",
-      eventFilter: "edition = skills",
+      event: "repo_click",
+      eventFilter: "section = skills",
     };
   }
   if (
@@ -35,8 +35,8 @@ function metricsHints(record: ExperimentRecord): MetricsHints {
   ) {
     return {
       pageviews: "Skills briefing pages (/briefings/skills/YYYY-MM-DD.html)",
-      event: "outbound_repo_click",
-      eventFilter: "edition = skills",
+      event: "repo_click",
+      eventFilter: "section = skills",
     };
   }
   if (
@@ -46,8 +46,8 @@ function metricsHints(record: ExperimentRecord): MetricsHints {
   ) {
     return {
       pageviews: "Skills briefing pages (/briefings/skills/YYYY-MM-DD.html)",
-      event: "outbound_repo_click",
-      eventFilter: "edition = skills",
+      event: "repo_click",
+      eventFilter: "section = skills",
     };
   }
   if (flags.SITE_LANDING_LAYOUT_V2 || record.id.includes("landing")) {

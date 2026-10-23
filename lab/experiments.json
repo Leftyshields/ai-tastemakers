@@ -5,7 +5,7 @@
       "id": "EXP-20260628-web-enrich-skills",
       "label": "Richer Skills briefs",
       "surface": "narration_skills",
-      "metric": "outbound_repo_click on Skills briefing pages",
+      "metric": "repo_click (section=skills) on Skills briefing pages",
       "start": "2026-07-12",
       "end": "2026-07-18",
       "min_read_days": 7,
@@ -19,7 +19,7 @@
         "exposure_count": null,
         "sample_count": null,
         "metric_delta": null,
-        "metric_delta_label": "outbound_repo_click",
+        "metric_delta_label": "repo_click",
         "captured_at": null,
         "note": "Formal PostHog experiment not linked; snapshot from imported CSV only."
       },
@@ -27,11 +27,11 @@
       "success": {
         "success_criteria": "Post-rank web/HN enrichment lifts Skills outbound repo clicks during the treatment window without a material drop in Skills briefing pageviews.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "increase",
           "baseline": null,
           "target": 120,
-          "pass_threshold": "Treatment window aggregate outbound_repo_click (edition=skills) ≥ baseline window; qualitative review that Why-now hooks cite enrich sources.",
+          "pass_threshold": "Treatment window aggregate repo_click (section=skills) ≥ baseline window; qualitative review that Why-now hooks cite enrich sources.",
           "metric_type": "posthog",
           "metric_label": "Repo clicks, Skills"
         },
@@ -92,11 +92,11 @@
       "success": {
         "success_criteria": "Firecrawl web enrich matches or beats Jina/HN shadow rubric on specificity, accuracy, and timely hooks on Skills shadow runs.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "increase",
           "baseline": null,
           "target": 60,
-          "pass_threshold": "Shadow rubric pass on ≥90% of reviewed repos; outbound_repo_click tracked as secondary (sparse traffic).",
+          "pass_threshold": "Shadow rubric pass on ≥90% of reviewed repos; repo_click (section=skills) tracked as secondary (sparse traffic).",
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
@@ -127,7 +127,7 @@
       "success": {
         "success_criteria": "Stronger soft-dedup cuts consecutive-day top-10 overlap by ≥15 percentage points vs the 70% baseline while keeping weekly unique repos and NEW share in the top 10 at or above baseline.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "decrease",
           "baseline": 70,
           "target": 55,
@@ -159,7 +159,7 @@
       "success": {
         "success_criteria": "Ponytail narration cuts average output tokens per repo by ≥15% vs baseline with rank-1 rubric pass rate ≥95% and Why-now still citing timely hooks.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "decrease",
           "baseline": 2005,
           "target": 1650,
@@ -196,7 +196,7 @@
       "success": {
         "success_criteria": "Post-narration Humanizer polish improves human-sounding quality on OSS and Skills blurbs without hurting specificity, Why-now, or factual accuracy (editorial rubric + spot-check). Do not gate on PostHog CTR.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "increase",
           "baseline": 3,
           "target": 5,
@@ -264,11 +264,11 @@
       "success": {
         "success_criteria": "DIGEST_ENRICH_COMPRESS lowers enrich input and output tokens vs baseline without dropping rank-1 rubric pass rate or Why-now quality (both editions).",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "decrease",
           "baseline": 1600,
           "target": 1300,
-          "pass_threshold": "≥15% lower avg enrich input tokens vs baseline with rubric pass ≥95%; PostHog outbound_repo_click secondary.",
+          "pass_threshold": "≥15% lower avg enrich input tokens vs baseline with rubric pass ≥95%; PostHog repo_click (section=skills) secondary.",
           "metric_type": "editorial",
           "metric_label": "Repo clicks, Skills"
         },
@@ -300,7 +300,7 @@
       "success": {
         "success_criteria": "Why-now memory reduces lexical overlap with prior briefs on repeat repos while keeping why-now rubric score and accuracy at or above baseline.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "increase",
           "baseline": 3.7,
           "target": 4.2,
@@ -334,7 +334,7 @@
       "success": {
         "success_criteria": "Tighter bootstrap max-stars guards improve list quality and day-over-day top-10 stability during bootstrap-like weeks without hiding real momentum picks.",
         "metric": {
-          "posthog": "event:outbound_repo_click?edition=skills",
+          "posthog": "event:repo_click?section=skills",
           "direction": "decrease",
           "baseline": 65,
           "target": 45,

@@ -39,7 +39,7 @@ A public **measure → experiment → report** loop for improving the digest pip
 | [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html) | Public experiment record: what we changed, whether we kept it, and what is live today |
 | [/lab/posts/](https://leftyshields.github.io/ai-tastemakers/lab/posts/) | Short write-ups when we try a digest-featured tool, or finish an experiment |
 
-**Site analytics:** PostHog pageviews + `outbound_repo_click` events on repo links (injected at Pages build when `POSTHOG_KEY` is set).
+**Site analytics:** PostHog pageviews + `repo_click` events on repo links (property `section` = oss or skills; injected at Pages build when `POSTHOG_KEY` is set).
 
 **SEO:** Pages build emits `sitemap.xml`, `robots.txt`, meta descriptions, canonical URLs, Open Graph/Twitter tags, and JSON-LD on daily brief pages.
 

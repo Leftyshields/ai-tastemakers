@@ -33,7 +33,7 @@ describe("PostHog experiment sync helpers", () => {
     success: {
       success_criteria: "Rubric passes.",
       metric: {
-        posthog: "event:outbound_repo_click?edition=skills",
+        posthog: "event:repo_click?section=skills",
         direction: "increase",
         baseline: 1,
         target: 2,
