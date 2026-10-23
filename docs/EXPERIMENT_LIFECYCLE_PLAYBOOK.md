@@ -84,7 +84,7 @@ Moved to `data/experiments/archive/`. The Lab dashboard lists them under **On th
 - `DIGEST_ENRICH_WEB=1` — fetch Jina/HN context before Claude narration
 - `DIGEST_ENRICH_SHADOW=0` in production (use `=1` only for local side-by-side review runs)
 
-**Primary metric:** PostHog event `outbound_repo_click` on Skills briefing pages.
+**Primary metric:** PostHog event `repo_click` where `section = skills` (Skills briefing and /go repo links).
 
 **Lab writeup:** [briefings/lab/posts/EXP-20260628-web-enrich-skills.md](../briefings/lab/posts/EXP-20260628-web-enrich-skills.md)
 
@@ -127,7 +127,7 @@ Leave OSS digest soft-dedup at defaults during this canary.
 
 **Secondary metrics (collect, do not gate):**
 
-- PostHog `outbound_repo_click` where `edition = skills`, plus Skills briefing pageviews
+- PostHog `repo_click` where `section = skills`, plus Skills briefing pageviews
 - Site traffic is still low — expect sparse click counts; record trends for later growth, but do not fail the experiment solely on CTR
 
 **Backlog:** [RANK-2](./PRODUCT_BACKLOG.md)
@@ -263,7 +263,7 @@ You need numbers from PostHog for each **completed window** (baseline end and tr
 For **web-enrich-skills** (Skills edition):
 
 1. **Pageviews** — Skills briefing pages (`/briefings/skills/YYYY-MM-DD.html`) during the window.
-2. **Outbound clicks** — event `outbound_repo_click` where `edition = skills` during the window.
+2. **Repo clicks** — event `repo_click` where `section = skills` during the window.
 
 For **landing-layout** (both editions):
 
@@ -280,8 +280,8 @@ For **landing-layout** (both editions):
    - Export CSV if available, or copy counts into the simplified format below.
 4. **Custom events**
    - Sidebar: **Analytics → Product analytics → Trends** ([new insight](https://us.posthog.com/project/489599/insights/new))
-   - Event: `outbound_repo_click` or `homepage_index_click`
-   - Add filters (e.g. `edition = skills` for enrich experiment)
+   - Event: `repo_click` or `homepage_index_click`
+   - Add filters (e.g. `section = skills` on `repo_click` for Skills narration experiments)
    - Note total events; for per-repo breakdown use breakdown by a repo property if you configured one, or use aggregate count.
 5. Save the file, e.g. `data/experiments/exports/EXP-20260628-baseline-2026-07-11.csv`
 

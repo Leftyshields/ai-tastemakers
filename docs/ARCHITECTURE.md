@@ -67,7 +67,7 @@ ai-tastemakers/
 |---------|-------|------|
 | GitHub REST | Search repositories, get repo, get README | `GITHUB_TOKEN` |
 | Anthropic Messages API | Daily repo briefs + weekly/monthly synthesis | `ANTHROPIC_API_KEY` |
-| PostHog | Pageviews + `outbound_repo_click` on GitHub Pages | Public script; `POSTHOG_KEY` + `POSTHOG_HOST` at build time |
+| PostHog | Pageviews + `repo_click` (property `section`: oss or skills) on GitHub Pages and /go | Public script; `POSTHOG_KEY` + `POSTHOG_HOST` at build time |
 | Jina Reader | Post-rank web snippet fetch (`r.jina.ai/{url}`) | No key for basic use |
 | HN Algolia | Post-rank story search by repo name | Public API |
 | Firebase | Subscribe/unsubscribe + digest recipients only | epiphoric-prod |

@@ -92,7 +92,7 @@ describe("validateSuccessBlock", () => {
     success: {
       success_criteria: "Ship it.",
       metric: {
-        posthog: "event:outbound_repo_click?edition=skills",
+        posthog: "event:repo_click?section=skills",
         direction: "increase",
         baseline: 1,
         target: 2,

@@ -7,7 +7,7 @@ import {
 
 describe("lab metric progress", () => {
   const metric = {
-    posthog: "event:outbound_repo_click?edition=skills",
+    posthog: "event:repo_click?section=skills",
     direction: "increase" as const,
     baseline: 10,
     target: 20,
