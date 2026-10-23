@@ -17,6 +17,7 @@ on:
       - "scripts/lab/validate-experiments.ts"
       - "scripts/lab/build-lab-public.ts"
       - "lab/experiments.json"
+      - "lab/experiment-status.json"
       - "scripts/seo-helpers.ts"
       - "scripts/generate-brief-og.ts"
       - "scripts/og-theme.ts"
