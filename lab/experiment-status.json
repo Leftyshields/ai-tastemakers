@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-23T10:19:56.077Z",
+  "generated_at": "2026-10-23T14:07:14.216Z",
   "project_id": "489599",
   "posthog_host": "https://us.posthog.com",
   "skipped": false,
@@ -60,7 +60,7 @@
   ],
   "live": {
     "EXP-20260913-humanizer-polish-skills": {
-      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_posthog": "event:repo_click?section=skills",
       "metric_current": null,
       "metric_daily": [],
       "metric_window_sum": null,
@@ -69,7 +69,7 @@
   },
   "metrics": {
     "EXP-20260628-web-enrich-skills": {
-      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_posthog": "event:repo_click?section=skills",
       "metric_current": null,
       "metric_daily": [],
       "metric_window_sum": null,
@@ -100,37 +100,28 @@
       "metric_fetch_error": null
     },
     "EXP-20260716-firecrawl-enrich-skills": {
-      "metric_posthog": "event:outbound_repo_click?edition=skills",
-      "metric_current": 1,
-      "metric_daily": [
-        {
-          "date": "2026-08-06",
-          "value": 1
-        },
-        {
-          "date": "2026-08-14",
-          "value": 1
-        }
-      ],
-      "metric_window_sum": 2,
+      "metric_posthog": "event:repo_click?section=skills",
+      "metric_current": null,
+      "metric_daily": [],
+      "metric_window_sum": null,
       "metric_fetch_error": null
     },
     "EXP-20260715-soft-dedup-diversity-skills": {
-      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_posthog": "event:repo_click?section=skills",
       "metric_current": null,
       "metric_daily": [],
       "metric_window_sum": null,
       "metric_fetch_error": null
     },
     "EXP-20260802-ponytail-narration-skills": {
-      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_posthog": "event:repo_click?section=skills",
       "metric_current": null,
       "metric_daily": [],
       "metric_window_sum": null,
       "metric_fetch_error": null
     },
     "EXP-20260913-humanizer-polish-skills": {
-      "metric_posthog": "event:outbound_repo_click?edition=skills",
+      "metric_posthog": "event:repo_click?section=skills",
       "metric_current": null,
       "metric_daily": [],
       "metric_window_sum": null,
