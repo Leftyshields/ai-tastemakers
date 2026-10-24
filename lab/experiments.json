@@ -189,10 +189,13 @@
       "depends_on": [
         "EXP-20260715-soft-dedup-diversity-skills"
       ],
-      "status": "running",
+      "status": "done",
       "experiment_key": "EXP-20260913-humanizer-polish-skills",
       "posthog_flag": null,
-      "note": "Treatment window; baseline 2026-09-27 to 2026-10-10. DIGEST_HUMANIZER_POLISH; PR #32 merged.",
+      "result_summary": "Kept. Treatment rubric 13 of 13 pass with why now 5.0 and specificity 5.0 vs baseline 3.7 and 4.5; DIGEST_HUMANIZER_POLISH stays on both digests.",
+      "verdict": "ship",
+      "posthog_snapshot_at_end": null,
+      "note": "Closed 2026-10-24 PT. DIGEST_HUMANIZER_POLISH kept on both OSS and Skills digest commands.",
       "success": {
         "success_criteria": "Post-narration Humanizer polish improves human-sounding quality on OSS and Skills blurbs without hurting specificity, Why-now, or factual accuracy (editorial rubric + spot-check). Do not gate on PostHog CTR.",
         "metric": {

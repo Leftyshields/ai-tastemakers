@@ -41,13 +41,18 @@ describe("Lab UX38 UX39 UX40 UX41", () => {
     expect(visible).not.toMatch(/[-–—]/);
   });
 
-  it("UX40 UX41 running hero shows origin chip and From line for humanizer", () => {
+  it("UX40 UX41 history shows From line for humanizer", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
-    expect(html).toContain("Proposed by pipeline");
-    expect(html).toContain("From");
-    expect(html).toContain("Humanizer");
-    expect(html).toContain("../skills/briefings/2026-08-05.html");
+    const humanizerRow = html.match(
+      /lab-exp-EXP-20260913-humanizer-polish-skills[\s\S]*?<\/tr>/,
+    )?.[0];
+    expect(humanizerRow).toContain("From");
+    expect(humanizerRow).toContain("blader/humanizer");
+    expect(humanizerRow).toContain("../skills/briefings/2026-08-05.html");
+    const humanizer = pub.experiments.find((e) => e.id === "EXP-20260913-humanizer-polish-skills");
+    expect(renderLabSourceOriginChip("auto", escapeHtml)).toContain("Proposed by pipeline");
+    expect(humanizer?.source).toBe("auto");
     expect(renderFromProjectLine({ sourceRepo: null, sourceUrl: null }, escapeHtml)).toBe("");
     expect(renderLabSourceOriginChip("hand", escapeHtml)).toContain("Picked by hand");
   });

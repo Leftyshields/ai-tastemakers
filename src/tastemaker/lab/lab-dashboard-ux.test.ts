@@ -30,19 +30,8 @@ describe("Lab dashboard UX copy", () => {
     expect(violations).toEqual([]);
   });
 
-  it("UX3 running headline renders without PostHog status sync", () => {
+  it("UX3 control panel renders without PostHog status sync when idle", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
-    const run = pub.control_panel.running!;
-    pub.control_panel.running = {
-      ...run,
-      metric_current: null,
-      metric_daily: [],
-      exposure_count: null,
-      sample_count: null,
-      metric_delta: null,
-      progress_pct: null,
-      track_status: null,
-    };
     pub.status_sync = {
       generated_at: null,
       skipped: true,
@@ -50,29 +39,25 @@ describe("Lab dashboard UX copy", () => {
     };
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
     const panel = html.match(/id="lab-control-panel"[\s\S]*?<\/section>/)?.[0] ?? "";
-    expect(panel).toMatch(/<h2[^>]*>Less AI sounding briefs<\/h2>/);
-    expect(panel).toContain("Running");
-    expect(panel).toContain("Day 9 of 14");
-    expect(panel).toContain("Read window");
-    expect(panel).not.toMatch(/Read window[\s\S]*?<p class="mt-3 text-sm leading-relaxed/);
-    expect(panel).toContain("lab-more-panel");
-    expect(panel).toContain('data-for="hero-EXP-20260913-humanizer-polish-skills"');
+    expect(panel).toContain("No experiment is running on the public Lab calendar right now.");
+    expect(panel).toContain("Last result");
+    expect(panel).toContain("Less AI sounding briefs");
     expect(panel).not.toContain("Do not gate on PostHog CTR");
     expect(panel).not.toContain("editorial rubric");
     expect(panel).not.toContain("<summary");
   });
 
-  it("UX17 control panel shows Testing, Next up, and Last result rows", () => {
+  it("UX17 control panel shows Next up and Last result rows", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const html = renderLabDashboardHtml(pub, escapeHtml, { asOfIsoDate: "2026-10-19" });
     const panel = html.match(/id="lab-control-panel"[\s\S]*?<\/section>/)?.[0] ?? "";
-    expect(panel).toContain("Testing");
     expect(panel).toContain("Next up");
     expect(panel).toContain("Last result");
     expect(panel).toContain("Write up");
     const summary = buildControlPanelSummary(pub.experiments);
-    expect(summary.testing?.hypothesis.length).toBeGreaterThan(0);
+    expect(summary.testing).toBeNull();
     expect(summary.next_up?.label.length).toBeGreaterThan(0);
+    expect(summary.last_result?.id).toBe("EXP-20260913-humanizer-polish-skills");
   });
 
   it("includes metric_type and short_hypothesis on every experiment row", () => {

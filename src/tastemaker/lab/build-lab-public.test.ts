@@ -20,9 +20,10 @@ describe("buildLabPublicFile", () => {
     expect(pub.experiments.some((e) => e.status === "planned")).toBe(true);
   });
 
-  it("includes running control panel", () => {
+  it("includes last result when no experiment is running", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
-    expect(pub.control_panel.running?.id).toBe("EXP-20260913-humanizer-polish-skills");
-    expect(pub.control_panel.running?.day_of_min_read).toBe(9);
+    expect(pub.control_panel.running).toBeNull();
+    expect(pub.control_panel.summary.last_result?.id).toBe("EXP-20260913-humanizer-polish-skills");
+    expect(pub.control_panel.summary.last_result?.verdict).toBe("ship");
   });
 });

@@ -26,7 +26,8 @@ describe("Lab Gantt timeline model (UX13 UX14 UX20)", () => {
   it("orders running, recent done, planned, then collapsed history row", () => {
     const pub = buildLabPublicFile(repoRoot, "2026-10-19");
     const model = buildTimelineModel(pub.experiments, ["running", "done", "planned"], "2026-10-19");
-    expect(model!.items[0]?.status).toBe("running");
+    expect(model!.items[0]?.status).toBe("done");
+    expect(model!.items[0]?.id).toBe("EXP-20260913-humanizer-polish-skills");
     const collapsedIdx = model!.items.findIndex((i) => i.kind === "collapsed");
     const plannedIdx = model!.items.findIndex((i) => i.status === "planned");
     const doneInWindowIdx = model!.items.findIndex(
