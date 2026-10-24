@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import {
+  isLowercaseOwnerRepoSourceRef,
   loadExperimentsFile,
   type LabExperimentEntry,
   type LabExperimentStatus,
@@ -17,14 +18,12 @@ export interface LabBadgeInfo {
   repoKey: string;
 }
 
-const OWNER_REPO_RE = /^[A-Za-z0-9._-]+\/[A-Za-z0-9._-]+$/;
-
 export function normalizeOwnerRepoKey(fullName: string): string {
   return fullName.trim().toLowerCase();
 }
 
 export function isOwnerRepoSourceRef(sourceRepo: string): boolean {
-  return OWNER_REPO_RE.test(sourceRepo.trim());
+  return isLowercaseOwnerRepoSourceRef(sourceRepo);
 }
 
 function badgeStatus(status: LabExperimentStatus): LabBadgeStatus | null {

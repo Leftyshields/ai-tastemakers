@@ -5,6 +5,13 @@ import { fileURLToPath } from "node:url";
 export type LabSurface = "digest_ui" | "narration_oss" | "narration_skills" | "email";
 
 export type LabExperimentStatus = "planned" | "running" | "done";
+
+/** GitHub owner/repo key for Lab tested badges (must be lowercase). */
+const LOWERCASE_OWNER_REPO_RE = /^[a-z0-9._-]+\/[a-z0-9._-]+$/;
+
+export function isLowercaseOwnerRepoSourceRef(sourceRepo: string): boolean {
+  return LOWERCASE_OWNER_REPO_RE.test(sourceRepo.trim());
+}
 export type LabVerdict = "ship" | "revert" | "inconclusive";
 export type LabMetricDirection = "increase" | "decrease";
 export type LabMetricType = "editorial" | "posthog";
@@ -274,6 +281,13 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
       issues.push({
         code: "schema",
         message: `Empty sourceRepo on '${exp.id}'.`,
+        experiment_ids: [exp.id],
+      });
+    }
+    if (exp.sourceRepo?.trim() && !isLowercaseOwnerRepoSourceRef(exp.sourceRepo)) {
+      issues.push({
+        code: "schema",
+        message: `sourceRepo on '${exp.id}' must be lowercase owner/repo (example: blader/humanizer).`,
         experiment_ids: [exp.id],
       });
     }
