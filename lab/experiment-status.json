@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-24T13:46:23.844Z",
+  "generated_at": "2026-10-24T17:08:40.366Z",
   "project_id": "489599",
   "posthog_host": "https://us.posthog.com",
   "skipped": false,
@@ -58,15 +58,7 @@
       "posthog_flag_key": null
     }
   ],
-  "live": {
-    "EXP-20260913-humanizer-polish-skills": {
-      "metric_posthog": "event:repo_click?section=skills",
-      "metric_current": null,
-      "metric_daily": [],
-      "metric_window_sum": null,
-      "metric_fetch_error": null
-    }
-  },
+  "live": {},
   "metrics": {
     "EXP-20260628-web-enrich-skills": {
       "metric_posthog": "event:repo_click?section=skills",
