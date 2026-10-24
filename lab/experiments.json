@@ -209,7 +209,7 @@
       },
       "short_hypothesis": "Humanizer polish makes OSS and Skills blurbs sound more human without losing accuracy.",
       "source": "auto",
-      "sourceRepo": "Humanizer",
+      "sourceRepo": "blader/humanizer",
       "sourceUrl": "../skills/briefings/2026-08-05.html"
     },
     {
