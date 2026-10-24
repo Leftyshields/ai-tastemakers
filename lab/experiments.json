@@ -280,7 +280,7 @@
       },
       "short_hypothesis": "Enrich compression lowers token use without dropping rubric pass or Why now quality.",
       "source": "auto",
-      "sourceRepo": "Caveman",
+      "sourceRepo": "juliusbrussee/caveman",
       "sourceUrl": "../skills/briefings/2026-08-04.html"
     },
     {
