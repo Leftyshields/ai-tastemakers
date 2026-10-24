@@ -223,4 +223,6 @@ export interface AppConfig {
   skillsExtraDiscovery: boolean;
   /** Post-narration Humanizer-style polish pass (one batch call per digest run). */
   humanizerPolish: boolean;
+  /** Caveman-style compression of Firecrawl/HN enrichment before narration. */
+  enrichCompress: boolean;
 }

@@ -32,5 +32,5 @@
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #3 after humanizer polish. Distinct from Ponytail (output writing rules). Distinct from Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md. 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity)."
+  "notes": "Queued #3 after humanizer polish. Distinct from Ponytail (output writing rules). Distinct from Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md. 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity). Code implemented 2026-10-10: DIGEST_ENRICH_COMPRESS (deterministic pre-narrate compress + token log before/after enrich chars). Keep flag off in digest.yml until treatment 2026-11-08."
 }
