@@ -47,12 +47,12 @@ Nothing is automatic except the reminder email. You edit JSON, workflows, and co
 
 ### Active Lab queue
 
-Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup closed 2026-09-26 (keep). Humanizer treatment from 2026-10-11 (baseline closed 2026-10-10).
+Formal experiment windows **resumed 2026-08-02**. Ponytail narration closed 2026-08-29 (keep). Soft-dedup closed 2026-09-26 (keep). Humanizer polish closed 2026-10-24 (keep).
 
 | # | Experiment | Surface | Status |
 |---|------------|---------|--------|
 | 1 | EXP-20260715-soft-dedup-diversity-skills | Skills digest | **complete** (keep; closed 2026-09-26) |
-| 2 | EXP-20260913-humanizer-polish-skills | Both digests | **active** (treatment 2026-10-11 to 2026-10-24) |
+| 2 | EXP-20260913-humanizer-polish-skills | Both digests | **complete** (keep; closed 2026-10-24) |
 | 3 | EXP-20260913-caveman-compress-skills | Both digests | **draft** (queued; baseline 2026-10-25) |
 | 4 | EXP-20260913-whynow-memory-skills | Both digests | **draft** (queued; baseline 2026-11-22) |
 | 5 | EXP-20260913-rank-bootstrap-skills | Both digests | **draft** (queued; baseline 2026-12-20) |
@@ -162,9 +162,9 @@ npm run digest -- --edition skills
 
 ---
 
-### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **active (#1)**
+### EXP-20260913-humanizer-polish-skills (Humanizer polish) — **complete (keep)**
 
-Baseline snapshot imported 2026-10-10. Treatment from **2026-10-11**: one batch post-narration polish per digest run (`DIGEST_HUMANIZER_POLISH=1`) on **both** OSS and Skills commands. `digest.yml` sets the flag only when the run date (Pacific) is **2026-10-11 or later** so catch-up runs on 2026-10-10 stay unpolished.
+Baseline snapshot imported 2026-10-10; treatment closed 2026-10-24. **Kept** `DIGEST_HUMANIZER_POLISH=1` on **both** OSS and Skills digest commands (one batch post-narration polish per run).
 
 | Window | Dates (PT) |
 |--------|------------|

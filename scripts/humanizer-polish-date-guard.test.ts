@@ -1,47 +1,16 @@
-import { execFileSync } from "node:child_process";
+import fs from "node:fs";
+import path from "node:path";
 import { describe, expect, it } from "vitest";
 
 /**
- * Same condition as .github/workflows/digest.yml "Run digest" step (humanizer date guard).
- * ISO dates (YYYY-MM-DD) compare lexicographically in bash [[ < ]].
+ * EXP-20260913-humanizer-polish-skills closed 2026-10-24 (keep): digest.yml always exports
+ * DIGEST_HUMANIZER_POLISH=1 for both OSS and Skills commands (no Pacific date guard).
  */
-function humanizerPolishEnabledForPacificDate(date: string): boolean {
-  const out = execFileSync(
-    "bash",
-    [
-      "-c",
-      `d="$1"; if [[ ! "$d" < "2026-10-11" ]]; then echo on; else echo off; fi`,
-      "humanizer-polish-date-guard",
-      date,
-    ],
-    { encoding: "utf8" },
-  ).trim();
-  return out === "on";
-}
-
-describe("digest.yml humanizer polish date guard (bash)", () => {
-  it("keeps polish off on 2026-10-10 (baseline last day)", () => {
-    expect(humanizerPolishEnabledForPacificDate("2026-10-10")).toBe(false);
-  });
-
-  it("turns polish on from 2026-10-11 (treatment start)", () => {
-    expect(humanizerPolishEnabledForPacificDate("2026-10-11")).toBe(true);
-  });
-
-  it("keeps polish on after treatment start", () => {
-    expect(humanizerPolishEnabledForPacificDate("2026-10-12")).toBe(true);
-  });
-
-  it("rejects invalid bash >= guard (regression)", () => {
-    const broken = execFileSync(
-      "bash",
-      [
-        "-c",
-        `d="2026-10-11"; if [ "$d" \\>= "2026-10-11" ]; then echo on; else echo off; fi 2>/dev/null || echo off`,
-        "broken-guard",
-      ],
-      { encoding: "utf8" },
-    ).trim();
-    expect(broken).toBe("off");
+describe("digest.yml humanizer polish (kept after experiment close)", () => {
+  it("always enables DIGEST_HUMANIZER_POLISH in the Run digest step", () => {
+    const yml = fs.readFileSync(path.join(process.cwd(), ".github/workflows/digest.yml"), "utf8");
+    const runDigest = yml.split("- name: Run digest (OSS + Skills)")[1]?.split("- name:")[0] ?? "";
+    expect(runDigest).toContain("export DIGEST_HUMANIZER_POLISH=1");
+    expect(runDigest).not.toMatch(/\[\[\s*!\s*"\$\{\{\s*steps\.gate\.outputs\.date\s*\}\}"\s*<\s*"2026-10-11"\s*\]\]/);
   });
 });
