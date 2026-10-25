@@ -60,11 +60,19 @@ export interface PostHogEndSnapshot {
   raw?: Record<string, unknown>;
 }
 
+export interface LabExperimentFirstSeen {
+  date: string;
+  list: "OSS" | "Skills";
+  fullName: string;
+}
+
 export interface LabExperimentSource extends LabExperimentEntry {
   label: string;
   result_summary?: string | null;
   verdict?: LabVerdict | null;
   posthog_snapshot_at_end?: PostHogEndSnapshot | null;
+  /** Earliest OSS or Skills daily-list appearance for sourceRepo (build time). */
+  firstSeen?: LabExperimentFirstSeen | null;
 }
 
 export interface PublicControlPanelRunning {

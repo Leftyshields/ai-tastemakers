@@ -38,6 +38,9 @@ import type {
   PublicTimelineModel,
 } from "./lab-public-types.js";
 import { sanitizeVisibleCopy } from "./lab-format.js";
+import { computeFirstSeen, formatFirstSeenClause, type FirstSeenRecord } from "./first-seen.js";
+
+export { computeFirstSeen, formatFirstSeenClause, type FirstSeenRecord };
 
 export type {
   LabVerdict,
@@ -139,6 +142,23 @@ export function buildControlPanelSummary(
   return { testing, next_up, last_result };
 }
 
+function attachFirstSeenToExperiments(
+  repoRoot: string,
+  entries: LabExperimentSource[],
+): LabExperimentSource[] {
+  const cache = new Map<string, FirstSeenRecord | null>();
+  return entries.map((exp) => {
+    const key = exp.sourceRepo?.trim();
+    if (!key) return exp;
+    const cacheKey = key.toLowerCase();
+    if (!cache.has(cacheKey)) {
+      cache.set(cacheKey, computeFirstSeen(repoRoot, key));
+    }
+    const firstSeen = cache.get(cacheKey) ?? null;
+    return { ...exp, firstSeen };
+  });
+}
+
 export function buildLabPublicFile(
   repoRoot: string,
   asOfIsoDate: string = new Date().toISOString().slice(0, 10),
@@ -146,7 +166,7 @@ export function buildLabPublicFile(
   const source = loadExperimentsFile(repoRoot) as LabExperimentsSourceFile;
   const status = loadExperimentStatus(repoRoot);
 
-  const all = source.experiments;
+  const all = attachFirstSeenToExperiments(repoRoot, source.experiments);
   const running = all.find((e) => e.status === "running");
 
   let control: PublicControlPanelRunning | null = null;

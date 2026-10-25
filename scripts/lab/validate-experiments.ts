@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { computeFirstSeen } from "./first-seen.js";
 
 export type LabSurface = "digest_ui" | "narration_oss" | "narration_skills" | "email";
 
@@ -385,6 +386,26 @@ export function validateExperimentsFile(file: LabExperimentsFile): ValidationIss
   return issues;
 }
 
+/** Console warnings only; does not fail validation. */
+export function warnSourceReposMissingFromDigests(
+  repoRoot: string,
+  file: LabExperimentsFile,
+): void {
+  const cache = new Map<string, ReturnType<typeof computeFirstSeen>>();
+  for (const exp of file.experiments) {
+    const key = exp.sourceRepo?.trim();
+    if (!key) continue;
+    const cacheKey = key.toLowerCase();
+    if (!cache.has(cacheKey)) {
+      cache.set(cacheKey, computeFirstSeen(repoRoot, key));
+    }
+    if (cache.get(cacheKey) != null) continue;
+    console.warn(
+      `warn: sourceRepo '${key}' on '${exp.id}' never appears in OSS or Skills digest archives`,
+    );
+  }
+}
+
 export function loadExperimentsFile(repoRoot: string): LabExperimentsFile {
   const filePath = path.join(repoRoot, "lab", "experiments.json");
   const raw = fs.readFileSync(filePath, "utf8");
@@ -408,5 +429,7 @@ if (isValidateCli) {
     }
     process.exit(1);
   }
-  console.log(`lab/experiments.json OK (${loadExperimentsFile(repoRoot).experiments.length} entries)`);
+  const file = loadExperimentsFile(repoRoot);
+  warnSourceReposMissingFromDigests(repoRoot, file);
+  console.log(`lab/experiments.json OK (${file.experiments.length} entries)`);
 }

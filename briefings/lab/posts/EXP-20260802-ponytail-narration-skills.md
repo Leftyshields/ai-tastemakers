@@ -11,7 +11,7 @@ The bet: two writing rules make briefs shorter, more concrete, and about 10% che
 The rules borrow habits from two GitHub projects that kept coming up in a late July [weekly takeaway](../../weekly/2026-W31/weekly_review.md#builder-takeaway). Neither project runs on the list. Only the habits carry over.
 
 - [Graphify](https://github.com/Graphify-Labs/graphify) turns a codebase into an organized map of facts instead of one big pile. The habit: keep lasting facts (the project's own description) separate from passing news. News can explain why now. It should not rewrite what it does.
-- [Ponytail](https://github.com/DietrichGebert/ponytail) stops coding assistants from overbuilding, for example by using a browser's built-in date field instead of adding a date picker library. The habit: one path, the smallest one. Try this becomes a single step a builder can do today.
+- [Ponytail](https://github.com/DietrichGebert/ponytail), which first appeared on the Skills list on Jun 13, 2026, stops coding assistants from overbuilding, for example by using a browser's built-in date field instead of adding a date picker library. The habit: one path, the smallest one. Try this becomes a single step a builder can do today.
 - YAGNI, short for "You Aren't Gonna Need It," is an old software saying against adding layers just in case. If a project's description never mentions a big multi-part setup, the brief should not recommend one.
 
 ## The change
