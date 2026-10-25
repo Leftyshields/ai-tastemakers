@@ -48,4 +48,20 @@ describe("renderLabPostHeaderClientScripts (jsdom)", () => {
       mountAndClick("?from_list=evil&from_rank=9", "../briefings/2026-08-01.html", "../../skills/index.html"),
     ).toBe("../index.html");
   });
+
+  it("rejects malicious or malformed attribution (same cases as former came-from gate)", () => {
+    const ossHref = "../briefings/2026-08-01.html";
+    const skillsHref = "../../skills/index.html";
+    const hostile = [
+      "?from_list=%22%3E%3Cscript%3Ealert(1)&from_rank=2",
+      "?from_list=skills&from_rank=3abc",
+      "?from_list=skills&from_rank=0",
+      "?from_list=skills&from_rank=11",
+      "?from_list=skills&from_rank=1%0d%0a",
+      "?from_list=skills&from_list=oss&from_rank=2",
+    ];
+    for (const search of hostile) {
+      expect(mountAndClick(search, ossHref, skillsHref), search).toBe("../index.html");
+    }
+  });
 });
