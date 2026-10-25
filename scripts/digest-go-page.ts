@@ -1,5 +1,6 @@
 import {
   digestDateFromCompact,
+  labBadgeAttributionClientParserSource,
   labBadgeDestGoInlineRegexSources,
   parseGoRedirectQuery,
   resolveAllowlistedGithubUrl,
@@ -28,6 +29,7 @@ export function renderGoRedirectPage(
   const safePostPathRe = escapeScriptString(labDestRe.postPath);
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
+  const attributionParser = labBadgeAttributionClientParserSource();
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -118,13 +120,24 @@ export function renderGoRedirectPage(
   var LAB_DEST_INDEX_PATH_RE = new RegExp('${safeIndexPathRe}', 'i');
   var LAB_DEST_INDEX_HASH_RE = new RegExp('${safeIndexHashRe}', 'i');
 
+  ${attributionParser}
+  function attributionQueryOk(search) {
+    if (!search) return true;
+    return parseLabBadgeAttribution(search) !== null;
+  }
   function isAllowlistedLabDest(raw) {
     if (!raw) return null;
     try { raw = decodeURIComponent(String(raw).trim()); } catch (e) { return null; }
-    if (!raw.startsWith("/") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0) return null;
+    var rawLower = String(raw).toLowerCase();
+    if (!raw.startsWith("/") || raw.startsWith("//") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0 || raw.indexOf("\\\\") >= 0) return null;
+    if (rawLower.indexOf("javascript:") === 0 || rawLower.indexOf("data:") === 0) return null;
     var hashIdx = raw.indexOf("#");
-    var pathPart = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
+    var beforeHash = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
     var hash = hashIdx >= 0 ? raw.slice(hashIdx) : "";
+    var qIdx = beforeHash.indexOf("?");
+    var pathPart = qIdx >= 0 ? beforeHash.slice(0, qIdx) : beforeHash;
+    var search = qIdx >= 0 ? beforeHash.slice(qIdx) : "";
+    if (!attributionQueryOk(search)) return null;
     var postOk = LAB_DEST_POST_RE.test(pathPart);
     var indexOk = LAB_DEST_INDEX_PATH_RE.test(pathPart) && LAB_DEST_INDEX_HASH_RE.test(hash);
     return (postOk || indexOk) ? encodeURIComponent(raw) : null;

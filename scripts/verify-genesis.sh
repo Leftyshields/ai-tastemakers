@@ -24,6 +24,10 @@ echo "verify: lab write up reader copy (UX46)"
 npx tsx scripts/verify-lab-writeup-reader-copy.ts
 echo "verify: lab post title above fold (UX46)"
 npx tsx scripts/verify-lab-post-title-fold.ts
+echo "verify: lab post header order (UX47)"
+npx tsx scripts/verify-lab-post-header-order.ts
+echo "verify: lab post header screenshots (UX47)"
+npx tsx scripts/verify-lab-post-header-screenshots.ts
 echo "verify: lab email flask asset (UX46)"
 npx tsx scripts/verify-lab-email-flask-asset.ts
 echo "verify: site internal hrefs and anchors (UX30 link checker)"

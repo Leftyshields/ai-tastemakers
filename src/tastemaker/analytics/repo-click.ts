@@ -1,4 +1,18 @@
 import type { EditionId } from "../editions.js";
+import {
+  isValidLabBadgeAttributionSearch,
+  parseLabBadgeFromListParam,
+  parseLabBadgeFromRankParam,
+} from "./lab-badge-attribution.js";
+
+export {
+  LAB_BADGE_FROM_RANK_PARAM_RE,
+  parseLabBadgeFromListParam,
+  parseLabBadgeFromRankParam,
+  parseLabBadgeAttributionSearch,
+  isValidLabBadgeAttributionSearch,
+  labBadgeAttributionClientParserSource,
+} from "./lab-badge-attribution.js";
 
 export type RepoClickChannel = "pages" | "email";
 export type RepoClickTarget = "title" | "button" | "url" | "card";
@@ -97,14 +111,44 @@ export const LAB_BADGE_DEST_INDEX_PATH_RE =
   /^\/(?:[A-Za-z0-9._-]+\/)?lab\/index\.html$/i;
 export const LAB_BADGE_DEST_INDEX_HASH_RE = /^#lab-exp-EXP-[0-9]{8}-[a-z0-9-]+$/i;
 
-/** Shared allowlist check on a decoded absolute site path (optional #hash). */
-export function isAllowlistedLabBadgeDestDecoded(path: string): boolean {
-  if (!path.startsWith("/") || path.includes("://") || path.includes("..")) return false;
+function splitLabBadgeDestPath(path: string): {
+  pathPart: string;
+  hash: string;
+  search: string;
+} | null {
+  if (
+    !path.startsWith("/") ||
+    path.startsWith("//") ||
+    path.includes("://") ||
+    path.includes("..") ||
+    path.includes("\\")
+  ) {
+    return null;
+  }
+  const lower = path.toLowerCase();
+  if (lower.startsWith("javascript:") || lower.startsWith("data:")) return null;
   const hashIdx = path.indexOf("#");
-  const pathPart = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
+  const beforeHash = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
   const hash = hashIdx >= 0 ? path.slice(hashIdx) : "";
-  const postOk = LAB_BADGE_DEST_POST_RE.test(pathPart);
-  const indexOk = LAB_BADGE_DEST_INDEX_PATH_RE.test(pathPart) && LAB_BADGE_DEST_INDEX_HASH_RE.test(hash);
+  const qIdx = beforeHash.indexOf("?");
+  const pathPart = qIdx >= 0 ? beforeHash.slice(0, qIdx) : beforeHash;
+  const search = qIdx >= 0 ? beforeHash.slice(qIdx) : "";
+  return { pathPart, hash, search };
+}
+
+function labBadgeAttributionQueryValid(search: string): boolean {
+  return isValidLabBadgeAttributionSearch(search);
+}
+
+/** Shared allowlist check on a decoded absolute site path (optional ?attribution and #hash). */
+export function isAllowlistedLabBadgeDestDecoded(path: string): boolean {
+  const parts = splitLabBadgeDestPath(path);
+  if (!parts) return false;
+  if (!labBadgeAttributionQueryValid(parts.search)) return false;
+  const postOk = LAB_BADGE_DEST_POST_RE.test(parts.pathPart);
+  const indexOk =
+    LAB_BADGE_DEST_INDEX_PATH_RE.test(parts.pathPart) &&
+    LAB_BADGE_DEST_INDEX_HASH_RE.test(parts.hash);
   return postOk || indexOk;
 }
 

@@ -33,6 +33,18 @@ describe("resolveGoPageDestination", () => {
     ).toBe(`https://example.com${dest}`);
   });
 
+  it("resolves lab badge dest with from_list attribution query", () => {
+    const dest =
+      "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=oss&from_rank=4";
+    expect(
+      resolveGoPageDestination(
+        `?event=lab_badge_click&dest=${encodeURIComponent(dest)}`,
+        allowlist,
+        "https://example.com/home/",
+      ),
+    ).toBe(`https://example.com${dest}`);
+  });
+
   it("rejects open redirect lab dest paths", () => {
     expect(
       resolveGoPageDestination(

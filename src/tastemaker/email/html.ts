@@ -14,10 +14,10 @@ import {
   renderLabTestedBadgeEmailPillCellHtml,
   renderLabTestedBadgeEmailHtml,
   renderLabTestedBadgePlainSuffix,
-  resolveLabBadgeHref,
   labBadgeSiteDestPath,
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
+import { appendLabBadgeAttributionToHref } from "../../../scripts/lab/lab-post-header.js";
 
 const EMAIL_TOPIC_LIMIT = 5;
 const BRAND_LINK = "#1e40af";
@@ -151,6 +151,11 @@ export function renderDigestEmailHtml(
       if (repo.rank <= 10) {
         const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
         if (match) {
+          const destPath = appendLabBadgeAttributionToHref(
+            labBadgeSiteDestPath(siteUrl, match, badgeCtx.writeupPostIds),
+            section,
+            repo.rank,
+          );
           const badgeHref = buildLabBadgeEmailGoUrl(siteUrl, {
             repo: repo.full_name,
             section,
@@ -158,7 +163,7 @@ export function renderDigestEmailHtml(
             expId: match.id,
             status: match.status,
             digestDate: dateLabel,
-            destPath: labBadgeSiteDestPath(siteUrl, match, badgeCtx.writeupPostIds),
+            destPath,
           });
           if (showGithubButton) {
             labBadgePillCell = renderLabTestedBadgeEmailPillCellHtml(

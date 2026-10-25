@@ -1,13 +1,18 @@
 import type { EditionId } from "../editions.js";
 import type { Digest, DigestRepo, RankingMode } from "../types.js";
+import type { LabExperimentEntry } from "../../../scripts/lab/validate-experiments.js";
+import {
+  digestBriefHasLabBadges,
+  renderDigestLabBadgeBlurbHtml,
+} from "../../../scripts/lab/lab-post-header.js";
 import { newRepoMarkdownSuffix } from "../writers/new-badge.js";
 import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
   labBadgeForRepo,
   renderLabTestedBadgePagesHtml,
-  resolveLabBadgeHref,
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
+import { resolveLabBadgeHrefForDigestCard } from "../../../scripts/lab/lab-post-header.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -79,7 +84,13 @@ export function renderDigestRepoCard(
   if (badgeContext && repo.rank <= 10) {
     const badge = labBadgeForRepo(badgeContext.lookup, repo.full_name);
     if (badge) {
-      const href = resolveLabBadgeHref(badge, badgeContext.labPrefix, badgeContext.writeupPostIds);
+      const href = resolveLabBadgeHrefForDigestCard(
+        badge,
+        badgeContext.labPrefix,
+        badgeContext.writeupPostIds,
+        section,
+        repo.rank,
+      );
       labBadgeHtml = renderLabTestedBadgePagesHtml(badge, href, escape);
     }
   }
@@ -108,16 +119,21 @@ export function renderDigestBriefArticle(
   headerMarkdown: string,
   escape: (t: string) => string = escapeHtml,
   badgeContext?: DigestRepoCardBadgeContext,
+  experiments?: readonly LabExperimentEntry[],
 ): string {
   const headerHtml = headerMarkdown
     ? `<div class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${renderSafeMarkdown(headerMarkdown)}</div>`
     : "";
+  const labBlurb =
+    experiments && digestBriefHasLabBadges(digest.repos, experiments)
+      ? renderDigestLabBadgeBlurbHtml(escape)
+      : "";
   const cards = digest.repos
     .map((repo) =>
       renderDigestRepoCard(repo, section, digestDate, digest.ranking_mode, escape, badgeContext),
     )
     .join("\n");
-  return `${headerHtml}\n<div class="digest-repo-list mt-8">${cards}</div>`;
+  return `${headerHtml}\n${labBlurb}\n<div class="digest-repo-list mt-8">${cards}</div>`;
 }
 
 /** Preserve legacy NEW span markup when splitting markdown headers. */

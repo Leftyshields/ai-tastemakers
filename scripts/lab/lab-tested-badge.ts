@@ -7,6 +7,8 @@ import {
   type LabExperimentStatus,
 } from "./validate-experiments.js";
 import { listLabWriteupPostIds } from "./lab-format.js";
+import type { EditionId } from "../../src/tastemaker/editions.js";
+import { resolveLabBadgeHrefForDigestCard } from "./lab-post-header.js";
 
 export type LabBadgeStatus = "done" | "running";
 
@@ -157,6 +159,17 @@ export function renderLabTestedBadgePagesHtml(
   return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
+/** Non-interactive Lab tested chip on experiment write-up pages (digest badges stay links). */
+export function renderLabTestedBadgePostHeaderChipHtml(
+  badge: LabBadgeInfo,
+  escape: (t: string) => string,
+): string {
+  const label = badgeVisibleLabel(badge.status);
+  const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
+  const aria = escape(badgeAriaLabel(badge.status, badge.title));
+  return `<span class="lab-tested-badge lab-tested-badge--post ${mod}" role="status" aria-label="${aria}" aria-current="page" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></span>`;
+}
+
 export function labBadgeEmailFlaskSrc(siteUrl: string): string {
   const trimmed = siteUrl.replace(/\/+$/, "");
   return `${trimmed}/assets/lab-flask-email.png`;
@@ -227,6 +240,7 @@ export function findLabTestedBadgeViolations(
   for (const b of loadLabBadgeLookup(repoRoot).values()) lookupById.set(b.id, b);
 
   for (const m of html.matchAll(/<a\b[^>]*\blab-tested-badge\b[^>]*>([\s\S]*?)<\/a>/gi)) {
+    const badgeStart = m.index ?? 0;
     const block = m[0] ?? "";
     const inner = m[1] ?? "";
     const expId = /data-lab-badge-exp="([^"]+)"/.exec(block)?.[1];
@@ -251,12 +265,45 @@ export function findLabTestedBadgeViolations(
     if (textOnly.includes("-")) {
       violations.push(`${pageRel}: badge copy contains dash for ${expId}`);
     }
-    const expectedHref = resolveHref(badge, pageAbsPath);
+    const cardCtx = digestCardAttributionBeforeIndex(html, badgeStart);
+    const expectedHref =
+      cardCtx != null
+        ? resolveLabBadgeHrefForDigestCard(
+            badge,
+            labPrefixFromBriefingPage(pageAbsPath, siteRootFromRepo(repoRoot)),
+            loadLabWriteupPostIds(repoRoot),
+            cardCtx.section,
+            cardCtx.rank,
+          )
+        : resolveHref(badge, pageAbsPath);
     if (!expectedHref || !href || href !== expectedHref) {
       violations.push(`${pageRel}: badge href mismatch for ${expId}`);
     }
   }
   return violations;
+}
+
+function siteRootFromRepo(repoRoot: string): string {
+  return path.join(repoRoot, "site");
+}
+
+export function digestCardAttributionBeforeIndex(
+  html: string,
+  badgeIndex: number,
+): { section: EditionId; rank: number } | null {
+  const prefix = html.slice(Math.max(0, badgeIndex - 6000), badgeIndex);
+  const re =
+    /data-section="(oss|skills)"[^>]*data-position="(\d+)"|data-position="(\d+)"[^>]*data-section="(oss|skills)"/g;
+  let last: { section: EditionId; rank: number } | null = null;
+  for (const match of prefix.matchAll(re)) {
+    if (match[1] && match[2]) {
+      last = { section: match[1] as EditionId, rank: Number.parseInt(match[2], 10) };
+    } else if (match[3] && match[4]) {
+      last = { section: match[4] as EditionId, rank: Number.parseInt(match[3], 10) };
+    }
+  }
+  if (!last || !Number.isFinite(last.rank)) return null;
+  return last;
 }
 
 export function ponytailDoneFixturePresent(html: string): boolean {

@@ -63,6 +63,26 @@
     @apply shrink-0;
   }
 
+  .lab-post-header .lab-tested-badge--action {
+    @apply min-h-11;
+  }
+
+  .lab-tested-badge--post {
+    @apply inline-flex items-center gap-1.5 font-sans text-sm font-semibold leading-none;
+  }
+
+  .lab-tested-badge--post.lab-tested-badge--done {
+    @apply text-stone-600 dark:text-stone-300;
+  }
+
+  .lab-tested-badge--post.lab-tested-badge--running {
+    @apply text-blue-800 dark:text-blue-300;
+  }
+
+  .digest-lab-badge-blurb {
+    @apply font-sans;
+  }
+
   .new-repo-badge {
     @apply ml-2 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-emerald-800 align-middle dark:border-emerald-700/60 dark:bg-emerald-950/60 dark:text-emerald-300;
   }
