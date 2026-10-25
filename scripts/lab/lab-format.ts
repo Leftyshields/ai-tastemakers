@@ -141,6 +141,7 @@ export function stripLabWriteupFrontMatter(markdown: string): string {
   return splitLabWriteupFrontMatter(markdown).body;
 }
 
+const LAB_WRITEUP_LEAD_FILENAME = /^EXP-[A-Za-z0-9_-]+\.md$/;
 const LAB_WRITEUP_LEAD_ID = /^EXP-[A-Za-z0-9_-]+$/;
 
 /** Copywriter panel leads keyed by write-up post id (`briefings/lab/lab-leads.md`). */
@@ -152,15 +153,25 @@ export function loadLabWriteupLeadsCatalog(
     throw new Error(`missing ${path.relative(repoRoot, catalogPath)}`);
   }
   const out: Record<string, string> = {};
+  let pendingId: string | null = null;
   for (const raw of fs.readFileSync(catalogPath, "utf8").split(/\r?\n/)) {
     const line = raw.trim();
     if (!line || line.startsWith("#")) continue;
+    if (LAB_WRITEUP_LEAD_FILENAME.test(line)) {
+      pendingId = line.slice(0, -".md".length);
+      continue;
+    }
+    if (line.startsWith("lead:")) {
+      const lead = line.slice(5).trim();
+      if (pendingId && lead) out[pendingId] = lead;
+      pendingId = null;
+      continue;
+    }
     const colon = line.indexOf(":");
     if (colon <= 0) continue;
     const id = line.slice(0, colon).trim();
     const lead = line.slice(colon + 1).trim();
-    if (!LAB_WRITEUP_LEAD_ID.test(id) || !lead) continue;
-    out[id] = lead;
+    if (LAB_WRITEUP_LEAD_ID.test(id) && lead) out[id] = lead;
   }
   return out;
 }

@@ -209,7 +209,7 @@ describe("lab post header E1", () => {
     expect(html).not.toContain("digest-lab-badge-blurb");
     expect(html).toContain('class="lab-post-panel__lead"');
     const lead = extractLabPostLeadParagraph(exp.id, md);
-    expect(lead).toContain("less random");
+    expect(lead).toBe(loadLabWriteupLeadsCatalog(repoRoot)[exp.id]);
     expect(lead).not.toBe("Queued, not started.");
   });
 

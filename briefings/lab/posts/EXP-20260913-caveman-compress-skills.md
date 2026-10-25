@@ -1,5 +1,5 @@
 ---
-lead: "A planned trim to the background notes the Skills writer reads before each brief aims to cut tokens without losing rubric quality."
+lead: "Trimming the background notes the writer reads should cut cost without losing a single fact."
 ---
 
 # Shorter background notes

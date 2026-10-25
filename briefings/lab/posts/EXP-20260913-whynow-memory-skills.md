@@ -1,5 +1,5 @@
 ---
-lead: "Memory of past why-now lines aims to keep Skills briefs fresh when a project returns to the list."
+lead: "Showing the writer its past \"Why now\" lines should give returning projects a fresh angle instead of the same old line."
 ---
 
 # Fresher "Why now" lines on repeats

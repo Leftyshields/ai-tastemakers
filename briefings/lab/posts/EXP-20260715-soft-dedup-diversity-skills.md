@@ -1,5 +1,5 @@
 ---
-lead: "The Skills list now repeats fewer of the previous day's top picks, with overlap in the top 10 down from 70% to 37.5%."
+lead: "The Skills list now repeats far fewer of yesterday's top picks, so readers see more new projects each day."
 ---
 
 # Less-repeated Skills picks

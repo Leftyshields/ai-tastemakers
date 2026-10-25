@@ -1,5 +1,5 @@
 ---
-lead: "Bootstrap guard tuning aims to make the Skills list less random when star history is still thin, without hiding projects with real momentum."
+lead: "A tighter star limit should keep giant, already famous projects from crowding the Skills list when there's too little history to rank fairly."
 ---
 
 # Smarter early ranking

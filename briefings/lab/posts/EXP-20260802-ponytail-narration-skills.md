@@ -1,5 +1,5 @@
 ---
-lead: "A tighter writing style for Skills briefs now cuts length by about 18%, keeps all 13 quality checks passing, and improves why-now clarity on average."
+lead: "Two simple writing rules made Skills briefs shorter and cheaper, and better at explaining why each project matters now."
 ---
 
 # Shorter Skills briefs

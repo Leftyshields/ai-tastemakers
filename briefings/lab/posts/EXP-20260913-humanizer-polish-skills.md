@@ -1,5 +1,5 @@
 ---
-lead: "A final polish pass on both daily lists rewrites machine-sounding phrasing while keeping all 13 quality checks and raising why-now and specificity scores."
+lead: "A final polish step now strips machine-sounding phrasing from every brief, and the scores for timeliness and specificity both went up."
 ---
 
 # Less AI-sounding briefs

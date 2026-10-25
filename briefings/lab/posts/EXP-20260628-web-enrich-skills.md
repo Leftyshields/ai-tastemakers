@@ -1,5 +1,5 @@
 ---
-lead: "Skills briefs now pull extra background from each project's web pages and from Hacker News before writing begins."
+lead: "Skills briefs now draw on each project's web pages and Hacker News mentions, which made them more timely without costing accuracy."
 ---
 
 # Richer Skills briefs
