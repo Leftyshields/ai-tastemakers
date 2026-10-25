@@ -32,6 +32,8 @@ echo "verify: lab post split chip contrast (UX47)"
 npx tsx scripts/verify-lab-post-chip-contrast.ts
 echo "verify: lab post chip mobile layout (UX47)"
 npx tsx scripts/verify-lab-post-chip-mobile.ts
+echo "verify: lab post plain repo link mobile (UX47)"
+npx tsx scripts/verify-lab-post-plain-repo-link-mobile.ts
 echo "verify: lab post header screenshots (UX47)"
 npx tsx scripts/verify-lab-post-header-screenshots.ts
 echo "verify: lab email flask asset (UX46)"

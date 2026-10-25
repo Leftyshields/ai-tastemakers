@@ -87,11 +87,15 @@
 
   @media (max-width: 480px) {
     .lab-post-header__hdr {
-      @apply flex-col items-stretch gap-4;
+      @apply flex-col items-start gap-4;
     }
 
     .lab-post-header__vdiv {
       @apply hidden;
+    }
+
+    .lab-post-header__repo-link {
+      @apply w-auto max-w-full flex-none self-start;
     }
   }
 
@@ -116,15 +120,29 @@
     @apply hidden;
   }
 
-  .lab-post-header__hdr--wrapped .lab-post-split-chip,
-  .lab-post-header__hdr--wrapped .lab-post-header__repo-link {
+  .lab-post-header__hdr--wrapped .lab-post-split-chip {
     flex-basis: 100%;
     @apply w-full max-w-full;
   }
 
+  .lab-post-header__hdr--wrapped .lab-post-header__repo-link {
+    flex-basis: auto;
+    width: fit-content;
+    max-width: 100%;
+  }
+
   .lab-post-header__repo-link {
-    @apply inline-flex min-h-11 w-auto max-w-full flex-none items-center justify-start break-words rounded-xl border border-solid border-stone-400 bg-stone-100 px-4 py-2 text-left font-mono text-sm font-semibold leading-snug text-blue-700 underline decoration-blue-700 underline-offset-[3px] dark:border-stone-500 dark:bg-[#0c0a09] dark:text-blue-300 dark:decoration-blue-300;
+    @apply min-h-11 max-w-full self-start rounded-xl border border-solid border-stone-400 bg-stone-100 px-4 py-2 text-left font-mono text-sm font-semibold leading-snug text-blue-700 underline decoration-blue-700 underline-offset-[3px] dark:border-stone-500 dark:bg-[#0c0a09] dark:text-blue-300 dark:decoration-blue-300;
     border-width: 1.5px;
+    display: inline-block;
+    width: fit-content;
+    vertical-align: top;
+    box-sizing: border-box;
+  }
+
+  .lab-post-header__repo-link .lab-post-split-chip__owner-line,
+  .lab-post-header__repo-link .lab-post-split-chip__name {
+    @apply inline w-auto leading-snug;
   }
 
   .lab-post-split-chip__plan {
@@ -157,8 +175,8 @@
     @apply min-w-0 flex-1 flex-col items-start justify-center py-2;
   }
 
-  .lab-post-header__hdr--wrapped .lab-post-split-chip__owner-line,
-  .lab-post-header__hdr--wrapped .lab-post-split-chip__name {
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo .lab-post-split-chip__owner-line,
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo .lab-post-split-chip__name {
     @apply block w-full;
   }
 
@@ -175,14 +193,18 @@
       @apply min-w-0 flex-1 flex-col items-start justify-center py-2;
     }
 
-    .lab-post-split-chip__owner-line,
-    .lab-post-split-chip__name {
+    .lab-post-split-chip__repo .lab-post-split-chip__owner-line,
+    .lab-post-split-chip__repo .lab-post-split-chip__name {
       @apply block w-full;
     }
 
     .lab-post-split-chip__repo wbr {
       display: none;
     }
+  }
+
+  .lab-post-header__repo-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-400;
   }
 
   .lab-post-split-chip__repo:focus-visible {

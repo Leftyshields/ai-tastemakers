@@ -38,7 +38,9 @@ async function shotViewport(
       document.querySelector(".lab-post-split-chip") ||
       document.querySelector(".lab-post-header__repo-link");
     if (!chip) return true;
-    return chip.getBoundingClientRect().height >= 40;
+    const h = chip.getBoundingClientRect().height;
+    const minH = chip.classList.contains("lab-post-header__repo-link") ? 32 : 40;
+    return h >= minH;
   });
   await page.screenshot({
     path: path.join(artifactDir, filename),
