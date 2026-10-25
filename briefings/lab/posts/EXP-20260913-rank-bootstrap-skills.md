@@ -44,7 +44,7 @@ Primary metrics come from `digest.json` ranking fields. PostHog is secondary.
 Planned treatment flags (placeholder; confirm at treatment start):
 
 | Flag | Planned value | Notes |
-|------|---------------|       |
+|------|---------------|-------|
 | `DIGEST_SKILLS_MAX_STARS_BOOTSTRAP` | `20000` (placeholder) | Baseline default today 25000; adjust after baseline analysis |
 
 Do **not** enable in `digest.yml` until treatment start.
