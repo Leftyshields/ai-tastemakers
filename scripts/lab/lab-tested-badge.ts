@@ -142,11 +142,8 @@ function badgeVisibleLabel(status: LabBadgeStatus): string {
   return status === "running" ? "In the Lab" : "Lab tested";
 }
 
-function badgeAriaLabel(status: LabBadgeStatus, title: string): string {
-  if (status === "running") {
-    return `In the Lab: read the ${title} experiment`;
-  }
-  return `Lab tested: read the ${title} experiment`;
+function badgeAriaLabel(_status: LabBadgeStatus, title: string): string {
+  return `Tested in the Lab. Read the ${title} experiment`;
 }
 
 export function renderLabTestedBadgePagesHtml(

@@ -100,7 +100,7 @@ describe("UX45 lab tested badge", () => {
     const href = resolveLabBadgeHref(badge, "../lab/", []);
     expect(href).toBe("../lab/index.html#lab-exp-EXP-20260802-ponytail-narration-skills");
     const html = renderLabTestedBadgePagesHtml(badge, href, escapeHtml);
-    expect(html).toContain('aria-label="Lab tested: read the');
+    expect(html).toContain('aria-label="Tested in the Lab. Read the');
     expect(html).not.toContain('title="');
     expect(html).toContain('stroke="currentColor"');
   });
