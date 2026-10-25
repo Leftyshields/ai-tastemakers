@@ -30,6 +30,11 @@ describe("renderSafeMarkdown", () => {
     expect(html).not.toContain("javascript:");
     expect(html).toContain("click");
   });
+
+  it("keeps sibling lab post hrefs", () => {
+    const html = renderSafeMarkdown("[prior](EXP-20260628-web-enrich-skills.html)");
+    expect(html).toContain('href="EXP-20260628-web-enrich-skills.html"');
+  });
 });
 
 describe("sanitizeHtml", () => {

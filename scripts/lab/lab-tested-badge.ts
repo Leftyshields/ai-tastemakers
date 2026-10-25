@@ -143,7 +143,10 @@ function badgeVisibleLabel(status: LabBadgeStatus): string {
 }
 
 function badgeAriaLabel(status: LabBadgeStatus, title: string): string {
-  return status === "running" ? `In the Lab: ${title}` : `Lab tested: ${title}`;
+  if (status === "running") {
+    return `In the Lab: read the ${title} experiment`;
+  }
+  return `Lab tested: read the ${title} experiment`;
 }
 
 export function renderLabTestedBadgePagesHtml(
@@ -154,8 +157,7 @@ export function renderLabTestedBadgePagesHtml(
   const label = badgeVisibleLabel(badge.status);
   const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
   const aria = escape(badgeAriaLabel(badge.status, badge.title));
-  const titleAttr = escape(badge.title);
-  return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
+  return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
 export function labBadgeEmailFlaskSrc(siteUrl: string): string {

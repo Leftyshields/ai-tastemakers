@@ -21,4 +21,25 @@ describe("resolveGoPageDestination", () => {
       resolveGoPageDestination("?repo=javascript:alert(1)", allowlist, "https://example.com/"),
     ).toBe("https://example.com/");
   });
+
+  it("resolves lab badge dest to lab post on site origin", () => {
+    const dest = "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html";
+    expect(
+      resolveGoPageDestination(
+        `?event=lab_badge_click&dest=${encodeURIComponent(dest)}`,
+        allowlist,
+        "https://example.com/home/",
+      ),
+    ).toBe(`https://example.com${dest}`);
+  });
+
+  it("rejects open redirect lab dest paths", () => {
+    expect(
+      resolveGoPageDestination(
+        "?event=lab_badge_click&dest=https://evil.com/phish",
+        allowlist,
+        "https://example.com/",
+      ),
+    ).toBe("https://example.com/");
+  });
 });

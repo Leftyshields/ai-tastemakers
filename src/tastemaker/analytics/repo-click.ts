@@ -91,6 +91,33 @@ export function parseGoRedirectQuery(search: string): Partial<GoRedirectQuery> {
   return { repo, section, pos: Number.isFinite(pos) ? pos : undefined, target, d };
 }
 
+const LAB_BADGE_DEST_POST_RE =
+  /^\/(?:[A-Za-z0-9._-]+\/)?lab\/posts\/EXP-[0-9]{8}-[a-z0-9-]+\.html$/i;
+const LAB_BADGE_DEST_INDEX_HASH_RE = /^#lab-exp-EXP-[0-9]{8}-[a-z0-9-]+$/i;
+
+/** Site path (with optional publish prefix) allowed for email lab badge /go dest=. */
+export function resolveAllowlistedLabBadgeDestPath(
+  dest: string | null | undefined,
+): string | null {
+  if (dest == null || !dest.trim()) return null;
+  let path = dest.trim();
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    return null;
+  }
+  if (!path.startsWith("/") || path.includes("://") || path.includes("..")) return null;
+  const hashIdx = path.indexOf("#");
+  const pathPart = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
+  const hash = hashIdx >= 0 ? path.slice(hashIdx) : "";
+  const postOk = LAB_BADGE_DEST_POST_RE.test(pathPart);
+  const indexOk =
+    /^\/(?:[A-Za-z0-9._-]+\/)?lab\/index\.html$/i.test(pathPart) &&
+    LAB_BADGE_DEST_INDEX_HASH_RE.test(hash);
+  if (!postOk && !indexOk) return null;
+  return path;
+}
+
 export interface LabBadgeEmailGoQuery {
   repo: string;
   section: EditionId;

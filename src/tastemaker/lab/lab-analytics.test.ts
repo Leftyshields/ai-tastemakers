@@ -3,6 +3,7 @@ import {
   defaultLabLinkContext,
   findLabAnalyticsViolations,
   labLinkClickScript,
+  prepareLabPostArticleHtml,
   resolveLabToolHref,
 } from "../../../scripts/lab/lab-analytics.js";
 
@@ -15,6 +16,17 @@ describe("Lab UX42 analytics", () => {
 
   it("lab link script mentions lab_link_click event", () => {
     expect(labLinkClickScript()).toContain("lab_link_click");
+  });
+
+  it("tags lab post body links and routes GitHub through go", () => {
+    const ctx = defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01");
+    const html = prepareLabPostArticleHtml(
+      '<p><a href="https://github.com/firecrawl/firecrawl">Firecrawl</a> and <a href="EXP-20260628-web-enrich-skills.html" data-lab-section="posts">prior</a></p>',
+      ctx,
+    );
+    expect(html).toContain("../../go/index.html?");
+    expect(html).toContain("firecrawl%2Ffirecrawl");
+    expect(html.match(/data-lab-section="posts"/g)?.length).toBe(2);
   });
 
   it("detects missing PostHog and tracking attrs", () => {

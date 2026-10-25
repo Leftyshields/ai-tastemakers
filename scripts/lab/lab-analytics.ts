@@ -45,6 +45,26 @@ function repoFromGithubHref(href: string): string | null {
   }
 }
 
+export function renderLabPostBackLink(escapeHtml: (t: string) => string): string {
+  return `<p class="mb-4 font-sans text-sm"><a href="../index.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="posts">${escapeHtml("Back to Lab")}</a></p>`;
+}
+
+/** Lab write up article: track links and route allowlisted GitHub URLs through /go. */
+export function prepareLabPostArticleHtml(html: string, ctx: LabLinkContext): string {
+  const withLinks = html.replace(/<a\b([^>]*)>/gi, (full, attrs: string) => {
+    const hrefMatch = /\shref="([^"]+)"/i.exec(attrs);
+    if (!hrefMatch) return full;
+    const href = hrefMatch[1]!;
+    const resolved = resolveLabToolHref(href, ctx);
+    let newAttrs = attrs.replace(/\shref="[^"]+"/i, ` href="${resolved}"`);
+    if (!/data-lab-section=/.test(newAttrs)) {
+      newAttrs = ` data-lab-section="posts"${newAttrs}`;
+    }
+    return `<a${newAttrs}>`;
+  });
+  return ensureLabLinkSections(withLinks, "posts");
+}
+
 export function resolveLabToolHref(href: string, ctx: LabLinkContext): string {
   const repo = repoFromGithubHref(href);
   if (!repo) return href;

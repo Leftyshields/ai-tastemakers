@@ -2,6 +2,7 @@ import {
   digestDateFromCompact,
   parseGoRedirectQuery,
   resolveAllowlistedGithubUrl,
+  resolveAllowlistedLabBadgeDestPath,
   type RepoClickProperties,
 } from "../src/tastemaker/analytics/repo-click.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
@@ -108,9 +109,22 @@ export function renderGoRedirectPage(
     return canonical;
   }
 
+  function isAllowlistedLabDest(raw) {
+    if (!raw) return null;
+    try { raw = decodeURIComponent(String(raw).trim()); } catch (e) { return null; }
+    if (!raw.startsWith("/") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0) return null;
+    var hashIdx = raw.indexOf("#");
+    var pathPart = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
+    var hash = hashIdx >= 0 ? raw.slice(hashIdx) : "";
+    var postOk = /^\\/(?:[A-Za-z0-9._-]+\\/)?lab\\/posts\\/EXP-[0-9]{8}-[a-z0-9-]+\\.html$/i.test(pathPart);
+    var indexOk = /^\\/(?:[A-Za-z0-9._-]+\\/)?lab\\/index\\.html$/i.test(pathPart) && /^#lab-exp-EXP-[0-9]{8}-[a-z0-9-]+$/i.test(hash);
+    return (postOk || indexOk) ? raw : null;
+  }
+
   var destination = resolveUrl() || (window.location.origin + HOME);
   if (eventName === "lab_badge_click" && labDest) {
-    destination = window.location.origin + labDest;
+    var safeLabDest = isAllowlistedLabDest(labDest);
+    if (safeLabDest) destination = window.location.origin + safeLabDest;
   }
   var continueLink = document.getElementById("continue-link");
   if (continueLink) continueLink.href = destination;
@@ -125,7 +139,8 @@ export function renderGoRedirectPage(
       status: parsed.status || "",
       list: section,
       rank: rank,
-      surface: "email"
+      surface: "email",
+      channel: parsed.channel || "email"
     });
   } else {
     var githubTarget = resolveUrl();
@@ -162,6 +177,20 @@ export function resolveGoPageDestination(
   allowlist: Record<string, string>,
   homeUrl: string,
 ): string {
+  const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+  const event = params.get("event") || "";
+  const dest = params.get("dest");
+  if (event === "lab_badge_click" && dest) {
+    const allowed = resolveAllowlistedLabBadgeDestPath(dest);
+    if (allowed) {
+      try {
+        const home = new URL(homeUrl);
+        return `${home.origin}${allowed}`;
+      } catch {
+        return homeUrl;
+      }
+    }
+  }
   const parsed = parseGoRedirectQuery(search);
   const github = resolveAllowlistedGithubUrl(parsed.repo ?? null, allowlist);
   return github ?? homeUrl;

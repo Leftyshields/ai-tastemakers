@@ -100,7 +100,8 @@ describe("UX45 lab tested badge", () => {
     const href = resolveLabBadgeHref(badge, "../lab/", []);
     expect(href).toBe("../lab/index.html#lab-exp-EXP-20260802-ponytail-narration-skills");
     const html = renderLabTestedBadgePagesHtml(badge, href, escapeHtml);
-    expect(html).toContain('aria-label="Lab tested:');
+    expect(html).toContain('aria-label="Lab tested: read the');
+    expect(html).not.toContain('title="');
     expect(html).toContain('stroke="currentColor"');
   });
 
@@ -133,6 +134,7 @@ describe("UX45 lab tested badge", () => {
     expect(labBadgeClickTrackingScript()).toContain("lab_badge_click");
     expect(labBadgeClickTrackingScript()).toContain("experiment_id");
     expect(labBadgeClickTrackingScript()).toContain('surface: "pages"');
+    expect(labBadgeClickTrackingScript()).toContain('channel: "pages"');
     expect(labBadgeClickTrackingScript()).toContain("source_repo");
     expect(digestRepoClickTrackingScript()).toContain('closest("a.lab-tested-badge")');
     process.env.POSTHOG_KEY = prev;
