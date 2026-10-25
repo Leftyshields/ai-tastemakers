@@ -53,10 +53,6 @@ function repoFromGithubHref(href: string): string | null {
   }
 }
 
-export function renderLabPostBackLink(escapeHtml: (t: string) => string): string {
-  return `<p class="mb-4 font-sans text-sm"><a href="../index.html" class="lab-post-back-link inline-flex min-h-11 items-center py-2 text-blue-800 underline dark:text-blue-400" data-lab-section="posts">${escapeHtml("Back to Lab")}</a></p>`;
-}
-
 /** Lab write up article: track links and route allowlisted GitHub URLs through /go. */
 export function prepareLabPostArticleHtml(html: string, ctx: LabLinkContext): string {
   const withLinks = html.replace(/<a\b([^>]*)>/gi, (full, attrs: string) => {
@@ -126,20 +122,24 @@ export function labLinkClickScript(): string {
     var t = ev.target;
     if(!t || !t.closest) return;
     var a = t.closest("a[href][data-lab-section]");
-    if(!a) return;
+    var btn = !a ? t.closest("button[data-lab-section]") : null;
+    var el = a || btn;
+    if(!el) return;
     if(typeof posthog === "undefined" || !posthog.capture) return;
-    var href = a.getAttribute("href") || "";
-    var external = /^(https?:|mailto:|tel:)/i.test(href);
+    var href = a ? (a.getAttribute("href") || "") : "";
+    var external = href ? /^(https?:|mailto:|tel:)/i.test(href) : false;
     var props = {
       page: pagePath(),
-      section: a.getAttribute("data-lab-section") || "",
-      link_text: linkText(a),
+      section: el.getAttribute("data-lab-section") || "",
+      link_text: linkText(el),
       href: href,
       is_external: external
     };
-    var expId = a.getAttribute("data-lab-experiment-id");
+    var nav = el.getAttribute("data-lab-nav");
+    if(nav) props.nav = nav;
+    var expId = el.getAttribute("data-lab-experiment-id");
     if(expId) props.experiment_id = expId;
-    var src = a.getAttribute("data-lab-source-repo");
+    var src = el.getAttribute("data-lab-source-repo");
     if(src) props.source_repo = src;
     posthog.capture("lab_link_click", props, { transport: "sendBeacon", send_instantly: true });
   }, true);

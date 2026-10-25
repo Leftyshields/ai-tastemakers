@@ -1,3 +1,7 @@
+---
+lead: "Kept Aug 29, 2026. Two simple writing rules made Skills briefs about 18% shorter, kept them passing every quality check, and made them better at explaining why each project matters now."
+---
+
 # Shorter Skills briefs
 
 _**Kept Aug 29, 2026.** This experiment tried a tighter writing style for Skills briefs. Briefs came out about 18% shorter, passed all 13 quality checks, and did a better job on average of explaining why each project matters now._

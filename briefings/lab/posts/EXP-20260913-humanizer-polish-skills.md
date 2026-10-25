@@ -1,3 +1,7 @@
+---
+lead: "Kept Oct 24, 2026. A final polish step now strips machine-sounding phrasing from both daily lists, and briefs passed all 13 quality checks while why now rose from 3.7 to 5.0 and specificity from 4.5 to 5.0."
+---
+
 # Less AI-sounding briefs
 
 _**Kept Oct 24, 2026.** This experiment added a final polish step to both daily lists that rewrites phrasing that sounds machine-written. From Oct 11 to Oct 24, 2026, briefs passed all 13 quality checks and scored 5.0 on why now and 5.0 on specificity, up from 3.7 and 4.5 before._

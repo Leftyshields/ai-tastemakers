@@ -1,3 +1,7 @@
+---
+lead: "Queued, not started, and planned for Nov 22 to Dec 19, 2026. Showing the writer its past \"Why now\" lines should give returning projects a fresh angle instead of the same old line."
+---
+
 # Fresher "Why now" lines on repeats
 
 _**Queued, not started.** This experiment will help the Skills writer avoid repeating itself when a project comes back to the list. It is planned for Nov 22 to Dec 19, 2026._

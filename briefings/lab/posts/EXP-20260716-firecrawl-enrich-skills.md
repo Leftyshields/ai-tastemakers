@@ -1,3 +1,7 @@
+---
+lead: "Shipped Aug 1, 2026, without the planned before and after comparison. Firecrawl replaced Jina Reader as the page reader behind Skills briefs, aiming for briefs that are more specific and accurate."
+---
+
 # Better source pages for Skills briefs
 
 _**Shipped Aug 1, 2026.** This experiment swapped the tool that reads web pages for Skills briefs to Firecrawl, aiming for briefs that are more specific and accurate. It shipped without the planned before and after comparison._

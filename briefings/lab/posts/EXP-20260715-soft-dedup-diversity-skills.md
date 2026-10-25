@@ -1,3 +1,7 @@
+---
+lead: "Closed Sep 26, 2026, and kept. The Skills list now repeats far fewer of yesterday's top picks, with repeats in the top 10 down from 70% to 37.5%, so readers see more new projects each day."
+---
+
 # Less-repeated Skills picks
 
 _**Closed Sep 26, 2026.** This experiment made the Skills list repeat fewer of the previous day's top picks. Repeats in the top 10 dropped from 70% to 37.5%, and the change stayed on after the test closed._

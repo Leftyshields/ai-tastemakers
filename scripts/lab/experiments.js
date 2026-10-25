@@ -51,8 +51,13 @@
     return `<span class="experiment-status experiment-status--${statusModifier(label)}">${esc(label)}</span>`;
   }
 
+  function planAnchorId(expId) {
+    return "lab-exp-" + expId;
+  }
+
   function cardHtml(exp) {
     return `
+      <article id="${esc(planAnchorId(exp.id))}" class="experiment-card-wrap">
       <button type="button" class="experiment-card" data-id="${esc(exp.id)}" aria-label="${esc(exp.title)}">
         <div class="experiment-card__meta">
           ${statusBadge(exp)}
@@ -61,7 +66,7 @@
         <h3 class="experiment-card__title">${esc(exp.title)}</h3>
         <p class="experiment-card__summary">${esc(exp.reader_summary || exp.change_summary)}</p>
         ${exp.outcome_line ? `<p class="experiment-card__outcome">${esc(exp.outcome_line)}</p>` : ""}
-      </button>`;
+      </button></article>`;
   }
 
   function liveRowHtml(exp) {
@@ -347,8 +352,14 @@
     URL.revokeObjectURL(a.href);
   }
 
+  function experimentIdFromHash(raw) {
+    if (!raw) return "";
+    if (raw.indexOf("lab-exp-") === 0) return raw.slice("lab-exp-".length);
+    return raw;
+  }
+
   function showFromHash() {
-    const id = decodeURIComponent(location.hash.replace(/^#/, ""));
+    const id = experimentIdFromHash(decodeURIComponent(location.hash.replace(/^#/, "")));
     if (!id) {
       if (selected) hideDetail();
       return;

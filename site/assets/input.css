@@ -67,6 +67,185 @@
     @apply min-h-11;
   }
 
+  .lab-post-shell {
+    @apply bg-stone-100 dark:bg-[#0c0a09];
+  }
+
+  .lab-post-panel {
+    @apply rounded-2xl border border-stone-300 bg-stone-50 p-6 font-sans dark:border-[#44403c] dark:bg-[#1c1917];
+  }
+
+  @media (max-width: 480px) {
+    .lab-post-panel {
+      @apply p-4;
+    }
+  }
+
+  .lab-post-header__hdr {
+    @apply flex flex-wrap items-center gap-4;
+  }
+
+  @media (max-width: 480px) {
+    .lab-post-header__hdr {
+      @apply flex-col items-start gap-4;
+    }
+
+    .lab-post-header__vdiv {
+      @apply hidden;
+    }
+
+    .lab-post-header__repo-link {
+      @apply w-auto max-w-full flex-none self-start;
+    }
+  }
+
+  .lab-post-back-btn {
+    @apply inline-flex min-h-11 shrink-0 cursor-pointer items-center gap-2 rounded-xl border border-solid border-stone-400 bg-stone-100 px-3.5 font-sans text-base font-semibold text-stone-900 dark:border-stone-400 dark:bg-stone-800 dark:text-stone-100;
+    border-width: 1.5px;
+  }
+
+  .lab-post-back-btn:hover {
+    @apply bg-stone-200 dark:bg-stone-700;
+  }
+
+  .lab-post-back-btn:focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-400;
+  }
+
+  .lab-post-header__vdiv {
+    @apply h-6 w-px shrink-0 bg-stone-300 dark:bg-[#44403c];
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-header__vdiv {
+    @apply hidden;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip {
+    flex-basis: 100%;
+    @apply w-full max-w-full;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-header__repo-link {
+    flex-basis: auto;
+    width: fit-content;
+    max-width: 100%;
+  }
+
+  .lab-post-header__repo-link {
+    @apply min-h-11 max-w-full self-start rounded-xl border border-solid border-stone-400 bg-stone-100 px-4 py-2 text-left font-mono text-sm font-semibold leading-snug text-blue-700 underline decoration-blue-700 underline-offset-[3px] dark:border-stone-500 dark:bg-[#0c0a09] dark:text-blue-300 dark:decoration-blue-300;
+    border-width: 1.5px;
+    display: inline-block;
+    width: fit-content;
+    vertical-align: top;
+    box-sizing: border-box;
+  }
+
+  .lab-post-header__repo-link .lab-post-split-chip__owner-line,
+  .lab-post-header__repo-link .lab-post-split-chip__name {
+    @apply inline w-auto leading-snug;
+  }
+
+  .lab-post-split-chip__plan {
+    @apply font-sans font-semibold normal-case not-italic;
+  }
+
+  .lab-post-split-chip {
+    @apply inline-flex w-auto max-w-full flex-none items-stretch;
+  }
+
+  .lab-post-split-chip__pill {
+    @apply min-h-11 flex-none shrink-0 rounded-l-xl rounded-r-none border border-solid border-stone-400 border-r-0 bg-stone-100 px-4 dark:border-stone-500 dark:bg-[#1c1917];
+    border-width: 1.5px;
+  }
+
+  .lab-post-split-chip__repo {
+    @apply inline-flex min-h-11 w-auto max-w-full flex-none items-center justify-start break-words rounded-r-xl border border-solid border-stone-400 bg-stone-100 px-4 py-2 text-left font-mono text-sm font-semibold leading-snug text-blue-700 underline decoration-blue-700 underline-offset-[3px] dark:border-stone-500 dark:bg-[#0c0a09] dark:text-blue-300 dark:decoration-blue-300;
+    border-width: 1.5px;
+  }
+
+  .lab-post-split-chip__owner-line {
+    @apply inline leading-snug;
+  }
+
+  .lab-post-split-chip__name {
+    @apply inline leading-snug;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo {
+    @apply min-w-0 flex-1 flex-col items-start justify-center py-2;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo .lab-post-split-chip__owner-line,
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo .lab-post-split-chip__name {
+    @apply block w-full;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo wbr {
+    display: none;
+  }
+
+  @media (max-width: 480px) {
+    .lab-post-split-chip {
+      @apply w-full max-w-full flex-none;
+    }
+
+    .lab-post-split-chip__repo {
+      @apply min-w-0 flex-1 flex-col items-start justify-center py-2;
+    }
+
+    .lab-post-split-chip__repo .lab-post-split-chip__owner-line,
+    .lab-post-split-chip__repo .lab-post-split-chip__name {
+      @apply block w-full;
+    }
+
+    .lab-post-split-chip__repo wbr {
+      display: none;
+    }
+  }
+
+  .lab-post-header__repo-link:focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-400;
+  }
+
+  .lab-post-split-chip__repo:focus-visible {
+    @apply outline-2 outline-offset-2 outline-blue-400;
+  }
+
+  .lab-post-panel__title {
+    @apply mb-2 mt-6 text-[26px] font-bold leading-tight tracking-tight text-stone-900 dark:text-stone-100;
+  }
+
+  @media (max-width: 480px) {
+    .lab-post-panel__title {
+      @apply text-[22px];
+    }
+
+    .lab-post-split-chip__pill {
+      /* UX47: keep repo segment ≥60% of chip on narrow viewports (incl. CI fonts) */
+      @apply px-2 text-sm;
+    }
+
+    .lab-post-split-chip__repo {
+      @apply px-3 text-[13px];
+    }
+  }
+
+  .lab-post-panel__status {
+    @apply inline-flex items-center gap-1.5 text-sm text-stone-600 dark:text-stone-300;
+  }
+
+  .lab-post-panel__status-icon {
+    @apply shrink-0 text-emerald-600 dark:text-emerald-400;
+  }
+
+  .lab-post-panel__status-em {
+    @apply font-semibold text-emerald-600 dark:text-emerald-400;
+  }
+
+  .lab-post-panel__lead {
+    @apply mt-4 text-[15px] leading-relaxed text-stone-600 dark:text-stone-300;
+  }
+
   .lab-tested-badge--post {
     @apply inline-flex items-center gap-1.5 font-sans text-sm font-semibold leading-none;
   }
@@ -79,8 +258,8 @@
     @apply text-blue-800 dark:text-blue-300;
   }
 
-  .digest-lab-badge-blurb {
-    @apply font-sans;
+  .lab-post-panel__badge-blurb {
+    @apply mt-2 font-sans;
   }
 
   .new-repo-badge {
