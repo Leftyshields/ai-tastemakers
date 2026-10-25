@@ -8,6 +8,7 @@ import {
   countLabPostPanelLeadOccurrences,
   extractLabPostLeadParagraph,
   firstResultSectionSentence,
+  labPostShowsLabTestedBadge,
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
   resolvePostVerdictLine,
@@ -102,6 +103,91 @@ describe("lab post header E1", () => {
     expect(LAB_TESTED_BADGE_BLURB).toBe(
       "Tastemakers doesn't just report on AI tools. It tests them. Every Lab tested badge marks a repo whose idea was put to work on these lists and measured in the open.",
     );
+  });
+
+  it("shows badge blurb only when the Lab tested pill renders (firecrawl yes, planned caveman no)", () => {
+    const linkCtx = defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01");
+    const firecrawl = loadExperimentsFile(repoRoot).experiments.find(
+      (e) => e.id === "EXP-20260716-firecrawl-enrich-skills",
+    )!;
+    const caveman = loadExperimentsFile(repoRoot).experiments.find(
+      (e) => e.id === "EXP-20260913-caveman-compress-skills",
+    )!;
+    const md = (id: string) =>
+      fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
+    const render = (exp: (typeof firecrawl)) =>
+      renderLabPostPageHeader({
+        experiment: exp,
+        title: exp.label,
+        markdown: md(exp.id),
+        postHref: `${exp.id}.html`,
+        linkCtx,
+        writeupPostIds: [exp.id],
+        repoRoot,
+        escape: (t) => t,
+      });
+
+    const doneHtml = render(firecrawl);
+    expect(labPostShowsLabTestedBadge(firecrawl)).toBe(true);
+    expect(doneHtml).toContain("digest-lab-badge-blurb");
+    expect(doneHtml).toContain("lab-post-split-chip__pill");
+
+    const plannedHtml = render(caveman);
+    expect(labPostShowsLabTestedBadge(caveman)).toBe(false);
+    expect(plannedHtml).not.toContain("digest-lab-badge-blurb");
+    expect(plannedHtml).not.toContain("lab-post-split-chip__pill");
+    expect(plannedHtml).toContain("lab-post-split-chip__repo");
+  });
+
+  it("omits badge blurb on done posts with no sourceRepo (web enrich)", () => {
+    const exp = loadExperimentsFile(repoRoot).experiments.find(
+      (e) => e.id === "EXP-20260628-web-enrich-skills",
+    )!;
+    expect(exp.status).toBe("done");
+    expect(exp.sourceRepo?.trim()).toBeFalsy();
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260628-web-enrich-skills.md"),
+      "utf8",
+    );
+    const html = renderLabPostPageHeader({
+      experiment: exp,
+      title: "Richer Skills briefs",
+      markdown: md,
+      postHref: `${exp.id}.html`,
+      linkCtx: defaultLabLinkContext(1, {}, "2026-08-01"),
+      writeupPostIds: [exp.id],
+      repoRoot,
+      escape: (t) => t,
+    });
+    expect(labPostShowsLabTestedBadge(exp)).toBe(true);
+    expect(html).not.toContain("digest-lab-badge-blurb");
+    expect(html).not.toContain("lab-post-split-chip__pill");
+  });
+
+  it("omits split chip when experiment has no sourceRepo (rank bootstrap)", () => {
+    const exp = loadExperimentsFile(repoRoot).experiments.find(
+      (e) => e.id === "EXP-20260913-rank-bootstrap-skills",
+    )!;
+    expect(exp.sourceRepo?.trim()).toBeFalsy();
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md"),
+      "utf8",
+    );
+    const html = renderLabPostPageHeader({
+      experiment: exp,
+      title: "Smarter early ranking",
+      markdown: md,
+      postHref: `${exp.id}.html`,
+      linkCtx: defaultLabLinkContext(1, {}, "2026-08-01"),
+      writeupPostIds: [exp.id],
+      repoRoot,
+      escape: (t) => t,
+    });
+    expect(html).toContain('id="lab-post-back-btn"');
+    expect(html).toContain("lab-post-panel__title");
+    expect(html).not.toContain('class="lab-post-split-chip"');
+    expect(html).not.toContain('class="lab-post-header__vdiv"');
+    expect(html).not.toContain("digest-lab-badge-blurb");
   });
 
   it("stripLabPostLeadMarkdown removes literal asterisks", () => {

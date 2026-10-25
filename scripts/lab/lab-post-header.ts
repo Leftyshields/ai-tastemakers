@@ -182,6 +182,11 @@ export function renderDigestLabBadgeBlurbHtml(escape: (t: string) => string): st
   )}</p>`;
 }
 
+/** Lab tested pill in the E1 split chip (done or running experiments only). */
+export function labPostShowsLabTestedBadge(exp: LabExperimentEntry): boolean {
+  return exp.status === "done" || exp.status === "running";
+}
+
 export function digestBriefHasLabBadges(
   repos: ReadonlyArray<{ rank: number; full_name: string }>,
   experiments: readonly LabExperimentEntry[],
@@ -350,13 +355,14 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   parts.push(`<section class="lab-post-panel">`);
 
   const repoKey = exp.sourceRepo?.trim();
+  const showsBadge = labPostShowsLabTestedBadge(exp);
   parts.push(`<div class="lab-post-header__hdr">`);
   parts.push(
     `<button type="button" id="lab-post-back-btn" class="lab-post-back-btn" data-lab-section="posts" data-lab-nav="back">${BACK_ARROW_SVG}<span class="lab-post-back-btn__text">${escape(LAB_POST_BACK_BUTTON_LABEL)}</span></button>`,
   );
-  parts.push(`<span class="lab-post-header__vdiv" aria-hidden="true"></span>`);
 
   if (repoKey) {
+    parts.push(`<span class="lab-post-header__vdiv" aria-hidden="true"></span>`);
     const { displayFullName, githubUrl } = resolveSourceRepoGithubLink(repoKey, repoRoot);
     const lookup = buildLabBadgeLookup([exp]);
     const badge =
@@ -368,11 +374,9 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
         repoKey,
       } as LabBadgeInfo);
     badge.repoKey = repoKey;
-    const badgeStatus =
-      exp.status === "running" ? "running" : exp.status === "done" ? "done" : null;
     parts.push(`<div class="lab-post-split-chip">`);
-    if (badgeStatus) {
-      badge.status = badgeStatus;
+    if (showsBadge) {
+      badge.status = exp.status === "running" ? "running" : "done";
       parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
     }
     parts.push(
@@ -393,7 +397,11 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   if (lead) {
     parts.push(`<p class="lab-post-panel__lead">${escape(lead)}</p>`);
   }
-  parts.push(`</section></header>`, renderLabPostHeaderClientScripts(ossBackHref, skillsBackHref));
+  parts.push(`</section>`);
+  if (repoKey && showsBadge) {
+    parts.push(renderDigestLabBadgeBlurbHtml(escape));
+  }
+  parts.push(`</header>`, renderLabPostHeaderClientScripts(ossBackHref, skillsBackHref));
 
   return parts.join("");
 }
@@ -463,10 +471,12 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
   for (let i = 1; i < LAB_POST_HEADER_ORDER_MARKERS.length; i++) {
     const cls = LAB_POST_HEADER_ORDER_MARKERS[i]!;
     const optional =
+      cls === "lab-post-header__vdiv" ||
       cls === "lab-post-split-chip" ||
       cls === "lab-post-split-chip__pill" ||
       cls === "lab-post-split-chip__repo" ||
-      cls === "lab-post-panel__lead";
+      cls === "lab-post-panel__lead" ||
+      cls === "digest-lab-badge-blurb";
     if (positions[i]! < 0) {
       if (optional) continue;
       return [`${pageRel}: missing ${cls}`];
@@ -487,12 +497,18 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
     "From the Skills top 10",
     "from_rank=",
     "at number",
-    LAB_TESTED_BADGE_BLURB.replace(/&/g, "&amp;"),
   ];
   for (const needle of forbidden) {
     if (header.includes(needle)) {
       return [`${pageRel}: header must not include forbidden copy ${needle}`];
     }
+  }
+  const hasBadgePill = header.includes("lab-post-split-chip__pill");
+  const hasBlurb = header.includes("digest-lab-badge-blurb");
+  if (hasBadgePill !== hasBlurb) {
+    return [
+      `${pageRel}: Lab tested badge blurb must ${hasBadgePill ? "be present" : "be absent"} (pill=${hasBadgePill}, blurb=${hasBlurb})`,
+    ];
   }
   if (!header.includes('id="lab-post-back-btn"')) {
     return [`${pageRel}: missing Back button`];
