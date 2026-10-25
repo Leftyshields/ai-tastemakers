@@ -1,6 +1,6 @@
 # Less-repeated Skills picks
 
-_We made the Skills list better at skipping projects too similar to ones already shown. Overlap dropped from 70% to 37.5%, so we kept it when the test closed on Sep 26, 2026._
+_We changed the Skills list so it repeats fewer of the previous day's top picks. The share of repeats in the top 10 dropped from 70% to 37.5%, so we kept it when the test closed on Sep 26, 2026._
 
 ## In plain English
 
