@@ -19,6 +19,7 @@ import { DEFAULT_DIGEST_SITE_URL, digestSiteUrlFromEnv } from "../config.js";
 import { renderDigestEmailHtml } from "../email/html.js";
 import { labBadgeClickTrackingScript, digestRepoClickTrackingScript } from "../../../scripts/edition-pages.js";
 import { buildLabBadgeEmailGoUrl } from "../analytics/repo-click.js";
+import { resolveLabBadgeHrefForDigestCard } from "../../../scripts/lab/lab-post-header.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -126,6 +127,15 @@ describe("UX45 lab tested badge", () => {
     expect(resolveLabBadgeHref(badge, "../lab/", writeups)).toBe(
       "../lab/posts/EXP-20260802-ponytail-narration-skills.html",
     );
+  });
+
+  it("digest card badge href includes from_list and from_rank", () => {
+    const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
+    const badge = labBadgeForRepo(lookup, "DietrichGebert/ponytail")!;
+    const writeups = ["EXP-20260802-ponytail-narration-skills"];
+    const href = resolveLabBadgeHrefForDigestCard(badge, "../lab/", writeups, "oss", 1);
+    expect(href).toContain("from_list=oss");
+    expect(href).toContain("from_rank=1");
   });
 
   it("tracks lab_badge_click without repo_click on badge taps", () => {

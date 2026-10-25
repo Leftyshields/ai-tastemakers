@@ -97,14 +97,62 @@ export const LAB_BADGE_DEST_INDEX_PATH_RE =
   /^\/(?:[A-Za-z0-9._-]+\/)?lab\/index\.html$/i;
 export const LAB_BADGE_DEST_INDEX_HASH_RE = /^#lab-exp-EXP-[0-9]{8}-[a-z0-9-]+$/i;
 
-/** Shared allowlist check on a decoded absolute site path (optional #hash). */
-export function isAllowlistedLabBadgeDestDecoded(path: string): boolean {
-  if (!path.startsWith("/") || path.includes("://") || path.includes("..")) return false;
+export function parseLabBadgeFromListParam(raw: string | null | undefined): EditionId | null {
+  if (raw == null) return null;
+  const v = raw.trim().toLowerCase();
+  if (v === "oss" || v === "skills") return v;
+  return null;
+}
+
+export function parseLabBadgeFromRankParam(raw: string | null | undefined): number | null {
+  if (raw == null) return null;
+  const n = Number.parseInt(String(raw).trim(), 10);
+  if (!Number.isFinite(n) || n < 1 || n > 10) return null;
+  return n;
+}
+
+function splitLabBadgeDestPath(path: string): {
+  pathPart: string;
+  hash: string;
+  search: string;
+} | null {
+  if (!path.startsWith("/") || path.includes("://") || path.includes("..")) return null;
   const hashIdx = path.indexOf("#");
-  const pathPart = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
+  const beforeHash = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
   const hash = hashIdx >= 0 ? path.slice(hashIdx) : "";
-  const postOk = LAB_BADGE_DEST_POST_RE.test(pathPart);
-  const indexOk = LAB_BADGE_DEST_INDEX_PATH_RE.test(pathPart) && LAB_BADGE_DEST_INDEX_HASH_RE.test(hash);
+  const qIdx = beforeHash.indexOf("?");
+  const pathPart = qIdx >= 0 ? beforeHash.slice(0, qIdx) : beforeHash;
+  const search = qIdx >= 0 ? beforeHash.slice(qIdx) : "";
+  return { pathPart, hash, search };
+}
+
+function labBadgeAttributionQueryValid(search: string): boolean {
+  if (!search) return true;
+  if (!search.startsWith("?")) return false;
+  const params = new URLSearchParams(search.slice(1));
+  const keys = [...params.keys()];
+  if (keys.length === 0) return true;
+  for (const key of keys) {
+    if (key !== "from_list" && key !== "from_rank") return false;
+  }
+  const list = params.has("from_list") ? parseLabBadgeFromListParam(params.get("from_list")) : null;
+  const rank = params.has("from_rank") ? parseLabBadgeFromRankParam(params.get("from_rank")) : null;
+  if (params.has("from_list") && !list) return false;
+  if (params.has("from_rank") && rank == null) return false;
+  if (list == null && rank == null && keys.length > 0) return false;
+  if ((list && rank == null) || (!list && rank != null)) return false;
+  return true;
+}
+
+/** Shared allowlist check on a decoded absolute site path (optional ?attribution and #hash). */
+export function isAllowlistedLabBadgeDestDecoded(path: string): boolean {
+  const parts = splitLabBadgeDestPath(path);
+  if (!parts) return false;
+  if (!labBadgeAttributionQueryValid(parts.search)) return false;
+  const postOk = LAB_BADGE_DEST_POST_RE.test(parts.pathPart);
+  const indexOk =
+    LAB_BADGE_DEST_INDEX_PATH_RE.test(parts.pathPart) &&
+    LAB_BADGE_DEST_INDEX_HASH_RE.test(parts.hash);
   return postOk || indexOk;
 }
 

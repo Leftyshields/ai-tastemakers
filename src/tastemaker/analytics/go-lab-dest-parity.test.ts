@@ -23,8 +23,11 @@ function clientAllowlistedLabDestEncoded(raw: string | null | undefined): string
 const SAMPLE_DESTS = [
   "/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
   "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
+  "/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=skills&from_rank=2",
+  "/ai-tastemakers/lab/index.html?from_list=oss&from_rank=1#lab-exp-EXP-20260913-humanizer-polish-skills",
   "/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills",
   "/ai-tastemakers/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills",
+  "/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=bad&from_rank=2",
   "https://evil.com/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
   "/lab/posts/not-an-exp-id.html",
   "/lab/index.html#evil",

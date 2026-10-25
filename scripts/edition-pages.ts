@@ -58,6 +58,12 @@ import {
   loadLabBadgeLookup,
   loadLabWriteupPostIds,
 } from "./lab/lab-tested-badge.js";
+import { loadExperimentsFile } from "./lab/validate-experiments.js";
+import {
+  renderLabPostPageHeader,
+  stripLeadingH1FromArticleHtml,
+} from "./lab/lab-post-header.js";
+import { listLabWriteupPostIds } from "./lab/lab-format.js";
 import {
   renderDigestBriefArticle,
   splitDailyBriefMarkdown,
@@ -1641,6 +1647,7 @@ export async function buildEditionSite(
   const writeupPostIds = loadLabWriteupPostIds(repoRoot);
   const labPrefix = edition.id === "skills" ? "../../lab/" : "../lab/";
   const badgeContext = { lookup: badgeLookup, labPrefix, writeupPostIds };
+  const labExperiments = loadExperimentsFile(repoRoot).experiments;
   const dates = await listBriefingDates(briefingsDir);
   const siteRoot = edition.siteSegment
     ? path.join(siteDir, edition.siteSegment)
@@ -1672,6 +1679,7 @@ export async function buildEditionSite(
         headerMarkdown,
         escapeHtml,
         badgeContext,
+        labExperiments,
       );
     } catch {
       /* fall back to markdown-only body */
@@ -1821,6 +1829,8 @@ export async function buildLabSite(
   const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };
   const allowlist = await collectDigestRepoAllowlist(repoRoot);
   const linkCtx = defaultLabLinkContext(0, allowlist, asOfIsoDate);
+  const labExperiments = loadExperimentsFile(repoRoot).experiments;
+  const writeupPostIds = listLabWriteupPostIds(repoRoot);
 
   const labPublic = writeLabPublicArtifacts(repoRoot, labSiteDir);
   const dashboardHtml = renderLabDashboardHtml(labPublic, escapeHtml, { asOfIsoDate });
@@ -1969,12 +1979,25 @@ export async function buildLabSite(
         let html = prepareLabWriteupHtmlFromMarkdown(markdown);
         const postLinkCtx = defaultLabLinkContext(1, allowlist, asOfIsoDate);
         html = prepareLabPostArticleHtml(html, postLinkCtx);
+        html = stripLeadingH1FromArticleHtml(html);
         const slug = file.replace(/\.md$/, "");
         const title = markdownH1(markdown, slug);
         listings.push(
           `<li class="mb-2"><a href="${slug}.html" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(title)}</a></li>`,
         );
-        const postBody = `${labNavHtml("posts", escapeHtml, 1)}${renderLabPostBackLink(escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
+        const exp = labExperiments.find((e) => e.id === slug);
+        const headerBlock = exp
+          ? renderLabPostPageHeader({
+              experiment: exp,
+              title,
+              markdown,
+              postHref: `${slug}.html`,
+              linkCtx: postLinkCtx,
+              writeupPostIds,
+              escape: escapeHtml,
+            })
+          : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
+        const postBody = `${labNavHtml("posts", escapeHtml, 1)}${renderLabPostBackLink(escapeHtml)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
           pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, {
