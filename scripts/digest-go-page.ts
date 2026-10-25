@@ -116,13 +116,16 @@ export function renderGoRedirectPage(
   if (continueLink) continueLink.href = destination;
 
   if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
+    var normalizedRepo = normalizeRepo(repo) || "";
     captureOnce("lab_badge_click", {
+      experiment_id: parsed.exp,
       exp_id: parsed.exp,
-      repo: normalizeRepo(repo) || repo || "",
+      repo: normalizedRepo || repo || "",
+      source_repo: normalizedRepo,
       status: parsed.status || "",
       list: section,
       rank: rank,
-      channel: parsed.channel || "email"
+      surface: "email"
     });
   } else {
     var githubTarget = resolveUrl();

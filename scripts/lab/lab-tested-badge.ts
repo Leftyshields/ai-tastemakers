@@ -82,10 +82,7 @@ export function resolveLabBadgeHref(
   if (writeupPostIds.includes(badge.id)) {
     return `${base}posts/${badge.id}.html`;
   }
-  if (badge.status === "done") {
-    return `${base}index.html#lab-exp-${badge.id}`;
-  }
-  return `${base}index.html#${badge.id}`;
+  return `${base}index.html#lab-exp-${badge.id}`;
 }
 
 /** Absolute site path for email /go dest= (from origin, includes publish prefix). */
@@ -106,6 +103,33 @@ export function labBadgeSiteDestPath(
 
 export function loadLabWriteupPostIds(repoRoot: string): string[] {
   return listLabWriteupPostIds(repoRoot);
+}
+
+/** Every badged experiment must resolve to a built post or a lab home history anchor. */
+export function findBadgedExperimentDestinationViolations(
+  repoRoot: string,
+  siteRoot: string,
+): string[] {
+  const writeups = new Set(loadLabWriteupPostIds(repoRoot));
+  const indexPath = path.join(siteRoot, "lab", "index.html");
+  if (!fs.existsSync(indexPath)) {
+    return ["missing site/lab/index.html (run npm run build:pages first)"];
+  }
+  const indexHtml = fs.readFileSync(indexPath, "utf8");
+  const violations: string[] = [];
+  const seen = new Set<string>();
+  for (const badge of loadLabBadgeLookup(repoRoot).values()) {
+    if (seen.has(badge.id)) continue;
+    seen.add(badge.id);
+    const hasPost = writeups.has(badge.id);
+    const hasAnchor = indexHtml.includes(`id="lab-exp-${badge.id}"`);
+    if (!hasPost && !hasAnchor) {
+      violations.push(
+        `${badge.id}: badged experiment has neither write up post nor lab-exp anchor on index`,
+      );
+    }
+  }
+  return violations;
 }
 
 const FLASK_SVG = `<svg class="lab-tested-badge__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 3h6v7l4 9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2l4-9V3z"/><path d="M9 3h6"/><path d="M7 14h10"/></svg>`;
@@ -131,7 +155,7 @@ export function renderLabTestedBadgePagesHtml(
   const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
   const aria = escape(badgeAriaLabel(badge.status, badge.title));
   const titleAttr = escape(badge.title);
-  return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
+  return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" title="${titleAttr}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
 export function labBadgeEmailFlaskSrc(siteUrl: string): string {

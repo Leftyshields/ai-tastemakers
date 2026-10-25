@@ -45,7 +45,7 @@ describe("Lab UX26 UX28 UX29", () => {
     const writeupIds = new Set(listLabWriteupPostIds(repoRoot));
     expect(writeupIds.has("EXP-20260701-landing-layout")).toBe(false);
     expect(html).not.toContain("posts/EXP-20260701-landing-layout.html");
-    expect(html).not.toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
+    expect(html).toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
   });
 
   it("UX35 index intro is short and links About in nav", () => {

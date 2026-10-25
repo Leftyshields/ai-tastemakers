@@ -28,6 +28,8 @@ echo "verify: site internal hrefs and anchors (UX30 link checker)"
 npx tsx scripts/verify-lab-internal-hrefs.ts
 echo "verify: lab tested badges on daily top 10 (UX45)"
 npx tsx scripts/verify-lab-tested-badges.ts
+echo "verify: badged experiments have post or lab index anchor"
+npx tsx scripts/verify-lab-badge-destinations.ts
 echo "verify: lab badge action row layout (UX45)"
 npx tsx scripts/verify-lab-badge-mobile-layout.ts
 echo "verify: lab PostHog and link tracking (UX42)"
