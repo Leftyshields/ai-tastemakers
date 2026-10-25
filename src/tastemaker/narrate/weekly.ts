@@ -188,9 +188,18 @@ Each named repo must be a markdown link on first mention, using the exact GitHub
 
 Referent check: the noun you assign each repo must match what that repo is.
 
+VOICE (Brian's house voice):
+- Short sentences, one idea each. If a sentence needs a comma list of more than three items, cut it down to the one or two a stranger would care about.
+- Explain what a repo does the way you would to a smart friend at dinner: plain words first, technical names only if they help. Bad: "inspect closed binaries, JavaScript and Electron apps, .NET assemblies... routing analysis through Hopper or Ghidra." Good: "it lets an AI agent take apart software it has no source code for."
+- Confident and direct. State the point; do not build up to it. No "That is a genuinely new surface." No "X is not Y anymore; it is Z" constructions. No "lands differently," "the scaffolding layer," or other abstract filler.
+- One light, self-deprecating or wry line is welcome when it fits (a quiet week, a repo that refused to leave the top spot). Keep it short and never at a project's expense.
+- No "we," "our," or "us." The repos and the week are the subject.
+- Never use the words "genuinely," "landscape," "surface" (as a noun), or "equipped."
+- Before finishing, reread the Body as a reader who has never heard of any of these repos. Rewrite any sentence they would have to read twice.
+
 RULES:
 - 200 to 250 words in the Body (Verdict is extra). Cut anything that reads as summary.
-- Do NOT reference our tooling, Lab, telemetry, token budgets, experiments, or how this digest is produced. The email is about the week's repos, not about us.
+- Do NOT reference our tooling, Lab, telemetry, token budgets, experiments, or how this digest is produced. The email is about the week's repos, not about how it is made.
 - Trending measures attention, not adoption or spend. Frame the so-what as what attention concentrated on and what that suggests, and say so plainly once. No quantified cost or adoption claim you cannot back from public numbers.
 - Use the same name for each list everywhere: AI Tastemakers and Skill Tastemakers.
 - Quiet week: say so plainly and keep it short. Never manufacture a thesis.
