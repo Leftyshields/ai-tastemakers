@@ -4,6 +4,7 @@ import {
   isUsGeographicProperNoun,
   labPostVisiblePlainText,
   stripLabPostHtmlForFirstPersonScan,
+  stripLabThirdPartyHtml,
 } from "../../../scripts/lab/lab-format.js";
 
 describe("lab post first-person gate", () => {
@@ -48,6 +49,12 @@ describe("lab post first-person gate", () => {
     const hits = findLabPostFirstPersonSentences(html);
     expect(hits).toEqual(["Deploy in US East before we roll out."]);
     expect(hits[0]).not.toMatch(/\bUS\b.*\bour\b/);
+  });
+
+  it("excludes third-party repo names marked with data-third-party", () => {
+    const html = `<main><p>Lab copy stays.</p><span data-third-party>dsh our free model</span></main>`;
+    expect(findLabPostFirstPersonSentences(html)).toEqual([]);
+    expect(stripLabThirdPartyHtml('<span data-third-party>our repo</span>')).not.toContain("our");
   });
 
   it("stripLabPostHtmlForFirstPersonScan removes nested excluded tags", () => {

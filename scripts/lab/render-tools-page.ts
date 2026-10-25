@@ -50,6 +50,16 @@ function toolDisplayName(fullName: string): string {
   return sanitizeVisibleCopy(fullName.slice(slash + 1));
 }
 
+function thirdPartyRepoLink(
+  href: string,
+  label: string,
+  ctx: LabLinkContext,
+  opts: Parameters<typeof renderLabTrackedLink>[3],
+  escapeHtml: (t: string) => string,
+): string {
+  return `<span data-third-party>${renderLabTrackedLink(href, label, ctx, opts, escapeHtml)}</span>`;
+}
+
 function experimentForTool(fullName: string, experiments: LabExperimentEntry[]): LabExperimentEntry | undefined {
   return experiments.find((e) => {
     if (e.sourceRepo && fullName.toLowerCase().includes(e.sourceRepo.toLowerCase())) return true;
@@ -139,7 +149,7 @@ export function renderToolsPageHtml(
       .map((r) => renderEditionTopicChip(roleLabel(r), escapeHtml))
       .join("");
     const rowId = escapeHtml(`tool-${entry.full_name.replace(/\//g, "-")}`);
-    const toolLink = renderLabTrackedLink(
+    const toolLink = thirdPartyRepoLink(
       entry.html_url,
       toolDisplayName(entry.full_name),
       ctx,
@@ -168,7 +178,9 @@ export function renderToolsPageHtml(
     }${moreBtn}</div></td>`;
     const expandBits: string[] = [];
     if (entry.notes?.trim()) {
-      expandBits.push(`<p>${escapeHtml(sanitizeVisibleCopy(entry.notes))}</p>`);
+      expandBits.push(
+        `<p data-third-party>${escapeHtml(sanitizeVisibleCopy(entry.notes))}</p>`,
+      );
     }
     if (exp) {
       expandBits.push(experimentTechnicalMoreHtml(exp, escapeHtml));
@@ -202,7 +214,7 @@ export function renderToolsPageHtml(
       .map((r) => renderEditionTopicChip(roleLabel(r), escapeHtml))
       .join("");
     const lastFeatured = escapeHtml(formatFeaturedDate(entry.last_seen));
-    const toolLink = renderLabTrackedLink(
+    const toolLink = thirdPartyRepoLink(
       entry.html_url,
       toolDisplayName(entry.full_name),
       ctx,
@@ -239,7 +251,7 @@ export function renderToolsPageHtml(
       .slice(0, 12)
       .map(
         (e) =>
-          `<li>${renderLabTrackedLink(e.html_url, toolDisplayName(e.full_name), ctx, { section, sourceRepo: e.full_name, className: LAB_TOOLS_LINK_CLASS }, escapeHtml)} (${escapeHtml(String(e.appearance_count))})</li>`,
+          `<li data-third-party>${thirdPartyRepoLink(e.html_url, toolDisplayName(e.full_name), ctx, { section, sourceRepo: e.full_name, className: LAB_TOOLS_LINK_CLASS }, escapeHtml)} (${escapeHtml(String(e.appearance_count))})</li>`,
       )
       .join("");
     parts.push(`<details class="lab-tools-role mb-2 rounded-lg border border-stone-200 dark:border-stone-700">

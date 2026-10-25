@@ -491,11 +491,26 @@ export const LAB_POST_FIRST_PERSON_WORD_RE = /\b(we|our|us)\b/gi;
 const LAB_POST_EXCLUDED_INLINE_RE =
   /<(blockquote|q|code|pre)\b[^>]*>[\s\S]*?<\/\1>/gi;
 
+/** Remove third-party repo names/descriptions marked for the first-person gate. */
+export function stripLabThirdPartyHtml(html: string): string {
+  let s = html;
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(
+      /<([a-z][a-z0-9]*)\b[^>]*\bdata-third-party(?:=[^>\s]+)?[^>]*>[\s\S]*?<\/\1>/gi,
+      " ",
+    );
+  }
+  return s;
+}
+
 /** Remove HTML comments and reader-excluded elements before first-person scan. */
 export function stripLabPostHtmlForFirstPersonScan(html: string): string {
   let s = html.replace(/<!--[\s\S]*?-->/g, " ");
   s = s.replace(/<script[\s\S]*?<\/script>/gi, " ");
   s = s.replace(/<style[\s\S]*?<\/style>/gi, " ");
+  s = stripLabThirdPartyHtml(s);
   let prev = "";
   while (prev !== s) {
     prev = s;
