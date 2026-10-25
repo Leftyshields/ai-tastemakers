@@ -5,7 +5,11 @@ import {
   normalizeRepoParam,
   resolveAllowlistedGithubUrl,
 } from "./repo-click.js";
-import { isSafeExternalHttpUrl, type OutboundDestRegistry } from "./outbound-dest-manifest.js";
+import {
+  isSafeExternalHttpUrl,
+  normalizeOutboundDest,
+  type OutboundDestRegistry,
+} from "./outbound-dest-manifest.js";
 
 export type OutboundLinkChannel = "pages" | "email";
 
@@ -116,11 +120,15 @@ export function buildGenericOutboundGoUrl(
   destination: string,
   ctx: Pick<OutboundRewriteContext, "destRegistry" | "channel" | "surface">,
 ): string | null {
-  if (!isSafeExternalHttpUrl(destination)) return null;
+  let normalizedDest = normalizeOutboundDest(destination);
+  if (!normalizedDest && /^http:\/\//i.test(destination.trim())) {
+    normalizedDest = normalizeOutboundDest(destination.trim().replace(/^http:/i, "https:"));
+  }
+  if (!normalizedDest) return null;
   ctx.destRegistry?.register(destination);
   const params = new URLSearchParams({
     event: "outbound_link_click",
-    dest: destination,
+    dest: normalizedDest,
     surface: ctx.surface,
     channel: ctx.channel,
   });

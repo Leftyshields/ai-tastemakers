@@ -430,6 +430,7 @@ async function main(): Promise<void> {
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl, destRegistry);
 
   await registerEmailOutboundDestsForManifest(destRegistry, ROOT, siteBaseUrl, allowlist);
+  await destRegistry.verifyHttpUpgrades();
 
   const manifestPath = path.join(SITE_DIR, "assets", "outbound-link-dests.json");
   await writeOutboundDestManifest(manifestPath, destRegistry);
