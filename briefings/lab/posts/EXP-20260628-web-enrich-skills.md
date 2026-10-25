@@ -1,77 +1,46 @@
 # Richer Skills briefs
 
-_We started giving our Skills writer extra background from each project's web pages and Hacker News, and kept it when the test closed on Jul 18, 2026._
+_**Closed Jul 18, 2026.** This experiment gave the Skills writer extra background from each project's web pages and Hacker News before writing. The change stayed on after the test closed._
 
-## In plain English
+## The idea
 
-Before Claude writes a Skills blurb, it can now read a bit more than the README: a cleaned web page plus recent Hacker News mentions. The list of repos is unchanged only the write-up gets richer.
+Each Skills brief is a short write-up about a GitHub project. Until this test, the writer, Claude, saw only the project's README. This experiment let Claude also read a cleaned copy of the project's GitHub page and recent Hacker News mentions of it. The top three projects each day got this extra background. The list of projects stayed exactly the same. Only the write-ups changed.
 
-We hoped that would raise clicks out to GitHub. Traffic was too low to tell. What we could see: “Why now” lines cited timely hooks more often, and the blurbs stayed accurate. So we kept the extra context.
+The hope: richer background would make briefs more timely, and more readers would click through to GitHub.
 
-The rest of this page is the operator record.
+## The change
 
----
+Two tools supplied the extra background. Jina Reader turned each project's GitHub page into plain text, and Hacker News search found recent stories naming the project. Their combined text was trimmed to a set length and handed to Claude after the README. Ranking and project discovery did not change.
 
-## Onboarding
+Before going live, a trial run wrote each brief twice, once with the README alone and once with the extra background, so the two versions could be compared side by side without touching published briefs. That trial checked that the setup worked. It did not score the writing.
 
-We added **post-rank, pre-narrate enrichment** to the Skills digest pipeline. After GitHub discovery and README fetch, the top three ranked repos can receive extra context from:
+## How to tell if it worked
 
-- **Jina Reader** plain-text fetch of the repo’s GitHub page
-- **Hacker News Algolia** recent story hits for the repo name
-
-That context is merged, truncated (`DIGEST_ENRICH_MAX_CHARS`), and passed to Claude as an optional block after the README excerpt. Ranking and discovery are unchanged.
-
-**Shadow mode** (`DIGEST_ENRICH_SHADOW=1`) narrates twice control (README only) vs treatment (README + external) and writes side-by-side diffs under `data/experiments/runs/{run_id}/` without touching published briefings.
-
-## Expected outcome
-
-**Hypothesis:** Post-rank web/HN enrichment improves outbound repo click rate on Skills editions without hurting digest quality.
-
-We expected treatment blurbs to cite timely hooks (launches, HN threads) more often while staying accurate to the README. If click-through rose after a treatment window and shadow rubric scores passed, we would keep the change for Skills and consider OSS later.
+Two signals counted. More clicks out to GitHub after the change would show readers cared. Briefs that cited timely news, like a launch or a Hacker News thread, while staying true to the README would show better writing. If both held, the change would stay on Skills, with the OSS list as a possible next step.
 
 ## What happened
 
-| Phase | Window (PT) | Outcome |
-|-------|-------------|         |
-| Baseline | 2026-06-28 → 2026-07-11 | 4 briefing pageviews, 0 outbound repo clicks |
-| Treatment | 2026-07-12 → 2026-07-18 | `DIGEST_ENRICH_WEB=1` in production; 7 Skills digests shipped |
-| Verdict | Closed 2026-07-18 | **Keep enrichment on Skills** |
+| Period | Dates (Pacific time) | Result |
+|--------|----------------------|--------|
+| Before the change | Jun 28 to Jul 11, 2026 | 4 views of Skills briefs, 0 clicks out to GitHub |
+| With the change | Jul 12 to Jul 18, 2026 | Extra background ran live on 7 Skills briefs |
+| Decision | Closed Jul 18, 2026 | Keep the extra background on Skills |
 
-### Metrics (PostHog)
+The traffic numbers are humbling. In the two weeks before the change, Skills briefs drew 4 views in total, 3 on the Jul 7 edition and 1 on the Jul 9 edition, and not a single click out to GitHub. Starting from zero clicks, there is no way to show a rise, so clicks could not settle this test. No separate traffic count was pulled for the week with the change, for the same reason. Ad blockers and light traffic undercount both weeks anyway.
 
-**Baseline snapshot** (imported 2026-07-13):
+The writing told a clearer story. An editor read every brief from Jul 12 to Jul 18, 2026:
 
-| Metric | Value |
-|--------|-------|
-| Skills briefing pageviews | 4 (2 paths: 2026-07-07 ×3, 2026-07-09 ×1) |
-| Outbound repo clicks | 0 |
+- "Why now" lines often mentioned a project's spot on GitHub Trending or Hacker News, which is exactly the outside background the change added.
+- Briefs stayed true to the README, with no made-up launch claims.
+- Readers saw no quality problems during that week.
 
-**Treatment window:** Production enrichment ran, but click volume remained too low for a meaningful before/after CTR comparison. We did not import a separate treatment snapshot for the same reason ad-blockers and sparse traffic under-count both windows.
+The writing got more timely without losing accuracy, so the change stayed on for Skills. Clicks remain unproven, because zero clicks and four views can't prove anything either way. The extra background stays on unless a later test or editor review finds a quality drop.
 
-### Qualitative review
-
-Editorial pass on treatment briefings (2026-07-12 through 2026-07-18) found:
-
-- “Why now” lines often referenced **GitHub Trending** or **Hacker News** placement consistent with enrichment attaching external context.
-- Blurbs stayed grounded in README facts; no obvious hallucinated launch claims.
-- No subscriber-facing quality incidents during the treatment window.
-
-The pre-module shadow run (`bfb156a9-…`) validated plumbing only; side-by-side rubric scoring on a post-module run remains optional follow-up.
-
-## Recommendation
-
-**Keep the change on Skills.**
-
-- **Quality:** Passed enrichment adds timely hooks without visible digest regressions.
-- **CTR:** Inconclusive zero baseline clicks and single-digit pageviews cannot support a statistical verdict either way.
-- **Next step:** Firecrawl replaced Jina as the Skills web provider on 2026-08-01. Formal follow-up is the shorter-briefs narration test (EXP-20260802), not another enrich-provider A/B.
-
-Do **not** revert enrichment flags unless a future experiment or rubric review fails quality.
+Firecrawl replaced Jina Reader as the page reader for Skills on Aug 1, 2026. The next test in this line was the shorter briefs test (EXP-20260802), not another comparison of page readers.
 
 ## References
 
-- Experiment ID: ``EXP-20260628-web-enrich-skills``
-- Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Side by side shadow view: [/lab/shadow/{run_id}.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html)
-- Shadow rubric: [/lab/shadow-rubric.html](https://leftyshields.github.io/ai-tastemakers/lab/shadow-rubric.html)
-- Pipeline flags: `DIGEST_ENRICH_WEB`, `DIGEST_ENRICH_SHADOW`, `DIGEST_ENRICH_MAX_REPOS`, `DIGEST_ENRICH_MAX_CHARS`
+- Experiment ID: EXP-20260628-web-enrich-skills
+- [All Lab experiments](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
+- [Side by side trial view](https://leftyshields.github.io/ai-tastemakers/lab/shadow/bfb156a9-cf6f-4beb-a898-6ae3d1d31c47.html)
+- [Scoring guide for side by side reviews](https://leftyshields.github.io/ai-tastemakers/lab/shadow-rubric.html)

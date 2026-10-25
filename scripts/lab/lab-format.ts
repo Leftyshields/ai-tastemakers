@@ -58,9 +58,35 @@ export function formatReaderDatePt(iso: string): string {
   return fmt.format(noonPt);
 }
 
+/**
+ * GFM table delimiter rows need dashes in every column; space-only cells break marked parsing
+ * and the table falls through as a single paragraph of pipes.
+ */
+export function repairGfmTableDelimiterRows(markdown: string): string {
+  return markdown.replace(/^(\|[^\n]+\|)\s*$/gm, (line) => {
+    const cells = line.split("|").slice(1, -1);
+    if (cells.length === 0) return line;
+    const delimiterLike = cells.every((c) => /^[\s:\-]*$/.test(c));
+    if (!delimiterLike || !cells.some((c) => c.includes("-"))) return line;
+    const needsFix = cells.some((c) => {
+      const t = c.trim();
+      if (t.length === 0) return true;
+      return !/^:?-{3,}:?$/.test(t);
+    });
+    if (!needsFix) return line;
+    const fixed = cells.map((c) => {
+      const t = c.trim();
+      if (t.length === 0 || !/^:?-{3,}:?$/.test(t)) return " --- ";
+      return c;
+    });
+    return `|${fixed.join("|")}|`;
+  });
+}
+
 /** Normalize write up markdown before render (dates, approximations). */
 export function normalizeLabWriteupMarkdown(markdown: string): string {
   let s = markdown;
+  s = repairGfmTableDelimiterRows(s);
   s = s.replace(/\bKept\s*\(\s*(\d{4}-\d{2}-\d{2})\s*\)/gi, (_, iso: string) => `Kept on ${formatReaderDatePt(iso)}`);
   s = s.replace(/~\s*(?=\d)/g, "about ");
   s = s.replace(/\b(\d{4}-\d{2}-\d{2})\b/g, (_, iso: string) => formatReaderDatePt(iso));
@@ -343,12 +369,35 @@ export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?
 }
 
 export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
-  let html = renderSafeMarkdown(markdown);
+  let html = renderSafeMarkdown(repairGfmTableDelimiterRows(markdown));
   html = stripLiteralBackticksToCode(html);
   html = stripLiteralBackticksInTableCells(html);
   html = normalizeLabPostCodeElements(html);
   html = wrapLabPostTables(html);
   return sanitizeLabVisibleHtml(html);
+}
+
+/** Unparsed markdown tables: pipe rows leaked outside rendered <table> (UX43). */
+export function findLabPostUnrenderedTableViolations(html: string, pageRel: string): string[] {
+  const article =
+    html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  let outside = article.replace(/<div class="lab-post-table-wrap">[\s\S]*?<\/div>/gi, "");
+  outside = outside.replace(/<table[\s\S]*?<\/table>/gi, "");
+  const violations: string[] = [];
+  if (/\| \|/.test(outside)) {
+    violations.push(`${pageRel}: raw markdown table fragment "| |" outside <table>`);
+  }
+  const text = outside.replace(/<script[\s\S]*?<\/script>/gi, "").replace(/<[^>]+>/g, "\n");
+  for (const line of text.split(/\n/)) {
+    const t = line.trim();
+    if (t.startsWith("|") && t.indexOf("|", 1) > 0) {
+      violations.push(
+        `${pageRel}: line starting with "|" outside <table>: ${t.slice(0, 72)}${t.length > 72 ? "…" : ""}`,
+      );
+      break;
+    }
+  }
+  return violations;
 }
 
 export function findLabPostTableWrapViolations(html: string, pageRel: string): string[] {

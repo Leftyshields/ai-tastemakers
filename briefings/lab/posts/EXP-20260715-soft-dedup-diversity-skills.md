@@ -61,7 +61,7 @@ Thirteen Skills digests in repo through **2026-09-25** (`2026-09-26` digest miss
 Flags enabled on the **Skills digest command** in `.github/workflows/digest.yml` as of 2026-09-13 (still on after close):
 
 | Flag | Value | Default |
-|------|-------|         |
+|------|-------|-------|
 | `DIGEST_SOFT_DEDUP_BRIEFINGS` | `14` | `5` |
 | `DIGEST_SOFT_DEDUP_PENALTY` | `0.15` | `0.5` |
 

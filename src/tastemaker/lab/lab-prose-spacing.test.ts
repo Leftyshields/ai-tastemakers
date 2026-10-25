@@ -6,11 +6,13 @@ import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
   buildIsoDatePt,
   findLabPostBacktickViolations,
+  findLabPostUnrenderedTableViolations,
   findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
   normalizeLabWriteupMarkdown,
   prepareLabProseHtmlFromMarkdown,
+  repairGfmTableDelimiterRows,
   sanitizeLabVisibleHtml,
 } from "../../../scripts/lab/lab-format.js";
 import { buildLabPublicFile, renderLabDashboardHtml } from "../../../scripts/lab/build-lab-public.js";
@@ -125,6 +127,28 @@ describe("Lab UX26 UX28 UX29", () => {
       const page = fs.readFileSync(builtPath, "utf8");
       expect(findLabPostBacktickViolations(page, rel)).toEqual([]);
     }
+  });
+
+  it("UX43 repairs GFM delimiter rows with space-only cells so marked emits tables", () => {
+    const broken = `| Phase | Window | Outcome |
+|-------|-------------|         |
+| Baseline | a | b |`;
+    const repaired = repairGfmTableDelimiterRows(broken);
+    expect(repaired).toContain("| --- |");
+    const html = prepareLabProseHtmlFromMarkdown(broken);
+    expect(html).toContain("lab-post-table-wrap");
+    expect(html).toContain("<table");
+    expect(findLabPostUnrenderedTableViolations(`<article class="lab-prose-capped">${html}</article>`, "test")).toEqual([]);
+  });
+
+  it("UX43 web enrich write up What happened table renders (not a pipe paragraph)", () => {
+    const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260628-web-enrich-skills.md");
+    const md = fs.readFileSync(mdPath, "utf8");
+    const section = md.split("## What happened")[1]?.split("### Metrics")[0] ?? "";
+    const html = prepareLabProseHtmlFromMarkdown(section);
+    expect(html).toContain("lab-post-table-wrap");
+    expect(html).not.toMatch(/<p>\|\s*Period/);
+    expect(findLabPostUnrenderedTableViolations(`<article class="lab-prose-capped">${html}</article>`, "test")).toEqual([]);
   });
 
   it("UX46 normalizes write up dates and about approximations", () => {
