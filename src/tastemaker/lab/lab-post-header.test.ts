@@ -24,7 +24,10 @@ import {
   stripLabPostIntroStatusPrefix,
   stripLabPostLeadMarkdown,
 } from "../../../scripts/lab/lab-post-header.js";
-import { LAB_POST_EXPERIMENT_PLAN_LINK_LABEL } from "../../../scripts/lab/lab-post-header-copy.js";
+import {
+  LAB_POST_EXPERIMENT_PLAN_LINK_LABEL,
+  LAB_POST_PLANNED_CHIP_EXPLAINER,
+} from "../../../scripts/lab/lab-post-header-copy.js";
 import {
   listLabWriteupPostIds,
   loadLabWriteupLeadsCatalog,
@@ -133,6 +136,13 @@ describe("lab post header E1", () => {
     );
   });
 
+  it("uses Copywriter final planned chip strings verbatim", () => {
+    expect(LAB_POST_EXPERIMENT_PLAN_LINK_LABEL).toBe("See the experiment plan");
+    expect(LAB_POST_PLANNED_CHIP_EXPLAINER).toBe(
+      "This experiment is in the Lab and hasn't run yet. Results land here once it does.",
+    );
+  });
+
   it("run-with-source posts show Lab tested pill, repo link, and badge blurb (firecrawl)", () => {
     const linkCtx = defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01");
     const firecrawl = loadExperimentsFile(repoRoot).experiments.find(
@@ -184,6 +194,8 @@ describe("lab post header E1", () => {
     expect(html).toContain(LAB_POST_EXPERIMENT_PLAN_LINK_LABEL);
     expect(html).toContain(labPostExperimentPlanHref(caveman.id));
     expect(html).not.toContain("digest-lab-badge-blurb");
+    expect(html).toContain("lab-post-panel__planned-explainer");
+    expect(html).toContain(LAB_POST_PLANNED_CHIP_EXPLAINER);
     expect(html).not.toContain("github.com");
     expect(html).not.toContain("juliusbrussee/caveman");
   });
