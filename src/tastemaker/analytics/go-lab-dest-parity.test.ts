@@ -69,7 +69,7 @@ describe("/go lab badge dest allowlist parity", () => {
     expect(html).toContain(escapeScriptString(re.postPath));
     expect(html).toContain(escapeScriptString(re.indexPath));
     expect(html).toContain(escapeScriptString(re.indexHash));
-    expect(html).toContain("function parseLabBadgeAttribution(search)");
+    expect(html).toContain("function parseLabPostFromSearch(search)");
     expect(extractInlineIsAllowlistedLabDest(html)).toBeTypeOf("function");
   });
 });

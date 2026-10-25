@@ -13,6 +13,7 @@ import {
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { resolveLabBadgeHrefForDigestCard } from "../../../scripts/lab/lab-post-header.js";
+import { digestRepoCardDomId } from "../analytics/lab-post-from.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -89,7 +90,8 @@ export function renderDigestRepoCard(
         badgeContext.labPrefix,
         badgeContext.writeupPostIds,
         section,
-        repo.rank,
+        digestDate,
+        repo.full_name,
       );
       labBadgeHtml = renderLabTestedBadgePagesHtml(badge, href, escape);
     }
@@ -99,7 +101,8 @@ export function renderDigestRepoCard(
     ? `<div class="digest-repo-card__actions flex flex-wrap items-center gap-2">${`<a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`}${labBadgeHtml}</div>`
     : `<a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`;
 
-  return `<article class="digest-repo-card group relative mb-8 cursor-pointer rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-stone-700 dark:bg-stone-950/40 dark:hover:border-blue-600" data-repo="${escape(repo.full_name)}" data-section="${section}" data-position="${repo.rank}" data-digest-date="${escape(digestDate)}">
+  const cardId = digestRepoCardDomId(repo.full_name);
+  return `<article id="${escape(cardId)}" class="digest-repo-card group relative mb-8 cursor-pointer rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-stone-700 dark:bg-stone-950/40 dark:hover:border-blue-600" data-repo="${escape(repo.full_name)}" data-section="${section}" data-position="${repo.rank}" data-digest-date="${escape(digestDate)}">
   <h2 class="digest-repo-card__heading mb-2 scroll-mt-20 font-sans text-lg font-semibold tracking-tight">
     <span class="mr-1 text-stone-500">${repo.rank}.</span>
     <a href="${githubUrl}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>${newBadgeHtml(repo.is_new)}

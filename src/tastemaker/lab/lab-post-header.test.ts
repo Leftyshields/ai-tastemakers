@@ -4,7 +4,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   LAB_TESTED_BADGE_BLURB,
-  appendLabBadgeAttributionToHref,
+  appendLabPostFromToHref,
   countLabPostPanelLeadOccurrences,
   extractLabPostLeadParagraph,
   firstResultSectionSentence,
@@ -46,14 +46,12 @@ import { loadExperimentsFile } from "../../../scripts/lab/validate-experiments.j
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
 describe("lab post header E1", () => {
-  it("appends validated attribution query before hash", () => {
-    const href = appendLabBadgeAttributionToHref(
+  it("appends validated from brief query before hash", () => {
+    const href = appendLabPostFromToHref(
       "../lab/posts/EXP-20260802-ponytail-narration-skills.html",
-      "skills",
-      3,
+      "skills/briefings/2026-08-22.html#repo-ponytail",
     );
-    expect(href).toContain("from_list=skills");
-    expect(href).toContain("from_rank=3");
+    expect(href).toContain("from=skills%2Fbriefings%2F2026-08-22.html%23repo-ponytail");
   });
 
   it("renders design E1 panel with Back button, split chip, title, status, and lead", () => {

@@ -2,10 +2,10 @@ import fs from "node:fs";
 import path from "node:path";
 import type { EditionId } from "../../src/tastemaker/editions.js";
 import {
-  labBadgeAttributionClientParserSource,
-  parseLabBadgeFromListParam,
-  parseLabBadgeFromRankParam,
-} from "../../src/tastemaker/analytics/repo-click.js";
+  appendLabPostFromToHref,
+  labBadgeFromBriefSitePath,
+  labPostFromClientParserSource,
+} from "../../src/tastemaker/analytics/lab-post-from.js";
 import { labStatusChipLabel } from "./lab-dashboard-ui.js";
 import { sanitizeVisibleCopy, splitLabWriteupFrontMatter } from "./lab-format.js";
 import {
@@ -47,44 +47,23 @@ const LIST_INDEX_HREF: Record<EditionId, string> = {
   skills: "../../skills/index.html",
 };
 
-const LAB_HOME_FROM_POSTS = "../index.html";
-
 const BACK_ARROW_SVG = `<svg class="lab-post-back-btn__icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`;
 
 const STATUS_CHECK_SVG = `<svg class="lab-post-panel__status-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5 9-10"/></svg>`;
 
-export { parseLabBadgeFromListParam, parseLabBadgeFromRankParam };
-
-export function labBadgeAttributionQuery(fromList: EditionId, rank: number): string {
-  return `from_list=${fromList}&from_rank=${rank}`;
-}
-
-/** Append validated attribution query to a lab badge href (query before hash). */
-export function appendLabBadgeAttributionToHref(
-  href: string,
-  fromList: EditionId,
-  rank: number,
-): string {
-  const q = labBadgeAttributionQuery(fromList, rank);
-  const hashIdx = href.indexOf("#");
-  if (hashIdx >= 0) {
-    const path = href.slice(0, hashIdx);
-    const hash = href.slice(hashIdx);
-    const sep = path.includes("?") ? "&" : "?";
-    return `${path}${sep}${q}${hash}`;
-  }
-  return href.includes("?") ? `${href}&${q}` : `${href}?${q}`;
-}
+export { appendLabPostFromToHref, labBadgeFromBriefSitePath };
 
 export function resolveLabBadgeHrefForDigestCard(
   badge: LabBadgeInfo,
   labPrefix: string,
   writeupPostIds: readonly string[],
   section: EditionId,
-  rank: number,
+  digestDate: string,
+  fullName: string,
 ): string {
   const base = resolveLabBadgeHref(badge, labPrefix, writeupPostIds);
-  return appendLabBadgeAttributionToHref(base, section, rank);
+  const fromSitePath = labBadgeFromBriefSitePath(section, digestDate, fullName);
+  return appendLabPostFromToHref(base, fromSitePath);
 }
 
 export function experimentStatusLabel(status: LabExperimentStatus): string {
@@ -423,24 +402,37 @@ function renderLabPostStatusLineHtml(
   return `<p class="lab-post-panel__status">${icon}<span class="lab-post-panel__status-text">${textInner}</span></p>`;
 }
 
-export function renderLabPostHeaderClientScripts(ossHref: string, skillsHref: string): string {
-  const attributionParser = labBadgeAttributionClientParserSource();
+export function renderLabPostHeaderClientScripts(): string {
+  const fromParser = labPostFromClientParserSource();
   return `<script>
-${attributionParser}
+${fromParser}
 (function(){
   var btn = document.getElementById("lab-post-back-btn");
   if(btn){
-    btn.addEventListener("click", function(){
-      var att = parseLabBadgeAttribution(window.location.search);
-      if(att){
-        window.location.href = att.list === "skills" ? ${JSON.stringify(skillsHref)} : ${JSON.stringify(ossHref)};
-        return;
+    btn.addEventListener("click", function(e){
+      e.preventDefault();
+      function sameOriginReferrer(){
+        try {
+          if(!document.referrer) return false;
+          return new URL(document.referrer).origin === window.location.origin;
+        } catch (err) { return false; }
       }
-      if(window.history.length > 1){
+      function dailyListHref(fromSitePath){
+        if(fromSitePath && fromSitePath.indexOf("skills/") === 0){
+          return ${JSON.stringify(LIST_INDEX_HREF.skills)};
+        }
+        return ${JSON.stringify(LIST_INDEX_HREF.oss)};
+      }
+      if(window.history.length > 1 && sameOriginReferrer()){
         window.history.back();
         return;
       }
-      window.location.href = ${JSON.stringify(LAB_HOME_FROM_POSTS)};
+      var fromSitePath = parseLabPostFromSearch(window.location.search);
+      if(fromSitePath){
+        window.location.assign(${JSON.stringify("../../")} + fromSitePath);
+        return;
+      }
+      window.location.assign(dailyListHref(null));
     });
   }
   var hdr = document.querySelector(".lab-post-header__hdr");
@@ -475,8 +467,6 @@ export interface LabPostHeaderOptions {
 
 export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   const { experiment: exp, title, markdown, linkCtx, repoRoot, escape } = opts;
-  const ossBackHref = resolveLabPostDigestBackHref(exp, "oss");
-  const skillsBackHref = resolveLabPostDigestBackHref(exp, "skills");
   const lead = extractLabPostLeadParagraph(exp.id, markdown);
 
   const parts: string[] = [];
@@ -555,7 +545,7 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
     parts.push(renderDigestLabPlannedChipExplainerHtml(escape));
   }
   parts.push(`</section>`);
-  parts.push(`</header>`, renderLabPostHeaderClientScripts(ossBackHref, skillsBackHref));
+  parts.push(`</header>`, renderLabPostHeaderClientScripts());
 
   return parts.join("");
 }
@@ -657,6 +647,7 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
     "From the OSS top 10",
     "From the Skills top 10",
     "from_rank=",
+    "from_list=",
     "at number",
   ];
   for (const needle of forbidden) {

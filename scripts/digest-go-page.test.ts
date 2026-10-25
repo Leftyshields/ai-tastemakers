@@ -33,9 +33,9 @@ describe("resolveGoPageDestination", () => {
     ).toBe(`https://example.com${dest}`);
   });
 
-  it("resolves lab badge dest with from_list attribution query", () => {
+  it("resolves lab badge dest with from brief attribution query", () => {
     const dest =
-      "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=oss&from_rank=4";
+      "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from=briefings%2F2026-10-25.html%23repo-ponytail";
     expect(
       resolveGoPageDestination(
         `?event=lab_badge_click&dest=${encodeURIComponent(dest)}`,

@@ -17,7 +17,7 @@ import {
   labBadgeSiteDestPath,
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
-import { appendLabBadgeAttributionToHref } from "../../../scripts/lab/lab-post-header.js";
+import { appendLabPostFromToHref, labBadgeFromBriefSitePath } from "../analytics/lab-post-from.js";
 
 const EMAIL_TOPIC_LIMIT = 5;
 const BRAND_LINK = "#1e40af";
@@ -151,10 +151,10 @@ export function renderDigestEmailHtml(
       if (repo.rank <= 10) {
         const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
         if (match) {
-          const destPath = appendLabBadgeAttributionToHref(
+          const fromSitePath = labBadgeFromBriefSitePath(section, dateLabel, repo.full_name);
+          const destPath = appendLabPostFromToHref(
             labBadgeSiteDestPath(siteUrl, match, badgeCtx.writeupPostIds),
-            section,
-            repo.rank,
+            fromSitePath,
           );
           const badgeHref = buildLabBadgeEmailGoUrl(siteUrl, {
             repo: repo.full_name,
