@@ -1,75 +1,42 @@
-# Fresher Why now on repeats
+# Fresher "Why now" lines on repeats
 
-_**Queued (#4).** Not started. Baseline planned **2026-11-22** through **2026-12-05**; treatment **2026-12-06** through **2026-12-19**. Soft-dedup diversity is still measuring (treatment through **2026-09-26**)._
+_**Queued, not started.** This experiment will help the Skills writer avoid repeating itself when a project comes back to the list. It is planned for Nov 22 to Dec 19, 2026._
 
-## The question, in English
+## The idea
 
-Popular Skills repos come back. Soft-dedup opens ranking slots, but the **narrator** can still remix the same Why now hook ("trending on GitHub again") even when the facts moved.
+Each Skills brief includes a "Why now" line that says why a project matters today. Popular projects come back to the list again and again. When they do, the writer, Claude, can fall back on the same line, such as "trending on GitHub again," even when there's real news to share.
 
-When a repo repeats, we want to **remember what we already said** and push Claude toward a fresh angle without inventing news.
+This experiment will show Claude the "Why now" lines it already wrote for that project, so the new one takes a fresh angle. It must still stick to real news and never make any up.
 
-That complements soft-dedup (ranking diversity) with **narration memory**. Hermes and ECC are *where the habit came from*, not tools we run.
+The earlier less-repeated picks test made the list itself repeat less. This one works on the writing when a repeat does show up.
 
-## What Hermes / ECC memory means here
+The idea comes from two projects that help AI assistants remember past work so they don't repeat themselves. Hermes Agent first appeared on the OSS list on Jun 14, 2026. ECC first appeared on the OSS list on Jun 14, 2026. The digest does not run either one. This test borrows the habit.
 
-[NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) and [affaan-m/ECC](https://github.com/affaan-m/ECC) both show up on the Skills list with agent memory patterns: carry prior session facts forward so the model does not repeat itself.
+## The change
 
-We are **not** running Hermes or ECC on the digest.
+When a project returns to the Skills list, Claude will see that project's "Why now" lines from the previous 7 Skills lists before writing a new one. This runs only on the Skills list, only during the second half of the test.
 
-We copied the habit: for repeat repos, feed **prior Skills brief Why now lines** (last 7 briefings) into the narrator prompt so the new hook differs from recent ones.
+| Period | Dates (Pacific time) |
+|--------|----------------------|
+| Before the change | Nov 22 to Dec 5, 2026 |
+| With the change | Dec 6 to Dec 19, 2026 |
 
-## How we'll know
+## How to tell if it worked
 
-| We want | What "good" looks like |
-|---------|------------------------|
-| Fresher hooks | Lower lexical overlap between repeat-repo Why now lines vs prior briefs |
-| Rubric holds | Why now rubric score stable or up |
-| Still accurate | No invented news; rank-1 accuracy pass rate unchanged |
+- **Fresher lines:** "Why now" lines for returning projects share fewer words with the ones written before.
+- **Quality holds:** scores for explaining why a project matters now stay the same or rise.
+- **Still accurate:** no made-up news, and the top brief each day passes its accuracy checks as often as before.
 
-Primary metrics come from digest.json text and rubric logs. PostHog is secondary.
+Reader clicks will be tracked but won't decide the result. With Skills clicks this rare, they'd be a coin flip with very few coins.
 
-## Windows
+## What happened
 
-| Phase | Dates (PT) |
-|-------|------------|
-| Before (change off) | 2026-11-22 → 2026-12-05 |
-| After (change on) | 2026-12-06 → 2026-12-19 |
-
-## Recommendation
-
-**Not started.** Implement memory flags at treatment start on the Skills digest command only. Keep status `draft` until caveman compress closes.
-
----
-
-## Operator notes
-
-| Flag | What it does |
-|------|----------------|
-| `DIGEST_WHYNOW_MEMORY=1` | Enable prior Why now memory for repeat Skills repos |
-| `DIGEST_WHYNOW_MEMORY_BRIEFINGS=7` | Look back 7 prior Skills briefings for the same repo |
-
-Flags go on the **Skills digest command only**. Do **not** enable in `digest.yml` until treatment start.
-
-### Optional side-by-side preview (after implementation)
-
-```bash
-EXPERIMENT_ID=`EXP-20260913-whynow-memory-skills` \
-DIGEST_ENRICH_WEB=1 \
-DIGEST_ENRICH_WEB_PROVIDER=firecrawl \
-DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
-DIGEST_NARRATE_PONYTAIL=1 \
-DIGEST_WHYNOW_MEMORY=1 \
-DIGEST_WHYNOW_MEMORY_BRIEFINGS=7 \
-DIGEST_ENRICH_SHADOW=1 \
-npm run digest -- --edition skills
-```
-
-Spot-check repeat repos (Ponytail, Caveman, ECC) for hook variety vs baseline briefs.
+Nothing yet. The test has not started. Results will be added here when it closes.
 
 ## References
 
-- Experiment ID: ``EXP-20260913-whynow-memory-skills``
-- Prior in queue: [Caveman compress](./EXP-20260913-caveman-compress-skills.html)
-- Ranking complement: soft-dedup (``EXP-20260715-soft-dedup-diversity-skills``)
-- Tool inventory: [affaan-m/ECC](https://github.com/affaan-m/ECC), [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent)
-- Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
+- Experiment ID: EXP-20260913-whynow-memory-skills
+- Earlier in the queue: [Shorter background notes](./EXP-20260913-caveman-compress-skills.html)
+- Related test: [Less-repeated Skills picks](./EXP-20260715-soft-dedup-diversity-skills.html)
+- Where the idea came from: [affaan-m/ECC](https://github.com/affaan-m/ECC), [NousResearch/hermes-agent](https://github.com/NousResearch/hermes-agent) (habit borrowed, not installed)
+- [All Lab experiments](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

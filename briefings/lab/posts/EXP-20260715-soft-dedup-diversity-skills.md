@@ -1,112 +1,52 @@
 # Less-repeated Skills picks
 
-_We changed the Skills list so it repeats fewer of the previous day's top picks. The share of repeats in the top 10 dropped from 70% to 37.5%, so we kept it when the test closed on Sep 26, 2026._
+_**Closed Sep 26, 2026.** This experiment made the Skills list repeat fewer of the previous day's top picks. Repeats in the top 10 dropped from 70% to 37.5%, and the change stayed on after the test closed._
 
-## In plain English
+## The idea
 
-The Skills digest ranks repos by 7-day momentum, then soft-dedup pushes down repos that showed up recently so the list does not repeat the same names every day.
+The Skills list ranks projects by how many GitHub stars they gained over the past seven days. A built-in rule already pushes down projects that appeared recently, so the list doesn't show the same names every day. Even so, about 70% of each day's top 10 were repeats from the day before.
 
-For this test we remember **more** of the recent list (14 prior briefings instead of the default 5) and penalize repeats **harder** (penalty 0.15 instead of default 0.5). Ranking still favors real weekly activity; we are only opening more slots for less-repeated repos over a week or two.
+This experiment made that rule stronger. The hope: a fresher list each day, with more projects that had never been featured on Skills before, while real weekly activity still decided the ranking.
 
-**Skills only.** OSS soft-dedup stays at defaults. Ponytail narration flags from the prior experiment stay on.
+## The change
 
-## What a reader might notice
+Two things changed, on the Skills list only:
 
-If this works, day-to-day Skills lists should feel slightly fresher: fewer of the same repos back-to-back, and more **NEW** badges across a week when a repo truly has not appeared before.
+- The rule looked back further. It checked the last 14 lists instead of the last 5.
+- Repeats got pushed down harder. A recent repeat kept 15% of its ranking score instead of 50%.
 
-## How we'll know
+Ranking, project discovery and the writing of each brief did not change. The OSS list kept its usual settings. The shorter writing style from the earlier Ponytail test stayed on throughout.
 
-**Primary (decide keep/revert on these):** structural diversity from `digest.json`:
+## How to tell if it worked
 
-| Signal | What it measures |
-|--------|------------------|
-| Consecutive-day top-10 overlap | How many of today's top 10 were also in yesterday's top 10 |
-| Unique repos / week | Distinct repos across top-10 slots in a 7-day window |
-| `is_new` share in top 10 | Share of top-10 slots marked new (never featured before on Skills) |
+The main signal was repeats: how many of today's top 10 were also in yesterday's top 10. Before the change, that averaged 70%. The bar for success was a drop of at least 15 percentage points.
 
-**Suggested success bar:** consecutive-day overlap down at least **15 percentage points** vs the 70% baseline average.
+Two more signals helped tell the story: how many different projects reached the top 10 over two weeks, and how many top 10 spots went to projects marked NEW (never featured on Skills before).
 
-**Secondary (collect, do not gate):** PostHog Skills briefing pageviews and `outbound_repo_click` where `edition=skills`. Traffic is still sparse; record trends but do not fail the experiment on CTR alone.
+Reader clicks were tracked too, but they couldn't decide the result. Traffic was too thin.
 
-## Baseline window (2026-08-30 → 2026-09-12)
+## What happened
 
-Fourteen Skills digests under default soft-dedup (5 briefings, 0.5 penalty). Ponytail narration flags were already on.
+| | Before the change | With the change |
+|--------|----------------------|--------|
+| Dates (Pacific time) | Aug 30 to Sep 12, 2026 | Sep 13 to Sep 26, 2026 |
+| Skills lists published | 14 | 13 |
+| Top 10 repeats from the day before | 70.0% | 37.5% |
+| Different projects in the top 10 | 33 (out of 140 spots) | 82 (out of 130 spots) |
+| Top 10 spots marked NEW | 4.3% | 26.2% |
 
-| Metric | Value |
-|--------|-------|
-| Skills digests | 14 |
-| Average consecutive-day top-10 overlap | **70.0%** |
-| Unique repos across window | **33** (140 top-10 slots) |
-| Average `is_new` share in top 10 | **4.3%** |
+Repeats fell by 32.5 percentage points, more than double the 15 point bar. In plain terms, a typical day went from 7 repeats in the top 10 to fewer than 4. Over two weeks, the number of different projects in the top 10 rose from 33 to 82, and the share of NEW projects jumped from 4.3% to 26.2%. The list got noticeably fresher.
 
-### PostHog (secondary, frozen)
+The test period had 13 lists instead of 14 because the Sep 26 list was missing when the test closed.
 
-| Metric | Value |
-|--------|-------|
-| Skills briefing pageviews | 2 (`/ai-tastemakers/skills/briefings/2026-09-01.html`) |
-| Skills index pageviews | 2 |
-| Outbound repo clicks (`edition=skills`) | **0** |
+The traffic numbers stay humble. In the two weeks before the change, Skills pages drew 2 views of a daily list (both on the Sep 1 edition), 2 views of the Skills home page, and 0 clicks out to GitHub. That's a small, loyal audience, and far too small to judge anything. Clicks did not count toward the decision.
 
-## Treatment (2026-09-13 → 2026-09-26)
+The Lab kept the change. It is still on for Skills.
 
-Thirteen Skills digests in repo through **2026-09-25** (`2026-09-26` digest missing at close). Diversity from `digest.json`:
-
-| Metric | Value |
-|--------|-------|
-| Skills digests | 13 |
-| Average consecutive-day top-10 overlap | **37.5%** |
-| Unique repos across window | **82** (130 top-10 slots) |
-| Average `is_new` share in top 10 | **26.2%** |
-
-Flags enabled on the **Skills digest command** in `.github/workflows/digest.yml` as of 2026-09-13 (still on after close):
-
-| Flag | Value | Default |
-|------|-------|-------|
-| `DIGEST_SOFT_DEDUP_BRIEFINGS` | `14` | `5` |
-| `DIGEST_SOFT_DEDUP_PENALTY` | `0.15` | `0.5` |
-
-Ponytail narration stays on:
-
-- `DIGEST_NARRATE_STRUCTURED_CONTEXT=1`
-- `DIGEST_NARRATE_PONYTAIL=1`
-
-OSS digest soft-dedup is unchanged.
-
-## Recommendation
-
-**Keep.** Mean consecutive-day overlap **37.5%** is **32.5pp** below the **70%** baseline (exceeds the ≥15pp success bar). Unique repos and NEW share rose sharply. PostHog clicks were not used to gate the decision.
-
-## Published briefs (baseline samples)
-
-Links go to live Skills digest pages from the baseline window.
-
-- [2026-08-30](../../skills/briefings/2026-08-30.html) · [2026-09-01](../../skills/briefings/2026-09-01.html) · [2026-09-12](../../skills/briefings/2026-09-12.html)
-
----
-
-## Operator notes
-
-Two soft-dedup flags on the Skills command only. Ranking, discovery, enrichment, and narration rules are unchanged except dedup memory and penalty.
-
-```yaml
-EXPERIMENT_ID=`EXP-20260715-soft-dedup-diversity-skills` \
-DIGEST_SOFT_DEDUP_BRIEFINGS=14 \
-DIGEST_SOFT_DEDUP_PENALTY=0.15 \
-DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
-DIGEST_NARRATE_PONYTAIL=1 \
-npm run digest -- --edition skills
-```
-
-| Phase | Dates (PT) |
-|-------|------------|
-| Baseline (defaults) | 2026-08-30 → 2026-09-12 |
-| Treatment (stronger dedup) | 2026-09-13 → 2026-09-26 |
-
-Import snapshots after each window: `npm run experiment -- snapshot`.
+Sample lists from before the change: [Aug 30](../../skills/briefings/2026-08-30.html) · [Sep 1](../../skills/briefings/2026-09-01.html) · [Sep 12](../../skills/briefings/2026-09-12.html)
 
 ## References
 
-- Experiment ID: ``EXP-20260715-soft-dedup-diversity-skills``
-- Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
-- Prior write-ups: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.html) · [Richer Skills briefs](./EXP-20260628-web-enrich-skills.html)
-- Backlog: [RANK-2](../../docs/PRODUCT_BACKLOG.md)
+- Experiment ID: EXP-20260715-soft-dedup-diversity-skills
+- [All Lab experiments](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
+- Earlier write-ups: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.html) · [Richer Skills briefs](./EXP-20260628-web-enrich-skills.html)
