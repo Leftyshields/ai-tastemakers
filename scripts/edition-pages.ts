@@ -39,6 +39,11 @@ import { renderToolsPageHtml } from "./lab/render-tools-page.js";
 import { labAboutRedirectScript } from "./lab/lab-about-redirect.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import {
+  outboundLinkSigningKeyFromEnv,
+  rewriteOutboundLinksInHtml,
+  type OutboundRewriteContext,
+} from "../src/tastemaker/analytics/rewrite-outbound-links.js";
+import {
   articleJsonLd,
   briefMetaDescription,
   briefSocialDescription,
@@ -227,6 +232,8 @@ export function digestRepoClickTrackingScript(): string {
     var link = targetEl.closest("a[href]");
     if (!link || !card.contains(link)) return;
     if (link.closest(".digest-repo-card__body")) return;
+    var href = link.getAttribute("href") || "";
+    if (href.indexOf("/go/") >= 0 || href.indexOf("go/index.html") >= 0) return;
     var clickTarget = link.classList.contains("digest-repo-card__cta")
       ? "button"
       : link.classList.contains("digest-repo-card__title-link")
@@ -235,59 +242,6 @@ export function digestRepoClickTrackingScript(): string {
     if (!clickTarget) return;
     captureRepoClick(card, clickTarget);
   }, true);
-})();
-</script>`;
-}
-
-/** @deprecated Legacy brief markdown link tracking; kept for shadow/lab pages if needed. */
-export function briefOutboundTrackingScript(editionId: string, pageDate: string): string {
-  if (!posthogAnalyticsEnabled()) return "";
-  const edition = escapeScriptString(editionId);
-  const pageDateSafe = escapeScriptString(pageDate);
-  return `<script>
-(function () {
-  function repoFromHref(href) {
-    try {
-      var u = new URL(href);
-      if (u.hostname !== "github.com") return "";
-      var parts = u.pathname.replace(/^\\/+/, "").split("/");
-      if (parts.length < 2) return "";
-      return parts[0] + "/" + parts[1];
-    } catch (e) {
-      return "";
-    }
-  }
-
-  function rankForAnchor(anchor) {
-    var block = anchor.closest("p") || anchor;
-    var el = block;
-    while (el && el.closest && el.closest(".brief-content")) {
-      var prev = el.previousElementSibling;
-      while (prev) {
-        if (prev.tagName === "H2" || prev.tagName === "H3") {
-          var m = prev.textContent.match(/^\\s*(\\d+)\\./);
-          if (m) return m[1];
-        }
-        prev = prev.previousElementSibling;
-      }
-      el = el.parentElement;
-    }
-    return "";
-  }
-
-  document.querySelectorAll(".brief-content a[href]").forEach(function (anchor) {
-    anchor.addEventListener("click", function () {
-      if (typeof posthog === "undefined" || !posthog.capture) return;
-      var repo = repoFromHref(anchor.href);
-      if (!repo) return;
-      posthog.capture("outbound_repo_click", {
-        edition: "${edition}",
-        repo: repo,
-        rank: rankForAnchor(anchor),
-        page_date: "${pageDateSafe}"
-      });
-    });
-  });
 })();
 </script>`;
 }
@@ -627,6 +581,7 @@ async function buildLabMarkdownPage(
   labShell: { labLayout: true },
   navActive: "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts" = "home",
   siteBaseUrl?: string,
+  outboundRewrite?: OutboundRewriteContext,
 ): Promise<boolean> {
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
@@ -651,6 +606,7 @@ async function buildLabMarkdownPage(
         labNavActive: navActive,
         labFallbackSection: "about",
         seo,
+        outboundRewrite,
       }),
     );
     return true;
@@ -665,6 +621,7 @@ async function writeLabAboutRedirectPage(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
+  outboundRewrite?: OutboundRewriteContext,
 ): Promise<void> {
   const body = `${labNavHtml("methodology", escapeHtml)}<p class="font-sans text-sm text-stone-700 dark:text-stone-300">This page moved to <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a>.</p>${labAboutRedirectScript()}${labPublishFooterHtml(escapeHtml)}`;
   await fs.writeFile(
@@ -674,6 +631,7 @@ async function writeLabAboutRedirectPage(
       labNavActive: "methodology",
       labFallbackSection: "about",
       metaRefresh: "methodology.html",
+      outboundRewrite,
     }),
   );
 }
@@ -698,6 +656,7 @@ async function buildShadowPages(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
+  outboundRewrite: OutboundRewriteContext,
 ): Promise<number> {
   const runsDir = path.join(repoRoot, "data", "experiments", "runs");
   const shadowSiteDir = path.join(labSiteDir, "shadow");
@@ -717,7 +676,10 @@ async function buildShadowPages(
     try {
       const raw = await fs.readFile(shadowPath, "utf8");
       const shadow = JSON.parse(raw) as ShadowDigestPayload;
-      const body = renderShadowCompareBody(shadow, escapeHtml);
+      const body = rewriteOutboundLinksInHtml(renderShadowCompareBody(shadow, escapeHtml), {
+        ...outboundRewrite,
+        surface: "shadow",
+      });
       await fs.writeFile(
         path.join(shadowSiteDir, `${runId}.html`),
         pageShell(
@@ -727,7 +689,7 @@ async function buildShadowPages(
           brand,
           "Side-by-side control vs treatment blurbs from a digest pipeline shadow run.",
           escapeHtml,
-          { ...labShell, labNavActive: "experiments", labNavDepth: 2 },
+          { ...labShell, labNavActive: "experiments", labNavDepth: 2, outboundRewrite: { ...outboundRewrite, surface: "shadow" } },
         ),
       );
       count++;
@@ -793,6 +755,7 @@ export function pageShell(
     seo?: PageSeoOptions;
     labFallbackSection?: LabLinkSection;
     metaRefresh?: string;
+    outboundRewrite?: OutboundRewriteContext;
   },
 ): string {
   const safeTitle = escapeHtml(title);
@@ -818,9 +781,20 @@ export function pageShell(
     ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
     : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12`;
   const labFallback = options?.labFallbackSection ?? "about";
-  const labBody = labLayout ? ensureLabLinkSections(body, labFallback) : body;
-  const mainHtml = labLayout ? `<main class="lab-main">${labBody}</main>` : body;
+  let processedBody = body;
+  if (options?.outboundRewrite) {
+    processedBody = rewriteOutboundLinksInHtml(processedBody, options.outboundRewrite);
+  }
+  const labBody = labLayout ? ensureLabLinkSections(processedBody, labFallback) : processedBody;
+  const mainHtml = labLayout ? `<main class="lab-main">${labBody}</main>` : labBody;
   const footerMt = labLayout ? "mt-10" : "mt-16";
+  let footerLinks = footerLinkRowHtml(paths, escapeHtml);
+  if (options?.outboundRewrite) {
+    footerLinks = rewriteOutboundLinksInHtml(footerLinks, {
+      ...options.outboundRewrite,
+      surface: "site_footer",
+    });
+  }
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -846,7 +820,7 @@ export function pageShell(
     </header>
     ${mainHtml}
     <footer class="site-footer ${footerMt}">
-      <nav aria-label="Site footer" class="site-footer__links">${footerLinkRowHtml(paths, escapeHtml)}</nav>
+      <nav aria-label="Site footer" class="site-footer__links">${footerLinks}</nav>
       <p class="site-footer__meta">Updated daily &middot; Automated pipeline</p>
     </footer>
   </div>
@@ -1530,7 +1504,16 @@ export async function buildMonthlySite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
+  siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
 ): Promise<number> {
+  const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
+  const outboundMonthly: OutboundRewriteContext = {
+    siteBaseUrl,
+    signingKey: outboundLinkSigningKeyFromEnv(),
+    githubAllowlist,
+    channel: "pages",
+    surface: "monthly_page",
+  };
   const months = await listMonthlyReviewMonths(repoRoot);
   const outDir = path.join(siteDir, "monthly");
   await fs.mkdir(outDir, { recursive: true });
@@ -1549,7 +1532,7 @@ export async function buildMonthlySite(
     } catch {
       continue;
     }
-    const html = renderSafeMarkdown(markdown);
+    const html = rewriteOutboundLinksInHtml(renderSafeMarkdown(markdown), outboundMonthly);
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
@@ -1568,6 +1551,7 @@ export async function buildMonthlySite(
         brand,
         "Monthly editorial synthesis across weekly Tastemakers reviews.",
         escapeHtml,
+        { outboundRewrite: outboundMonthly },
       ),
     );
   }
@@ -1590,7 +1574,16 @@ export async function buildWeeklySite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
+  siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
 ): Promise<number> {
+  const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
+  const outboundWeekly: OutboundRewriteContext = {
+    siteBaseUrl,
+    signingKey: outboundLinkSigningKeyFromEnv(),
+    githubAllowlist,
+    channel: "pages",
+    surface: "weekly_page",
+  };
   const weeks = await listWeeklyReviewWeeks(repoRoot);
   const outDir = path.join(siteDir, "weekly");
   await fs.mkdir(outDir, { recursive: true });
@@ -1609,7 +1602,7 @@ export async function buildWeeklySite(
     } catch {
       continue;
     }
-    const html = renderSafeMarkdown(markdown);
+    const html = rewriteOutboundLinksInHtml(renderSafeMarkdown(markdown), outboundWeekly);
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
@@ -1628,6 +1621,7 @@ export async function buildWeeklySite(
         brand,
         "One week of AI open source, written for executives first, then builders, then the numbers.",
         escapeHtml,
+        { outboundRewrite: outboundWeekly },
       ),
     );
   }
@@ -1656,6 +1650,17 @@ export async function buildEditionSite(
   await fs.mkdir(briefOutDir, { recursive: true });
 
   const brand = { name: edition.name, tagline: edition.tagline };
+  const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
+  const pagesSiteBase =
+    siteBaseUrl?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+  const outboundPagesBase: OutboundRewriteContext = {
+    siteBaseUrl: pagesSiteBase,
+    signingKey: outboundLinkSigningKeyFromEnv(),
+    githubAllowlist,
+    channel: "pages",
+    surface: "daily_brief",
+    section: edition.id,
+  };
 
   for (const date of dates) {
     const mdPath = path.join(briefingsDir, date, "daily_brief.md");
@@ -1680,6 +1685,7 @@ export async function buildEditionSite(
         escapeHtml,
         badgeContext,
         labExperiments,
+        { ...outboundPagesBase, digestDate: date },
       );
     } catch {
       /* fall back to markdown-only body */
@@ -1757,6 +1763,7 @@ export async function buildEditionSite(
       path.join(briefOutDir, `${date}.html`),
       pageShell(pageTitle, body, paths, brand, description, escapeHtml, {
         seo,
+        outboundRewrite: { ...outboundPagesBase, digestDate: date },
       }),
     );
   }
@@ -1790,6 +1797,7 @@ export async function buildEditionSite(
     path.join(siteRoot, "index.html"),
     pageShell(edition.name, indexBody, indexPaths, brand, indexDescription, escapeHtml, {
       wideIndex: useV2,
+      outboundRewrite: { ...outboundPagesBase, surface: "index" },
       seo: siteBaseUrl
         ? {
             siteBaseUrl,
@@ -1828,6 +1836,15 @@ export async function buildLabSite(
 
   const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };
   const allowlist = await collectDigestRepoAllowlist(repoRoot);
+  const labSiteBase =
+    siteBaseUrl?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+  const labOutbound: OutboundRewriteContext = {
+    siteBaseUrl: labSiteBase,
+    signingKey: outboundLinkSigningKeyFromEnv(),
+    githubAllowlist: allowlist,
+    channel: "pages",
+    surface: "lab",
+  };
   const linkCtx = defaultLabLinkContext(0, allowlist, asOfIsoDate);
   const labExperiments = loadExperimentsFile(repoRoot).experiments;
   const writeupPostIds = listLabWriteupPostIds(repoRoot);
@@ -1865,9 +1882,10 @@ export async function buildLabSite(
     labShell,
     "methodology",
     siteBaseUrl,
+    labOutbound,
   );
 
-  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell);
+  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell, labOutbound);
 
   const labIndexDescription =
     "How AI Tastemakers measures site engagement, runs digest pipeline experiments, and publishes results openly.";
@@ -1878,6 +1896,7 @@ export async function buildLabSite(
       ...labShell,
       labNavActive: "home",
       labFallbackSection: "hero",
+      outboundRewrite: labOutbound,
     }),
   );
 
@@ -1889,6 +1908,7 @@ export async function buildLabSite(
       ...labShell,
       labNavActive: "tools",
       labFallbackSection: "tools",
+      outboundRewrite: labOutbound,
     }),
   );
 
@@ -1926,7 +1946,7 @@ export async function buildLabSite(
       brand,
       "Public record of digest and homepage experiments: what we changed, whether we kept it, and what is live today.",
       escapeHtml,
-      { ...labShell, labNavActive: "experiments" },
+      { ...labShell, labNavActive: "experiments", outboundRewrite: labOutbound },
     ),
   );
 
@@ -1945,7 +1965,7 @@ export async function buildLabSite(
       brand,
       "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
       escapeHtml,
-      { ...labShell, labNavActive: "tokens" },
+      { ...labShell, labNavActive: "tokens", outboundRewrite: labOutbound },
     ),
   );
 
@@ -1959,9 +1979,18 @@ export async function buildLabSite(
     escapeHtml,
     labShell,
     "experiments",
+    siteBaseUrl,
+    labOutbound,
   );
 
-  const shadowCount = await buildShadowPages(repoRoot, labSiteDir, brand, escapeHtml, labShell);
+  const shadowCount = await buildShadowPages(
+    repoRoot,
+    labSiteDir,
+    brand,
+    escapeHtml,
+    labShell,
+    labOutbound,
+  );
 
   await fs.mkdir(path.join(labSiteDir, "posts"), { recursive: true });
   const postsDir = path.join(repoRoot, "briefings", "lab", "posts");
@@ -1979,6 +2008,7 @@ export async function buildLabSite(
         let html = prepareLabWriteupHtmlFromMarkdown(markdown);
         const postLinkCtx = defaultLabLinkContext(1, allowlist, asOfIsoDate);
         html = prepareLabPostArticleHtml(html, postLinkCtx);
+        html = rewriteOutboundLinksInHtml(html, labOutbound);
         html = stripLeadingH1FromArticleHtml(html);
         const slug = file.replace(/\.md$/, "");
         const title = markdownH1(markdown, slug);
@@ -2006,6 +2036,7 @@ export async function buildLabSite(
             labNavActive: "posts",
             labNavDepth: 1,
             labFallbackSection: "posts",
+            outboundRewrite: labOutbound,
           }),
         );
       }
@@ -2020,6 +2051,7 @@ export async function buildLabSite(
       ...labShell,
       labNavActive: "posts",
       labNavDepth: 1,
+      outboundRewrite: labOutbound,
     }),
   );
 

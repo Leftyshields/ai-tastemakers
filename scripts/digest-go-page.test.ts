@@ -1,5 +1,8 @@
 import { describe, it, expect } from "vitest";
 import { renderGoRedirectPage, resolveGoPageDestination } from "./digest-go-page.js";
+import {
+  signOutboundDestination,
+} from "../src/tastemaker/analytics/outbound-link-sign.js";
 
 describe("renderGoRedirectPage", () => {
   it("includes a single capture guard and Continue to GitHub fallback", () => {
@@ -53,5 +56,38 @@ describe("resolveGoPageDestination", () => {
         "https://example.com/",
       ),
     ).toBe("https://example.com/");
+  });
+
+  it("resolves signed outbound_link_click destinations", () => {
+    const dest = "https://docs.example.com/guide";
+    const sig = signOutboundDestination(dest, "test-key");
+    const key = "test-key";
+    expect(
+      resolveGoPageDestination(
+        `?event=outbound_link_click&dest=${encodeURIComponent(dest)}&sig=${encodeURIComponent(sig)}`,
+        allowlist,
+        "https://example.com/",
+        key,
+      ),
+    ).toBe(dest);
+  });
+
+  it("rejects outbound_link_click without valid signature", () => {
+    expect(
+      resolveGoPageDestination(
+        "?event=outbound_link_click&dest=https://evil.com/phish&sig=bad",
+        allowlist,
+        "https://example.com/",
+        "test-key",
+      ),
+    ).toBe("https://example.com/");
+  });
+});
+
+describe("renderGoRedirectPage outbound", () => {
+  it("includes outbound_link_click capture", () => {
+    const html = renderGoRedirectPage({}, "/", "test-key");
+    expect(html).toContain("outbound_link_click");
+    expect(html).toContain("verifyOutboundSig");
   });
 });

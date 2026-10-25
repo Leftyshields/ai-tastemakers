@@ -7,6 +7,11 @@ import {
   resolveAllowlistedLabBadgeDestPath,
   type RepoClickProperties,
 } from "../src/tastemaker/analytics/repo-click.js";
+import { outboundGoVerifyClientScript } from "../src/tastemaker/analytics/outbound-go-client.js";
+import {
+  isSafeExternalHttpUrl,
+  verifyOutboundDestination,
+} from "../src/tastemaker/analytics/outbound-link-sign.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
 
 function escapeHtml(text: string): string {
@@ -20,6 +25,7 @@ function escapeHtml(text: string): string {
 export function renderGoRedirectPage(
   allowlist: Record<string, string>,
   homePath = "/",
+  signingKey = "",
 ): string {
   const allowlistJson = JSON.stringify(allowlist);
   const posthog = posthogScriptHtml();
@@ -30,6 +36,7 @@ export function renderGoRedirectPage(
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
   const attributionParser = labBadgeAttributionClientParserSource();
+  const outboundVerify = outboundGoVerifyClientScript(signingKey);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -73,6 +80,8 @@ export function renderGoRedirectPage(
     window.location.replace(url);
   }
 
+  ${outboundVerify}
+
   var params = new URLSearchParams(window.location.search);
   var eventName = params.get("event") || "";
   var parsed = {
@@ -85,7 +94,9 @@ export function renderGoRedirectPage(
     exp: params.get("exp"),
     status: params.get("status"),
     dest: params.get("dest"),
-    channel: params.get("channel")
+    channel: params.get("channel"),
+    surface: params.get("surface"),
+    sig: params.get("sig")
   };
 
   var repo = parsed.repo;
@@ -143,41 +154,50 @@ export function renderGoRedirectPage(
     return (postOk || indexOk) ? encodeURIComponent(raw) : null;
   }
 
+  var clickChannel = parsed.channel === "pages" ? "pages" : "email";
+  var clickSource = parsed.channel === "pages" ? "direct" : "email";
+
   var destination = resolveUrl() || (window.location.origin + HOME);
   if (eventName === "lab_badge_click" && labDest) {
     var safeLabDest = isAllowlistedLabDest(labDest);
     if (safeLabDest) destination = window.location.origin + decodeURIComponent(safeLabDest);
   }
+
   var continueLink = document.getElementById("continue-link");
   if (continueLink) continueLink.href = destination;
 
-  if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
-    var normalizedRepo = normalizeRepo(repo) || "";
-    captureOnce("lab_badge_click", {
-      experiment_id: parsed.exp,
-      exp_id: parsed.exp,
-      repo: normalizedRepo || repo || "",
-      source_repo: normalizedRepo,
-      status: parsed.status || "",
-      list: section,
-      rank: rank,
-      surface: "email",
-      channel: parsed.channel || "email"
-    });
-  } else {
+  function captureForQuery() {
+    if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
+      var normalizedRepo = normalizeRepo(repo) || "";
+      captureOnce("lab_badge_click", {
+        experiment_id: parsed.exp,
+        exp_id: parsed.exp,
+        repo: normalizedRepo || repo || "",
+        source_repo: normalizedRepo,
+        status: parsed.status || "",
+        list: section,
+        rank: rank,
+        surface: "email",
+        channel: parsed.channel || "email"
+      });
+      return;
+    }
+    if (eventName === "outbound_link_click") return;
     var githubTarget = resolveUrl();
     if (githubTarget && section && Number.isFinite(pos)) {
       captureOnce("repo_click", {
         repo: normalizeRepo(repo),
         section: section,
-        channel: "email",
+        channel: clickChannel,
         position: pos,
         target: target,
         digest_date: digestDate,
-        source: "email"
+        source: clickSource
       });
     }
   }
+
+  captureForQuery();
 
   var done = false;
   function go() {
@@ -186,7 +206,32 @@ export function renderGoRedirectPage(
     forward(destination);
   }
 
-  setTimeout(go, 300);
+  function finishOutbound(destUrl, surface) {
+    if (!isSafeExternalUrl(destUrl)) {
+      setTimeout(go, 300);
+      return;
+    }
+    destination = destUrl;
+    if (continueLink) continueLink.href = destination;
+    var host = "";
+    try { host = new URL(destUrl).hostname; } catch (e) {}
+    captureOnce("outbound_link_click", {
+      destination: destUrl,
+      host: host,
+      surface: surface || "",
+      channel: clickChannel
+    });
+    setTimeout(go, 300);
+  }
+
+  if (eventName === "outbound_link_click" && parsed.dest && parsed.sig) {
+    verifyOutboundSig(parsed.dest, parsed.sig).then(function (ok) {
+      if (ok) finishOutbound(parsed.dest, parsed.surface || "");
+      else setTimeout(go, 300);
+    });
+  } else {
+    setTimeout(go, 300);
+  }
 })();
   </script>
 </body>
@@ -198,10 +243,21 @@ export function resolveGoPageDestination(
   search: string,
   allowlist: Record<string, string>,
   homeUrl: string,
+  signingKey = "",
 ): string {
   const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
   const event = params.get("event") || "";
   const dest = params.get("dest");
+  const sig = params.get("sig") ?? "";
+  if (event === "outbound_link_click" && dest) {
+    if (
+      isSafeExternalHttpUrl(dest) &&
+      verifyOutboundDestination(dest, sig, signingKey)
+    ) {
+      return dest;
+    }
+    return homeUrl;
+  }
   if (event === "lab_badge_click" && dest) {
     const allowed = resolveAllowlistedLabBadgeDestPath(dest);
     if (allowed) {

@@ -16,6 +16,7 @@ import {
   weeklyEmailSubject,
 } from "./weekly-html.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
+import { collectDigestRepoAllowlist } from "../analytics/digest-allowlist.js";
 
 export async function shouldSendDigestEmail(config: AppConfig): Promise<boolean> {
   if (!config.resendApiKey || !config.digestEmailFrom) return false;
@@ -60,6 +61,7 @@ export async function sendDigestEmail(
 
   const resend = new Resend(config.resendApiKey);
   const subject = digestEmailSubject(dateLabel);
+  const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
 
   for (const record of records) {
@@ -74,6 +76,8 @@ export async function sendDigestEmail(
       config.digestSiteUrl,
       unsubscribeUrl,
       config.editionId,
+      undefined,
+      githubAllowlist,
     );
     const text = renderDigestEmailText(
       digest,
@@ -81,6 +85,8 @@ export async function sendDigestEmail(
       config.digestSiteUrl,
       unsubscribeUrl,
       config.editionId,
+      undefined,
+      githubAllowlist,
     );
     const { data, error } = await resend.emails.send({
       from: config.digestEmailFrom,
@@ -122,6 +128,7 @@ export async function sendWeeklyDigestEmail(
 
   const resend = new Resend(config.resendApiKey);
   const subject = weeklyEmailSubject(review);
+  const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
 
   for (const record of records) {
@@ -134,8 +141,8 @@ export async function sendWeeklyDigestEmail(
       from: config.digestEmailFrom,
       to: [record.email],
       subject,
-      html: renderWeeklyEmailHtml(review, config.digestSiteUrl, unsubscribeUrl),
-      text: renderWeeklyEmailText(review, config.digestSiteUrl, unsubscribeUrl),
+      html: renderWeeklyEmailHtml(review, config.digestSiteUrl, unsubscribeUrl, githubAllowlist),
+      text: renderWeeklyEmailText(review, config.digestSiteUrl, unsubscribeUrl, githubAllowlist),
       headers: {
         "List-Unsubscribe": `<${unsubscribeUrl}>`,
       },
