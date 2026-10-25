@@ -20,6 +20,8 @@ echo "verify: lab prose inline spacing and write up fonts (UX26 UX46)"
 npx tsx scripts/verify-lab-prose-inline-spacing.ts
 echo "verify: lab post write-ups tables and backticks (UX43)"
 npx tsx scripts/verify-lab-post-writeups.ts
+echo "verify: lab post affected screenshots (brief sample links)"
+npx tsx scripts/verify-lab-post-affected-screenshots.ts
 echo "verify: lab write up reader copy (UX46)"
 npx tsx scripts/verify-lab-writeup-reader-copy.ts
 echo "verify: lab rendered first-person copy (we/our/us)"

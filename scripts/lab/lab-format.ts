@@ -176,13 +176,36 @@ export function loadLabWriteupLeadsCatalog(
   return out;
 }
 
+const LINK_DEST_PLACEHOLDER = "\u0000LINKDEST";
+
+/** Keep markdown link destinations intact while normalizing visible ISO dates in prose. */
+export function shieldMarkdownLinkDestinations(markdown: string): { text: string; dests: string[] } {
+  const dests: string[] = [];
+  const text = markdown.replace(/\]\(([^)\n]+)\)/g, (_full, dest: string) => {
+    const idx = dests.length;
+    dests.push(dest);
+    return `]${LINK_DEST_PLACEHOLDER}${idx}\u0000)`;
+  });
+  return { text, dests };
+}
+
+export function restoreMarkdownLinkDestinations(markdown: string, dests: string[]): string {
+  return markdown.replace(
+    new RegExp(`\\]${LINK_DEST_PLACEHOLDER}(\\d+)\\u0000\\)`, "g"),
+    (_, idx: string) => `](${dests[Number(idx)] ?? ""})`,
+  );
+}
+
 /** Normalize write up markdown before render (dates, approximations). */
 export function normalizeLabWriteupMarkdown(markdown: string): string {
   let s = stripLabWriteupFrontMatter(markdown);
   s = repairGfmTableDelimiterRows(s);
+  const shielded = shieldMarkdownLinkDestinations(s);
+  s = shielded.text;
   s = s.replace(/\bKept\s*\(\s*(\d{4}-\d{2}-\d{2})\s*\)/gi, (_, iso: string) => `Kept on ${formatReaderDatePt(iso)}`);
   s = s.replace(/~\s*(?=\d)/g, "about ");
   s = s.replace(/\b(\d{4}-\d{2}-\d{2})\b/g, (_, iso: string) => formatReaderDatePt(iso));
+  s = restoreMarkdownLinkDestinations(s, shielded.dests);
   return s;
 }
 
@@ -468,6 +491,24 @@ export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
   html = normalizeLabPostCodeElements(html);
   html = wrapLabPostTables(html);
   return sanitizeLabVisibleHtml(html);
+}
+
+/** Unparsed markdown links leaked as literal `[text](url)` in rendered HTML (UX43). */
+export function findLabPostUnrenderedMarkdownLinkViolations(html: string, pageRel: string): string[] {
+  const article =
+    html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  let stripped = article.replace(/<pre[\s\S]*?<\/pre>/gi, "");
+  stripped = stripped.replace(/<code[\s\S]*?<\/code>/gi, "");
+  stripped = stripped.replace(/<a\b[\s\S]*?<\/a>/gi, "");
+  const text = stripped.replace(/<[^>]+>/g, " ");
+  const violations: string[] = [];
+  if (/\]\s*\(/.test(text)) {
+    violations.push(`${pageRel}: raw markdown link "]( " in rendered lab HTML`);
+  }
+  if (/\[[^\]]+\]\s*\(/.test(text)) {
+    violations.push(`${pageRel}: raw markdown link "[...](" in rendered lab HTML`);
+  }
+  return violations;
 }
 
 /** Unparsed markdown tables: pipe rows leaked outside rendered <table> (UX43). */
