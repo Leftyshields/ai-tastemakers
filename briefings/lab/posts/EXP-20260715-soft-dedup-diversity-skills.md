@@ -1,6 +1,6 @@
 # Less-repeated Skills picks
 
-_Treatment closed 2026-09-26 (PT). **Kept** stronger soft-dedup on Skills digest._
+_We changed the Skills list so it repeats fewer of the previous day's top picks. The share of repeats in the top 10 dropped from 70% to 37.5%, so we kept it when the test closed on Sep 26, 2026._
 
 ## In plain English
 
