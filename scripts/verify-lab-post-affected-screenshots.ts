@@ -6,11 +6,22 @@ import fs from "node:fs";
 import { createServer } from "node:http";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { chromium, type Page } from "playwright";
+import { chromium, type Browser, type Page } from "playwright";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteRoot = path.join(repoRoot, "site");
+const siteRootWithSep = `${siteRoot}${path.sep}`;
 const artifactDir = "/opt/cursor/artifacts/screenshots";
+
+const MIME_BY_EXT: Record<string, string> = {
+  ".html": "text/html; charset=utf-8",
+  ".css": "text/css; charset=utf-8",
+  ".js": "application/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
+  ".png": "image/png",
+  ".svg": "image/svg+xml",
+  ".woff2": "font/woff2",
+};
 
 /** Lab posts touched for briefing sample links (keep in sync with PR report). */
 export const LAB_POSTS_AFFECTED_BY_BRIEF_SAMPLE_LINKS = [
@@ -24,6 +35,22 @@ export const LAB_POSTS_AFFECTED_BY_BRIEF_SAMPLE_LINKS = [
   },
 ] as const;
 
+function isPathUnderSiteRoot(abs: string): boolean {
+  const normalized = path.resolve(abs);
+  if (normalized === siteRoot) return true;
+  const rel = path.relative(siteRoot, normalized);
+  return rel !== "" && !rel.startsWith(`..${path.sep}`) && rel !== ".." && !path.isAbsolute(rel);
+}
+
+function resolveSiteFile(pathname: string): string | null {
+  let rel = decodeURIComponent(pathname).replace(/^\//, "");
+  if (!rel || rel.endsWith("/")) rel = `${rel}index.html`;
+  const abs = path.resolve(siteRoot, rel);
+  if (!isPathUnderSiteRoot(abs)) return null;
+  if (!fs.existsSync(abs) || fs.statSync(abs).isDirectory()) return null;
+  return abs;
+}
+
 function siteAbsToUrl(origin: string, siteAbs: string): string {
   const rel = path.relative(siteRoot, siteAbs).split(path.sep).join("/");
   return `${origin}/${rel}`;
@@ -33,20 +60,21 @@ function resolveHrefFromPage(pageAbs: string, href: string): string {
   return path.normalize(path.join(path.dirname(pageAbs), href));
 }
 
+function contentTypeFor(abs: string): string {
+  return MIME_BY_EXT[path.extname(abs).toLowerCase()] ?? "application/octet-stream";
+}
+
 async function startStaticSiteServer(): Promise<{ origin: string; close: () => Promise<void> }> {
   return new Promise((resolve, reject) => {
     const server = createServer((req, res) => {
-      const pathname = decodeURIComponent(new URL(req.url ?? "/", "http://127.0.0.1").pathname);
-      let rel = pathname.replace(/^\//, "");
-      if (!rel || rel.endsWith("/")) rel = `${rel}index.html`;
-      const abs = path.normalize(path.join(siteRoot, rel));
-      if (!abs.startsWith(siteRoot) || !fs.existsSync(abs) || fs.statSync(abs).isDirectory()) {
+      const abs = resolveSiteFile(new URL(req.url ?? "/", "http://127.0.0.1").pathname);
+      if (!abs) {
         res.statusCode = 404;
         res.end("Not found");
         return;
       }
       res.statusCode = 200;
-      res.setHeader("Content-Type", "text/html; charset=utf-8");
+      res.setHeader("Content-Type", contentTypeFor(abs));
       res.end(fs.readFileSync(abs));
     });
     server.listen(0, "127.0.0.1", () => {
@@ -60,10 +88,94 @@ async function startStaticSiteServer(): Promise<{ origin: string; close: () => P
   });
 }
 
+function backgroundLightness(css: string): number | null {
+  const oklch = css.match(/oklch\(\s*([\d.]+)/i);
+  if (oklch) return Number(oklch[1]);
+  const m = css.match(/rgba?\(\s*(\d+)\s*,\s*(\d+)\s*,\s*(\d+)/i);
+  if (!m) return null;
+  const r = Number(m[1]) / 255;
+  const g = Number(m[2]) / 255;
+  const b = Number(m[3]) / 255;
+  const lin = (c: number) => (c <= 0.03928 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4);
+  return 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b);
+}
+
+export async function assertLabPostStylesApplied(
+  page: Page,
+  scheme: "light" | "dark",
+): Promise<void> {
+  await page.waitForFunction(() => {
+    const links = Array.from(document.querySelectorAll('link[rel="stylesheet"]'));
+    if (links.length === 0) return false;
+    return links.every((link) => {
+      const sheet = (link as HTMLLinkElement).sheet;
+      if (!sheet) return false;
+      try {
+        return sheet.cssRules.length > 0;
+      } catch {
+        return Boolean(sheet.href?.includes("style"));
+      }
+    });
+  });
+
+  const article = page.locator("article.lab-prose-capped").first();
+  await article.waitFor({ state: "visible" });
+  const fontFamily = await article.evaluate((el) => getComputedStyle(el).fontFamily.toLowerCase());
+  if (!fontFamily.includes("sans") && fontFamily.includes("serif")) {
+    throw new Error(
+      `lab post prose looks unstyled (font-family: ${fontFamily}); expected sans from ${siteRootWithSep}assets/style*.css`,
+    );
+  }
+
+  const shellBg = await page.locator(".lab-post-shell").first().evaluate((el) => {
+    return getComputedStyle(el).backgroundColor;
+  });
+  const lum = backgroundLightness(shellBg);
+  if (lum == null) {
+    throw new Error(`could not parse lab-post-shell background: ${shellBg}`);
+  }
+  if (scheme === "dark" && lum > 0.25) {
+    throw new Error(`dark mode crop expected dark shell background, got ${shellBg} (lightness ${lum})`);
+  }
+  if (scheme === "light" && lum < 0.85) {
+    throw new Error(`light mode crop expected light shell background, got ${shellBg} (lightness ${lum})`);
+  }
+
+  const htmlHasDark = await page.evaluate(() => document.documentElement.classList.contains("dark"));
+  if (scheme === "dark" && !htmlHasDark) {
+    throw new Error("dark mode screenshot requires html.dark (colorScheme + head script)");
+  }
+  if (scheme === "light" && htmlHasDark) {
+    throw new Error("light mode screenshot must not have html.dark");
+  }
+}
+
+async function loadStyledPost(
+  browser: Browser,
+  pageUrl: string,
+  width: number,
+  scheme: "light" | "dark",
+): Promise<{ page: Page; context: Awaited<ReturnType<Browser["newContext"]>> }> {
+  const context = await browser.newContext({
+    viewport: { width, height: 900 },
+    colorScheme: scheme,
+  });
+  const page = await context.newPage();
+  const cssResponse = page.waitForResponse(
+    (res) => res.url().includes("/assets/style") && res.status() === 200,
+    { timeout: 15_000 },
+  );
+  await page.goto(pageUrl, { waitUntil: "networkidle" });
+  await cssResponse;
+  await assertLabPostStylesApplied(page, scheme);
+  return { page, context };
+}
+
 async function screenshotCompareSection(
   page: Page,
   headingText: string,
   filename: string,
+  viewportWidth: number,
 ): Promise<void> {
   const h3 = page.locator("article h3").filter({ hasText: headingText }).first();
   const ul = h3.locator("+ ul");
@@ -74,13 +186,13 @@ async function screenshotCompareSection(
   if (!h3Box || !ulBox) {
     throw new Error(`compare section bounding box missing for "${headingText}"`);
   }
-  const x = Math.min(h3Box.x, ulBox.x);
-  const y = h3Box.y;
-  const right = Math.max(h3Box.x + h3Box.width, ulBox.x + ulBox.width);
-  const bottom = ulBox.y + ulBox.height;
+  const padTop = 72;
+  const padBottom = 32;
+  const y = Math.max(0, h3Box.y - padTop);
+  const bottom = Math.min(900, ulBox.y + ulBox.height + padBottom);
   await page.screenshot({
     path: path.join(artifactDir, filename),
-    clip: { x, y, width: right - x, height: bottom - y },
+    clip: { x: 0, y, width: viewportWidth, height: bottom - y },
   });
 }
 
@@ -134,7 +246,7 @@ async function verifyBeforeAfterLinks(
 }
 
 async function capturePost(
-  page: Page,
+  browser: Browser,
   origin: string,
   pageAbs: string,
   compareHeading: string,
@@ -145,24 +257,31 @@ async function capturePost(
     { width: 390, scheme: "dark" as const, tag: "390-dark" },
     { width: 1280, scheme: "light" as const, tag: "desktop-light" },
   ]) {
-    await page.setViewportSize({ width, height: 900 });
-    await page.emulateMedia({ colorScheme: scheme });
-    await page.goto(pageUrl, { waitUntil: "networkidle" });
-    await screenshotCompareSection(
-      page,
-      compareHeading,
-      `lab-post-${short}-compare-${tag}.png`,
-    );
+    const { page, context } = await loadStyledPost(browser, pageUrl, width, scheme);
+    try {
+      await screenshotCompareSection(
+        page,
+        compareHeading,
+        `lab-post-${short}-compare-${tag}.png`,
+        width,
+      );
+    } finally {
+      await context.close();
+    }
   }
-  await page.goto(pageUrl, { waitUntil: "networkidle" });
-  await verifyBeforeAfterLinks(page, pageAbs, pageUrl, compareHeading);
+
+  const { page, context } = await loadStyledPost(browser, pageUrl, 390, "light");
+  try {
+    await verifyBeforeAfterLinks(page, pageAbs, pageUrl, compareHeading);
+  } finally {
+    await context.close();
+  }
 }
 
 async function main(): Promise<void> {
   fs.mkdirSync(artifactDir, { recursive: true });
   const server = await startStaticSiteServer();
   const browser = await chromium.launch();
-  const page = await browser.newPage();
   try {
     for (const { slug, compareHeading } of LAB_POSTS_AFFECTED_BY_BRIEF_SAMPLE_LINKS) {
       const abs = path.join(siteRoot, "lab/posts", `${slug}.html`);
@@ -171,7 +290,7 @@ async function main(): Promise<void> {
         process.exit(1);
       }
       const short = slug.replace(/^EXP-\d{8}-/, "").slice(0, 40);
-      await capturePost(page, server.origin, abs, compareHeading, short);
+      await capturePost(browser, server.origin, abs, compareHeading, short);
     }
   } finally {
     await browser.close();
