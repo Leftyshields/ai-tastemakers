@@ -92,12 +92,27 @@ export const LAB_PROSE_ARTICLE_CLASS =
 const LAB_POST_CODE_CLASS =
   "lab-post-code rounded bg-stone-100 px-1 py-0.5 text-sm font-sans dark:bg-stone-800";
 
+function convertInlineBacktickMarkers(text: string): string {
+  return text.replace(/`([^`\n]+)`/g, `<code class="${LAB_POST_CODE_CLASS}">$1</code>`);
+}
+
 /** Turn leftover `inline` markers in text nodes into <code> (UX26). */
 export function stripLiteralBackticksToCode(html: string): string {
   return html.replace(/>([^<]*`[^`\n]+`[^<]*)</g, (_match, text: string) => {
-    const converted = text.replace(/`([^`\n]+)`/g, `<code class="${LAB_POST_CODE_CLASS}">$1</code>`);
-    return `>${converted}<`;
+    return `>${convertInlineBacktickMarkers(text)}<`;
   });
+}
+
+/** Table cells can sit beside inline tags; scan td/th inner HTML (UX43 stacked cells). */
+export function stripLiteralBackticksInTableCells(html: string): string {
+  return html.replace(/<t([dh])(\s[^>]*)?>([\s\S]*?)<\/t\1>/gi, (full, tag: string, attrs = "", inner: string) => {
+    if (!inner.includes("`")) return full;
+    return `<t${tag}${attrs}>${convertInlineBacktickMarkers(inner)}</t${tag}>`;
+  });
+}
+
+function labPostCellVisibleText(cellHtml: string): string {
+  return cellHtml.replace(/<code[\s\S]*?<\/code>/gi, "").replace(/<[^>]+>/g, "");
 }
 
 /** Ensure inline <code> in write ups has lab styling (no typography backtick pseudo content). */
@@ -296,6 +311,7 @@ export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?
 export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
   let html = renderSafeMarkdown(markdown);
   html = stripLiteralBackticksToCode(html);
+  html = stripLiteralBackticksInTableCells(html);
   html = normalizeLabPostCodeElements(html);
   html = wrapLabPostTables(html);
   return sanitizeLabVisibleHtml(html);
@@ -319,6 +335,15 @@ export function findLabPostTableWrapViolations(html: string, pageRel: string): s
 export function findLabPostBacktickViolations(html: string, pageRel: string): string[] {
   const article =
     html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  for (const m of article.matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)) {
+    const text = labPostCellVisibleText(m[1] ?? "");
+    const idx = text.indexOf("`");
+    if (idx >= 0) {
+      return [
+        `${pageRel}: literal backtick in lab post table cell …${text.slice(Math.max(0, idx - 12), idx + 12)}…`,
+      ];
+    }
+  }
   const withoutCode = article.replace(/<code[\s\S]*?<\/code>/gi, "");
   const text = withoutCode.replace(/<[^>]+>/g, " ");
   const idx = text.indexOf("`");

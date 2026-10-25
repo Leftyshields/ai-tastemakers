@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
   buildIsoDatePt,
+  findLabPostBacktickViolations,
   findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
@@ -65,6 +66,20 @@ describe("Lab UX26 UX28 UX29", () => {
     const wrapped = `<article class="lab-prose-capped">${sample}</article>`;
     expect(findLabProseInlineSpacingViolations(wrapped)).toEqual([]);
     expect(findLabProseBacktickViolations(wrapped)).toEqual([]);
+  });
+
+  it("UX43 detects literal backticks inside stacked table cells", () => {
+    const bad = `<article class="lab-prose-capped"><div class="lab-post-table-wrap"><table class="lab-post-table"><tbody><tr><td data-label="We want">Better briefs</td><td data-label="What good looks like">see \`repo_click\` here</td></tr></tbody></table></div></article>`;
+    expect(findLabPostBacktickViolations(bad, "site/lab/posts/x.html")).toHaveLength(1);
+    expect(findLabPostBacktickViolations(bad, "site/lab/posts/x.html")[0]).toContain("table cell");
+
+    const md = `| We want | What "good" looks like |
+| --- | --- |
+| Better briefs | \`repo_click\` with \`section=skills\` |`;
+    const html = prepareLabProseHtmlFromMarkdown(md);
+    const wrapped = `<article class="lab-prose-capped">${html}</article>`;
+    expect(findLabPostBacktickViolations(wrapped, "site/lab/posts/x.html")).toEqual([]);
+    expect(html).toContain('data-label="What &amp;quot;good&amp;quot; looks like"');
   });
 
   it("UX43 write-up tables wrap and inline code renders without backticks", () => {
