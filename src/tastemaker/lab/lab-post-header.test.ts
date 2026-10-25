@@ -6,8 +6,10 @@ import {
   LAB_TESTED_BADGE_BLURB,
   appendLabBadgeAttributionToHref,
   firstResultSectionSentence,
+  renderLabPostPageHeader,
   resolvePostVerdictLine,
 } from "../../../scripts/lab/lab-post-header.js";
+import { defaultLabLinkContext } from "../../../scripts/lab/lab-analytics.js";
 import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
 import {
   isAllowlistedLabBadgeDestDecoded,
@@ -79,6 +81,33 @@ describe("lab post header UX47", () => {
       "When a repo card says Lab tested, it means we tried an idea from that repo in Tastemakers Lab.",
     );
     expect(LAB_TESTED_BADGE_BLURB).not.toMatch(/[\u2013\u2014]/);
+  });
+
+  it("renders repo line with digest casing and post badge as non-interactive chip", () => {
+    const exp = loadExperimentsFile(repoRoot).experiments.find(
+      (e) => e.id === "EXP-20260802-ponytail-narration-skills",
+    )!;
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md"),
+      "utf8",
+    );
+    const html = renderLabPostPageHeader({
+      experiment: exp,
+      title: "Test",
+      markdown: md,
+      postHref: "EXP-20260802-ponytail-narration-skills.html",
+      linkCtx: defaultLabLinkContext(1, { "DietrichGebert/ponytail": "https://github.com/DietrichGebert/ponytail" }, "2026-08-02"),
+      writeupPostIds: [exp.id],
+      repoRoot,
+      escape: (t) => t,
+    });
+    expect(html).toContain("DietrichGebert/ponytail");
+    expect(html).not.toContain(">dietrichgebert/ponytail<");
+    expect(html).toContain('class="text-blue-800 underline dark:text-blue-400"');
+    expect(html).toContain("lab-tested-badge--post");
+    expect(html).toContain('aria-current="page"');
+    expect(html).not.toContain("lab-tested-badge--action");
+    expect(html).not.toMatch(/lab-post-header__badge[\s\S]*<a\b/);
   });
 
   it("parses Outcome section sentence from ponytail post", () => {

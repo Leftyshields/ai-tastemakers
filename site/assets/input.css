@@ -67,6 +67,18 @@
     @apply min-h-11;
   }
 
+  .lab-tested-badge--post {
+    @apply inline-flex items-center gap-1.5 font-sans text-sm font-semibold leading-none;
+  }
+
+  .lab-tested-badge--post.lab-tested-badge--done {
+    @apply text-stone-600 dark:text-stone-300;
+  }
+
+  .lab-tested-badge--post.lab-tested-badge--running {
+    @apply text-blue-800 dark:text-blue-300;
+  }
+
   .digest-lab-badge-blurb {
     @apply font-sans;
   }

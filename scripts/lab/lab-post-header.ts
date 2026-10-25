@@ -11,10 +11,11 @@ import { sanitizeVisibleCopy } from "./lab-format.js";
 import {
   buildLabBadgeLookup,
   labBadgeForRepo,
-  renderLabTestedBadgePagesHtml,
+  renderLabTestedBadgePostHeaderChipHtml,
   resolveLabBadgeHref,
   type LabBadgeInfo,
 } from "./lab-tested-badge.js";
+import { resolveSourceRepoGithubLink } from "./source-repo-display.js";
 import {
   loadExperimentsFile,
   type LabExperimentEntry,
@@ -186,6 +187,8 @@ ${attributionParser}
 </script>`;
 }
 
+const LAB_POST_REPO_LINK_CLASS = "text-blue-800 underline dark:text-blue-400";
+
 export interface LabPostHeaderOptions {
   experiment: LabExperimentEntry;
   title: string;
@@ -193,11 +196,12 @@ export interface LabPostHeaderOptions {
   postHref: string;
   linkCtx: LabLinkContext;
   writeupPostIds: readonly string[];
+  repoRoot: string;
   escape: (t: string) => string;
 }
 
 export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
-  const { experiment: exp, title, markdown, postHref, linkCtx, escape } = opts;
+  const { experiment: exp, title, markdown, linkCtx, repoRoot, escape } = opts;
   const parts: string[] = [];
   parts.push(
     `<header class="lab-post-header mb-6 font-sans">`,
@@ -208,13 +212,18 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
 
   const repoKey = exp.sourceRepo?.trim();
   if (repoKey) {
-    const githubUrl = `https://github.com/${repoKey}`;
+    const { displayFullName, githubUrl } = resolveSourceRepoGithubLink(repoKey, repoRoot);
     parts.push(
       `<p class="lab-post-header__repo mb-3 text-sm text-stone-600 dark:text-stone-400">${renderLabTrackedLink(
         githubUrl,
-        repoKey,
+        displayFullName,
         linkCtx,
-        { section: "posts", experimentId: exp.id, sourceRepo: repoKey },
+        {
+          section: "posts",
+          experimentId: exp.id,
+          sourceRepo: repoKey,
+          className: LAB_POST_REPO_LINK_CLASS,
+        },
         escape,
       )}</p>`,
     );
@@ -236,9 +245,8 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   if (badgeStatus) {
     badge.status = badgeStatus;
     parts.push(
-      `<div class="lab-post-header__badge mb-3">${renderLabTestedBadgePagesHtml(
+      `<div class="lab-post-header__badge mb-3">${renderLabTestedBadgePostHeaderChipHtml(
         badge,
-        postHref,
         escape,
       )}</div>`,
     );

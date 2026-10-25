@@ -55,10 +55,10 @@ async function main(): Promise<void> {
   await shot(PONYTAIL_POST, "pr53-ponytail-post-390-dark.png", { width: 390, scheme: "dark" });
   await shot(PONYTAIL_POST, "pr53-ponytail-post-desktop-light.png", { width: 1280, scheme: "light" });
   await shot(PONYTAIL_POST, "pr53-ponytail-post-desktop-dark.png", { width: 1280, scheme: "dark" });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-from-skills-rank-1.png", {
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-from-skills-rank-3.png", {
     width: 390,
     scheme: "light",
-    search: "?from_list=skills&from_rank=1",
+    search: "?from_list=skills&from_rank=3",
   });
   await shot(PONYTAIL_POST, "pr53-ponytail-post-390-bad-params.png", {
     width: 390,

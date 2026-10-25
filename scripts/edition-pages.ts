@@ -1994,6 +1994,7 @@ export async function buildLabSite(
               postHref: `${slug}.html`,
               linkCtx: postLinkCtx,
               writeupPostIds,
+              repoRoot,
               escape: escapeHtml,
             })
           : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
