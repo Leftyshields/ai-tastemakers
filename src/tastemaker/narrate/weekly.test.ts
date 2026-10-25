@@ -113,9 +113,7 @@ Stars measure attention, not spend.`);
     expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("day anchors");
     expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toMatch(/Do NOT reference our tooling, Lab/i);
     expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toMatch(/not about how it is made/i);
-    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("One voice:");
-    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain(
-      "The ranked top 10 still posts daily on the site, linked below.",
-    );
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("VOICE (Brian's house voice):");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("smart friend at dinner");
   });
 });

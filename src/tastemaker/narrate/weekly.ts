@@ -188,11 +188,14 @@ Each named repo must be a markdown link on first mention, using the exact GitHub
 
 Referent check: the noun you assign each repo must match what that repo is.
 
-One voice: one builder, one email. Do not write ## For executives, ## For AI generalists, or ## The numbers. The site weekly page keeps the layered version; this email is the short story only.
-
-The template adds the ranked-list footer after your prose. Do not reproduce the daily top 10, do not add list links, and do not write "The ranked top 10 still posts daily on the site, linked below." or a paraphrase of it.
-
-No pipeline jargon in subscriber copy. Do not use why-now, Skills-brief, flag names, Lab, or telemetry.
+VOICE (Brian's house voice):
+- Short sentences, one idea each. If a sentence needs a comma list of more than three items, cut it down to the one or two a stranger would care about.
+- Explain what a repo does the way you would to a smart friend at dinner: plain words first, technical names only if they help. Bad: "inspect closed binaries, JavaScript and Electron apps, .NET assemblies... routing analysis through Hopper or Ghidra." Good: "it lets an AI agent take apart software it has no source code for."
+- Confident and direct. State the point; do not build up to it. No "That is a genuinely new surface." No "X is not Y anymore; it is Z" constructions. No "lands differently," "the scaffolding layer," or other abstract filler.
+- One light, self-deprecating or wry line is welcome when it fits (a quiet week, a repo that refused to leave the top spot). Keep it short and never at a project's expense.
+- No "we," "our," or "us." The repos and the week are the subject.
+- Never use the words "genuinely," "landscape," "surface" (as a noun), or "equipped."
+- Before finishing, reread the Body as a reader who has never heard of any of these repos. Rewrite any sentence they would have to read twice.
 
 RULES:
 - 200 to 250 words in the Body (Verdict is extra). Cut anything that reads as summary.
