@@ -1,3 +1,7 @@
+---
+lead: "This experiment will help the Skills writer avoid repeating itself when a project comes back to the list. It is planned for Nov 22 to Dec 19, 2026."
+---
+
 # Fresher "Why now" lines on repeats
 
 _**Queued, not started.** This experiment will help the Skills writer avoid repeating itself when a project comes back to the list. It is planned for Nov 22 to Dec 19, 2026._

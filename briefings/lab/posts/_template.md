@@ -1,3 +1,7 @@
+---
+lead: "<Optional panel lead: full Copywriter summary without the status/date prefix. Omit to derive from the intro paragraph below.>"
+---
+
 # Short public name
 
 _**<Status: Queued, Running, Shipped or Closed> <Mon D, YYYY>.** One sentence on what this experiment changed, in words any reader understands. One sentence on the result or the plan._

@@ -1,3 +1,7 @@
+---
+lead: "This experiment will trim the background notes the Skills writer reads before writing each brief. It is planned for Oct 25 to Nov 21, 2026."
+---
+
 # Shorter background notes
 
 _**Queued, not started.** This experiment will trim the background notes the Skills writer reads before writing each brief. It is planned for Oct 25 to Nov 21, 2026._

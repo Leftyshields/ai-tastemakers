@@ -14,8 +14,10 @@ import {
   renderLabPostPageHeader,
   resolvePostVerdictLine,
   stripLabPostIntroParagraphFromArticleHtml,
+  stripLabPostIntroStatusPrefix,
   stripLabPostLeadMarkdown,
 } from "../../../scripts/lab/lab-post-header.js";
+import { splitLabWriteupFrontMatter } from "../../../scripts/lab/lab-format.js";
 import { listLabWriteupPostIds, prepareLabWriteupHtmlFromMarkdown } from "../../../scripts/lab/lab-format.js";
 import { defaultLabLinkContext } from "../../../scripts/lab/lab-analytics.js";
 import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
@@ -71,14 +73,17 @@ describe("lab post header E1", () => {
     expect(html).toContain('<a href="');
   });
 
-  it("extracts firecrawl lead from post markdown (Copywriter rewrite, not legacy override)", () => {
+  it("extracts firecrawl lead from front matter (Copywriter rewrite, not legacy override)", () => {
     const md = fs.readFileSync(
       path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
       "utf8",
     );
+    expect(splitLabWriteupFrontMatter(md).frontMatter.lead).toBeTruthy();
     const lead = extractLabPostLeadParagraph("EXP-20260716-firecrawl-enrich-skills", md);
-    expect(lead).toBe("Shipped Aug 1, 2026.");
+    expect(lead).toContain("Firecrawl");
+    expect(lead).toContain("before and after comparison");
     expect(lead!.toLowerCase()).not.toContain("we switched");
+    expect(lead!.toLowerCase()).not.toMatch(/\b(we|our|us)\b/);
   });
 
   it("resolves verdict from experiments.json for ponytail", () => {
@@ -191,7 +196,9 @@ describe("lab post header E1", () => {
     expect(html).not.toContain('class="lab-post-header__vdiv"');
     expect(html).not.toContain("digest-lab-badge-blurb");
     expect(html).toContain('class="lab-post-panel__lead"');
-    expect(extractLabPostLeadParagraph(exp.id, md)).toBe("Queued, not started.");
+    const lead = extractLabPostLeadParagraph(exp.id, md);
+    expect(lead).toContain("less random");
+    expect(lead).not.toBe("Queued, not started.");
   });
 
   it("panel lead never shows queue rank or backlog labels", () => {
@@ -230,6 +237,23 @@ describe("lab post header E1", () => {
     expect(stripLabPostLeadMarkdown("no **bold** here")).toBe("no bold here");
   });
 
+  it("stripLabPostIntroStatusPrefix keeps full intro body for panel lead fallback", () => {
+    expect(
+      stripLabPostIntroStatusPrefix("Shipped Aug 1, 2026. This experiment swapped the tool to Firecrawl."),
+    ).toBe("This experiment swapped the tool to Firecrawl.");
+    expect(stripLabPostIntroStatusPrefix("Queued, not started.")).toBe("");
+  });
+
+  it("panel leads avoid first person and em dashes", () => {
+    for (const id of listLabWriteupPostIds(repoRoot)) {
+      const md = fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
+      const lead = extractLabPostLeadParagraph(id, md);
+      if (!lead) continue;
+      expect(lead, `${id} lead`).not.toMatch(/\b(we|our|us)\b/i);
+      expect(lead, `${id} lead`).not.toMatch(/\u2014|\u2013/);
+    }
+  });
+
   it("long-repo fixture lead has no markdown artifacts", () => {
     const html = renderLabPostLongNameFixtureHeader(
       defaultLabLinkContext(1, {}, "2026-08-01"),
@@ -238,7 +262,7 @@ describe("lab post header E1", () => {
     );
     expect(html).not.toContain("**");
     expect(html).toContain("lab-post-panel__lead");
-    expect(html).toContain("Aug 1, 2026");
+    expect(html).toContain("Firecrawl");
     expect(html).toContain("lab-post-panel__badge-blurb");
   });
 

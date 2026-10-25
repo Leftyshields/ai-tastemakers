@@ -1,3 +1,7 @@
+---
+lead: "This experiment will make the Skills list less random during stretches with little star history. It is planned for Dec 20, 2026 to Jan 16, 2027."
+---
+
 # Smarter early ranking
 
 _**Queued, not started.** This experiment will make the Skills list less random during stretches with little star history. It is planned for Dec 20, 2026 to Jan 16, 2027._

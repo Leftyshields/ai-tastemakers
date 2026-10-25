@@ -7,7 +7,7 @@ import {
   parseLabBadgeFromRankParam,
 } from "../../src/tastemaker/analytics/repo-click.js";
 import { labStatusChipLabel } from "./lab-dashboard-ui.js";
-import { sanitizeVisibleCopy } from "./lab-format.js";
+import { sanitizeVisibleCopy, splitLabWriteupFrontMatter } from "./lab-format.js";
 import {
   buildLabBadgeLookup,
   labBadgeForRepo,
@@ -238,16 +238,27 @@ export function stripLabPostLeadMarkdown(text: string): string {
   return out.replace(/\*\*/g, "").replace(/\*/g, "").replace(/_/g, "").trim();
 }
 
-export function extractLabPostLeadParagraph(
-  experimentId: string,
-  markdown: string,
-): string | null {
-  const override = LAB_POST_LEAD[experimentId]?.trim();
-  if (override) {
-    const cleaned = sanitizeVisibleCopy(stripLabPostLeadMarkdown(override));
-    return labPostPanelLeadIsForbidden(cleaned) ? null : cleaned;
+/** Remove bold date/status prefix from the first intro paragraph (reader-facing lead body). */
+export function stripLabPostIntroStatusPrefix(text: string): string {
+  let s = text.trim();
+  if (/^Queued, not started\.\s*/i.test(s)) {
+    return s.replace(/^Queued, not started\.\s*/i, "").trim();
   }
-  const lines = markdown.split(/\r?\n/);
+  const statusPrefix = s.match(/^(?:Closed|Shipped|Kept|Running|Active)\b[^.]*\.\s*/i);
+  if (statusPrefix) {
+    return s.slice(statusPrefix[0].length).trim();
+  }
+  return s;
+}
+
+function finalizeLabPostPanelLead(raw: string): string | null {
+  const cleaned = sanitizeVisibleCopy(stripLabPostLeadMarkdown(raw.trim()));
+  if (!cleaned || labPostPanelLeadIsForbidden(cleaned)) return null;
+  return cleaned;
+}
+
+function collectLabPostIntroParagraphs(markdownBody: string): string[] {
+  const lines = markdownBody.split(/\r?\n/);
   let pastH1 = false;
   const paragraphs: string[] = [];
   let buf: string[] = [];
@@ -277,13 +288,27 @@ export function extractLabPostLeadParagraph(
     }
   }
   flushParagraph();
-  for (const para of paragraphs) {
-    const text = stripLabPostLeadMarkdown(para);
-    const sentence = text.split(/(?<=[.!?])\s+/)[0]?.trim();
-    if (!sentence) continue;
-    const cleaned = sanitizeVisibleCopy(sentence);
-    if (labPostPanelLeadIsForbidden(cleaned)) continue;
-    return cleaned;
+  return paragraphs;
+}
+
+export function extractLabPostLeadParagraph(
+  experimentId: string,
+  markdown: string,
+): string | null {
+  const { frontMatter, body } = splitLabWriteupFrontMatter(markdown);
+  const fmLead = frontMatter.lead?.trim();
+  if (fmLead) {
+    return finalizeLabPostPanelLead(fmLead);
+  }
+  const override = LAB_POST_LEAD[experimentId]?.trim();
+  if (override) {
+    return finalizeLabPostPanelLead(override);
+  }
+  for (const para of collectLabPostIntroParagraphs(body)) {
+    const text = stripLabPostIntroStatusPrefix(stripLabPostLeadMarkdown(para));
+    if (!text) continue;
+    const cleaned = finalizeLabPostPanelLead(text);
+    if (cleaned) return cleaned;
   }
   return null;
 }

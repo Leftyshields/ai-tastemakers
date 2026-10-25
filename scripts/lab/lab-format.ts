@@ -83,9 +83,67 @@ export function repairGfmTableDelimiterRows(markdown: string): string {
   });
 }
 
+export type LabWriteupFrontMatter = {
+  lead?: string;
+};
+
+/** Optional YAML front matter at the top of Lab write-ups (`lead:` for panel copy). */
+export function splitLabWriteupFrontMatter(markdown: string): {
+  frontMatter: LabWriteupFrontMatter;
+  body: string;
+} {
+  const trimmed = markdown.replace(/^\uFEFF/, "");
+  if (!trimmed.startsWith("---")) {
+    return { frontMatter: {}, body: markdown };
+  }
+  const end = trimmed.indexOf("\n---", 3);
+  if (end < 0) {
+    return { frontMatter: {}, body: markdown };
+  }
+  const yamlBlock = trimmed.slice(3, end).trim();
+  const body = trimmed.slice(end + 4).replace(/^\r?\n/, "");
+  const frontMatter: LabWriteupFrontMatter = {};
+  const lines = yamlBlock.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    if (!line.startsWith("lead:")) continue;
+    let rest = line.slice(5).trim();
+    if (rest === "|" || rest === ">") {
+      const folded: string[] = [];
+      for (i++; i < lines.length; i++) {
+        const next = lines[i] ?? "";
+        if (/^[A-Za-z0-9_-]+:/.test(next)) {
+          i--;
+          break;
+        }
+        folded.push(next.replace(/^\s{2,}/, ""));
+      }
+      frontMatter.lead = folded.join(" ").trim();
+      break;
+    }
+    if (
+      (rest.startsWith('"') && rest.endsWith('"')) ||
+      (rest.startsWith("'") && rest.endsWith("'"))
+    ) {
+      frontMatter.lead = rest
+        .slice(1, -1)
+        .replace(/\\"/g, '"')
+        .replace(/\\'/g, "'");
+    } else {
+      frontMatter.lead = rest;
+    }
+    break;
+  }
+  return { frontMatter, body };
+}
+
+export function stripLabWriteupFrontMatter(markdown: string): string {
+  return splitLabWriteupFrontMatter(markdown).body;
+}
+
 /** Normalize write up markdown before render (dates, approximations). */
 export function normalizeLabWriteupMarkdown(markdown: string): string {
-  let s = markdown;
+  let s = stripLabWriteupFrontMatter(markdown);
   s = repairGfmTableDelimiterRows(s);
   s = s.replace(/\bKept\s*\(\s*(\d{4}-\d{2}-\d{2})\s*\)/gi, (_, iso: string) => `Kept on ${formatReaderDatePt(iso)}`);
   s = s.replace(/~\s*(?=\d)/g, "about ");

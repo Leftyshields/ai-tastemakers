@@ -1,3 +1,7 @@
+---
+lead: "This experiment made the Skills list repeat fewer of the previous day's top picks. Repeats in the top 10 dropped from 70% to 37.5%, and the change stayed on after the test closed."
+---
+
 # Less-repeated Skills picks
 
 _**Closed Sep 26, 2026.** This experiment made the Skills list repeat fewer of the previous day's top picks. Repeats in the top 10 dropped from 70% to 37.5%, and the change stayed on after the test closed._
