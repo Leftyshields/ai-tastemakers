@@ -8,7 +8,7 @@ Briefs already ran through the Ponytail rules (short sections, one thing to try)
 
 The bet: one light polish pass after the writing strips those tells, keeps every fact and the why now line, and adds a plain explanation when a project name assumes specialist knowledge.
 
-[Humanizer](https://github.com/blader/humanizer), a project that appeared on the Skills list, spots common AI writing patterns and rewrites them without inventing facts. Humanizer itself does not run on the list. The polish step borrows its habit.
+[Humanizer](https://github.com/blader/humanizer), a project that first appeared on the Skills list on Aug 5, 2026, spots common AI writing patterns and rewrites them without inventing facts. Humanizer itself does not run on the list. The polish step borrows its habit.
 
 ## The change
 

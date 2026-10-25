@@ -10,7 +10,7 @@ The bet: a better page reader gives the writer better material, so briefs come o
 
 ## The change
 
-[Firecrawl](https://github.com/firecrawl/firecrawl), an open source project that had appeared on the list, replaced Jina Reader. Nothing else moved. Project picks and the Hacker News step stayed the same.
+[Firecrawl](https://github.com/firecrawl/firecrawl), an open source project that first appeared on the OSS list on Jun 14, 2026, replaced Jina Reader. Nothing else moved. Project picks and the Hacker News step stayed the same.
 
 | Part | Before | After |
 |-------|--------|-------|
