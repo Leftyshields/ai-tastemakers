@@ -17,8 +17,12 @@ import {
   stripLabPostIntroStatusPrefix,
   stripLabPostLeadMarkdown,
 } from "../../../scripts/lab/lab-post-header.js";
-import { splitLabWriteupFrontMatter } from "../../../scripts/lab/lab-format.js";
-import { listLabWriteupPostIds, prepareLabWriteupHtmlFromMarkdown } from "../../../scripts/lab/lab-format.js";
+import {
+  listLabWriteupPostIds,
+  loadLabWriteupLeadsCatalog,
+  prepareLabWriteupHtmlFromMarkdown,
+  splitLabWriteupFrontMatter,
+} from "../../../scripts/lab/lab-format.js";
 import { defaultLabLinkContext } from "../../../scripts/lab/lab-analytics.js";
 import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
 import {
@@ -73,15 +77,23 @@ describe("lab post header E1", () => {
     expect(html).toContain('<a href="');
   });
 
+  it("post lead front matter matches briefings/lab/lab-leads.md", () => {
+    const catalog = loadLabWriteupLeadsCatalog(repoRoot);
+    for (const id of listLabWriteupPostIds(repoRoot).filter((postId) => postId.startsWith("EXP-"))) {
+      expect(catalog[id], `${id} missing from lab-leads.md`).toBeTruthy();
+      const md = fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
+      const { frontMatter } = splitLabWriteupFrontMatter(md);
+      expect(frontMatter.lead, `${id} lead front matter`).toBe(catalog[id]);
+    }
+  });
+
   it("extracts firecrawl lead from front matter (Copywriter rewrite, not legacy override)", () => {
-    const md = fs.readFileSync(
-      path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
-      "utf8",
-    );
-    expect(splitLabWriteupFrontMatter(md).frontMatter.lead).toBeTruthy();
-    const lead = extractLabPostLeadParagraph("EXP-20260716-firecrawl-enrich-skills", md);
+    const catalog = loadLabWriteupLeadsCatalog(repoRoot);
+    const id = "EXP-20260716-firecrawl-enrich-skills";
+    const md = fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
+    const lead = extractLabPostLeadParagraph(id, md);
+    expect(lead).toBe(catalog[id]);
     expect(lead).toContain("Firecrawl");
-    expect(lead).toContain("before and after comparison");
     expect(lead!.toLowerCase()).not.toContain("we switched");
     expect(lead!.toLowerCase()).not.toMatch(/\b(we|our|us)\b/);
   });

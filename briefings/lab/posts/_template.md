@@ -1,5 +1,5 @@
 ---
-lead: "<Optional panel lead: full Copywriter summary without the status/date prefix. Omit to derive from the intro paragraph below.>"
+lead: "<Optional panel lead: must match briefings/lab/lab-leads.md verbatim for shipped posts. Omit to derive from the intro paragraph below.>"
 ---
 
 # Short public name

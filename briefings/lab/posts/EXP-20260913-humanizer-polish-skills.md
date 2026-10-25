@@ -1,5 +1,5 @@
 ---
-lead: "This experiment added a final polish step to both daily lists that rewrites phrasing that sounds machine-written. From Oct 11 to Oct 24, 2026, briefs passed all 13 quality checks and scored 5.0 on why now and 5.0 on specificity, up from 3.7 and 4.5 before."
+lead: "A final polish pass on both daily lists rewrites machine-sounding phrasing while keeping all 13 quality checks and raising why-now and specificity scores."
 ---
 
 # Less AI-sounding briefs

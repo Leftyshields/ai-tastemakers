@@ -1,5 +1,5 @@
 ---
-lead: "This experiment gave the Skills writer extra background from each project's web pages and Hacker News before writing. The change stayed on after the test closed."
+lead: "Skills briefs now pull extra background from each project's web pages and from Hacker News before writing begins."
 ---
 
 # Richer Skills briefs

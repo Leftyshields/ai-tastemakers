@@ -1,5 +1,5 @@
 ---
-lead: "This experiment will make the Skills list less random during stretches with little star history. It is planned for Dec 20, 2026 to Jan 16, 2027."
+lead: "Bootstrap guard tuning aims to make the Skills list less random when star history is still thin, without hiding projects with real momentum."
 ---
 
 # Smarter early ranking

@@ -141,6 +141,30 @@ export function stripLabWriteupFrontMatter(markdown: string): string {
   return splitLabWriteupFrontMatter(markdown).body;
 }
 
+const LAB_WRITEUP_LEAD_ID = /^EXP-[A-Za-z0-9_-]+$/;
+
+/** Copywriter panel leads keyed by write-up post id (`briefings/lab/lab-leads.md`). */
+export function loadLabWriteupLeadsCatalog(
+  repoRoot: string,
+): Readonly<Record<string, string>> {
+  const catalogPath = path.join(repoRoot, "briefings/lab/lab-leads.md");
+  if (!fs.existsSync(catalogPath)) {
+    throw new Error(`missing ${path.relative(repoRoot, catalogPath)}`);
+  }
+  const out: Record<string, string> = {};
+  for (const raw of fs.readFileSync(catalogPath, "utf8").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    const colon = line.indexOf(":");
+    if (colon <= 0) continue;
+    const id = line.slice(0, colon).trim();
+    const lead = line.slice(colon + 1).trim();
+    if (!LAB_WRITEUP_LEAD_ID.test(id) || !lead) continue;
+    out[id] = lead;
+  }
+  return out;
+}
+
 /** Normalize write up markdown before render (dates, approximations). */
 export function normalizeLabWriteupMarkdown(markdown: string): string {
   let s = stripLabWriteupFrontMatter(markdown);

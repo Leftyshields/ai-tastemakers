@@ -1,5 +1,5 @@
 ---
-lead: "This experiment will help the Skills writer avoid repeating itself when a project comes back to the list. It is planned for Nov 22 to Dec 19, 2026."
+lead: "Memory of past why-now lines aims to keep Skills briefs fresh when a project returns to the list."
 ---
 
 # Fresher "Why now" lines on repeats

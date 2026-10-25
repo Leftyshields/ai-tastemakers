@@ -1,5 +1,5 @@
 ---
-lead: "This experiment will trim the background notes the Skills writer reads before writing each brief. It is planned for Oct 25 to Nov 21, 2026."
+lead: "A planned trim to the background notes the Skills writer reads before each brief aims to cut tokens without losing rubric quality."
 ---
 
 # Shorter background notes

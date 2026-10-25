@@ -1,5 +1,5 @@
 ---
-lead: "This experiment tried a tighter writing style for Skills briefs. Briefs came out about 18% shorter, passed all 13 quality checks, and did a better job on average of explaining why each project matters now."
+lead: "A tighter writing style for Skills briefs now cuts length by about 18%, keeps all 13 quality checks passing, and improves why-now clarity on average."
 ---
 
 # Shorter Skills briefs

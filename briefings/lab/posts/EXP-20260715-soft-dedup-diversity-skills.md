@@ -1,5 +1,5 @@
 ---
-lead: "This experiment made the Skills list repeat fewer of the previous day's top picks. Repeats in the top 10 dropped from 70% to 37.5%, and the change stayed on after the test closed."
+lead: "The Skills list now repeats fewer of the previous day's top picks, with overlap in the top 10 down from 70% to 37.5%."
 ---
 
 # Less-repeated Skills picks

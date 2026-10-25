@@ -1,5 +1,5 @@
 ---
-lead: "This experiment swapped the tool that reads web pages for Skills briefs to Firecrawl, aiming for briefs that are more specific and accurate. It shipped without the planned before and after comparison."
+lead: "A new page reader, Firecrawl, now gathers the source material for Skills briefs, aiming for briefs that are more specific and accurate."
 ---
 
 # Better source pages for Skills briefs
