@@ -27,7 +27,7 @@ import { renderLabTrackedLink } from "./lab-analytics.js";
 
 /** Shared with digest pages: opening sentence on experiment detail posts. */
 export const LAB_TESTED_BADGE_BLURB =
-  "When a repo card says Lab tested, Tastemakers Lab borrowed an idea from that repo and tested it on the daily lists.";
+  "Tastemakers doesn't just report on AI tools. It tests them. Every Lab tested badge marks a repo whose idea was put to work on these lists and measured in the open.";
 
 export const LAB_POST_CAME_FROM_PREFIX = "You came here from the";
 export const LAB_POST_CAME_FROM_AT_NUMBER = "at number";

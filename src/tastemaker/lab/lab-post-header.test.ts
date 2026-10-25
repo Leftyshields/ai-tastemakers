@@ -78,7 +78,7 @@ describe("lab post header UX47", () => {
 
   it("uses Copywriter final badge blurb constant", () => {
     expect(LAB_TESTED_BADGE_BLURB).toBe(
-      "When a repo card says Lab tested, Tastemakers Lab borrowed an idea from that repo and tested it on the daily lists.",
+      "Tastemakers doesn't just report on AI tools. It tests them. Every Lab tested badge marks a repo whose idea was put to work on these lists and measured in the open.",
     );
     expect(LAB_TESTED_BADGE_BLURB).not.toMatch(/[\u2013\u2014]/);
   });
