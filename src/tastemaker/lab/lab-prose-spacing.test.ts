@@ -147,7 +147,7 @@ describe("Lab UX26 UX28 UX29", () => {
     const section = md.split("## What happened")[1]?.split("### Metrics")[0] ?? "";
     const html = prepareLabProseHtmlFromMarkdown(section);
     expect(html).toContain("lab-post-table-wrap");
-    expect(html).not.toMatch(/<p>\| Phase/);
+    expect(html).not.toMatch(/<p>\|\s*Period/);
     expect(findLabPostUnrenderedTableViolations(`<article class="lab-prose-capped">${html}</article>`, "test")).toEqual([]);
   });
 
