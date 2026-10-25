@@ -27,3 +27,12 @@ jobs:
 
       - name: Run tests
         run: npm test && npm run test:digest
+
+      - name: Install Playwright (Lab verify gates)
+        run: npx --yes playwright@1.49.0 install chromium
+
+      - name: Genesis verification (verify:genesis)
+        run: npm run verify:genesis
+        env:
+          POSTHOG_KEY: phc_ci_lab_analytics_gate_only
+          DIGEST_AS_OF_DATE: "2026-10-19"

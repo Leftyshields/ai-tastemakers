@@ -22,6 +22,8 @@ echo "verify: lab post write-ups tables and backticks (UX43)"
 npx tsx scripts/verify-lab-post-writeups.ts
 echo "verify: lab write up reader copy (UX46)"
 npx tsx scripts/verify-lab-writeup-reader-copy.ts
+echo "verify: lab post first-person copy (we/our/us)"
+npx tsx scripts/verify-lab-post-first-person.ts
 echo "verify: lab post title above fold (UX46)"
 npx tsx scripts/verify-lab-post-title-fold.ts
 echo "verify: lab post header order (UX47)"
