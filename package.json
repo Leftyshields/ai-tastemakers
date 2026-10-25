@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "test": "node --test lib/loadGenome.test.js lib/decompose.test.js lib/signaling.test.js lib/guardrails.test.js lib/run.test.js lib/repair.test.js scripts/derive-expression-profiles.test.js scripts/molecules-read_file.test.js",
+    "test": "node --test lib/loadGenome.test.js lib/decompose.test.js lib/signaling.test.js lib/guardrails.test.js lib/run.test.js lib/repair.test.js scripts/derive-expression-profiles.test.js scripts/molecules-read_file.test.js && npx tsx --test scripts/site-css-path.test.ts",
     "test:instantiate": "node --test scripts/instantiate.test.js",
     "test:digest": "vitest run",
     "digest": "tsx src/tastemaker/cli.ts",
@@ -11,7 +11,7 @@
     "weekly": "tsx src/tastemaker/weekly-cli.ts",
     "monthly": "tsx src/tastemaker/monthly-cli.ts",
     "build:digest": "tsc -p tsconfig.json",
-    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
+    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify && tsx scripts/stamp-css-cache-bust.ts",
     "inventory:tools": "tsx src/tastemaker/inventory-cli.ts",
     "experiment": "tsx src/tastemaker/experiments-cli.ts",
     "experiment:reminders": "tsx src/tastemaker/experiment-reminders-cli.ts",
