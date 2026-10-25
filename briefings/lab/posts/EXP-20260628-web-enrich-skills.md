@@ -31,13 +31,11 @@ We expected treatment blurbs to cite timely hooks (launches, HN threads) more of
 
 ## What happened
 
-_Draft table copy. Copywriter review pending._
-
-| Step | When (Pacific) | What we saw |
-| --- | --- | --- |
-| Before extra web reading | Jun 28 to Jul 11, 2026 | 4 briefing pageviews, 0 outbound repo clicks |
-| With extra web reading on | Jul 12 to Jul 18, 2026 | Extra web reading enabled in production; 7 Skills digests shipped |
-| Decision | Closed Jul 18, 2026 | **Keep enrichment on Skills** |
+| Phase | Window (PT) | Outcome |
+|-------|-------------|---------|
+| Baseline | 2026-06-28 → 2026-07-11 | 4 briefing pageviews, 0 outbound repo clicks |
+| Treatment | 2026-07-12 → 2026-07-18 | `DIGEST_ENRICH_WEB=1` in production; 7 Skills digests shipped |
+| Verdict | Closed 2026-07-18 | **Keep enrichment on Skills** |
 
 ### Metrics (PostHog)
 
