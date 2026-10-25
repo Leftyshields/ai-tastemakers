@@ -1,5 +1,5 @@
 /**
- * Design E1: Playwright screenshots for Firecrawl post and long-repo fixture.
+ * Design E1: Playwright viewport screenshots (device scale, not full page or element-only).
  * Writes PNGs under /opt/cursor/artifacts/screenshots (not committed).
  */
 import fs from "node:fs";
@@ -16,21 +16,39 @@ const FIRECRAWL_POST = path.join(
 );
 const LONG_FIXTURE = path.join(repoRoot, "site/lab/posts/_fixture-e1-long-repo.html");
 
-async function shotPanel(
+async function shotViewport(
   absPath: string,
   filename: string,
-  opts: { width: number; scheme: "light" | "dark" },
+  opts: { width: number; height: number; scheme: "light" | "dark"; deviceScaleFactor: number },
 ): Promise<void> {
   const browser = await chromium.launch();
   const page = await browser.newPage({
-    viewport: { width: opts.width, height: 900 },
+    viewport: { width: opts.width, height: opts.height },
+    deviceScaleFactor: opts.deviceScaleFactor,
     colorScheme: opts.scheme,
   });
   await page.goto(`file://${absPath}`, { waitUntil: "networkidle" });
-  const panel = page.locator(".lab-post-panel").first();
-  await panel.scrollIntoViewIfNeeded();
-  await panel.screenshot({ path: path.join(artifactDir, filename) });
+  await page.evaluate((dark) => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, opts.scheme === "dark");
+  await page.waitForFunction(() => {
+    const hdr = document.querySelector(".lab-post-header__hdr");
+    const chip = document.querySelector(".lab-post-split-chip");
+    const btn = document.getElementById("lab-post-back-btn");
+    if (!hdr || !chip || !btn) return true;
+    return chip.getBoundingClientRect().height >= 40;
+  });
+  await page.screenshot({
+    path: path.join(artifactDir, filename),
+    fullPage: false,
+    animations: "disabled",
+  });
   await browser.close();
+}
+
+function viewportForWidth(width: number): { height: number; deviceScaleFactor: number } {
+  if (width <= 390) return { height: 844, deviceScaleFactor: 3 };
+  return { height: 900, deviceScaleFactor: 2 };
 }
 
 async function main(): Promise<void> {
@@ -55,11 +73,12 @@ async function main(): Promise<void> {
 
   for (const [name, abs, width] of shots) {
     const scheme = name.includes("dark") ? "dark" : "light";
-    await shotPanel(abs, name, { width, scheme });
+    const { height, deviceScaleFactor } = viewportForWidth(width);
+    await shotViewport(abs, name, { width, height, scheme, deviceScaleFactor });
     console.log(path.join(artifactDir, name));
   }
 
-  console.log(`verify: lab post header screenshots ok (${artifactDir}, 8 PNGs)`);
+  console.log(`verify: lab post header screenshots ok (${artifactDir}, 8 PNGs, viewport crop @ device scale)`);
 }
 
 const isMain =
