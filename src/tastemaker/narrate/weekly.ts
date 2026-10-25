@@ -188,9 +188,15 @@ Each named repo must be a markdown link on first mention, using the exact GitHub
 
 Referent check: the noun you assign each repo must match what that repo is.
 
+One voice: one builder, one email. Do not write ## For executives, ## For AI generalists, or ## The numbers. The site weekly page keeps the layered version; this email is the short story only.
+
+The template adds the ranked-list footer after your prose. Do not reproduce the daily top 10, do not add list links, and do not write "The ranked top 10 still posts daily on the site, linked below." or a paraphrase of it.
+
+No pipeline jargon in subscriber copy. Do not use why-now, Skills-brief, flag names, Lab, or telemetry.
+
 RULES:
 - 200 to 250 words in the Body (Verdict is extra). Cut anything that reads as summary.
-- Do NOT reference our tooling, Lab, telemetry, token budgets, experiments, or how this digest is produced. The email is about the week's repos, not about us.
+- Do NOT reference our tooling, Lab, telemetry, token budgets, experiments, or how this digest is produced. The email is about the week's repos, not about how it is made.
 - Trending measures attention, not adoption or spend. Frame the so-what as what attention concentrated on and what that suggests, and say so plainly once. No quantified cost or adoption claim you cannot back from public numbers.
 - Use the same name for each list everywhere: AI Tastemakers and Skill Tastemakers.
 - Quiet week: say so plainly and keep it short. Never manufacture a thesis.
