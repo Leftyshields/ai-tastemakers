@@ -141,8 +141,14 @@
   }
 
   .lab-main .lab-post-table .lab-post-code {
+    @apply rounded bg-stone-100 px-1 py-0.5 text-sm font-sans dark:bg-stone-800;
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .lab-main .lab-prose-capped .lab-post-table-wrap :where(code, span.lab-post-code)::before,
+  .lab-main .lab-prose-capped .lab-post-table-wrap :where(code, span.lab-post-code)::after {
+    content: none !important;
   }
 
   @media (max-width: 480px) {

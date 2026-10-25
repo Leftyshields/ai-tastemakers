@@ -103,16 +103,32 @@ export function stripLiteralBackticksToCode(html: string): string {
   });
 }
 
+const LAB_POST_INLINE_CODE_TAG = "span";
+
+function inlineCodeHtml(inner: string): string {
+  return `<${LAB_POST_INLINE_CODE_TAG} class="${LAB_POST_CODE_CLASS}">${inner}</${LAB_POST_INLINE_CODE_TAG}>`;
+}
+
 /** Table cells can sit beside inline tags; scan td/th inner HTML (UX43 stacked cells). */
 export function stripLiteralBackticksInTableCells(html: string): string {
   return html.replace(/<t([dh])(\s[^>]*)?>([\s\S]*?)<\/t\1>/gi, (full, tag: string, attrs = "", inner: string) => {
-    if (!inner.includes("`")) return full;
-    return `<t${tag}${attrs}>${convertInlineBacktickMarkers(inner)}</t${tag}>`;
+    let out = inner;
+    if (out.includes("`")) {
+      out = out.replace(/`([^`\n]+)`/g, (_m, code: string) => inlineCodeHtml(code));
+    }
+    out = out.replace(/<code(\s[^>]*)?>([\s\S]*?)<\/code>/gi, (_m, _attrs, code: string) =>
+      inlineCodeHtml(code),
+    );
+    if (out === inner) return full;
+    return `<t${tag}${attrs}>${out}</t${tag}>`;
   });
 }
 
 function labPostCellVisibleText(cellHtml: string): string {
-  return cellHtml.replace(/<code[\s\S]*?<\/code>/gi, "").replace(/<[^>]+>/g, "");
+  return cellHtml
+    .replace(/<(?:code|span)[^>]*class="[^"]*lab-post-code[^"]*"[\s\S]*?<\/(?:code|span)>/gi, "")
+    .replace(/<code[\s\S]*?<\/code>/gi, "")
+    .replace(/<[^>]+>/g, "");
 }
 
 /** Ensure inline <code> in write ups has lab styling (no typography backtick pseudo content). */
@@ -134,6 +150,17 @@ function escapeHtmlAttr(value: string): string {
   return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
 }
 
+/** Plain text from table header HTML (single attr escape; avoids &amp;quot; double encoding). */
+function tableHeaderLabelPlainText(thInnerHtml: string): string {
+  const stripped = stripHtmlTags(thInnerHtml);
+  return stripped
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*34;/gi, '"')
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">");
+}
+
 /** Add data-label on cells for stacked mobile post tables (480px). */
 export function labelLabPostTableCells(html: string): string {
   return html.replace(
@@ -142,7 +169,7 @@ export function labelLabPostTableCells(html: string): string {
       const headers: string[] = [];
       const thead = inner.match(/<thead>[\s\S]*?<\/thead>/i)?.[0] ?? "";
       for (const m of thead.matchAll(/<th[^>]*>([\s\S]*?)<\/th>/gi)) {
-        headers.push(stripHtmlTags(m[1] ?? ""));
+        headers.push(tableHeaderLabelPlainText(m[1] ?? ""));
       }
       if (headers.length === 0) {
         return `<div class="lab-post-table-wrap"><table class="lab-post-table">${inner}</table></div>`;
@@ -282,7 +309,13 @@ export function sanitizeVisibleCopy(text: string): string {
 
 /** Sanitize visible text nodes in static Lab markdown HTML (preserves tag structure). */
 export function sanitizeLabVisibleHtml(html: string): string {
-  return html.replace(/>([^<]+)</g, (match, text: string) => {
+  const tableBlocks: string[] = [];
+  const placeholder = (i: number) => `\u0000LAB_POST_TABLE_${i}\u0000`;
+  let withoutTables = html.replace(/<div class="lab-post-table-wrap">[\s\S]*?<\/div>/gi, (block) => {
+    tableBlocks.push(block);
+    return placeholder(tableBlocks.length - 1);
+  });
+  withoutTables = withoutTables.replace(/>([^<]+)</g, (match, text: string) => {
     if (!text.trim()) return match;
     const leading = text.match(/^\s*/)?.[0] ?? "";
     const trailing = text.match(/\s*$/)?.[0] ?? "";
@@ -290,6 +323,7 @@ export function sanitizeLabVisibleHtml(html: string): string {
     if (!core) return match;
     return `>${leading}${core}${trailing}<`;
   });
+  return withoutTables.replace(/\u0000LAB_POST_TABLE_(\d+)\u0000/g, (_m, idx: string) => tableBlocks[Number(idx)] ?? "");
 }
 
 /** Experiment ids with a markdown post under briefings/lab/posts/ (UX29). */

@@ -31,7 +31,7 @@ PostHog click through was never the main test for this switch. Editorial review 
 
 ## Outcome
 
-We **shipped** Firecrawl for Skills web context and archived the experiment record. Hacker News enrichment and ranking by 7 day momentum stayed as they were. Later writing improvements (Ponytail, Humanizer) build on this layer. For the earlier chapter with Jina and Hacker News, see the [web context write up](EXP-20260628-web-enrich-skills.html).
+We **shipped** Firecrawl for Skills web context and archived the experiment record. Hacker News enrichment and ranking by seven day momentum stayed as they were. Later writing improvements (Ponytail, Humanizer) build on this layer. For the earlier chapter with Jina and Hacker News, see the [web context write up](EXP-20260628-web-enrich-skills.html).
 
 ## Operator notes
 

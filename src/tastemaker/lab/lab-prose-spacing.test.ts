@@ -79,7 +79,9 @@ describe("Lab UX26 UX28 UX29", () => {
     const html = prepareLabProseHtmlFromMarkdown(md);
     const wrapped = `<article class="lab-prose-capped">${html}</article>`;
     expect(findLabPostBacktickViolations(wrapped, "site/lab/posts/x.html")).toEqual([]);
-    expect(html).toContain('data-label="What &amp;quot;good&amp;quot; looks like"');
+    expect(html).toContain('data-label="What &quot;good&quot; looks like"');
+    expect(html).toContain('<span class="lab-post-code');
+    expect(html).not.toMatch(/<td[^>]*>[^<]*`/);
   });
 
   it("UX43 write-up tables wrap and inline code renders without backticks", () => {
@@ -88,7 +90,7 @@ describe("Lab UX26 UX28 UX29", () => {
 | Traffic | \`repo_click\` with \`section=skills\` |`;
     const html = prepareLabProseHtmlFromMarkdown(md);
     expect(html).toContain("lab-post-table-wrap");
-    expect(html).toContain("<code");
+    expect(html).toContain("lab-post-code");
     expect(html).toContain("repo_click");
     expect(html).not.toContain("`");
     expect(html).toContain('data-label="Signal"');
@@ -99,10 +101,30 @@ describe("Lab UX26 UX28 UX29", () => {
     const md = fs.readFileSync(mdPath, "utf8");
     expect(md).not.toMatch(/DIGEST_ENRICH/);
     expect(md).not.toContain("FIRECRAWL_API_KEY");
+    expect(md).toContain("ranking by seven day momentum stayed as they were");
     const html = prepareLabProseHtmlFromMarkdown(md);
     expect(html).not.toMatch(/DIGEST_ENRICH/);
     expect(html).not.toContain("FIRECRAWL_API_KEY");
     expect(html).toContain("Web enrichment switch");
+    expect(html).toContain("seven day momentum");
+  });
+
+  it("UX43 Firecrawl post article matches built HTML backtick and data-label rules", () => {
+    const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md");
+    const md = fs.readFileSync(mdPath, "utf8");
+    const article = `<article class="brief-content lab-prose-capped prose">${prepareLabProseHtmlFromMarkdown(md)}</article>`;
+    const rel = "site/lab/posts/EXP-20260716-firecrawl-enrich-skills.html";
+    expect(findLabPostBacktickViolations(article, rel)).toEqual([]);
+    expect(article).not.toContain('data-label="What &amp;quot;');
+    expect(article).toContain('data-label="What &quot;good&quot; looks like"');
+    expect(article).toContain('<span class="lab-post-code');
+
+    const builtPath = path.join(repoRoot, rel);
+    if (fs.existsSync(builtPath)) {
+      const page = fs.readFileSync(builtPath, "utf8");
+      expect(findLabPostBacktickViolations(page, rel)).toEqual([]);
+      expect(page).not.toContain('data-label="What &amp;quot;');
+    }
   });
 
   it("UX46 normalizes write up dates and about approximations", () => {
