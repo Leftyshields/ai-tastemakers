@@ -11,7 +11,7 @@ import { sanitizeVisibleCopy } from "./lab-format.js";
 import {
   buildLabBadgeLookup,
   labBadgeForRepo,
-  renderLabTestedBadgePostHeaderChipHtml,
+  renderLabTestedBadgeSplitChipPillHtml,
   resolveLabBadgeHref,
   type LabBadgeInfo,
 } from "./lab-tested-badge.js";
@@ -22,30 +22,31 @@ import {
   type LabExperimentStatus,
   type LabVerdict,
 } from "./validate-experiments.js";
-import type { LabLinkContext } from "./lab-analytics.js";
-import { renderLabTrackedLink } from "./lab-analytics.js";
+import type { LabLinkContext, LabLinkTrackOptions } from "./lab-analytics.js";
+import { labLinkDataAttrs, resolveLabToolHref } from "./lab-analytics.js";
 import {
-  LAB_POST_BACK_TO_LIST_LABEL,
-  LAB_POST_CARD_LABEL_OSS,
-  LAB_POST_CARD_LABEL_SKILLS,
-  labPostRepoDescription,
+  LAB_POST_BACK_BUTTON_LABEL,
+  LAB_POST_LEAD,
+  LAB_POST_LONG_REPO_FIXTURE_ID,
+  LAB_POST_LONG_REPO_FIXTURE_SOURCE,
 } from "./lab-post-header-copy.js";
 
 /** Shared with digest pages: opening sentence on experiment detail posts. */
 export const LAB_TESTED_BADGE_BLURB =
   "Tastemakers doesn't just report on AI tools. It tests them. Every Lab tested badge marks a repo whose idea was put to work on these lists and measured in the open.";
 
-export { LAB_POST_BACK_TO_LIST_LABEL } from "./lab-post-header-copy.js";
+export { LAB_POST_BACK_BUTTON_LABEL } from "./lab-post-header-copy.js";
 
 const LIST_INDEX_HREF: Record<EditionId, string> = {
   oss: "../../index.html",
   skills: "../../skills/index.html",
 };
 
-const LAB_POST_CARD_LABEL: Record<EditionId, string> = {
-  oss: LAB_POST_CARD_LABEL_OSS,
-  skills: LAB_POST_CARD_LABEL_SKILLS,
-};
+const LAB_HOME_FROM_POSTS = "../index.html";
+
+const BACK_ARROW_SVG = `<svg class="lab-post-back-btn__icon" aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M11 6l-6 6 6 6"/></svg>`;
+
+const STATUS_CHECK_SVG = `<svg class="lab-post-panel__status-icon" aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12l5 5 9-10"/></svg>`;
 
 export { parseLabBadgeFromListParam, parseLabBadgeFromRankParam };
 
@@ -174,41 +175,110 @@ export function resolveLabPostDigestBackHref(
   return LIST_INDEX_HREF.oss;
 }
 
-export function renderLabPostBackToListScript(
-  defaultHref: string,
-  ossHref: string,
-  skillsHref: string,
-): string {
-  const attributionParser = labBadgeAttributionClientParserSource();
-  return `<script>
-${attributionParser}
-(function(){
-  var link = document.getElementById("lab-post-back-to-list-link");
-  if(!link) return;
-  var att = parseLabBadgeAttribution(window.location.search);
-  if(att){
-    link.href = att.list === "skills" ? ${JSON.stringify(skillsHref)} : ${JSON.stringify(ossHref)};
+export function extractLabPostLeadParagraph(
+  experimentId: string,
+  markdown: string,
+): string | null {
+  const override = LAB_POST_LEAD[experimentId]?.trim();
+  if (override) return sanitizeVisibleCopy(override);
+  const lines = markdown.split(/\r?\n/);
+  let pastH1 = false;
+  const buf: string[] = [];
+  for (const raw of lines) {
+    const line = raw.trim();
+    if (!pastH1) {
+      if (/^#\s+/.test(line)) pastH1 = true;
+      continue;
+    }
+    if (!line) {
+      if (buf.length > 0) break;
+      continue;
+    }
+    if (/^##\s/.test(line)) break;
+    buf.push(line);
+    if (line.endsWith(".") || line.endsWith("!") || line.endsWith("?")) break;
   }
-})();
-</script>`;
+  if (buf.length === 0) return null;
+  let text = buf.join(" ");
+  text = text.replace(/^[_*]+|[_*]+$/g, "").trim();
+  text = text.replace(/\*\*([^*]+)\*\*/g, "$1");
+  text = text.replace(/\*([^*]+)\*/g, "$1");
+  const sentence = text.split(/(?<=[.!?])\s+/)[0]?.trim();
+  if (!sentence) return null;
+  return sanitizeVisibleCopy(sentence);
 }
 
-const LAB_POST_REPO_LINK_CLASS =
-  "lab-post-card__repo-link text-blue-800 no-underline hover:underline dark:text-blue-400";
+function renderLabPostSplitRepoLinkHtml(
+  githubUrl: string,
+  displayFullName: string,
+  linkCtx: LabLinkContext,
+  opts: LabLinkTrackOptions,
+  escape: (t: string) => string,
+): string {
+  const resolved = resolveLabToolHref(githubUrl, linkCtx);
+  const slash = displayFullName.indexOf("/");
+  const inner =
+    slash >= 0
+      ? `<span class="lab-post-split-chip__owner">${escape(displayFullName.slice(0, slash))}</span>/<wbr><span class="lab-post-split-chip__name">${escape(displayFullName.slice(slash + 1))}</span>`
+      : escape(displayFullName);
+  return `<a href="${escape(resolved)}" class="lab-post-split-chip__repo" ${labLinkDataAttrs(opts)}>${inner}</a>`;
+}
 
 function renderLabPostStatusLineHtml(
   exp: LabExperimentEntry,
   markdown: string,
   escape: (t: string) => string,
 ): string {
-  const verdict = resolvePostVerdictLine(exp, markdown);
+  const statusLabel = sanitizeVisibleCopy(experimentStatusLabel(exp.status));
+  let textInner: string;
+  if (exp.verdict) {
+    const verdictLabel = sanitizeVisibleCopy(verdictDisplayLabel(exp.verdict));
+    textInner = `<b class="lab-post-panel__status-em">${escape(statusLabel)}</b>, ${escape(verdictLabel)}`;
+  } else {
+    textInner = escape(statusLabel);
+  }
   const showCheck = exp.status === "done" && exp.verdict === "ship";
-  const check = showCheck
-    ? `<span class="lab-post-card__status-check mr-1 text-emerald-600 dark:text-emerald-400" aria-hidden="true">✓</span>`
-    : "";
-  return `<p class="lab-post-card__status mb-0 text-sm text-stone-600 dark:text-stone-400">${check}<span class="lab-post-card__status-text">${escape(
-    verdict.line,
-  )}</span></p>`;
+  const icon = showCheck ? STATUS_CHECK_SVG : "";
+  return `<p class="lab-post-panel__status">${icon}<span class="lab-post-panel__status-text">${textInner}</span></p>`;
+}
+
+export function renderLabPostHeaderClientScripts(ossHref: string, skillsHref: string): string {
+  const attributionParser = labBadgeAttributionClientParserSource();
+  return `<script>
+${attributionParser}
+(function(){
+  var btn = document.getElementById("lab-post-back-btn");
+  if(btn){
+    btn.addEventListener("click", function(){
+      var att = parseLabBadgeAttribution(window.location.search);
+      if(att){
+        window.location.href = att.list === "skills" ? ${JSON.stringify(skillsHref)} : ${JSON.stringify(ossHref)};
+        return;
+      }
+      if(window.history.length > 1){
+        window.history.back();
+        return;
+      }
+      window.location.href = ${JSON.stringify(LAB_HOME_FROM_POSTS)};
+    });
+  }
+  var hdr = document.querySelector(".lab-post-header__hdr");
+  var btnEl = document.getElementById("lab-post-back-btn");
+  var chip = document.querySelector(".lab-post-split-chip");
+  if(hdr && btnEl && chip){
+    function syncWrap(){
+      var wrapped = chip.offsetTop > btnEl.offsetTop + 2;
+      hdr.classList.toggle("lab-post-header__hdr--wrapped", wrapped);
+    }
+    syncWrap();
+    if(typeof ResizeObserver !== "undefined"){
+      new ResizeObserver(syncWrap).observe(hdr);
+    } else {
+      window.addEventListener("resize", syncWrap);
+    }
+  }
+})();
+</script>`;
 }
 
 export interface LabPostHeaderOptions {
@@ -224,51 +294,23 @@ export interface LabPostHeaderOptions {
 
 export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   const { experiment: exp, title, markdown, linkCtx, repoRoot, escape } = opts;
-  const cardEdition = editionFromSourceUrl(exp.sourceUrl);
-  const cardLabel = LAB_POST_CARD_LABEL[cardEdition];
-  const defaultBackHref = resolveLabPostDigestBackHref(exp, cardEdition);
   const ossBackHref = resolveLabPostDigestBackHref(exp, "oss");
   const skillsBackHref = resolveLabPostDigestBackHref(exp, "skills");
+  const lead = extractLabPostLeadParagraph(exp.id, markdown);
 
   const parts: string[] = [];
   parts.push(`<header class="lab-post-header mb-6 font-sans">`);
+  parts.push(`<section class="lab-post-panel">`);
 
   const repoKey = exp.sourceRepo?.trim();
-  if (repoKey) {
-    parts.push(
-      `<p class="lab-post-header__label mb-2 font-sans text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400">${escape(
-        cardLabel,
-      )}</p>`,
-    );
-  }
-
-  parts.push(`<article class="lab-post-card mb-4 rounded-xl border border-stone-200 bg-stone-100/80 p-5 dark:border-stone-700 dark:bg-stone-900/60">`);
+  parts.push(`<div class="lab-post-header__hdr">`);
+  parts.push(
+    `<button type="button" id="lab-post-back-btn" class="lab-post-back-btn" data-lab-section="posts" data-lab-nav="back">${BACK_ARROW_SVG}<span class="lab-post-back-btn__text">${escape(LAB_POST_BACK_BUTTON_LABEL)}</span></button>`,
+  );
+  parts.push(`<span class="lab-post-header__vdiv" aria-hidden="true"></span>`);
 
   if (repoKey) {
     const { displayFullName, githubUrl } = resolveSourceRepoGithubLink(repoKey, repoRoot);
-    parts.push(
-      `<h2 class="lab-post-card__repo mb-2 font-sans text-lg font-semibold tracking-tight">${renderLabTrackedLink(
-        githubUrl,
-        displayFullName,
-        linkCtx,
-        {
-          section: "posts",
-          experimentId: exp.id,
-          sourceRepo: repoKey,
-          className: LAB_POST_REPO_LINK_CLASS,
-        },
-        escape,
-      )}</h2>`,
-    );
-    const description = labPostRepoDescription(repoKey);
-    if (description) {
-      parts.push(
-        `<p class="lab-post-card__description mb-3 font-sans text-sm text-stone-600 dark:text-stone-400 max-[479px]:hidden">${escape(
-          description,
-        )}</p>`,
-      );
-    }
-
     const lookup = buildLabBadgeLookup([exp]);
     const badge =
       labBadgeForRepo(lookup, repoKey) ??
@@ -281,46 +323,78 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
     badge.repoKey = repoKey;
     const badgeStatus =
       exp.status === "running" ? "running" : exp.status === "done" ? "done" : null;
+    parts.push(`<div class="lab-post-split-chip">`);
     if (badgeStatus) {
       badge.status = badgeStatus;
-      parts.push(
-        `<div class="lab-post-card__badge mb-4">${renderLabTestedBadgePostHeaderChipHtml(
-          badge,
-          escape,
-        )}</div>`,
-      );
+      parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
     }
+    parts.push(
+      renderLabPostSplitRepoLinkHtml(githubUrl, displayFullName, linkCtx, {
+        section: "posts",
+        experimentId: exp.id,
+        sourceRepo: repoKey,
+      }, escape),
+    );
+    parts.push(`</div>`);
   }
 
+  parts.push(`</div>`);
   parts.push(
-    `<h1 class="lab-post-card__title mb-2 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escape(
-      sanitizeVisibleCopy(title),
-    )}</h1>`,
+    `<h1 class="lab-post-panel__title">${escape(sanitizeVisibleCopy(title))}</h1>`,
     renderLabPostStatusLineHtml(exp, markdown, escape),
-    `</article>`,
-    `<p class="lab-post-header__back mb-0 font-sans text-sm"><a id="lab-post-back-to-list-link" href="${escape(
-      defaultBackHref,
-    )}" class="lab-post-back-link inline-flex min-h-11 items-center py-2 text-blue-800 underline dark:text-blue-400" data-lab-section="posts">${escape(
-      LAB_POST_BACK_TO_LIST_LABEL,
-    )}</a></p>`,
-    `</header>`,
-    renderLabPostBackToListScript(defaultBackHref, ossBackHref, skillsBackHref),
   );
+  if (lead) {
+    parts.push(`<p class="lab-post-panel__lead">${escape(lead)}</p>`);
+  }
+  parts.push(`</section></header>`, renderLabPostHeaderClientScripts(ossBackHref, skillsBackHref));
 
   return parts.join("");
+}
+
+/** Stress-test header for long owner/repo names (verify screenshots only). */
+export function renderLabPostLongNameFixtureHeader(
+  linkCtx: LabLinkContext,
+  repoRoot: string,
+  escape: (t: string) => string,
+): string {
+  const exp = loadExperimentsFile(repoRoot).experiments.find(
+    (e) => e.id === "EXP-20260716-firecrawl-enrich-skills",
+  );
+  if (!exp) throw new Error("missing Firecrawl experiment for long-repo fixture");
+  const fixtureExp: LabExperimentEntry = {
+    ...exp,
+    id: LAB_POST_LONG_REPO_FIXTURE_ID,
+    sourceRepo: LAB_POST_LONG_REPO_FIXTURE_SOURCE,
+  };
+  const md = fs.readFileSync(
+    path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
+    "utf8",
+  );
+  return renderLabPostPageHeader({
+    experiment: fixtureExp,
+    title: "Better source pages for Skills briefs",
+    markdown: md,
+    postHref: "_fixture-e1-long-repo.html",
+    linkCtx,
+    writeupPostIds: [],
+    repoRoot,
+    escape,
+  });
 }
 
 /** DOM order check for verify gate (marker class sequence). */
 export const LAB_POST_HEADER_ORDER_MARKERS = [
   "lab-post-header",
-  "lab-post-header__label",
-  "lab-post-card",
-  "lab-post-card__repo",
-  "lab-post-card__description",
-  "lab-post-card__badge",
-  "lab-post-card__title",
-  "lab-post-card__status",
-  "lab-post-header__back",
+  "lab-post-panel",
+  "lab-post-header__hdr",
+  "lab-post-back-btn",
+  "lab-post-header__vdiv",
+  "lab-post-split-chip",
+  "lab-post-split-chip__pill",
+  "lab-post-split-chip__repo",
+  "lab-post-panel__title",
+  "lab-post-panel__status",
+  "lab-post-panel__lead",
 ] as const;
 
 export function findLabPostHeaderOrderViolations(html: string, pageRel: string): string[] {
@@ -342,10 +416,10 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
   for (let i = 1; i < LAB_POST_HEADER_ORDER_MARKERS.length; i++) {
     const cls = LAB_POST_HEADER_ORDER_MARKERS[i]!;
     const optional =
-      cls === "lab-post-header__label" ||
-      cls === "lab-post-card__repo" ||
-      cls === "lab-post-card__description" ||
-      cls === "lab-post-card__badge";
+      cls === "lab-post-split-chip" ||
+      cls === "lab-post-split-chip__pill" ||
+      cls === "lab-post-split-chip__repo" ||
+      cls === "lab-post-panel__lead";
     if (positions[i]! < 0) {
       if (optional) continue;
       return [`${pageRel}: missing ${cls}`];
@@ -359,17 +433,22 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
     "lab-post-came-from",
     "You clicked this",
     "You came here from the",
+    "Back to the daily list",
+    "Back to Lab",
+    "lab-post-back-link",
+    "From the OSS top 10",
+    "From the Skills top 10",
     "from_rank=",
     "at number",
     LAB_TESTED_BADGE_BLURB.replace(/&/g, "&amp;"),
   ];
   for (const needle of forbidden) {
     if (header.includes(needle)) {
-      return [`${pageRel}: header must not include ${needle}`];
+      return [`${pageRel}: header must not include forbidden copy ${needle}`];
     }
   }
-  if (!header.includes(LAB_POST_BACK_TO_LIST_LABEL.replace(/&/g, "&amp;"))) {
-    return [`${pageRel}: missing back to daily list link`];
+  if (!header.includes('id="lab-post-back-btn"')) {
+    return [`${pageRel}: missing Back button`];
   }
   const proseIdx = html.search(/<article\b[^>]*lab-prose-capped/i);
   const headerIdx = html.indexOf('class="lab-post-header');

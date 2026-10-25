@@ -1,20 +1,14 @@
-/** Copywriter-owned strings for Lab post header (design C). Swap literals here only. */
+/** Copywriter-owned strings for Lab post header (design E1). Swap literals here only. */
 
-export const LAB_POST_BACK_TO_LIST_LABEL = "Back to the daily list";
+export const LAB_POST_BACK_BUTTON_LABEL = "Back";
 
-export const LAB_POST_CARD_LABEL_OSS = "From the OSS top 10";
-export const LAB_POST_CARD_LABEL_SKILLS = "From the Skills top 10";
-
-/** GitHub-style repo one-liners shown under the owner/repo link (hidden below 480px). */
-export const LAB_POST_REPO_DESCRIPTION: Readonly<Record<string, string>> = {
-  "firecrawl/firecrawl":
-    "Turn any website into clean, LLM ready markdown or structured data.",
-  "dietrichgebert/ponytail":
-    "Structured writing rules and context for AI coding agents.",
+/** Optional lead override by experiment id; falls back to first markdown paragraph. */
+export const LAB_POST_LEAD: Readonly<Record<string, string>> = {
+  "EXP-20260716-firecrawl-enrich-skills":
+    "On Aug 1, 2026, we switched to a different tool for reading web pages, aiming for more specific and accurate Skills briefs. We kept it, though we shipped without running the planned before and after comparison.",
+  "EXP-20260802-ponytail-narration-skills":
+    "On Aug 17, 2026, we tightened Skills brief narration to cut tokens while keeping rubric pass rates steady.",
 };
 
-export function labPostRepoDescription(sourceRepo: string): string | null {
-  const key = sourceRepo.trim().toLowerCase();
-  if (!key) return null;
-  return LAB_POST_REPO_DESCRIPTION[key] ?? null;
-}
+export const LAB_POST_LONG_REPO_FIXTURE_ID = "FIXTURE-e1-long-repo";
+export const LAB_POST_LONG_REPO_FIXTURE_SOURCE = "wanshuiyin/auto-claude-code-research-in-sleep";

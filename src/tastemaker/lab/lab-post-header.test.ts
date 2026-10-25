@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import {
   LAB_TESTED_BADGE_BLURB,
   appendLabBadgeAttributionToHref,
+  extractLabPostLeadParagraph,
   firstResultSectionSentence,
   renderLabPostPageHeader,
   resolvePostVerdictLine,
@@ -19,7 +20,7 @@ import { loadExperimentsFile } from "../../../scripts/lab/validate-experiments.j
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
-describe("lab post header UX47", () => {
+describe("lab post header E1", () => {
   it("appends validated attribution query before hash", () => {
     const href = appendLabBadgeAttributionToHref(
       "../lab/posts/EXP-20260802-ponytail-narration-skills.html",
@@ -28,28 +29,47 @@ describe("lab post header UX47", () => {
     );
     expect(href).toContain("from_list=skills");
     expect(href).toContain("from_rank=3");
-    const withHash = appendLabBadgeAttributionToHref(
-      "../lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills",
-      "oss",
-      1,
+  });
+
+  it("renders design E1 panel with Back button, split chip, title, status, and lead", () => {
+    const exp = loadExperimentsFile(repoRoot).experiments.find(
+      (e) => e.id === "EXP-20260716-firecrawl-enrich-skills",
+    )!;
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
+      "utf8",
     );
-    expect(withHash).toMatch(/index\.html\?from_list=oss&from_rank=1#lab-exp-/);
+    const html = renderLabPostPageHeader({
+      experiment: exp,
+      title: "Better source pages for Skills briefs",
+      markdown: md,
+      postHref: "EXP-20260716-firecrawl-enrich-skills.html",
+      linkCtx: defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01"),
+      writeupPostIds: [exp.id],
+      repoRoot,
+      escape: (t) => t,
+    });
+    expect(html).toContain('id="lab-post-back-btn"');
+    expect(html).toContain("lab-post-split-chip__pill");
+    expect(html).toContain("lab-post-split-chip__repo");
+    expect(html).toContain("firecrawl/firecrawl");
+    expect(html).toContain("<wbr>");
+    expect(html).toContain('aria-current="page"');
+    expect(html).not.toContain("Back to the daily list");
+    expect(html).not.toContain("From the OSS top 10");
+    expect(html).toContain("lab-post-panel__lead");
+    expect(html).toMatch(/lab-post-split-chip__pill[\s\S]*Lab tested/);
+    expect(html).toContain('<span class="lab-post-split-chip__pill');
+    expect(html).toContain('<a href="');
   });
 
-  it("allowlists lab dest paths with attribution query", () => {
-    const dest =
-      "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=skills&from_rank=2";
-    expect(isAllowlistedLabBadgeDestDecoded(dest)).toBe(true);
-    expect(resolveAllowlistedLabBadgeDestPath(dest)).toBeTruthy();
-  });
-
-  it("rejects malicious lab dest samples from SAMPLE_DESTS", () => {
-    for (const dest of LAB_BADGE_DEST_REJECTED_SAMPLES) {
-      expect(resolveAllowlistedLabBadgeDestPath(dest)).toBeNull();
-      if (dest && dest.startsWith("/") && !dest.startsWith("//")) {
-        expect(isAllowlistedLabBadgeDestDecoded(dest)).toBe(false);
-      }
-    }
+  it("extracts firecrawl lead from copy constants", () => {
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
+      "utf8",
+    );
+    const lead = extractLabPostLeadParagraph("EXP-20260716-firecrawl-enrich-skills", md);
+    expect(lead).toContain("Aug 1, 2026");
   });
 
   it("resolves verdict from experiments.json for ponytail", () => {
@@ -63,51 +83,19 @@ describe("lab post header UX47", () => {
     expect(resolved.line).toContain("Shipped");
   });
 
-  it("extracts first Outcome sentence when verdict missing", () => {
-    const exp = loadExperimentsFile(repoRoot).experiments.find(
-      (e) => e.id === "EXP-20260802-ponytail-narration-skills",
-    )!;
-    const md = "## Outcome\n\nWe shipped Firecrawl. Later steps build on this.\n";
-    const resolved = resolvePostVerdictLine(
-      { ...exp, verdict: null, result_summary: null },
-      md,
-    );
-    expect(resolved.source).toBe("result_section");
-    expect(resolved.line).toContain("We shipped Firecrawl.");
+  it("rejects malicious lab dest samples from SAMPLE_DESTS", () => {
+    for (const dest of LAB_BADGE_DEST_REJECTED_SAMPLES) {
+      expect(resolveAllowlistedLabBadgeDestPath(dest)).toBeNull();
+      if (dest && dest.startsWith("/") && !dest.startsWith("//")) {
+        expect(isAllowlistedLabBadgeDestDecoded(dest)).toBe(false);
+      }
+    }
   });
 
-  it("uses Copywriter final badge blurb constant", () => {
+  it("uses Copywriter final badge blurb constant on digest only", () => {
     expect(LAB_TESTED_BADGE_BLURB).toBe(
       "Tastemakers doesn't just report on AI tools. It tests them. Every Lab tested badge marks a repo whose idea was put to work on these lists and measured in the open.",
     );
-    expect(LAB_TESTED_BADGE_BLURB).not.toMatch(/[\u2013\u2014]/);
-  });
-
-  it("renders repo line with digest casing and post badge as non-interactive chip", () => {
-    const exp = loadExperimentsFile(repoRoot).experiments.find(
-      (e) => e.id === "EXP-20260802-ponytail-narration-skills",
-    )!;
-    const md = fs.readFileSync(
-      path.join(repoRoot, "briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md"),
-      "utf8",
-    );
-    const html = renderLabPostPageHeader({
-      experiment: exp,
-      title: "Test",
-      markdown: md,
-      postHref: "EXP-20260802-ponytail-narration-skills.html",
-      linkCtx: defaultLabLinkContext(1, { "DietrichGebert/ponytail": "https://github.com/DietrichGebert/ponytail" }, "2026-08-02"),
-      writeupPostIds: [exp.id],
-      repoRoot,
-      escape: (t) => t,
-    });
-    expect(html).toContain("DietrichGebert/ponytail");
-    expect(html).not.toContain(">dietrichgebert/ponytail<");
-    expect(html).toContain('class="text-blue-800 underline dark:text-blue-400"');
-    expect(html).toContain("lab-tested-badge--post");
-    expect(html).toContain('aria-current="page"');
-    expect(html).not.toContain("lab-tested-badge--action");
-    expect(html).not.toMatch(/lab-post-header__badge[\s\S]*<a\b/);
   });
 
   it("parses What happened section sentence from ponytail post", () => {

@@ -30,7 +30,6 @@ import {
   defaultLabLinkContext,
   ensureLabLinkSections,
   prepareLabPostArticleHtml,
-  renderLabPostBackLink,
   labLinkClickScript,
   type LabLinkContext,
   type LabLinkSection,
@@ -60,6 +59,7 @@ import {
 } from "./lab/lab-tested-badge.js";
 import { loadExperimentsFile } from "./lab/validate-experiments.js";
 import {
+  renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
   stripLeadingH1FromArticleHtml,
 } from "./lab/lab-post-header.js";
@@ -792,6 +792,7 @@ export function pageShell(
     wideIndex?: boolean;
     seo?: PageSeoOptions;
     labFallbackSection?: LabLinkSection;
+    labPostShell?: boolean;
     metaRefresh?: string;
   },
 ): string {
@@ -814,8 +815,9 @@ export function pageShell(
         )
       : "";
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
+  const labPostShell = options?.labPostShell === true;
   const shellClass = labLayout
-    ? "mx-auto max-w-2xl border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12"
+    ? `mx-auto max-w-2xl border-stone-200 px-5 py-8 text-stone-900 dark:border-stone-700 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12${labPostShell ? " lab-post-shell bg-stone-100 dark:bg-[#0c0a09]" : " bg-[#fffcf8] dark:bg-stone-900"}`
     : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12`;
   const labFallback = options?.labFallbackSection ?? "about";
   const labBody = labLayout ? ensureLabLinkSections(body, labFallback) : body;
@@ -1974,10 +1976,10 @@ export async function buildLabSite(
       postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Write-ups appear here after we finish an experiment or try a tool from the digest.</p>`;
     } else {
       const listings: string[] = [];
+      const postLinkCtx = defaultLabLinkContext(1, allowlist, asOfIsoDate);
       for (const file of postFiles) {
         const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
         let html = prepareLabWriteupHtmlFromMarkdown(markdown);
-        const postLinkCtx = defaultLabLinkContext(1, allowlist, asOfIsoDate);
         html = prepareLabPostArticleHtml(html, postLinkCtx);
         html = stripLeadingH1FromArticleHtml(html);
         const slug = file.replace(/\.md$/, "");
@@ -1998,7 +2000,7 @@ export async function buildLabSite(
               escape: escapeHtml,
             })
           : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
-        const postBody = `${labNavHtml("posts", escapeHtml, 1)}${renderLabPostBackLink(escapeHtml)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
+        const postBody = `${labNavHtml("posts", escapeHtml, 1)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
           pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, {
@@ -2006,9 +2008,22 @@ export async function buildLabSite(
             labNavActive: "posts",
             labNavDepth: 1,
             labFallbackSection: "posts",
+            labPostShell: true,
           }),
         );
       }
+      const fixtureHeader = renderLabPostLongNameFixtureHeader(postLinkCtx, repoRoot, escapeHtml);
+      const fixtureBody = `${labNavHtml("posts", escapeHtml, 1)}${fixtureHeader}<article class="${LAB_PROSE_ARTICLE_CLASS}"><p>Long repo name header fixture for verify screenshots.</p></article>`;
+      await fs.writeFile(
+        path.join(labSiteDir, "posts", "_fixture-e1-long-repo.html"),
+        pageShell("Long repo header fixture · Lab", fixtureBody, labSitePaths(1), brand, undefined, escapeHtml, {
+          ...labShell,
+          labNavActive: "posts",
+          labNavDepth: 1,
+          labFallbackSection: "posts",
+          labPostShell: true,
+        }),
+      );
       postsBody += `<ul class="font-sans text-sm leading-relaxed">${listings.join("")}</ul>`;
     }
   } catch {

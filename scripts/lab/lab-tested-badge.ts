@@ -136,6 +136,8 @@ export function findBadgedExperimentDestinationViolations(
 
 const FLASK_SVG = `<svg class="lab-tested-badge__icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true"><path d="M9 3h6v7l4 9a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2l4-9V3z"/><path d="M9 3h6"/><path d="M7 14h10"/></svg>`;
 
+const FLASK_SVG_E1 = `<svg class="lab-tested-badge__icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 3h6M10 3v6L4.5 19a1.5 1.5 0 0 0 1.3 2h12.4a1.5 1.5 0 0 0 1.3-2L14 9V3"/><path d="M7 15h10"/></svg>`;
+
 /** Temporary gate fixture: Running badge beside Done Ponytail. */
 export const LAB_BADGE_RUNNING_FIXTURE_REPO = "PlaceholderOrg/humanizer-polish-skills";
 export const LAB_BADGE_RUNNING_FIXTURE_EXP_ID = "EXP-20260913-humanizer-polish-skills";
@@ -168,6 +170,17 @@ export function renderLabTestedBadgePostHeaderChipHtml(
   const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
   const aria = escape(badgeAriaLabel(badge.status, badge.title));
   return `<span class="lab-tested-badge lab-tested-badge--action lab-tested-badge--post ${mod}" role="status" aria-label="${aria}" aria-current="page" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></span>`;
+}
+
+/** Left half of design E1 split chip (non-interactive, aria-current=page). */
+export function renderLabTestedBadgeSplitChipPillHtml(
+  badge: LabBadgeInfo,
+  escape: (t: string) => string,
+): string {
+  const label = badgeVisibleLabel(badge.status);
+  const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
+  const aria = escape(badgeAriaLabel(badge.status, badge.title));
+  return `<span class="lab-post-split-chip__pill lab-tested-badge lab-tested-badge--action lab-tested-badge--post ${mod}" role="status" aria-label="${aria}" aria-current="page" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG_E1}<span class="lab-tested-badge__text">${escape(label)}</span></span>`;
 }
 
 export function labBadgeEmailFlaskSrc(siteUrl: string): string {
