@@ -486,6 +486,111 @@ export function findLabProseInlineSpacingViolations(html: string): string[] {
   return violations;
 }
 
+export const LAB_POST_FIRST_PERSON_WORD_RE = /\b(we|our|us)\b/gi;
+
+const LAB_POST_EXCLUDED_INLINE_RE =
+  /<(blockquote|q|code|pre)\b[^>]*>[\s\S]*?<\/\1>/gi;
+
+/** Remove third-party repo names/descriptions marked for the first-person gate. */
+export function stripLabThirdPartyHtml(html: string): string {
+  let s = html;
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(
+      /<([a-z][a-z0-9]*)\b[^>]*\bdata-third-party(?:=[^>\s]+)?[^>]*>[\s\S]*?<\/\1>/gi,
+      " ",
+    );
+  }
+  return s;
+}
+
+/** Remove HTML comments and reader-excluded elements before first-person scan. */
+export function stripLabPostHtmlForFirstPersonScan(html: string): string {
+  let s = html.replace(/<!--[\s\S]*?-->/g, " ");
+  s = s.replace(/<script[\s\S]*?<\/script>/gi, " ");
+  s = s.replace(/<style[\s\S]*?<\/style>/gi, " ");
+  s = stripLabThirdPartyHtml(s);
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(LAB_POST_EXCLUDED_INLINE_RE, " ");
+  }
+  return s;
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&");
+}
+
+function labShellTaglinePlain(html: string): string {
+  const m = html.match(
+    /<header class="mb-8[\s\S]*?<p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">([\s\S]*?)<\/p>/i,
+  );
+  if (!m?.[1]) return "";
+  return decodeHtmlEntities(m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+}
+
+function labMainVisiblePlain(html: string): string {
+  const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] ?? html;
+  const withoutNav = main.replace(/<nav[\s\S]*?<\/nav>/gi, " ");
+  const stripped = stripLabPostHtmlForFirstPersonScan(withoutNav);
+  let blockAware = stripped.replace(/<\/(?:p|h[1-6]|li|td|th|figcaption|dt|dd)>/gi, ". ");
+  blockAware = blockAware.replace(/<(?:br|hr)\s*\/?>/gi, ". ");
+  const noTags = blockAware.replace(/<[^>]+>/g, " ");
+  return decodeHtmlEntities(noTags).replace(/\s+/g, " ").trim();
+}
+
+/** Visible plain text from Lab layout tagline plus `<main>` after first-person exclusions. */
+export function labPostVisiblePlainText(html: string): string {
+  const tagline = labShellTaglinePlain(html);
+  const mainText = labMainVisiblePlain(html);
+  return [tagline, mainText].filter(Boolean).join(" ").trim();
+}
+
+function splitPlainIntoSentences(text: string): string[] {
+  const parts = text.split(/(?<=[.!?])\s+/);
+  const out: string[] = [];
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (trimmed) out.push(trimmed);
+  }
+  return out;
+}
+
+/** Skip “US” when it heads a region name (example: US East). */
+export function isUsGeographicProperNoun(text: string, matchIndex: number): boolean {
+  if (text.slice(matchIndex, matchIndex + 2) !== "US") return false;
+  const after = text.slice(matchIndex + 2);
+  return /^\s+(?:East|West|Central)\b/.test(after);
+}
+
+function sentenceContainsFirstPerson(sentence: string): boolean {
+  const re = new RegExp(LAB_POST_FIRST_PERSON_WORD_RE.source, LAB_POST_FIRST_PERSON_WORD_RE.flags);
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(sentence)) !== null) {
+    if (!isUsGeographicProperNoun(sentence, m.index)) return true;
+  }
+  return false;
+}
+
+/** Sentences in rendered Lab HTML that contain we / our / us (with exclusions). */
+export function findLabPostFirstPersonSentences(html: string): string[] {
+  const plain = labPostVisiblePlainText(html);
+  if (!plain) return [];
+  return splitPlainIntoSentences(plain)
+    .map((sentence) => sentence.replace(/\.{2,}/g, "."))
+    .filter((sentence) => sentenceContainsFirstPerson(sentence));
+}
+
 export function isoTitleAttr(iso: string | null): string {
   return iso ?? "";
 }

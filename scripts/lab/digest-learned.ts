@@ -202,13 +202,13 @@ export function renderDigestLearnedSectionHtml(
       if (exp.sourceRepo?.trim()) {
         const tool = inventoryToolForSourceRepo(exp.sourceRepo, inventory);
         if (tool) {
-          toolPart = ` from ${renderLabTrackedLink(
+          toolPart = ` from <span data-third-party>${renderLabTrackedLink(
             tool.html_url,
             sanitizeVisibleCopy(exp.sourceRepo),
             ctx,
             { ...linkOpts, sourceRepo: tool.full_name },
             escapeHtml,
-          )}`;
+          )}</span>`;
         }
       }
       const summary = exp.result_summary?.trim()
@@ -237,13 +237,13 @@ export function renderDigestLearnedSectionHtml(
       if (exp.sourceRepo?.trim()) {
         const tool = inventoryToolForSourceRepo(exp.sourceRepo, inventory);
         if (tool) {
-          toolPart = ` inspired by ${renderLabTrackedLink(
+          toolPart = ` inspired by <span data-third-party>${renderLabTrackedLink(
             tool.html_url,
             sanitizeVisibleCopy(exp.sourceRepo),
             ctx,
             { ...linkOpts, sourceRepo: tool.full_name },
             escapeHtml,
-          )}`;
+          )}</span>`;
         }
       }
       parts.push(`<li ${renderClaimAttrs(claim, escapeHtml)}>${expLink}${toolPart}.</li>`);

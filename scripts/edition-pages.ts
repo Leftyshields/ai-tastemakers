@@ -750,7 +750,7 @@ export function labMethodologyFooterHref(paths: SitePaths): string {
 }
 
 export function renderLabExperimentsHowLink(escapeHtml: (t: string) => string): string {
-  return `<p class="lab-experiments-how mt-2 text-sm text-stone-600 dark:text-stone-400"><a href="methodology.html" class="underline decoration-stone-400 hover:text-blue-800 dark:text-stone-400 dark:decoration-stone-500 dark:hover:text-blue-400" data-lab-section="about">${escapeHtml("How we run experiments")}</a></p>`;
+  return `<p class="lab-experiments-how mt-2 text-sm text-stone-600 dark:text-stone-400"><a href="methodology.html" class="underline decoration-stone-400 hover:text-blue-800 dark:text-stone-400 dark:decoration-stone-500 dark:hover:text-blue-400" data-lab-section="about">${escapeHtml("How experiments work")}</a></p>`;
 }
 
 /** @deprecated Use labHomeFooterHref */
@@ -1823,7 +1823,7 @@ export async function buildLabSite(
   const brand = {
     name: "Tastemakers Lab",
     tagline:
-      "Public notes on how we pick repos, test pipeline changes, and measure what readers engage with.",
+      "Public notes on how repos get picked, how pipeline changes get tested, and what readers actually engage with.",
   };
 
   const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };
@@ -1895,8 +1895,8 @@ export async function buildLabSite(
   const experimentsBody = `
     ${labNavHtml("experiments", escapeHtml)}
     <header class="lab-lede">
-      <h2>What we're testing</h2>
-      <p>We change one thing at a time in how daily briefs are written, how the homepage is laid out, or which repos show up in the list, then we say whether we kept it. This page is the public record, not a live split test dashboard.</p>
+      <h2>Testing right now</h2>
+      <p>Each experiment changes one thing at a time: how daily briefs are written, how the homepage is laid out, or which repos make the list. Every post says whether the change stayed. This page is the public record, not a live split test dashboard.</p>
       <p><strong>Before</strong> is the site as it was. <strong>After</strong> is the site with the change turned on. Pages rebuild once a day, so these are calendar windows, not random assignment tests.</p>
     </header>
     <div id="experiments-root" class="font-sans text-sm">
