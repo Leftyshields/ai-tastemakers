@@ -56,4 +56,5 @@ jobs:
       - name: Deploy Pages only (never digest workflows)
         env:
           GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
         run: gh workflow run pages.yml --ref main
