@@ -1,5 +1,5 @@
 ---
-lead: "A tighter star limit should keep giant, already famous projects from crowding the Skills list when there's too little history to rank fairly."
+lead: "Queued, not started, and planned for Dec 20, 2026 to Jan 16, 2027. A tighter star limit should keep giant, already famous projects from crowding the Skills list when there's too little history to rank fairly, and the exact limit is still to be set."
 ---
 
 # Smarter early ranking

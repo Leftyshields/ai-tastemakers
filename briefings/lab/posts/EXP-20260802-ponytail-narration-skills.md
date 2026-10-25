@@ -1,5 +1,5 @@
 ---
-lead: "Two simple writing rules made Skills briefs shorter and cheaper, and better at explaining why each project matters now."
+lead: "Kept Aug 29, 2026. Two simple writing rules made Skills briefs about 18% shorter, kept them passing every quality check, and made them better at explaining why each project matters now."
 ---
 
 # Shorter Skills briefs

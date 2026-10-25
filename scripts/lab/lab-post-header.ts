@@ -303,6 +303,7 @@ export function extractLabPostLeadParagraph(
   const { frontMatter, body } = splitLabWriteupFrontMatter(markdown);
   const fmLead = frontMatter.lead?.trim();
   if (fmLead) {
+    // Copywriter panel leads include date/status; do not strip status prefix (intro fallback only).
     return finalizeLabPostPanelLead(fmLead);
   }
   const override = LAB_POST_LEAD[experimentId]?.trim();

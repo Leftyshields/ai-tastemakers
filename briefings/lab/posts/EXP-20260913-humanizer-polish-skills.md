@@ -1,5 +1,5 @@
 ---
-lead: "A final polish step now strips machine-sounding phrasing from every brief, and the scores for timeliness and specificity both went up."
+lead: "Kept Oct 24, 2026. A final polish step now strips machine-sounding phrasing from both daily lists, and briefs passed all 13 quality checks while why now rose from 3.7 to 5.0 and specificity from 4.5 to 5.0."
 ---
 
 # Less AI-sounding briefs

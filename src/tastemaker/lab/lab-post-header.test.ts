@@ -213,7 +213,7 @@ describe("lab post header E1", () => {
     expect(html).toContain('class="lab-post-panel__lead"');
     const lead = extractLabPostLeadParagraph(exp.id, md);
     expect(lead).toBe(loadLabWriteupLeadsCatalog(repoRoot)[exp.id]);
-    expect(lead).not.toBe("Queued, not started.");
+    expect(lead).toMatch(/^Queued, not started, and planned for Dec 20, 2026 to Jan 16, 2027\./);
   });
 
   it("panel lead never shows queue rank or backlog labels", () => {

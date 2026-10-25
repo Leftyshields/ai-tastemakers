@@ -1,5 +1,5 @@
 ---
-lead: "Trimming the background notes the writer reads should cut cost without losing a single fact."
+lead: "Queued, not started, and planned for Oct 25 to Nov 21, 2026. Trimming the background notes the writer reads should cut cost without losing a single fact."
 ---
 
 # Shorter background notes

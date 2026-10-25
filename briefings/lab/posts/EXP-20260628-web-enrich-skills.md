@@ -1,5 +1,5 @@
 ---
-lead: "Skills briefs now draw on each project's web pages and Hacker News mentions, which made them more timely without costing accuracy."
+lead: "Closed Jul 18, 2026, and kept. Skills briefs now draw on each project's web pages and Hacker News mentions, which made them more timely without costing accuracy, though traffic was too thin to show a click lift."
 ---
 
 # Richer Skills briefs
