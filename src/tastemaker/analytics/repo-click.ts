@@ -1,4 +1,18 @@
 import type { EditionId } from "../editions.js";
+import {
+  isValidLabBadgeAttributionSearch,
+  parseLabBadgeFromListParam,
+  parseLabBadgeFromRankParam,
+} from "./lab-badge-attribution.js";
+
+export {
+  LAB_BADGE_FROM_RANK_PARAM_RE,
+  parseLabBadgeFromListParam,
+  parseLabBadgeFromRankParam,
+  parseLabBadgeAttributionSearch,
+  isValidLabBadgeAttributionSearch,
+  labBadgeAttributionClientParserSource,
+} from "./lab-badge-attribution.js";
 
 export type RepoClickChannel = "pages" | "email";
 export type RepoClickTarget = "title" | "button" | "url" | "card";
@@ -97,26 +111,22 @@ export const LAB_BADGE_DEST_INDEX_PATH_RE =
   /^\/(?:[A-Za-z0-9._-]+\/)?lab\/index\.html$/i;
 export const LAB_BADGE_DEST_INDEX_HASH_RE = /^#lab-exp-EXP-[0-9]{8}-[a-z0-9-]+$/i;
 
-export function parseLabBadgeFromListParam(raw: string | null | undefined): EditionId | null {
-  if (raw == null) return null;
-  const v = raw.trim().toLowerCase();
-  if (v === "oss" || v === "skills") return v;
-  return null;
-}
-
-export function parseLabBadgeFromRankParam(raw: string | null | undefined): number | null {
-  if (raw == null) return null;
-  const n = Number.parseInt(String(raw).trim(), 10);
-  if (!Number.isFinite(n) || n < 1 || n > 10) return null;
-  return n;
-}
-
 function splitLabBadgeDestPath(path: string): {
   pathPart: string;
   hash: string;
   search: string;
 } | null {
-  if (!path.startsWith("/") || path.includes("://") || path.includes("..")) return null;
+  if (
+    !path.startsWith("/") ||
+    path.startsWith("//") ||
+    path.includes("://") ||
+    path.includes("..") ||
+    path.includes("\\")
+  ) {
+    return null;
+  }
+  const lower = path.toLowerCase();
+  if (lower.startsWith("javascript:") || lower.startsWith("data:")) return null;
   const hashIdx = path.indexOf("#");
   const beforeHash = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
   const hash = hashIdx >= 0 ? path.slice(hashIdx) : "";
@@ -127,21 +137,7 @@ function splitLabBadgeDestPath(path: string): {
 }
 
 function labBadgeAttributionQueryValid(search: string): boolean {
-  if (!search) return true;
-  if (!search.startsWith("?")) return false;
-  const params = new URLSearchParams(search.slice(1));
-  const keys = [...params.keys()];
-  if (keys.length === 0) return true;
-  for (const key of keys) {
-    if (key !== "from_list" && key !== "from_rank") return false;
-  }
-  const list = params.has("from_list") ? parseLabBadgeFromListParam(params.get("from_list")) : null;
-  const rank = params.has("from_rank") ? parseLabBadgeFromRankParam(params.get("from_rank")) : null;
-  if (params.has("from_list") && !list) return false;
-  if (params.has("from_rank") && rank == null) return false;
-  if (list == null && rank == null && keys.length > 0) return false;
-  if ((list && rank == null) || (!list && rank != null)) return false;
-  return true;
+  return isValidLabBadgeAttributionSearch(search);
 }
 
 /** Shared allowlist check on a decoded absolute site path (optional ?attribution and #hash). */

@@ -8,6 +8,7 @@ import {
   firstResultSectionSentence,
   resolvePostVerdictLine,
 } from "../../../scripts/lab/lab-post-header.js";
+import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
 import {
   isAllowlistedLabBadgeDestDecoded,
   resolveAllowlistedLabBadgeDestPath,
@@ -38,11 +39,15 @@ describe("lab post header UX47", () => {
       "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=skills&from_rank=2";
     expect(isAllowlistedLabBadgeDestDecoded(dest)).toBe(true);
     expect(resolveAllowlistedLabBadgeDestPath(dest)).toBeTruthy();
-    expect(
-      isAllowlistedLabBadgeDestDecoded(
-        "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=evil&from_rank=2",
-      ),
-    ).toBe(false);
+  });
+
+  it("rejects malicious lab dest samples from SAMPLE_DESTS", () => {
+    for (const dest of LAB_BADGE_DEST_REJECTED_SAMPLES) {
+      expect(resolveAllowlistedLabBadgeDestPath(dest)).toBeNull();
+      if (dest && dest.startsWith("/") && !dest.startsWith("//")) {
+        expect(isAllowlistedLabBadgeDestDecoded(dest)).toBe(false);
+      }
+    }
   });
 
   it("resolves verdict from experiments.json for ponytail", () => {

@@ -1,5 +1,6 @@
 import {
   digestDateFromCompact,
+  labBadgeAttributionClientParserSource,
   labBadgeDestGoInlineRegexSources,
   parseGoRedirectQuery,
   resolveAllowlistedGithubUrl,
@@ -28,6 +29,7 @@ export function renderGoRedirectPage(
   const safePostPathRe = escapeScriptString(labDestRe.postPath);
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
+  const attributionParser = labBadgeAttributionClientParserSource();
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -118,36 +120,17 @@ export function renderGoRedirectPage(
   var LAB_DEST_INDEX_PATH_RE = new RegExp('${safeIndexPathRe}', 'i');
   var LAB_DEST_INDEX_HASH_RE = new RegExp('${safeIndexHashRe}', 'i');
 
-  function parseFromList(raw) {
-    if (!raw) return null;
-    var v = String(raw).trim().toLowerCase();
-    return v === "oss" || v === "skills" ? v : null;
-  }
-  function parseFromRank(raw) {
-    if (raw == null) return null;
-    var n = parseInt(String(raw).trim(), 10);
-    return Number.isFinite(n) && n >= 1 && n <= 10 ? n : null;
-  }
+  ${attributionParser}
   function attributionQueryOk(search) {
     if (!search) return true;
-    if (!search.startsWith("?")) return false;
-    var params = new URLSearchParams(search.slice(1));
-    var keys = Array.from(params.keys());
-    for (var i = 0; i < keys.length; i++) {
-      if (keys[i] !== "from_list" && keys[i] !== "from_rank") return false;
-    }
-    var list = params.has("from_list") ? parseFromList(params.get("from_list")) : null;
-    var rank = params.has("from_rank") ? parseFromRank(params.get("from_rank")) : null;
-    if (params.has("from_list") && !list) return false;
-    if (params.has("from_rank") && rank == null) return false;
-    if (list && rank == null) return false;
-    if (!list && rank != null) return false;
-    return true;
+    return parseLabBadgeAttribution(search) !== null;
   }
   function isAllowlistedLabDest(raw) {
     if (!raw) return null;
     try { raw = decodeURIComponent(String(raw).trim()); } catch (e) { return null; }
-    if (!raw.startsWith("/") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0) return null;
+    var rawLower = String(raw).toLowerCase();
+    if (!raw.startsWith("/") || raw.startsWith("//") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0 || raw.indexOf("\\\\") >= 0) return null;
+    if (rawLower.indexOf("javascript:") === 0 || rawLower.indexOf("data:") === 0) return null;
     var hashIdx = raw.indexOf("#");
     var beforeHash = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
     var hash = hashIdx >= 0 ? raw.slice(hashIdx) : "";

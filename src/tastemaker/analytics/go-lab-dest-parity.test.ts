@@ -2,6 +2,11 @@ import { describe, it, expect } from "vitest";
 import { renderGoRedirectPage } from "../../../scripts/digest-go-page.js";
 import { escapeScriptString } from "../../../scripts/edition-pages.js";
 import {
+  LAB_BADGE_DEST_ALLOWED_SAMPLES,
+  LAB_BADGE_DEST_REJECTED_SAMPLES,
+  SAMPLE_DESTS,
+} from "./lab-badge-dest-samples.js";
+import {
   isAllowlistedLabBadgeDestDecoded,
   labBadgeDestGoInlineRegexSources,
   resolveAllowlistedLabBadgeDestPath,
@@ -20,24 +25,26 @@ function clientAllowlistedLabDestEncoded(raw: string | null | undefined): string
   return encodeURIComponent(path);
 }
 
-const SAMPLE_DESTS = [
-  "/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
-  "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
-  "/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=skills&from_rank=2",
-  "/ai-tastemakers/lab/index.html?from_list=oss&from_rank=1#lab-exp-EXP-20260913-humanizer-polish-skills",
-  "/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills",
-  "/ai-tastemakers/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills",
-  "/lab/posts/EXP-20260716-firecrawl-enrich-skills.html?from_list=bad&from_rank=2",
-  "https://evil.com/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
-  "/lab/posts/not-an-exp-id.html",
-  "/lab/index.html#evil",
-  "",
-];
-
 describe("/go lab badge dest allowlist parity", () => {
-  it("resolveAllowlistedLabBadgeDestPath matches client validator", () => {
-    for (const sample of SAMPLE_DESTS) {
+  it("SAMPLE_DESTS includes allowed and rejected cases", () => {
+    expect(SAMPLE_DESTS.length).toBe(
+      LAB_BADGE_DEST_ALLOWED_SAMPLES.length + LAB_BADGE_DEST_REJECTED_SAMPLES.length,
+    );
+  });
+
+  it("resolveAllowlistedLabBadgeDestPath matches client validator for allowed dests", () => {
+    for (const sample of LAB_BADGE_DEST_ALLOWED_SAMPLES) {
       expect(resolveAllowlistedLabBadgeDestPath(sample)).toBe(clientAllowlistedLabDestEncoded(sample));
+    }
+  });
+
+  it("rejects malicious SAMPLE_DESTS on server and client", () => {
+    for (const sample of LAB_BADGE_DEST_REJECTED_SAMPLES) {
+      expect(resolveAllowlistedLabBadgeDestPath(sample)).toBeNull();
+      expect(clientAllowlistedLabDestEncoded(sample)).toBeNull();
+      if (sample && sample.startsWith("/") && !sample.startsWith("//")) {
+        expect(isAllowlistedLabBadgeDestDecoded(sample)).toBe(false);
+      }
     }
   });
 
@@ -47,5 +54,6 @@ describe("/go lab badge dest allowlist parity", () => {
     expect(html).toContain(escapeScriptString(re.postPath));
     expect(html).toContain(escapeScriptString(re.indexPath));
     expect(html).toContain(escapeScriptString(re.indexHash));
+    expect(html).toContain("function parseLabBadgeAttribution(search)");
   });
 });

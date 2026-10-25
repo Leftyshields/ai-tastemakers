@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { EditionId } from "../../src/tastemaker/editions.js";
 import {
+  labBadgeAttributionClientParserSource,
   parseLabBadgeFromListParam,
   parseLabBadgeFromRankParam,
 } from "../../src/tastemaker/analytics/repo-click.js";
@@ -149,22 +150,37 @@ export function digestBriefHasLabBadges(
 }
 
 export function renderLabPostCameFromScript(): string {
+  const attributionParser = labBadgeAttributionClientParserSource();
   return `<script>
+${attributionParser}
 (function(){
   var el = document.getElementById("lab-post-came-from");
   if(!el) return;
-  var params = new URLSearchParams(window.location.search);
-  var list = params.get("from_list");
-  var rankRaw = params.get("from_rank");
-  if(list !== "oss" && list !== "skills") return;
-  var rank = parseInt(rankRaw || "", 10);
-  if(!Number.isFinite(rank) || rank < 1 || rank > 10) return;
+  var att = parseLabBadgeAttribution(window.location.search);
+  if(!att) return;
+  var list = att.list;
+  var rank = att.rank;
   var listLabel = list === "skills" ? ${JSON.stringify(LIST_LABEL.skills)} : ${JSON.stringify(LIST_LABEL.oss)};
   var listHref = list === "skills" ? ${JSON.stringify(LIST_INDEX_HREF.skills)} : ${JSON.stringify(LIST_INDEX_HREF.oss)};
   var prefix = ${JSON.stringify(LAB_POST_CAME_FROM_PREFIX)};
   var atNumber = ${JSON.stringify(LAB_POST_CAME_FROM_AT_NUMBER)};
   var backLabel = ${JSON.stringify(LAB_POST_BACK_TO_LIST_LABEL)};
-  el.innerHTML = prefix + " <a href=\\"" + listHref + "\\" class=\\"text-blue-800 underline dark:text-blue-400\\" data-lab-section=\\"posts\\">" + listLabel + "</a> " + atNumber + " " + rank + ". <a href=\\"" + listHref + "\\" class=\\"text-blue-800 underline dark:text-blue-400\\" data-lab-section=\\"posts\\">" + backLabel + "</a>";
+  var linkClass = "text-blue-800 underline dark:text-blue-400";
+  el.textContent = "";
+  el.appendChild(document.createTextNode(prefix + " "));
+  var listLink = document.createElement("a");
+  listLink.href = listHref;
+  listLink.className = linkClass;
+  listLink.setAttribute("data-lab-section", "posts");
+  listLink.textContent = listLabel;
+  el.appendChild(listLink);
+  el.appendChild(document.createTextNode(" " + atNumber + " " + String(rank) + ". "));
+  var backLink = document.createElement("a");
+  backLink.href = listHref;
+  backLink.className = linkClass;
+  backLink.setAttribute("data-lab-section", "posts");
+  backLink.textContent = backLabel;
+  el.appendChild(backLink);
   el.classList.remove("hidden");
 })();
 </script>`;
