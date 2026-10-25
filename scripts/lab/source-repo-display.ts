@@ -21,11 +21,7 @@ function inventoryToolForSourceRepo(
   inventory: ToolInventoryFile,
 ): ToolInventoryEntry | undefined {
   const needle = sourceRepo.trim().toLowerCase();
-  return inventory.entries.find((e) => {
-    const name = e.full_name.toLowerCase();
-    const short = e.full_name.split("/")[1]?.toLowerCase();
-    return name === needle || name.includes(needle) || short === needle.split("/")[1];
-  });
+  return inventory.entries.find((e) => e.full_name.toLowerCase() === needle);
 }
 
 /** Display owner/repo casing from tool inventory (same source as digest learned links). */
