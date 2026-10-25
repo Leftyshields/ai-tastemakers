@@ -35,6 +35,13 @@ describe("renderSafeMarkdown", () => {
     const html = renderSafeMarkdown("[prior](EXP-20260628-web-enrich-skills.html)");
     expect(html).toContain('href="EXP-20260628-web-enrich-skills.html"');
   });
+
+  it("keeps parent-relative briefing hrefs from lab posts", () => {
+    const html = renderSafeMarkdown(
+      "[Aug 17, 2026](../../skills/briefings/2026-08-17.html)",
+    );
+    expect(html).toContain('href="../../skills/briefings/2026-08-17.html"');
+  });
 });
 
 describe("sanitizeHtml", () => {

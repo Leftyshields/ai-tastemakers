@@ -66,7 +66,7 @@ function isSafeUrl(raw: string): boolean {
   if (!href) return false;
   if (/^(javascript|data|vbscript):/i.test(href)) return false;
   if (/^EXP-[0-9]{8}-[a-z0-9-]+\.html$/i.test(href)) return true;
-  return /^(https?:\/\/|mailto:|\/|#|\.\/)/i.test(href);
+  return /^(https?:\/\/|mailto:|\/|#|\.\.\/|\.\/)/i.test(href);
 }
 
 function isSafeStyle(raw: string): boolean {

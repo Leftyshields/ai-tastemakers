@@ -47,7 +47,10 @@ The traffic numbers stay humble. In the two weeks before the change, Skills page
 
 The Lab kept the change. It is still on for Skills.
 
-Sample lists from before the change: [Aug 30](../../skills/briefings/2026-08-30.html) · [Sep 1](../../skills/briefings/2026-09-01.html) · [Sep 12](../../skills/briefings/2026-09-12.html)
+### Compare two briefs
+
+- **Before:** [Aug 30, 2026](../../skills/briefings/2026-08-30.html)
+- **After:** [Sep 12, 2026](../../skills/briefings/2026-09-12.html)
 
 ## References
 

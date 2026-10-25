@@ -7,6 +7,7 @@ import { fileURLToPath } from "node:url";
 import {
   findLabPostBacktickViolations,
   findLabPostTableWrapViolations,
+  findLabPostUnrenderedMarkdownLinkViolations,
   findLabPostUnrenderedTableViolations,
 } from "./lab/lab-format.js";
 
@@ -40,6 +41,10 @@ function main(): void {
       console.error(`verify: lab post write-up failed (UX43): ${v}`);
     }
     for (const v of findLabPostUnrenderedTableViolations(html, rel)) {
+      failed = true;
+      console.error(`verify: lab post write-up failed (UX43): ${v}`);
+    }
+    for (const v of findLabPostUnrenderedMarkdownLinkViolations(html, rel)) {
       failed = true;
       console.error(`verify: lab post write-up failed (UX43): ${v}`);
     }
