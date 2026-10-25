@@ -159,7 +159,7 @@ export function renderLabTestedBadgePagesHtml(
   return `<a href="${escape(href)}" class="digest-repo-card__lab-badge lab-tested-badge lab-tested-badge--action ${mod}" aria-label="${aria}" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></a>`;
 }
 
-/** Non-interactive Lab tested chip on experiment write-up pages (digest badges stay links). */
+/** Non-interactive Lab tested chip on experiment write-up pages (ring matches digest list badge). */
 export function renderLabTestedBadgePostHeaderChipHtml(
   badge: LabBadgeInfo,
   escape: (t: string) => string,
@@ -167,7 +167,7 @@ export function renderLabTestedBadgePostHeaderChipHtml(
   const label = badgeVisibleLabel(badge.status);
   const mod = badge.status === "running" ? "lab-tested-badge--running" : "lab-tested-badge--done";
   const aria = escape(badgeAriaLabel(badge.status, badge.title));
-  return `<span class="lab-tested-badge lab-tested-badge--post ${mod}" role="status" aria-label="${aria}" aria-current="page" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></span>`;
+  return `<span class="lab-tested-badge lab-tested-badge--action lab-tested-badge--post ${mod}" role="status" aria-label="${aria}" aria-current="page" data-lab-badge-exp="${escape(badge.id)}" data-lab-badge-status="${badge.status}" data-lab-badge-source-repo="${escape(badge.repoKey)}">${FLASK_SVG}<span class="lab-tested-badge__text">${escape(label)}</span></span>`;
 }
 
 export function labBadgeEmailFlaskSrc(siteUrl: string): string {
