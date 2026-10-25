@@ -13,19 +13,20 @@ function mountAndClick(search: string, ossHref: string, skillsHref: string): str
   eval(code);
   let navigated: string | undefined;
   const base = `https://example.com/lab/posts/x.html${search}`;
-  Object.defineProperty(window, "location", {
+  const loc = {
+    search,
+    assign(v: string) {
+      navigated = v;
+    },
+  };
+  Object.defineProperty(loc, "href", {
     configurable: true,
-    value: {
-      href: base,
-      search,
-      assign(v: string) {
-        navigated = v;
-      },
-      set href(v: string) {
-        navigated = v;
-      },
+    get: () => base,
+    set(v: string) {
+      navigated = v;
     },
   });
+  Object.defineProperty(window, "location", { configurable: true, value: loc });
   Object.defineProperty(window.history, "length", { configurable: true, value: 1 });
   document.getElementById("lab-post-back-btn")!.click();
   return navigated;
