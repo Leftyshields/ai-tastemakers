@@ -10,6 +10,8 @@ import {
   firstResultSectionSentence,
   labPostPanelLeadIsForbidden,
   labPostShowsLabTestedBadge,
+  labPostHeaderChipRepoKey,
+  labPostHeaderUsesRepoFallback,
   labPostSplitChipShowsLabTestedPill,
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
@@ -155,18 +157,20 @@ describe("lab post header E1", () => {
     const plannedHtml = render(caveman);
     expect(labPostShowsLabTestedBadge(caveman)).toBe(false);
     expect(labPostSplitChipShowsLabTestedPill(caveman)).toBe(true);
+    expect(labPostHeaderUsesRepoFallback(caveman)).toBe(false);
     expect(plannedHtml).toContain("digest-lab-badge-blurb");
     expect(plannedHtml).toContain("lab-post-split-chip__pill");
     expect(plannedHtml).toContain("lab-post-split-chip__repo");
     expect(plannedHtml).toContain("juliusbrussee/caveman");
   });
 
-  it("omits badge blurb on done posts with no sourceRepo (web enrich)", () => {
+  it("uses header-only ai-tastemakers repo fallback when sourceRepo is unset (web enrich)", () => {
     const exp = loadExperimentsFile(repoRoot).experiments.find(
       (e) => e.id === "EXP-20260628-web-enrich-skills",
     )!;
-    expect(exp.status).toBe("done");
     expect(exp.sourceRepo?.trim()).toBeFalsy();
+    expect(labPostHeaderUsesRepoFallback(exp)).toBe(true);
+    expect(labPostHeaderChipRepoKey(exp)).toBe("leftyshields/ai-tastemakers");
     const md = fs.readFileSync(
       path.join(repoRoot, "briefings/lab/posts/EXP-20260628-web-enrich-skills.md"),
       "utf8",
@@ -181,39 +185,38 @@ describe("lab post header E1", () => {
       repoRoot,
       escape: (t) => t,
     });
-    expect(labPostShowsLabTestedBadge(exp)).toBe(true);
-    expect(html).not.toContain("digest-lab-badge-blurb");
-    expect(html).not.toContain("lab-post-split-chip__pill");
+    expect(html).toContain('class="lab-post-split-chip"');
+    expect(html).toContain("lab-post-split-chip__pill");
+    expect(html).toContain("Leftyshields/ai-tastemakers");
+    expect(html).toContain("https://github.com/Leftyshields/ai-tastemakers");
+    expect(html).toContain("digest-lab-badge-blurb");
   });
 
-  it("omits split chip when experiment has no sourceRepo (rank bootstrap)", () => {
-    const exp = loadExperimentsFile(repoRoot).experiments.find(
-      (e) => e.id === "EXP-20260913-rank-bootstrap-skills",
-    )!;
-    expect(exp.sourceRepo?.trim()).toBeFalsy();
-    const md = fs.readFileSync(
-      path.join(repoRoot, "briefings/lab/posts/EXP-20260913-rank-bootstrap-skills.md"),
-      "utf8",
-    );
-    const html = renderLabPostPageHeader({
-      experiment: exp,
-      title: "Smarter early ranking",
-      markdown: md,
-      postHref: `${exp.id}.html`,
-      linkCtx: defaultLabLinkContext(1, {}, "2026-08-01"),
-      writeupPostIds: [exp.id],
-      repoRoot,
-      escape: (t) => t,
-    });
-    expect(html).toContain('id="lab-post-back-btn"');
-    expect(html).toContain("lab-post-panel__title");
-    expect(html).not.toContain('class="lab-post-split-chip"');
-    expect(html).not.toContain('class="lab-post-header__vdiv"');
-    expect(html).not.toContain("digest-lab-badge-blurb");
-    expect(html).toContain('class="lab-post-panel__lead"');
-    const lead = extractLabPostLeadParagraph(exp.id, md);
-    expect(lead).toBe(loadLabWriteupLeadsCatalog(repoRoot)[exp.id]);
-    expect(lead).toMatch(/^Queued, not started, and planned for Dec 20, 2026 to Jan 16, 2027\./);
+  it("all eight EXP write-ups render the E1 split chip", () => {
+    const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
+    const expIds = listLabWriteupPostIds(repoRoot).filter((id) => id.startsWith("EXP-"));
+    expect(expIds).toHaveLength(8);
+    for (const id of expIds) {
+      const exp = loadExperimentsFile(repoRoot).experiments.find((e) => e.id === id);
+      expect(exp, id).toBeTruthy();
+      const md = fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
+      const titleMatch = md.match(/^#\s+(.+)$/m);
+      const title = titleMatch?.[1]?.trim() ?? exp!.label;
+      const html = renderLabPostPageHeader({
+        experiment: exp!,
+        title,
+        markdown: md,
+        postHref: `${id}.html`,
+        linkCtx,
+        writeupPostIds: expIds,
+        repoRoot,
+        escape: (t) => t,
+      });
+      expect(html, id).toContain('class="lab-post-split-chip"');
+      expect(html, id).toContain("lab-post-split-chip__pill");
+      expect(html, id).toContain("lab-post-split-chip__repo");
+      expect(html, id).toContain("digest-lab-badge-blurb");
+    }
   });
 
   it("panel lead never shows queue rank or backlog labels", () => {

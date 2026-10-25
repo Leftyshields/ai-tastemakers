@@ -27,6 +27,9 @@ import { labLinkDataAttrs, resolveLabToolHref } from "./lab-analytics.js";
 import {
   LAB_POST_BACK_BUTTON_LABEL,
   LAB_POST_LEAD,
+  LAB_POST_HEADER_FALLBACK_DISPLAY,
+  LAB_POST_HEADER_FALLBACK_GITHUB_URL,
+  LAB_POST_HEADER_FALLBACK_SOURCE_REPO,
   LAB_POST_LONG_REPO_FIXTURE_ID,
   LAB_POST_LONG_REPO_FIXTURE_SOURCE,
 } from "./lab-post-header-copy.js";
@@ -195,9 +198,17 @@ export function labPostShowsLabTestedBadge(exp: LabExperimentEntry): boolean {
   return exp.status === "done" || exp.status === "running";
 }
 
-/** E1 post header split chip: Lab tested pill whenever sourceRepo is set. */
-export function labPostSplitChipShowsLabTestedPill(exp: LabExperimentEntry): boolean {
-  return Boolean(exp.sourceRepo?.trim());
+/** E1 post header split chip: Lab tested pill on every experiment write-up header. */
+export function labPostSplitChipShowsLabTestedPill(_exp: LabExperimentEntry): boolean {
+  return true;
+}
+
+export function labPostHeaderChipRepoKey(exp: LabExperimentEntry): string {
+  return exp.sourceRepo?.trim() || LAB_POST_HEADER_FALLBACK_SOURCE_REPO;
+}
+
+export function labPostHeaderUsesRepoFallback(exp: LabExperimentEntry): boolean {
+  return !exp.sourceRepo?.trim();
 }
 
 export function digestBriefHasLabBadges(
@@ -413,40 +424,39 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   parts.push(`<header class="lab-post-header mb-6 font-sans">`);
   parts.push(`<section class="lab-post-panel">`);
 
-  const repoKey = exp.sourceRepo?.trim();
+  const registryRepoKey = exp.sourceRepo?.trim();
+  const chipRepoKey = labPostHeaderChipRepoKey(exp);
   const showsChipPill = labPostSplitChipShowsLabTestedPill(exp);
   parts.push(`<div class="lab-post-header__hdr">`);
   parts.push(
     `<button type="button" id="lab-post-back-btn" class="lab-post-back-btn" data-lab-section="posts" data-lab-nav="back">${BACK_ARROW_SVG}<span class="lab-post-back-btn__text">${escape(LAB_POST_BACK_BUTTON_LABEL)}</span></button>`,
   );
 
-  if (repoKey) {
-    parts.push(`<span class="lab-post-header__vdiv" aria-hidden="true"></span>`);
-    const { displayFullName, githubUrl } = resolveSourceRepoGithubLink(repoKey, repoRoot);
-    const lookup = buildLabBadgeLookup([exp]);
-    const badge =
-      labBadgeForRepo(lookup, repoKey) ??
-      ({
-        id: exp.id,
-        title: exp.label.trim(),
-        status: exp.status === "running" ? "running" : "done",
-        repoKey,
-      } as LabBadgeInfo);
-    badge.repoKey = repoKey;
-    parts.push(`<div class="lab-post-split-chip">`);
-    if (showsChipPill) {
-      badge.status = exp.status === "running" ? "running" : "done";
-      parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
-    }
-    parts.push(
-      renderLabPostSplitRepoLinkHtml(githubUrl, displayFullName, linkCtx, {
-        section: "posts",
-        experimentId: exp.id,
-        sourceRepo: repoKey,
-      }, escape),
-    );
-    parts.push(`</div>`);
+  parts.push(`<span class="lab-post-header__vdiv" aria-hidden="true"></span>`);
+  const { displayFullName, githubUrl } = labPostHeaderUsesRepoFallback(exp)
+    ? {
+        displayFullName: LAB_POST_HEADER_FALLBACK_DISPLAY,
+        githubUrl: LAB_POST_HEADER_FALLBACK_GITHUB_URL,
+      }
+    : resolveSourceRepoGithubLink(registryRepoKey!, repoRoot);
+  const badge: LabBadgeInfo = {
+    id: exp.id,
+    title: exp.label.trim(),
+    status: exp.status === "running" ? "running" : "done",
+    repoKey: chipRepoKey,
+  };
+  parts.push(`<div class="lab-post-split-chip">`);
+  if (showsChipPill) {
+    parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
   }
+  parts.push(
+    renderLabPostSplitRepoLinkHtml(githubUrl, displayFullName, linkCtx, {
+      section: "posts",
+      experimentId: exp.id,
+      sourceRepo: chipRepoKey,
+    }, escape),
+  );
+  parts.push(`</div>`);
 
   parts.push(`</div>`);
   parts.push(
@@ -456,7 +466,7 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   if (lead) {
     parts.push(`<p class="lab-post-panel__lead">${escape(lead)}</p>`);
   }
-  if (repoKey && showsChipPill) {
+  if (showsChipPill) {
     parts.push(renderDigestLabBadgeBlurbHtml(escape));
   }
   parts.push(`</section>`);
