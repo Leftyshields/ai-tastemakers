@@ -27,7 +27,7 @@ import { renderLabTrackedLink } from "./lab-analytics.js";
 
 /** Shared with digest pages: opening sentence on experiment detail posts. */
 export const LAB_TESTED_BADGE_BLURB =
-  "When a repo card says Lab tested, it means we tried an idea from that repo in Tastemakers Lab.";
+  "When a repo card says Lab tested, Tastemakers Lab borrowed an idea from that repo and tested it on the daily lists.";
 
 export const LAB_POST_CAME_FROM_PREFIX = "You came here from the";
 export const LAB_POST_CAME_FROM_AT_NUMBER = "at number";
@@ -90,7 +90,7 @@ export function firstResultSectionSentence(markdown: string): string | null {
   let inSection = false;
   for (const raw of lines) {
     const line = raw.trim();
-    if (/^##\s+(Result|Outcome)\s*$/.test(line)) {
+    if (/^##\s+(Result|Outcome|What happened)\s*$/.test(line)) {
       inSection = true;
       continue;
     }

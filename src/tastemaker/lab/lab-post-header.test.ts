@@ -78,7 +78,7 @@ describe("lab post header UX47", () => {
 
   it("uses Copywriter final badge blurb constant", () => {
     expect(LAB_TESTED_BADGE_BLURB).toBe(
-      "When a repo card says Lab tested, it means we tried an idea from that repo in Tastemakers Lab.",
+      "When a repo card says Lab tested, Tastemakers Lab borrowed an idea from that repo and tested it on the daily lists.",
     );
     expect(LAB_TESTED_BADGE_BLURB).not.toMatch(/[\u2013\u2014]/);
   });
@@ -110,13 +110,13 @@ describe("lab post header UX47", () => {
     expect(html).not.toMatch(/lab-post-header__badge[\s\S]*<a\b/);
   });
 
-  it("parses Outcome section sentence from ponytail post", () => {
+  it("parses What happened section sentence from ponytail post", () => {
     const md = fs.readFileSync(
       path.join(repoRoot, "briefings/lab/posts/EXP-20260802-ponytail-narration-skills.md"),
       "utf8",
     );
     const sentence = firstResultSectionSentence(md);
     expect(sentence).toBeTruthy();
-    expect(sentence!.toLowerCase()).toMatch(/kept|ship/);
+    expect(sentence!.toLowerCase()).toMatch(/before|2005|output/);
   });
 });
