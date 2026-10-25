@@ -106,16 +106,58 @@
     min-height: 2rem;
   }
 
-  .lab-main .prose table {
-    @apply my-4 block w-full overflow-x-auto text-sm;
+  .lab-main .lab-post-table-wrap {
+    @apply my-4 w-full max-w-full overflow-x-auto;
+    -webkit-overflow-scrolling: touch;
   }
 
-  .lab-main .prose thead th {
-    @apply whitespace-nowrap px-3 py-2 align-bottom;
+  .lab-main .lab-post-table {
+    @apply w-full min-w-0 border-collapse text-sm;
+    table-layout: fixed;
   }
 
-  .lab-main .prose tbody td {
+  .lab-main .lab-post-table th,
+  .lab-main .lab-post-table td {
     @apply px-3 py-2 align-top;
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  .lab-main .lab-post-table thead th {
+    @apply align-bottom font-semibold;
+  }
+
+  .lab-main .lab-post-table .lab-post-code {
+    overflow-wrap: anywhere;
+    word-break: break-word;
+  }
+
+  @media (max-width: 480px) {
+    .lab-main .lab-post-table thead {
+      display: none;
+    }
+
+    .lab-main .lab-post-table tbody tr {
+      @apply mb-3 block rounded-lg border border-stone-200 p-3 dark:border-stone-700;
+    }
+
+    .lab-main .lab-post-table tbody td {
+      @apply block border-none px-0 py-1;
+    }
+
+    .lab-main .lab-post-table tbody td::before {
+      content: attr(data-label);
+      @apply mb-0.5 block text-xs font-semibold uppercase tracking-wide text-stone-500 dark:text-stone-400;
+    }
+  }
+
+  .lab-main .lab-history-table tr.lab-data-row:target {
+    @apply outline outline-2 outline-offset-2 outline-blue-700 dark:outline-blue-400;
+    background-color: rgb(239 246 255);
+  }
+
+  .dark .lab-main .lab-history-table tr.lab-data-row:target {
+    background-color: rgb(30 58 138 / 0.35);
   }
 
   @media (min-width: 768px) {

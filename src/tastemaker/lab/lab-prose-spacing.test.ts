@@ -66,6 +66,18 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(findLabProseBacktickViolations(wrapped)).toEqual([]);
   });
 
+  it("UX43 write-up tables wrap and env vars render as code without backticks", () => {
+    const md = `| Flag | Meaning |
+| --- | --- |
+| Web | \`DIGEST_ENRICH_WEB=1\` default |`;
+    const html = prepareLabProseHtmlFromMarkdown(md);
+    expect(html).toContain("lab-post-table-wrap");
+    expect(html).toContain("<code");
+    expect(html).toContain("DIGEST_ENRICH_WEB=1");
+    expect(html).not.toContain("`");
+    expect(html).toContain('data-label="Flag"');
+  });
+
   it("UX46 normalizes write up dates and about approximations", () => {
     const md = "_**Kept (2026-08-29).** Cut ~18% with hook on 2026-08-17._";
     const out = normalizeLabWriteupMarkdown(md);

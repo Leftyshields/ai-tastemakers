@@ -23,6 +23,11 @@ function main(): void {
     console.error("verify: no site/lab HTML (run npm run build:pages with POSTHOG_KEY set first)");
     process.exit(1);
   }
+  if (!process.env.POSTHOG_KEY?.trim()) {
+    console.log(
+      "verify: UX42 note — rebuild uses POSTHOG_KEY from verify:genesis; without a real key, checks markup and lab_link_click wiring only (no live PostHog delivery).",
+    );
+  }
   let failed = false;
   for (const abs of pages) {
     const rel = path.relative(repoRoot, abs);

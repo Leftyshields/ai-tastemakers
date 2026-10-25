@@ -46,7 +46,7 @@ function repoFromGithubHref(href: string): string | null {
 }
 
 export function renderLabPostBackLink(escapeHtml: (t: string) => string): string {
-  return `<p class="mb-4 font-sans text-sm"><a href="../index.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="posts">${escapeHtml("Back to Lab")}</a></p>`;
+  return `<p class="mb-4 font-sans text-sm"><a href="../index.html" class="lab-post-back-link inline-flex min-h-11 items-center py-2 text-blue-800 underline dark:text-blue-400" data-lab-section="posts">${escapeHtml("Back to Lab")}</a></p>`;
 }
 
 /** Lab write up article: track links and route allowlisted GitHub URLs through /go. */
