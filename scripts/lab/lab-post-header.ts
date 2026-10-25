@@ -190,9 +190,14 @@ export function labPostPanelLeadIsForbidden(text: string): boolean {
   return false;
 }
 
-/** Lab tested pill in the E1 split chip (done or running experiments only). */
+/** Lab tested pill on digest cards (done or running experiments only). */
 export function labPostShowsLabTestedBadge(exp: LabExperimentEntry): boolean {
   return exp.status === "done" || exp.status === "running";
+}
+
+/** E1 post header split chip: Lab tested pill whenever sourceRepo is set. */
+export function labPostSplitChipShowsLabTestedPill(exp: LabExperimentEntry): boolean {
+  return Boolean(exp.sourceRepo?.trim());
 }
 
 export function digestBriefHasLabBadges(
@@ -408,7 +413,7 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   parts.push(`<section class="lab-post-panel">`);
 
   const repoKey = exp.sourceRepo?.trim();
-  const showsBadge = labPostShowsLabTestedBadge(exp);
+  const showsChipPill = labPostSplitChipShowsLabTestedPill(exp);
   parts.push(`<div class="lab-post-header__hdr">`);
   parts.push(
     `<button type="button" id="lab-post-back-btn" class="lab-post-back-btn" data-lab-section="posts" data-lab-nav="back">${BACK_ARROW_SVG}<span class="lab-post-back-btn__text">${escape(LAB_POST_BACK_BUTTON_LABEL)}</span></button>`,
@@ -428,7 +433,7 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
       } as LabBadgeInfo);
     badge.repoKey = repoKey;
     parts.push(`<div class="lab-post-split-chip">`);
-    if (showsBadge) {
+    if (showsChipPill) {
       badge.status = exp.status === "running" ? "running" : "done";
       parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
     }
@@ -450,7 +455,7 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   if (lead) {
     parts.push(`<p class="lab-post-panel__lead">${escape(lead)}</p>`);
   }
-  if (repoKey && showsBadge) {
+  if (repoKey && showsChipPill) {
     parts.push(renderDigestLabBadgeBlurbHtml(escape));
   }
   parts.push(`</section>`);

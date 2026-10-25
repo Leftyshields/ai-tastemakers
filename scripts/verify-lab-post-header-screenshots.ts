@@ -6,19 +6,14 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
+import { listLabWriteupPostIds } from "./lab/lab-format.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const artifactDir = "/opt/cursor/artifacts/screenshots";
 
-const FIRECRAWL_POST = path.join(
-  repoRoot,
-  "site/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
-);
+const FIRECRAWL_ID = "EXP-20260716-firecrawl-enrich-skills";
+const FIRECRAWL_POST = path.join(repoRoot, "site/lab/posts", `${FIRECRAWL_ID}.html`);
 const LONG_FIXTURE = path.join(repoRoot, "site/lab/posts/_fixture-e1-long-repo.html");
-const RANK_BOOTSTRAP_POST = path.join(
-  repoRoot,
-  "site/lab/posts/EXP-20260913-rank-bootstrap-skills.html",
-);
 
 async function shotViewport(
   absPath: string,
@@ -58,7 +53,11 @@ function viewportForWidth(width: number): { height: number; deviceScaleFactor: n
 
 async function main(): Promise<void> {
   fs.mkdirSync(artifactDir, { recursive: true });
-  const allPaths = [FIRECRAWL_POST, LONG_FIXTURE, RANK_BOOTSTRAP_POST];
+
+  const expIds = listLabWriteupPostIds(repoRoot).filter((id) => id.startsWith("EXP-"));
+  const expPosts = expIds.map((id) => path.join(repoRoot, "site/lab/posts", `${id}.html`));
+
+  const allPaths = [...expPosts, LONG_FIXTURE];
   for (const p of allPaths) {
     if (!fs.existsSync(p)) {
       console.error(`missing ${p} (run npm run build:pages first)`);
@@ -66,17 +65,25 @@ async function main(): Promise<void> {
     }
   }
 
-  const shots: Array<[string, string, number]> = [
-    ["firecrawl-post-390-light.png", FIRECRAWL_POST, 390],
-    ["firecrawl-post-390-dark.png", FIRECRAWL_POST, 390],
-    ["firecrawl-post-desktop-light.png", FIRECRAWL_POST, 1280],
-    ["firecrawl-post-desktop-dark.png", FIRECRAWL_POST, 1280],
-    ["long-repo-post-390-light.png", LONG_FIXTURE, 390],
-    ["long-repo-post-390-dark.png", LONG_FIXTURE, 390],
-    ["long-repo-post-desktop-light.png", LONG_FIXTURE, 1280],
-    ["long-repo-post-desktop-dark.png", LONG_FIXTURE, 1280],
-    ["rank-bootstrap-post-390-dark.png", RANK_BOOTSTRAP_POST, 390],
-  ];
+  const shots: Array<[string, string, number, "light" | "dark"]> = [];
+
+  for (const id of expIds) {
+    const abs = path.join(repoRoot, "site/lab/posts", `${id}.html`);
+    shots.push([`${id}-390-dark.png`, abs, 390, "dark"]);
+  }
+  shots.push([`${FIRECRAWL_ID}-desktop-light.png`, FIRECRAWL_POST, 1280, "light"]);
+
+  // Genesis UX47 regression set (Firecrawl + long-repo fixture).
+  shots.push(
+    ["firecrawl-post-390-light.png", FIRECRAWL_POST, 390, "light"],
+    ["firecrawl-post-390-dark.png", FIRECRAWL_POST, 390, "dark"],
+    ["firecrawl-post-desktop-light.png", FIRECRAWL_POST, 1280, "light"],
+    ["firecrawl-post-desktop-dark.png", FIRECRAWL_POST, 1280, "dark"],
+    ["long-repo-post-390-light.png", LONG_FIXTURE, 390, "light"],
+    ["long-repo-post-390-dark.png", LONG_FIXTURE, 390, "dark"],
+    ["long-repo-post-desktop-light.png", LONG_FIXTURE, 1280, "light"],
+    ["long-repo-post-desktop-dark.png", LONG_FIXTURE, 1280, "dark"],
+  );
 
   const filter = new Set(process.argv.slice(2));
   const selected =
@@ -86,8 +93,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
 
-  for (const [name, abs, width] of selected) {
-    const scheme = name.includes("dark") ? "dark" : "light";
+  for (const [name, abs, width, scheme] of selected) {
     const { height, deviceScaleFactor } = viewportForWidth(width);
     await shotViewport(abs, name, { width, height, scheme, deviceScaleFactor });
     console.log(path.join(artifactDir, name));

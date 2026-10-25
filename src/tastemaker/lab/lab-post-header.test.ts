@@ -10,6 +10,7 @@ import {
   firstResultSectionSentence,
   labPostPanelLeadIsForbidden,
   labPostShowsLabTestedBadge,
+  labPostSplitChipShowsLabTestedPill,
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
   resolvePostVerdictLine,
@@ -124,7 +125,7 @@ describe("lab post header E1", () => {
     );
   });
 
-  it("shows badge blurb only when the Lab tested pill renders (firecrawl yes, planned caveman no)", () => {
+  it("shows split chip pill and badge blurb when sourceRepo is set (firecrawl and planned caveman)", () => {
     const linkCtx = defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01");
     const firecrawl = loadExperimentsFile(repoRoot).experiments.find(
       (e) => e.id === "EXP-20260716-firecrawl-enrich-skills",
@@ -153,9 +154,11 @@ describe("lab post header E1", () => {
 
     const plannedHtml = render(caveman);
     expect(labPostShowsLabTestedBadge(caveman)).toBe(false);
-    expect(plannedHtml).not.toContain("digest-lab-badge-blurb");
-    expect(plannedHtml).not.toContain("lab-post-split-chip__pill");
+    expect(labPostSplitChipShowsLabTestedPill(caveman)).toBe(true);
+    expect(plannedHtml).toContain("digest-lab-badge-blurb");
+    expect(plannedHtml).toContain("lab-post-split-chip__pill");
     expect(plannedHtml).toContain("lab-post-split-chip__repo");
+    expect(plannedHtml).toContain("juliusbrussee/caveman");
   });
 
   it("omits badge blurb on done posts with no sourceRepo (web enrich)", () => {
