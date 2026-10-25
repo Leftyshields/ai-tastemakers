@@ -69,8 +69,10 @@ describe("lab post header UX47", () => {
     expect(resolved.line).toContain("We shipped Firecrawl.");
   });
 
-  it("uses shared badge blurb constant", () => {
-    expect(LAB_TESTED_BADGE_BLURB.length).toBeGreaterThan(20);
+  it("uses Copywriter final badge blurb constant", () => {
+    expect(LAB_TESTED_BADGE_BLURB).toBe(
+      "When a repo card says Lab tested, it means we tried an idea from that repo in Tastemakers Lab.",
+    );
     expect(LAB_TESTED_BADGE_BLURB).not.toMatch(/[\u2013\u2014]/);
   });
 

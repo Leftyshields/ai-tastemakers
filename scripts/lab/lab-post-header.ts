@@ -25,10 +25,10 @@ import { renderLabTrackedLink } from "./lab-analytics.js";
 
 /** Shared with digest pages: opening sentence on experiment detail posts. */
 export const LAB_TESTED_BADGE_BLURB =
-  "When you see Lab tested on a repo card, we tried a change inspired by that repo in Tastemakers Lab.";
+  "When a repo card says Lab tested, it means we tried an idea from that repo in Tastemakers Lab.";
 
-export const LAB_POST_CAME_FROM_PREFIX = "You opened this from the";
-export const LAB_POST_CAME_FROM_SUFFIX = "at rank";
+export const LAB_POST_CAME_FROM_PREFIX = "You came here from the";
+export const LAB_POST_CAME_FROM_AT_NUMBER = "at number";
 export const LAB_POST_BACK_TO_LIST_LABEL = "Back to the daily list";
 
 const LIST_LABEL: Record<EditionId, string> = {
@@ -162,9 +162,9 @@ export function renderLabPostCameFromScript(): string {
   var listLabel = list === "skills" ? ${JSON.stringify(LIST_LABEL.skills)} : ${JSON.stringify(LIST_LABEL.oss)};
   var listHref = list === "skills" ? ${JSON.stringify(LIST_INDEX_HREF.skills)} : ${JSON.stringify(LIST_INDEX_HREF.oss)};
   var prefix = ${JSON.stringify(LAB_POST_CAME_FROM_PREFIX)};
-  var suffix = ${JSON.stringify(LAB_POST_CAME_FROM_SUFFIX)};
+  var atNumber = ${JSON.stringify(LAB_POST_CAME_FROM_AT_NUMBER)};
   var backLabel = ${JSON.stringify(LAB_POST_BACK_TO_LIST_LABEL)};
-  el.innerHTML = prefix + " <a href=\\"" + listHref + "\\" class=\\"text-blue-800 underline dark:text-blue-400\\" data-lab-section=\\"posts\\">" + listLabel + "</a> " + suffix + " " + rank + ". <a href=\\"" + listHref + "\\" class=\\"text-blue-800 underline dark:text-blue-400\\" data-lab-section=\\"posts\\">" + backLabel + "</a>";
+  el.innerHTML = prefix + " <a href=\\"" + listHref + "\\" class=\\"text-blue-800 underline dark:text-blue-400\\" data-lab-section=\\"posts\\">" + listLabel + "</a> " + atNumber + " " + rank + ". <a href=\\"" + listHref + "\\" class=\\"text-blue-800 underline dark:text-blue-400\\" data-lab-section=\\"posts\\">" + backLabel + "</a>";
   el.classList.remove("hidden");
 })();
 </script>`;

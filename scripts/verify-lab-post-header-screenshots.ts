@@ -1,63 +1,81 @@
 /**
- * UX47: Playwright screenshots for Ponytail and Firecrawl post headers (390px + desktop, light/dark, with/without from_list params).
+ * UX47 / PR 53: Playwright screenshots for Ponytail post and digest badge.
  * Writes PNGs under /opt/cursor/artifacts/screenshots (not committed).
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { chromium, type Page } from "playwright";
+import { chromium } from "playwright";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const artifactDir = "/opt/cursor/artifacts/screenshots";
 
-const POSTS = [
-  "EXP-20260802-ponytail-narration-skills.html",
-  "EXP-20260716-firecrawl-enrich-skills.html",
-] as const;
+const PONYTAIL_POST = path.join(
+  repoRoot,
+  "site/lab/posts/EXP-20260802-ponytail-narration-skills.html",
+);
+const PONYTAIL_DIGEST = path.join(repoRoot, "site/skills/briefings/2026-08-22.html");
 
-type Variant = { suffix: string; search: string };
-
-const VARIANTS: Variant[] = [
-  { suffix: "plain", search: "" },
-  { suffix: "from-skills-rank-3", search: "?from_list=skills&from_rank=3" },
-];
-
-async function screenshotPage(page: Page, absPath: string, name: string): Promise<void> {
-  await page.goto(`file://${absPath}`, { waitUntil: "networkidle" });
-  await page.screenshot({ path: path.join(artifactDir, name), fullPage: false });
+async function shot(
+  absPath: string,
+  filename: string,
+  opts: {
+    width: number;
+    scheme: "light" | "dark";
+    search?: string;
+    clipSelector?: string;
+  },
+): Promise<void> {
+  const browser = await chromium.launch();
+  const page = await browser.newPage({
+    viewport: { width: opts.width, height: 900 },
+    colorScheme: opts.scheme,
+  });
+  await page.goto(`file://${absPath}${opts.search ?? ""}`, { waitUntil: "networkidle" });
+  if (opts.clipSelector) {
+    const el = page.locator(opts.clipSelector).first();
+    await el.scrollIntoViewIfNeeded();
+    await el.screenshot({ path: path.join(artifactDir, filename) });
+  } else {
+    await page.screenshot({ path: path.join(artifactDir, filename), fullPage: false });
+  }
+  await browser.close();
 }
 
 async function main(): Promise<void> {
   fs.mkdirSync(artifactDir, { recursive: true });
-  for (const post of POSTS) {
-    const abs = path.join(repoRoot, "site/lab/posts", post);
-    if (!fs.existsSync(abs)) {
-      console.error(`missing ${abs} (run npm run build:pages first)`);
+  for (const p of [PONYTAIL_POST, PONYTAIL_DIGEST]) {
+    if (!fs.existsSync(p)) {
+      console.error(`missing ${p} (run npm run build:pages first)`);
       process.exit(1);
     }
   }
 
-  const browser = await chromium.launch();
-  for (const post of POSTS) {
-    const slug = post.replace(/\.html$/, "");
-    const abs = path.join(repoRoot, "site/lab/posts", post);
-    for (const variant of VARIANTS) {
-      for (const width of [390, 1280] as const) {
-        for (const scheme of ["light", "dark"] as const) {
-          const page = await browser.newPage({
-            viewport: { width, height: scheme === "dark" ? 900 : 844 },
-            colorScheme: scheme,
-          });
-          const url = `file://${abs}${variant.search}`;
-          await page.goto(url, { waitUntil: "networkidle" });
-          const name = `lab-post-header-${slug}-${variant.suffix}-${width}-${scheme}.png`;
-          await page.screenshot({ path: path.join(artifactDir, name), fullPage: false });
-          await page.close();
-        }
-      }
-    }
-  }
-  await browser.close();
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-light.png", { width: 390, scheme: "light" });
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-dark.png", { width: 390, scheme: "dark" });
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-desktop-light.png", { width: 1280, scheme: "light" });
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-desktop-dark.png", { width: 1280, scheme: "dark" });
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-from-skills-rank-1.png", {
+    width: 390,
+    scheme: "light",
+    search: "?from_list=skills&from_rank=1",
+  });
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-bad-params.png", {
+    width: 390,
+    scheme: "light",
+    search: "?from_list=evil&from_rank=99",
+  });
+  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-no-params.png", {
+    width: 390,
+    scheme: "light",
+    search: "",
+  });
+  await shot(PONYTAIL_DIGEST, "pr53-digest-ponytail-badge-390.png", {
+    width: 390,
+    scheme: "light",
+    clipSelector: 'article.digest-repo-card[data-repo="DietrichGebert/ponytail"]',
+  });
+
   console.log(`verify: lab post header screenshots ok (${artifactDir})`);
 }
 
