@@ -27,9 +27,11 @@ import { labLinkDataAttrs, resolveLabToolHref } from "./lab-analytics.js";
 import {
   LAB_POST_BACK_BUTTON_LABEL,
   LAB_POST_LEAD,
+  LAB_POST_EXPERIMENT_PLAN_LINK_LABEL,
   LAB_POST_HEADER_FALLBACK_DISPLAY,
   LAB_POST_HEADER_FALLBACK_GITHUB_URL,
   LAB_POST_HEADER_FALLBACK_SOURCE_REPO,
+  LAB_POST_PLANNED_CHIP_EXPLAINER,
   LAB_POST_LONG_REPO_FIXTURE_ID,
   LAB_POST_LONG_REPO_FIXTURE_SOURCE,
 } from "./lab-post-header-copy.js";
@@ -198,9 +200,22 @@ export function labPostShowsLabTestedBadge(exp: LabExperimentEntry): boolean {
   return exp.status === "done" || exp.status === "running";
 }
 
-/** E1 post header split chip: Lab tested pill on every experiment write-up header. */
-export function labPostSplitChipShowsLabTestedPill(_exp: LabExperimentEntry): boolean {
-  return true;
+export type LabPostHeaderChipMode = "planned" | "run_no_source" | "run_with_source";
+
+export function labPostHeaderChipMode(exp: LabExperimentEntry): LabPostHeaderChipMode {
+  if (exp.status === "planned") return "planned";
+  if (exp.sourceRepo?.trim()) return "run_with_source";
+  return "run_no_source";
+}
+
+/** Lab tested pill (done-style) on run-with-source write-ups only. */
+export function labPostSplitChipShowsLabTestedPill(exp: LabExperimentEntry): boolean {
+  return labPostHeaderChipMode(exp) === "run_with_source";
+}
+
+/** In the Lab pill on planned write-ups. */
+export function labPostSplitChipShowsInTheLabPill(exp: LabExperimentEntry): boolean {
+  return labPostHeaderChipMode(exp) === "planned";
 }
 
 export function labPostHeaderChipRepoKey(exp: LabExperimentEntry): string {
@@ -208,7 +223,16 @@ export function labPostHeaderChipRepoKey(exp: LabExperimentEntry): string {
 }
 
 export function labPostHeaderUsesRepoFallback(exp: LabExperimentEntry): boolean {
-  return !exp.sourceRepo?.trim();
+  return labPostHeaderChipMode(exp) === "run_no_source";
+}
+
+export function labExperimentPlanAnchorId(experimentId: string): string {
+  return `lab-exp-${experimentId}`;
+}
+
+/** Relative to `lab/posts/` → experiments dashboard plan anchor. */
+export function labPostExperimentPlanHref(experimentId: string): string {
+  return `../experiments.html#${labExperimentPlanAnchorId(experimentId)}`;
 }
 
 export function digestBriefHasLabBadges(
@@ -330,6 +354,41 @@ export function extractLabPostLeadParagraph(
   return null;
 }
 
+export function renderDigestLabPlannedChipExplainerHtml(escape: (t: string) => string): string {
+  const text = LAB_POST_PLANNED_CHIP_EXPLAINER.trim();
+  if (!text) return "";
+  return `<p class="lab-post-panel__planned-explainer mt-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">${escape(
+    text,
+  )}</p>`;
+}
+
+function renderLabPostSplitPlanLinkHtml(
+  href: string,
+  label: string,
+  linkCtx: LabLinkContext,
+  opts: LabLinkTrackOptions,
+  escape: (t: string) => string,
+): string {
+  const resolved = resolveLabToolHref(href, linkCtx);
+  return `<a href="${escape(resolved)}" class="lab-post-split-chip__repo lab-post-split-chip__plan" ${labLinkDataAttrs(opts)}>${escape(label)}</a>`;
+}
+
+function renderLabPostPlainRepoLinkHtml(
+  githubUrl: string,
+  displayFullName: string,
+  linkCtx: LabLinkContext,
+  opts: LabLinkTrackOptions,
+  escape: (t: string) => string,
+): string {
+  const resolved = resolveLabToolHref(githubUrl, linkCtx);
+  const slash = displayFullName.indexOf("/");
+  const inner =
+    slash >= 0
+      ? `<span class="lab-post-split-chip__owner-line"><span class="lab-post-split-chip__owner">${escape(displayFullName.slice(0, slash))}</span>/</span><wbr><span class="lab-post-split-chip__name">${escape(displayFullName.slice(slash + 1))}</span>`
+      : escape(displayFullName);
+  return `<a href="${escape(resolved)}" class="lab-post-header__repo-link" ${labLinkDataAttrs(opts)}>${inner}</a>`;
+}
+
 function renderLabPostSplitRepoLinkHtml(
   githubUrl: string,
   displayFullName: string,
@@ -386,7 +445,7 @@ ${attributionParser}
   }
   var hdr = document.querySelector(".lab-post-header__hdr");
   var btnEl = document.getElementById("lab-post-back-btn");
-  var chip = document.querySelector(".lab-post-split-chip");
+  var chip = document.querySelector(".lab-post-split-chip") || document.querySelector(".lab-post-header__repo-link");
   if(hdr && btnEl && chip){
     function syncWrap(){
       var wrapped = chip.offsetTop > btnEl.offsetTop + 2;
@@ -424,39 +483,63 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   parts.push(`<header class="lab-post-header mb-6 font-sans">`);
   parts.push(`<section class="lab-post-panel">`);
 
+  const chipMode = labPostHeaderChipMode(exp);
   const registryRepoKey = exp.sourceRepo?.trim();
   const chipRepoKey = labPostHeaderChipRepoKey(exp);
-  const showsChipPill = labPostSplitChipShowsLabTestedPill(exp);
+  const trackOpts =
+    chipMode === "planned"
+      ? { section: "posts" as const, experimentId: exp.id }
+      : {
+          section: "posts" as const,
+          experimentId: exp.id,
+          sourceRepo: chipRepoKey,
+        };
   parts.push(`<div class="lab-post-header__hdr">`);
   parts.push(
     `<button type="button" id="lab-post-back-btn" class="lab-post-back-btn" data-lab-section="posts" data-lab-nav="back">${BACK_ARROW_SVG}<span class="lab-post-back-btn__text">${escape(LAB_POST_BACK_BUTTON_LABEL)}</span></button>`,
   );
 
   parts.push(`<span class="lab-post-header__vdiv" aria-hidden="true"></span>`);
-  const { displayFullName, githubUrl } = labPostHeaderUsesRepoFallback(exp)
-    ? {
-        displayFullName: LAB_POST_HEADER_FALLBACK_DISPLAY,
-        githubUrl: LAB_POST_HEADER_FALLBACK_GITHUB_URL,
-      }
-    : resolveSourceRepoGithubLink(registryRepoKey!, repoRoot);
-  const badge: LabBadgeInfo = {
-    id: exp.id,
-    title: exp.label.trim(),
-    status: exp.status === "running" ? "running" : "done",
-    repoKey: chipRepoKey,
-  };
-  parts.push(`<div class="lab-post-split-chip">`);
-  if (showsChipPill) {
-    parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
+
+  if (chipMode === "run_no_source") {
+    parts.push(
+      renderLabPostPlainRepoLinkHtml(
+        LAB_POST_HEADER_FALLBACK_GITHUB_URL,
+        LAB_POST_HEADER_FALLBACK_DISPLAY,
+        linkCtx,
+        trackOpts,
+        escape,
+      ),
+    );
+  } else {
+    const badge: LabBadgeInfo = {
+      id: exp.id,
+      title: exp.label.trim(),
+      status: chipMode === "planned" ? "running" : exp.status === "running" ? "running" : "done",
+      repoKey: chipMode === "planned" ? exp.id : chipRepoKey,
+    };
+    parts.push(`<div class="lab-post-split-chip">`);
+    if (labPostSplitChipShowsInTheLabPill(exp) || labPostSplitChipShowsLabTestedPill(exp)) {
+      parts.push(renderLabTestedBadgeSplitChipPillHtml(badge, escape));
+    }
+    if (chipMode === "planned") {
+      parts.push(
+        renderLabPostSplitPlanLinkHtml(
+          labPostExperimentPlanHref(exp.id),
+          LAB_POST_EXPERIMENT_PLAN_LINK_LABEL,
+          linkCtx,
+          trackOpts,
+          escape,
+        ),
+      );
+    } else {
+      const { displayFullName, githubUrl } = resolveSourceRepoGithubLink(registryRepoKey!, repoRoot);
+      parts.push(
+        renderLabPostSplitRepoLinkHtml(githubUrl, displayFullName, linkCtx, trackOpts, escape),
+      );
+    }
+    parts.push(`</div>`);
   }
-  parts.push(
-    renderLabPostSplitRepoLinkHtml(githubUrl, displayFullName, linkCtx, {
-      section: "posts",
-      experimentId: exp.id,
-      sourceRepo: chipRepoKey,
-    }, escape),
-  );
-  parts.push(`</div>`);
 
   parts.push(`</div>`);
   parts.push(
@@ -466,8 +549,10 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   if (lead) {
     parts.push(`<p class="lab-post-panel__lead">${escape(lead)}</p>`);
   }
-  if (showsChipPill) {
+  if (labPostSplitChipShowsLabTestedPill(exp)) {
     parts.push(renderDigestLabBadgeBlurbHtml(escape));
+  } else if (labPostSplitChipShowsInTheLabPill(exp)) {
+    parts.push(renderDigestLabPlannedChipExplainerHtml(escape));
   }
   parts.push(`</section>`);
   parts.push(`</header>`, renderLabPostHeaderClientScripts(ossBackHref, skillsBackHref));
@@ -514,6 +599,7 @@ export const LAB_POST_HEADER_ORDER_MARKERS = [
   "lab-post-back-btn",
   "lab-post-header__vdiv",
   "lab-post-split-chip",
+  "lab-post-header__repo-link",
   "lab-post-split-chip__pill",
   "lab-post-split-chip__repo",
   "lab-post-panel__title",
@@ -532,6 +618,10 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
   const header = html.match(/<header class="lab-post-header[\s\S]*?<\/header>/i)?.[0] ?? "";
   const positions = LAB_POST_HEADER_ORDER_MARKERS.map((cls) => {
     if (cls === "lab-post-header") return header.indexOf('class="lab-post-header');
+    if (cls === "lab-post-split-chip") return header.indexOf('class="lab-post-split-chip"');
+    if (cls === "lab-post-header__repo-link") return header.indexOf('class="lab-post-header__repo-link"');
+    if (cls === "lab-post-split-chip__pill") return header.indexOf("lab-post-split-chip__pill");
+    if (cls === "lab-post-split-chip__repo") return header.indexOf("lab-post-split-chip__repo");
     return header.indexOf(cls);
   });
   if (positions[0]! < 0) {
@@ -543,6 +633,7 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
     const optional =
       cls === "lab-post-header__vdiv" ||
       cls === "lab-post-split-chip" ||
+      cls === "lab-post-header__repo-link" ||
       cls === "lab-post-split-chip__pill" ||
       cls === "lab-post-split-chip__repo" ||
       cls === "lab-post-panel__lead" ||
@@ -573,11 +664,13 @@ export function findLabPostHeaderOrderViolations(html: string, pageRel: string):
       return [`${pageRel}: header must not include forbidden copy ${needle}`];
     }
   }
-  const hasBadgePill = header.includes("lab-post-split-chip__pill");
+  const hasLabTestedPill =
+    header.includes("lab-post-split-chip__pill") &&
+    header.includes('data-lab-badge-status="done"');
   const hasBlurb = header.includes("digest-lab-badge-blurb");
-  if (hasBadgePill !== hasBlurb) {
+  if (hasLabTestedPill !== hasBlurb) {
     return [
-      `${pageRel}: Lab tested badge blurb must ${hasBadgePill ? "be present" : "be absent"} (pill=${hasBadgePill}, blurb=${hasBlurb})`,
+      `${pageRel}: Lab tested badge blurb must ${hasLabTestedPill ? "be present" : "be absent"} (labTestedPill=${hasLabTestedPill}, blurb=${hasBlurb})`,
     ];
   }
   if (!header.includes('id="lab-post-back-btn"')) {

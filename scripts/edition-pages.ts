@@ -1895,6 +1895,13 @@ export async function buildLabSite(
     }),
   );
 
+  await writeExperimentsData(repoRoot, labSiteDir);
+  const expDataRaw = await fs.readFile(path.join(labSiteDir, "experiments-data.json"), "utf8");
+  const expData = JSON.parse(expDataRaw) as { experiments?: Array<{ id: string }> };
+  const experimentPlanAnchorsHtml = (expData.experiments ?? [])
+    .map((e) => `<span id="lab-exp-${escapeHtml(e.id)}"></span>`)
+    .join("");
+
   const experimentsBody = `
     ${labNavHtml("experiments", escapeHtml)}
     <header class="lab-lede">
@@ -1911,10 +1918,9 @@ export async function buildLabSite(
         <button type="button" id="export-markdown">Download this write up</button>
       </div>
     </div>
+    <div hidden aria-hidden="true">${experimentPlanAnchorsHtml}</div>
     <noscript><p class="experiment-muted">Turn on JavaScript to browse the experiment cards. Records also live in the GitHub repo under <code>data/experiments/</code>.</p></noscript>
     <script src="experiments.js"></script>`;
-
-  await writeExperimentsData(repoRoot, labSiteDir);
   await fs.copyFile(
     path.join(repoRoot, "scripts", "lab", "experiments.js"),
     path.join(labSiteDir, "experiments.js"),

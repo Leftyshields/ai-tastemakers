@@ -10,8 +10,12 @@ import {
   firstResultSectionSentence,
   labPostPanelLeadIsForbidden,
   labPostShowsLabTestedBadge,
+  labExperimentPlanAnchorId,
+  labPostExperimentPlanHref,
+  labPostHeaderChipMode,
   labPostHeaderChipRepoKey,
   labPostHeaderUsesRepoFallback,
+  labPostSplitChipShowsInTheLabPill,
   labPostSplitChipShowsLabTestedPill,
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
@@ -20,6 +24,7 @@ import {
   stripLabPostIntroStatusPrefix,
   stripLabPostLeadMarkdown,
 } from "../../../scripts/lab/lab-post-header.js";
+import { LAB_POST_EXPERIMENT_PLAN_LINK_LABEL } from "../../../scripts/lab/lab-post-header-copy.js";
 import {
   listLabWriteupPostIds,
   loadLabWriteupLeadsCatalog,
@@ -27,6 +32,7 @@ import {
   splitLabWriteupFrontMatter,
 } from "../../../scripts/lab/lab-format.js";
 import { defaultLabLinkContext } from "../../../scripts/lab/lab-analytics.js";
+import { findInternalHrefViolations } from "../../../scripts/verify-lab-internal-hrefs.js";
 import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
 import {
   isAllowlistedLabBadgeDestDecoded,
@@ -127,50 +133,66 @@ describe("lab post header E1", () => {
     );
   });
 
-  it("shows split chip pill and badge blurb when sourceRepo is set (firecrawl and planned caveman)", () => {
+  it("run-with-source posts show Lab tested pill, repo link, and badge blurb (firecrawl)", () => {
     const linkCtx = defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01");
     const firecrawl = loadExperimentsFile(repoRoot).experiments.find(
       (e) => e.id === "EXP-20260716-firecrawl-enrich-skills",
     )!;
+    expect(labPostHeaderChipMode(firecrawl)).toBe("run_with_source");
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
+      "utf8",
+    );
+    const html = renderLabPostPageHeader({
+      experiment: firecrawl,
+      title: firecrawl.label,
+      markdown: md,
+      postHref: `${firecrawl.id}.html`,
+      linkCtx,
+      writeupPostIds: [firecrawl.id],
+      repoRoot,
+      escape: (t) => t,
+    });
+    expect(html).toContain("digest-lab-badge-blurb");
+    expect(html).toMatch(/lab-post-split-chip__pill[\s\S]*Lab tested/);
+    expect(html).toContain("firecrawl/firecrawl");
+    expect(html).not.toContain(LAB_POST_EXPERIMENT_PLAN_LINK_LABEL);
+  });
+
+  it("planned posts show In the Lab pill and experiment plan link, not a repo (caveman)", () => {
+    const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
     const caveman = loadExperimentsFile(repoRoot).experiments.find(
       (e) => e.id === "EXP-20260913-caveman-compress-skills",
     )!;
-    const md = (id: string) =>
-      fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
-    const render = (exp: (typeof firecrawl)) =>
-      renderLabPostPageHeader({
-        experiment: exp,
-        title: exp.label,
-        markdown: md(exp.id),
-        postHref: `${exp.id}.html`,
-        linkCtx,
-        writeupPostIds: [exp.id],
-        repoRoot,
-        escape: (t) => t,
-      });
-
-    const doneHtml = render(firecrawl);
-    expect(labPostShowsLabTestedBadge(firecrawl)).toBe(true);
-    expect(doneHtml).toContain("digest-lab-badge-blurb");
-    expect(doneHtml).toContain("lab-post-split-chip__pill");
-
-    const plannedHtml = render(caveman);
-    expect(labPostShowsLabTestedBadge(caveman)).toBe(false);
-    expect(labPostSplitChipShowsLabTestedPill(caveman)).toBe(true);
-    expect(labPostHeaderUsesRepoFallback(caveman)).toBe(false);
-    expect(plannedHtml).toContain("digest-lab-badge-blurb");
-    expect(plannedHtml).toContain("lab-post-split-chip__pill");
-    expect(plannedHtml).toContain("lab-post-split-chip__repo");
-    expect(plannedHtml).toContain("juliusbrussee/caveman");
+    expect(labPostHeaderChipMode(caveman)).toBe("planned");
+    expect(caveman.sourceRepo?.trim()).toBeTruthy();
+    const md = fs.readFileSync(
+      path.join(repoRoot, "briefings/lab/posts/EXP-20260913-caveman-compress-skills.md"),
+      "utf8",
+    );
+    const html = renderLabPostPageHeader({
+      experiment: caveman,
+      title: caveman.label,
+      markdown: md,
+      postHref: `${caveman.id}.html`,
+      linkCtx,
+      writeupPostIds: [caveman.id],
+      repoRoot,
+      escape: (t) => t,
+    });
+    expect(html).toMatch(/lab-post-split-chip__pill[\s\S]*In the Lab/);
+    expect(html).toContain(LAB_POST_EXPERIMENT_PLAN_LINK_LABEL);
+    expect(html).toContain(labPostExperimentPlanHref(caveman.id));
+    expect(html).not.toContain("digest-lab-badge-blurb");
+    expect(html).not.toContain("github.com");
+    expect(html).not.toContain("juliusbrussee/caveman");
   });
 
-  it("uses header-only ai-tastemakers repo fallback when sourceRepo is unset (web enrich)", () => {
+  it("run-without-source posts show plain ai-tastemakers repo link only (web enrich)", () => {
     const exp = loadExperimentsFile(repoRoot).experiments.find(
       (e) => e.id === "EXP-20260628-web-enrich-skills",
     )!;
-    expect(exp.sourceRepo?.trim()).toBeFalsy();
-    expect(labPostHeaderUsesRepoFallback(exp)).toBe(true);
-    expect(labPostHeaderChipRepoKey(exp)).toBe("leftyshields/ai-tastemakers");
+    expect(labPostHeaderChipMode(exp)).toBe("run_no_source");
     const md = fs.readFileSync(
       path.join(repoRoot, "briefings/lab/posts/EXP-20260628-web-enrich-skills.md"),
       "utf8",
@@ -185,20 +207,22 @@ describe("lab post header E1", () => {
       repoRoot,
       escape: (t) => t,
     });
-    expect(html).toContain('class="lab-post-split-chip"');
-    expect(html).toContain("lab-post-split-chip__pill");
+    expect(html).toContain('class="lab-post-header__repo-link"');
+    expect(html).not.toContain('class="lab-post-split-chip"');
+    expect(html).not.toContain("lab-post-split-chip__pill");
     expect(html).toContain("Leftyshields/ai-tastemakers");
     expect(html).toContain("https://github.com/Leftyshields/ai-tastemakers");
-    expect(html).toContain("digest-lab-badge-blurb");
+    expect(html).not.toContain("digest-lab-badge-blurb");
   });
 
-  it("all eight EXP write-ups render the E1 split chip", () => {
+  it("all eight EXP write-ups render a header chip (split chip or repo link)", () => {
     const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
     const expIds = listLabWriteupPostIds(repoRoot).filter((id) => id.startsWith("EXP-"));
     expect(expIds).toHaveLength(8);
     for (const id of expIds) {
       const exp = loadExperimentsFile(repoRoot).experiments.find((e) => e.id === id);
       expect(exp, id).toBeTruthy();
+      const mode = labPostHeaderChipMode(exp!);
       const md = fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8");
       const titleMatch = md.match(/^#\s+(.+)$/m);
       const title = titleMatch?.[1]?.trim() ?? exp!.label;
@@ -212,10 +236,46 @@ describe("lab post header E1", () => {
         repoRoot,
         escape: (t) => t,
       });
-      expect(html, id).toContain('class="lab-post-split-chip"');
-      expect(html, id).toContain("lab-post-split-chip__pill");
-      expect(html, id).toContain("lab-post-split-chip__repo");
-      expect(html, id).toContain("digest-lab-badge-blurb");
+      if (mode === "run_no_source") {
+        expect(html, id).toContain("lab-post-header__repo-link");
+      } else {
+        expect(html, id).toContain('class="lab-post-split-chip"');
+        expect(html, id).toContain("lab-post-split-chip__pill");
+      }
+      if (mode === "planned") {
+        expect(html, id).toMatch(/In the Lab/);
+        expect(html, id).toContain(`#${labExperimentPlanAnchorId(id)}`);
+        expect(html, id).not.toMatch(/github\.com/i);
+      } else if (mode === "run_with_source") {
+        expect(html, id).toMatch(/Lab tested/);
+        expect(html, id).toContain("digest-lab-badge-blurb");
+      }
+    }
+  });
+
+  it("planned post plan links resolve to experiments.html anchors when site is built", () => {
+    for (const id of [
+      "EXP-20260913-caveman-compress-skills",
+      "EXP-20260913-whynow-memory-skills",
+      "EXP-20260913-rank-bootstrap-skills",
+    ]) {
+      const postPath = path.join(repoRoot, "site/lab/posts", `${id}.html`);
+      if (!fs.existsSync(postPath)) continue;
+      const violations = findInternalHrefViolations(fs.readFileSync(postPath, "utf8"), postPath);
+      expect(violations, id).toEqual([]);
+    }
+  });
+
+  it("experiments dashboard JS exposes stable lab-exp plan anchors", () => {
+    const js = fs.readFileSync(path.join(repoRoot, "scripts/lab/experiments.js"), "utf8");
+    expect(js).toContain('return "lab-exp-" + expId');
+    for (const id of [
+      "EXP-20260913-caveman-compress-skills",
+      "EXP-20260913-whynow-memory-skills",
+      "EXP-20260913-rank-bootstrap-skills",
+    ]) {
+      expect(js).toContain(`planAnchorId(exp.id)`);
+      expect(labExperimentPlanAnchorId(id)).toBe(`lab-exp-${id}`);
     }
   });
 

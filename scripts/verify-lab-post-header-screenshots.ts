@@ -34,7 +34,9 @@ async function shotViewport(
     const hdr = document.querySelector(".lab-post-header__hdr");
     const btn = document.getElementById("lab-post-back-btn");
     if (!hdr || !btn) return false;
-    const chip = document.querySelector(".lab-post-split-chip");
+    const chip =
+      document.querySelector(".lab-post-split-chip") ||
+      document.querySelector(".lab-post-header__repo-link");
     if (!chip) return true;
     return chip.getBoundingClientRect().height >= 40;
   });
