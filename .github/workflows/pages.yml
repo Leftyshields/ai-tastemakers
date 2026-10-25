@@ -94,7 +94,7 @@ jobs:
           sleep 60
 
       - id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         continue-on-error: true
         with:
           timeout: 900000
@@ -106,7 +106,7 @@ jobs:
       - name: Retry Pages deployment (attempt 2)
         if: steps.deployment.outcome == 'failure'
         id: deployment_retry
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         continue-on-error: true
         with:
           timeout: 900000
@@ -118,7 +118,7 @@ jobs:
       - name: Retry Pages deployment (attempt 3)
         if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
         id: deployment_retry_2
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         continue-on-error: true
         with:
           timeout: 900000
