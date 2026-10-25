@@ -94,7 +94,7 @@
   function renderList() {
     if (!allExperiments.length) {
       tableWrap.innerHTML =
-        '<p class="experiment-empty">No experiments yet. We publish them here when we try a change.</p>';
+        '<p class="experiment-empty">No experiments yet. Each one appears here as soon as a change is tested.</p>';
       return;
     }
 
@@ -124,12 +124,12 @@
       )}
       ${sectionHtml(
         "On the site today",
-        "Changes we kept. They are live for readers even if we skipped a full measured window.",
+        "Changes that stayed on. They are live for readers, even where a full measured period was skipped.",
         live.length ? `<ul class="experiment-live-list">${live.map(liveRowHtml).join("")}</ul>` : "",
       )}
       ${sectionHtml(
-        "What we tried",
-        "Open a card for the question we asked and what we learned.",
+        "What was tried",
+        "Open a card to see the question behind each test and what it showed.",
         tried.length ? `<div class="experiment-card-list">${tried.map(cardHtml).join("")}</div>` : "",
       )}`;
 
@@ -234,7 +234,7 @@
     const glossary = (exp.reader_glossary || []).filter((item) => item?.term && item?.meaning);
     const glossaryHtml = glossary.length
       ? `<h3>Where the names come from</h3>
-      <p>These are source ideas, not tools we installed.</p>
+      <p>These are where the ideas came from, not tools installed in the pipeline.</p>
       <dl class="experiment-glossary">${glossary
         .map(
           (item) =>
@@ -244,7 +244,7 @@
       : "";
 
     const measure = exp.how_we_measure?.trim()
-      ? `<h3>How we'll know</h3>
+      ? `<h3>How to tell if it worked</h3>
       <p>${esc(exp.how_we_measure)}</p>
       ${showTokens ? `<p><a href="token-usage.html">See writing cost and quality</a></p>` : ""}`
       : showTokens
@@ -255,10 +255,10 @@
       exp.status === "active"
         ? "The new writing style is on. After each Skills digest, check whether briefs got shorter without getting worse."
         : exp.status === "baseline"
-          ? "We are still collecting the before picture. The change is off."
+          ? "Still collecting the before picture. The change is off."
           : exp.status === "complete"
             ? "No written verdict yet."
-            : "Not started — we write a verdict after the after-window ends.";
+            : "Not started. A verdict follows once the after period ends.";
 
     const verdict = exp.verdict?.trim() || defaultVerdict;
     const writeup = exp.writeup_href
@@ -269,20 +269,20 @@
         ? "Not decided yet."
         : exp.keep_change
           ? "Yes — it is still on."
-          : "No — we turned it off.";
+          : "No. The change was turned off.";
 
     detailBody.innerHTML = `
       <p class="experiment-detail__lede">${esc(exp.reader_summary || exp.change_summary)}</p>
       <p class="experiment-detail__meta">${statusBadge(exp)} <span>${esc(exp.edition_label || exp.edition)}</span></p>
       ${writeup}
-      <h3>What we're trying</h3>
+      <h3>The change</h3>
       <p>${esc(exp.hypothesis)}</p>
       ${glossaryHtml}
       <h3>When</h3>
       <p><strong>Before</strong> (old writing): ${esc(windowLabel(exp.baseline_window?.start, exp.baseline_window?.end))}<br>
       <strong>After</strong> (new writing): ${esc(windowLabel(exp.treatment_window?.start, exp.treatment_window?.end))}</p>
       ${measure}
-      <h3>What we learned</h3>
+      <h3>What happened</h3>
       <p>${esc(verdict)}</p>
       <p><strong>Still on the live site?</strong> ${esc(keep)}</p>
       <details class="experiment-ops">
@@ -290,7 +290,7 @@
         <p class="experiment-muted">Internal id: <code>${esc(exp.id)}</code></p>
         ${flags ? `<h4 class="experiment-subhead">Flags</h4><ul>${flags}</ul>` : ""}
         <h4 class="experiment-subhead">Imported analytics</h4>
-        ${snapshots || '<p class="experiment-muted">No click analytics imported. For this test we use writing cost and quality, not pageviews.</p>'}
+        ${snapshots || '<p class="experiment-muted">No click data was pulled. This test judges writing cost and quality, not page views.</p>'}
         <h4 class="experiment-subhead">Preview runs</h4>
         ${shadows ? `<ul>${shadows}</ul>` : '<p class="experiment-muted">No side-by-side preview stored for this experiment.</p>'}
         ${exp.notes ? `<p class="experiment-muted">${esc(exp.notes)}</p>` : ""}
@@ -312,7 +312,7 @@
       "",
       `Experiment ID: ${exp.id}`,
       "",
-      "## What we're trying",
+      "## The change",
       exp.hypothesis,
       "",
       ...(exp.reader_glossary || []).flatMap((item) =>
@@ -324,7 +324,7 @@
       `- **Before window:** ${windowLabel(exp.baseline_window?.start, exp.baseline_window?.end)}`,
       `- **After window:** ${windowLabel(exp.treatment_window?.start, exp.treatment_window?.end)}`,
       "",
-      "## What we learned",
+      "## What happened",
       exp.verdict?.trim() || "_Fill in after the after-window._",
       "",
       "## Still on the live site?",

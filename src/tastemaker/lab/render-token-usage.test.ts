@@ -242,7 +242,7 @@ describe("render-token-usage", () => {
     );
     expect(html).toContain("Results at a glance");
     expect(html).toContain("Latest cost per digest");
-    expect(html).toContain("What we are testing right now");
+    expect(html).toContain("Testing right now");
     expect(html).toContain("$0.09");
   });
 });

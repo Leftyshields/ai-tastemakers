@@ -80,9 +80,9 @@ export function experimentGoalSentence(experiments: ExperimentRecord[]): string 
   }
   if (active.id.includes("ponytail")) {
     if (active.status === "baseline") {
-      return "We are measuring today’s narration setup as a baseline, then we will check whether a tighter writing method is about 10% cheaper without making the summaries worse.";
+      return "This test first measures the current writing setup, then checks whether a tighter writing method is about 10% cheaper without making the summaries worse.";
     }
-    return "We are checking whether a tighter narration method is about 10% cheaper without making the summaries worse.";
+    return "This test checks whether a tighter writing method is about 10% cheaper without making the summaries worse.";
   }
   if (active.change_summary) {
     return sanitizeVisibleCopy(
@@ -223,7 +223,7 @@ function renderHeadlineCards(stats: HeadlineStats, esc: EscapeHtml): string {
     <div class="rounded-xl border border-stone-200 bg-white p-5 shadow-sm dark:border-stone-700 dark:bg-stone-950/50">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Writing quality</p>
       <p class="mb-2 font-sans text-lg font-semibold ${stats.qualityClass}">${esc(stats.qualityLabel)}</p>
-      <p class="mb-0 text-sm leading-relaxed text-stone-600 dark:text-stone-400">${esc(stats.rubricDetail ?? "We spot check the number one ranked brief for clarity, timeliness, and accuracy after each run.")}</p>
+      <p class="mb-0 text-sm leading-relaxed text-stone-600 dark:text-stone-400">${esc(stats.rubricDetail ?? "After each run, an editor spot checks the top brief for clarity, timeliness, and accuracy.")}</p>
     </div>
   </div>`;
 }
@@ -250,7 +250,7 @@ function renderDailySection(data: TokenUsageDataFile, esc: EscapeHtml): string {
     th("Edition", "OSS or Skills newsletter", esc),
     th("AI output size", "How much text Claude wrote back. Smaller usually means cheaper", esc),
     th("Word count", "Human readable length of those briefs", esc),
-    th("Prompt size", "How much background we sent Claude before it wrote", esc),
+    th("Prompt size", "How much background Claude received before writing", esc),
     th("Prompt efficiency", "Background size vs. billing units. Lower can mean tighter packaging", esc),
     th("Extra context fetched", "Web and forum snippets added before narration", esc),
     th("Wait time per repo", "How long Claude took per repository on average", esc),
@@ -297,7 +297,7 @@ function renderShadowSection(data: TokenUsageDataFile, esc: EscapeHtml): string 
 
   return `<section class="mb-10">
     <h2 class="mb-2 font-sans text-base font-semibold">Side by side method tests</h2>
-    <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Before changing production, we sometimes run two narration methods on the same digest and compare cost and output size.</p>
+    <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Before a change goes live, the Lab sometimes runs two writing methods on the same digest and compares cost and length.</p>
     ${body}
   </section>`;
 }
@@ -453,11 +453,11 @@ export function renderTokenUsagePage(
 
   return `<div class="font-sans text-sm">
     <p class="mb-6 text-base leading-relaxed text-stone-700 dark:text-stone-300">
-      This page tracks how much it costs for Claude to write the daily briefs each time a digest runs, and whether the writing still reads well as we try to spend less. Everything here comes from automatic logs, not manual spreadsheets.
+      This page tracks how much it costs for Claude to write the daily briefs each time a digest runs, and whether the writing still reads well as costs come down. Everything here comes from automatic logs, not manual spreadsheets.
     </p>
 
     <div class="mb-8 rounded-lg border border-blue-200 bg-blue-50 px-4 py-3 dark:border-blue-900/50 dark:bg-blue-950/30">
-      <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-blue-900 dark:text-blue-200">What we are testing right now</p>
+      <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-blue-900 dark:text-blue-200">Testing right now</p>
       <p class="mb-0 text-sm leading-relaxed text-blue-950 dark:text-blue-100">${esc(goal)}</p>
     </div>
 

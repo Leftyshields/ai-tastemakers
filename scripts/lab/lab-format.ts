@@ -516,7 +516,7 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&amp;/gi, "&");
 }
 
-/** Visible plain text from HTML after first-person exclusions (Lab post `<main>` only). */
+/** Visible plain text from HTML after first-person exclusions (Lab page `<main>` only). */
 export function labPostVisiblePlainText(html: string): string {
   const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] ?? html;
   const withoutNav = main.replace(/<nav[\s\S]*?<\/nav>/gi, " ");
@@ -553,7 +553,7 @@ function sentenceContainsFirstPerson(sentence: string): boolean {
   return false;
 }
 
-/** Sentences in rendered lab post HTML that contain we / our / us (with exclusions). */
+/** Sentences in rendered Lab HTML that contain we / our / us (with exclusions). */
 export function findLabPostFirstPersonSentences(html: string): string[] {
   const plain = labPostVisiblePlainText(html);
   if (!plain) return [];

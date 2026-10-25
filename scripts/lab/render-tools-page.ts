@@ -118,7 +118,7 @@ export function renderToolsPageHtml(
   parts.push(renderLabLoopStripHtml("about", escapeHtml, { activeStep: 2, linkCtx: ctx }));
   parts.push(`<header class="lab-tools-lede mb-6 font-sans">
     <h2 class="text-lg font-bold tracking-tight">Evaluated tools</h2>
-    <p class="mt-2 text-sm text-stone-700 dark:text-stone-300">Tools we've featured, and how they scored as candidates to improve our pipeline.</p>
+    <p class="mt-2 text-sm text-stone-700 dark:text-stone-300">Tools featured on Tastemakers, and how each scored as a way to improve the pipeline.</p>
   </header>`);
 
   parts.push(renderDigestLearnedSectionHtml(repoRoot, ctx, escapeHtml));

@@ -24,28 +24,28 @@ export function labLoopSteps(mode: LabLoopHrefMode): LabLoopStep[] {
       label: "Featured in digest",
       href: digest,
       aboutSentence:
-        "Daily briefings surface new open source tools that might fit our pipeline.",
+        "Daily briefings surface new open source tools that might fit the pipeline.",
     },
     {
       n: 2,
       label: "Evaluated",
       href: tools,
       aboutSentence:
-        "Tool inventory tags briefing history by pipeline role so we know what to try next.",
+        "The tool inventory tags past briefings by the job each tool could do, which points to what to try next.",
     },
     {
       n: 3,
       label: "Experiment",
       href: experiment,
       aboutSentence:
-        "Registered changes run on baseline and treatment windows with metrics we can audit.",
+        "Each change runs through a before period and an after period, with numbers anyone can check.",
     },
     {
       n: 4,
       label: "Result",
       href: result,
       aboutSentence:
-        "History and posts record what we shipped, reverted, or left inconclusive.",
+        "History and posts record every change that shipped, got reverted, or ended without a clear answer.",
     },
   ];
 }
