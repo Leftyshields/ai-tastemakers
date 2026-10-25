@@ -221,7 +221,8 @@
     }
 
     .lab-post-split-chip__pill {
-      @apply px-3 text-sm;
+      /* UX47: keep repo segment ≥60% of chip on narrow viewports (incl. CI fonts) */
+      @apply px-2 text-sm;
     }
 
     .lab-post-split-chip__repo {
