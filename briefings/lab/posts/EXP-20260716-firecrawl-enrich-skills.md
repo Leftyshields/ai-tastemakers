@@ -1,6 +1,6 @@
 # Better source pages for Skills briefs
 
-_**Shipped Aug 1, 2026.** We switched the tool that reads web pages for our Skills briefs to Firecrawl, aiming for briefs that are more specific and accurate. We shipped it without running the planned before and after comparison._
+_On Aug 1, 2026, we switched to a better tool for reading web pages, aiming for more specific and accurate Skills briefs. We kept it, though we shipped without running the planned before and after comparison._
 
 ## What we tried
 

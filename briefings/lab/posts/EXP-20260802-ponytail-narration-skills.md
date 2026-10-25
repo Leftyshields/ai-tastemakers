@@ -1,6 +1,6 @@
 # Shorter Skills briefs
 
-_**Kept (2026-08-29).** Treatment cut output ~18% with 13/13 rubric pass and stronger Why now scores on average. Both narration flags stay on Skills digests._
+_We tried a tighter writing style for Skills briefs. They came out about 18% shorter, passed all 13 of our quality checks, and on average did a better job explaining why each project matters now, so we kept it on Aug 29, 2026._
 
 ## The question, in English
 

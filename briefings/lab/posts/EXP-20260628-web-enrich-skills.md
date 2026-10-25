@@ -1,6 +1,6 @@
 # Richer Skills briefs
 
-_We kept extra web and Hacker News context on Skills write-ups. Closed 2026-07-18._
+_We started giving our Skills writer extra background from each project's web pages and Hacker News, and kept it when the test closed on Jul 18, 2026._
 
 ## In plain English
 

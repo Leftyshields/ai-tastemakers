@@ -1,6 +1,6 @@
 # Less-repeated Skills picks
 
-_Treatment closed 2026-09-26 (PT). **Kept** stronger soft-dedup on Skills digest._
+_We made the Skills list better at skipping projects too similar to ones already shown. Overlap dropped from 70% to 37.5%, so we kept it when the test closed on Sep 26, 2026._
 
 ## In plain English
 

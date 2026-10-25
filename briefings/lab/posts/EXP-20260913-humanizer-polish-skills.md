@@ -1,6 +1,6 @@
 # Less AI-sounding Skills briefs
 
-_**Active (#1).** Baseline **2026-09-27** through **2026-10-10** (snapshot imported 2026-10-10). Treatment **2026-10-11** through **2026-10-24** with `DIGEST_HUMANIZER_POLISH=1` on **both** OSS and Skills digests._
+_We added a final polish step to both daily lists that rewrites phrasing that sounds machine-written, and tested it from Oct 11 to Oct 24, 2026. Briefs passed all 13 quality checks and scored 5.0 on why now and 5.0 on specificity, up from 3.7 and 4.5 before, so we kept it._
 
 ## The question, in English
 
