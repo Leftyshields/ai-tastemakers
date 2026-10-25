@@ -67,7 +67,10 @@ jobs:
           SITE_LANDING_LAYOUT_V2: "1"
 
       - name: Verify CSS artifact
-        run: test -s site/assets/style.css && test "$(wc -c < site/assets/style.css)" -gt 1000
+        run: |
+          css="$(find site/assets -maxdepth 1 -name 'style.*.css' ! -name 'style.css.json' | head -1)"
+          test -n "$css" && test -s "$css" && test "$(wc -c < "$css")" -gt 1000
+          test -f site/assets/style.css.json
 
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5.0.0
 

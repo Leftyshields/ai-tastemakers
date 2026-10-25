@@ -30,6 +30,8 @@ echo "verify: lab post header order (UX47)"
 npx tsx scripts/verify-lab-post-header-order.ts
 echo "verify: lab post split chip contrast (UX47)"
 npx tsx scripts/verify-lab-post-chip-contrast.ts
+echo "verify: lab post and index render contrast (UX47 dark-mode regression gate)"
+npx tsx scripts/verify-lab-post-render-contrast.ts
 echo "verify: lab post chip mobile layout (UX47)"
 npx tsx scripts/verify-lab-post-chip-mobile.ts
 echo "verify: lab post plain repo link mobile (UX47)"
