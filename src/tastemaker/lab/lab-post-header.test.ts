@@ -5,14 +5,16 @@ import { fileURLToPath } from "node:url";
 import {
   LAB_TESTED_BADGE_BLURB,
   appendLabBadgeAttributionToHref,
+  countLabPostPanelLeadOccurrences,
   extractLabPostLeadParagraph,
   firstResultSectionSentence,
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
   resolvePostVerdictLine,
+  stripLabPostIntroParagraphFromArticleHtml,
   stripLabPostLeadMarkdown,
 } from "../../../scripts/lab/lab-post-header.js";
-import { listLabWriteupPostIds } from "../../../scripts/lab/lab-format.js";
+import { listLabWriteupPostIds, prepareLabWriteupHtmlFromMarkdown } from "../../../scripts/lab/lab-format.js";
 import { defaultLabLinkContext } from "../../../scripts/lab/lab-analytics.js";
 import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
 import {
@@ -117,6 +119,35 @@ describe("lab post header E1", () => {
     expect(html).toContain("lab-post-panel__lead");
     expect(html).toContain("Aug 1, 2026");
     expect(html).not.toContain("Shipped Aug 1, 2026.");
+  });
+
+  it("panel lead appears once in full post HTML (no duplicate body intro)", () => {
+    const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
+    for (const id of listLabWriteupPostIds(repoRoot)) {
+      const exp = loadExperimentsFile(repoRoot).experiments.find((e) => e.id === id);
+      if (!exp?.sourceRepo) continue;
+      const mdPath = path.join(repoRoot, "briefings/lab/posts", `${id}.md`);
+      const md = fs.readFileSync(mdPath, "utf8");
+      const titleMatch = md.match(/^#\s+(.+)$/m);
+      const title = titleMatch?.[1]?.trim() ?? exp.label;
+      let article = prepareLabWriteupHtmlFromMarkdown(md).replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/i, "");
+      article = stripLabPostIntroParagraphFromArticleHtml(article);
+      const header = renderLabPostPageHeader({
+        experiment: exp,
+        title,
+        markdown: md,
+        postHref: `${id}.html`,
+        linkCtx,
+        writeupPostIds: [id],
+        repoRoot,
+        escape: (t) => t,
+      });
+      const full = `${header}<article>${article}</article>`;
+      const { lead, count } = countLabPostPanelLeadOccurrences(full);
+      if (lead) {
+        expect(count, `${id}: duplicate panel lead`).toBe(1);
+      }
+    }
   });
 
   it("rendered post headers never contain literal ** in lead HTML", () => {

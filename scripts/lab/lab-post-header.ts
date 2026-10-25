@@ -141,6 +141,41 @@ export function stripLeadingH1FromArticleHtml(html: string): string {
   return html.replace(/^\s*<h1\b[^>]*>[\s\S]*?<\/h1>\s*/i, "");
 }
 
+/** Remove markdown intro paragraph from article body (lead lives in the E1 panel). */
+export function stripLabPostIntroParagraphFromArticleHtml(html: string): string {
+  return html.replace(/^\s*<p\b[^>]*>[\s\S]*?<\/p>\s*/i, "");
+}
+
+function htmlTextContent(fragment: string): string {
+  return fragment
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/\s+/g, " ")
+    .trim();
+}
+
+/** Count visible occurrences of panel lead copy in HTML (for duplicate-lead tests). */
+export function countLabPostPanelLeadOccurrences(html: string): { lead: string | null; count: number } {
+  const m = html.match(/class="lab-post-panel__lead"[^>]*>([^<]*)</);
+  if (!m) return { lead: null, count: 0 };
+  const lead = htmlTextContent(m[1] ?? "").trim();
+  if (!lead) return { lead: null, count: 0 };
+  const pageText = htmlTextContent(html);
+  let count = 0;
+  let idx = 0;
+  while (true) {
+    const at = pageText.indexOf(lead, idx);
+    if (at < 0) break;
+    count++;
+    idx = at + lead.length;
+  }
+  return { lead, count };
+}
+
 export function renderDigestLabBadgeBlurbHtml(escape: (t: string) => string): string {
   return `<p class="digest-lab-badge-blurb mb-6 font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">${escape(
     LAB_TESTED_BADGE_BLURB,

@@ -61,6 +61,7 @@ import { loadExperimentsFile } from "./lab/validate-experiments.js";
 import {
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
+  stripLabPostIntroParagraphFromArticleHtml,
   stripLeadingH1FromArticleHtml,
 } from "./lab/lab-post-header.js";
 import { listLabWriteupPostIds } from "./lab/lab-format.js";
@@ -1988,6 +1989,9 @@ export async function buildLabSite(
           `<li class="mb-2"><a href="${slug}.html" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(title)}</a></li>`,
         );
         const exp = labExperiments.find((e) => e.id === slug);
+        if (exp) {
+          html = stripLabPostIntroParagraphFromArticleHtml(html);
+        }
         const headerBlock = exp
           ? renderLabPostPageHeader({
               experiment: exp,
