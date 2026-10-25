@@ -286,7 +286,8 @@ export function findLabTestedBadgeViolations(
             labPrefixFromBriefingPage(pageAbsPath, siteRootFromRepo(repoRoot)),
             loadLabWriteupPostIds(repoRoot),
             cardCtx.section,
-            cardCtx.rank,
+            cardCtx.digestDate,
+            cardCtx.fullName,
           )
         : resolveHref(badge, pageAbsPath);
     if (!expectedHref || !href || href !== expectedHref) {
@@ -303,19 +304,29 @@ function siteRootFromRepo(repoRoot: string): string {
 export function digestCardAttributionBeforeIndex(
   html: string,
   badgeIndex: number,
-): { section: EditionId; rank: number } | null {
+): { section: EditionId; rank: number; digestDate: string; fullName: string } | null {
   const prefix = html.slice(Math.max(0, badgeIndex - 6000), badgeIndex);
-  const re =
-    /data-section="(oss|skills)"[^>]*data-position="(\d+)"|data-position="(\d+)"[^>]*data-section="(oss|skills)"/g;
-  let last: { section: EditionId; rank: number } | null = null;
-  for (const match of prefix.matchAll(re)) {
-    if (match[1] && match[2]) {
-      last = { section: match[1] as EditionId, rank: Number.parseInt(match[2], 10) };
-    } else if (match[3] && match[4]) {
-      last = { section: match[4] as EditionId, rank: Number.parseInt(match[3], 10) };
+  const cardRe =
+    /data-repo="([^"]+)"[^>]*data-section="(oss|skills)"[^>]*data-position="(\d+)"[^>]*data-digest-date="([^"]+)"|data-section="(oss|skills)"[^>]*data-position="(\d+)"[^>]*data-digest-date="([^"]+)"[^>]*data-repo="([^"]+)"/g;
+  let last: { section: EditionId; rank: number; digestDate: string; fullName: string } | null = null;
+  for (const match of prefix.matchAll(cardRe)) {
+    if (match[1] && match[2] && match[3] && match[4]) {
+      last = {
+        fullName: match[1],
+        section: match[2] as EditionId,
+        rank: Number.parseInt(match[3], 10),
+        digestDate: match[4],
+      };
+    } else if (match[5] && match[6] && match[7] && match[8]) {
+      last = {
+        section: match[5] as EditionId,
+        rank: Number.parseInt(match[6], 10),
+        digestDate: match[7],
+        fullName: match[8],
+      };
     }
   }
-  if (!last || !Number.isFinite(last.rank)) return null;
+  if (!last || !Number.isFinite(last.rank) || !last.digestDate || !last.fullName) return null;
   return last;
 }
 

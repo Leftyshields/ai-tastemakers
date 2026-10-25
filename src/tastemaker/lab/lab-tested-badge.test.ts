@@ -129,13 +129,19 @@ describe("UX45 lab tested badge", () => {
     );
   });
 
-  it("digest card badge href includes from_list and from_rank", () => {
+  it("digest card badge href includes validated from brief path", () => {
     const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
     const badge = labBadgeForRepo(lookup, "DietrichGebert/ponytail")!;
     const writeups = ["EXP-20260802-ponytail-narration-skills"];
-    const href = resolveLabBadgeHrefForDigestCard(badge, "../lab/", writeups, "oss", 1);
-    expect(href).toContain("from_list=oss");
-    expect(href).toContain("from_rank=1");
+    const href = resolveLabBadgeHrefForDigestCard(
+      badge,
+      "../lab/",
+      writeups,
+      "oss",
+      "2026-10-25",
+      "DietrichGebert/ponytail",
+    );
+    expect(href).toContain("from=briefings%2F2026-10-25.html%23repo-ponytail");
   });
 
   it("tracks lab_badge_click without repo_click on badge taps", () => {

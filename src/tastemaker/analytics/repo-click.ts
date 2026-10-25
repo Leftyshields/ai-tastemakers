@@ -1,18 +1,17 @@
 import type { EditionId } from "../editions.js";
-import {
-  isValidLabBadgeAttributionSearch,
-  parseLabBadgeFromListParam,
-  parseLabBadgeFromRankParam,
-} from "./lab-badge-attribution.js";
+import { isValidLabPostFromSearch } from "./lab-post-from.js";
 
 export {
-  LAB_BADGE_FROM_RANK_PARAM_RE,
-  parseLabBadgeFromListParam,
-  parseLabBadgeFromRankParam,
-  parseLabBadgeAttributionSearch,
-  isValidLabBadgeAttributionSearch,
-  labBadgeAttributionClientParserSource,
-} from "./lab-badge-attribution.js";
+  digestBriefSitePath,
+  digestRepoCardDomId,
+  labBadgeFromBriefSitePath,
+  appendLabPostFromToHref,
+  parseLabPostFromSearch,
+  parseLabPostFromSitePath,
+  isValidLabPostFromSearch,
+  labPostFromClientParserSource,
+  LAB_POST_FROM_SITE_PATH_RE,
+} from "./lab-post-from.js";
 
 export type RepoClickChannel = "pages" | "email";
 export type RepoClickTarget = "title" | "button" | "url" | "card";
@@ -136,15 +135,15 @@ function splitLabBadgeDestPath(path: string): {
   return { pathPart, hash, search };
 }
 
-function labBadgeAttributionQueryValid(search: string): boolean {
-  return isValidLabBadgeAttributionSearch(search);
+function labBadgeFromQueryValid(search: string): boolean {
+  return isValidLabPostFromSearch(search);
 }
 
 /** Shared allowlist check on a decoded absolute site path (optional ?attribution and #hash). */
 export function isAllowlistedLabBadgeDestDecoded(path: string): boolean {
   const parts = splitLabBadgeDestPath(path);
   if (!parts) return false;
-  if (!labBadgeAttributionQueryValid(parts.search)) return false;
+  if (!labBadgeFromQueryValid(parts.search)) return false;
   const postOk = LAB_BADGE_DEST_POST_RE.test(parts.pathPart);
   const indexOk =
     LAB_BADGE_DEST_INDEX_PATH_RE.test(parts.pathPart) &&
@@ -170,7 +169,11 @@ export function resolveAllowlistedLabBadgeDestPath(
   dest: string | null | undefined,
 ): string | null {
   if (dest == null || !dest.trim()) return null;
-  let path = dest.trim();
+  const trimmed = dest.trim();
+  if (isAllowlistedLabBadgeDestDecoded(trimmed)) {
+    return encodeURIComponent(trimmed);
+  }
+  let path = trimmed;
   try {
     path = decodeURIComponent(path);
   } catch {

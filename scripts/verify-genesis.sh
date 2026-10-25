@@ -38,6 +38,8 @@ echo "verify: lab post plain repo link mobile (UX47)"
 npx tsx scripts/verify-lab-post-plain-repo-link-mobile.ts
 echo "verify: lab post header screenshots (UX47)"
 npx tsx scripts/verify-lab-post-header-screenshots.ts
+echo "verify: lab post back roundtrip (UX47)"
+npx tsx scripts/verify-lab-post-back-roundtrip.ts
 echo "verify: lab email flask asset (UX46)"
 npx tsx scripts/verify-lab-email-flask-asset.ts
 echo "verify: site internal hrefs and anchors (UX30 link checker)"

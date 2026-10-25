@@ -1,6 +1,6 @@
 import {
   digestDateFromCompact,
-  labBadgeAttributionClientParserSource,
+  labPostFromClientParserSource,
   labBadgeDestGoInlineRegexSources,
   parseGoRedirectQuery,
   resolveAllowlistedGithubUrl,
@@ -29,7 +29,7 @@ export function renderGoRedirectPage(
   const safePostPathRe = escapeScriptString(labDestRe.postPath);
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
-  const attributionParser = labBadgeAttributionClientParserSource();
+  const fromParser = labPostFromClientParserSource();
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -120,27 +120,32 @@ export function renderGoRedirectPage(
   var LAB_DEST_INDEX_PATH_RE = new RegExp('${safeIndexPathRe}', 'i');
   var LAB_DEST_INDEX_HASH_RE = new RegExp('${safeIndexHashRe}', 'i');
 
-  ${attributionParser}
+  ${fromParser}
   function attributionQueryOk(search) {
     if (!search) return true;
-    return parseLabBadgeAttribution(search) !== null;
+    return parseLabPostFromSearch(search) !== null;
   }
-  function isAllowlistedLabDest(raw) {
-    if (!raw) return null;
-    try { raw = decodeURIComponent(String(raw).trim()); } catch (e) { return null; }
+  function labDestPathAllowed(raw) {
     var rawLower = String(raw).toLowerCase();
-    if (!raw.startsWith("/") || raw.startsWith("//") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0 || raw.indexOf("\\\\") >= 0) return null;
-    if (rawLower.indexOf("javascript:") === 0 || rawLower.indexOf("data:") === 0) return null;
+    if (!raw.startsWith("/") || raw.startsWith("//") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0 || raw.indexOf("\\\\") >= 0) return false;
+    if (rawLower.indexOf("javascript:") === 0 || rawLower.indexOf("data:") === 0) return false;
     var hashIdx = raw.indexOf("#");
     var beforeHash = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
     var hash = hashIdx >= 0 ? raw.slice(hashIdx) : "";
     var qIdx = beforeHash.indexOf("?");
     var pathPart = qIdx >= 0 ? beforeHash.slice(0, qIdx) : beforeHash;
     var search = qIdx >= 0 ? beforeHash.slice(qIdx) : "";
-    if (!attributionQueryOk(search)) return null;
+    if (!attributionQueryOk(search)) return false;
     var postOk = LAB_DEST_POST_RE.test(pathPart);
     var indexOk = LAB_DEST_INDEX_PATH_RE.test(pathPart) && LAB_DEST_INDEX_HASH_RE.test(hash);
-    return (postOk || indexOk) ? encodeURIComponent(raw) : null;
+    return postOk || indexOk;
+  }
+  function isAllowlistedLabDest(raw) {
+    if (!raw) return null;
+    var trimmed = String(raw).trim();
+    if (labDestPathAllowed(trimmed)) return encodeURIComponent(trimmed);
+    try { raw = decodeURIComponent(trimmed); } catch (e) { return null; }
+    return labDestPathAllowed(raw) ? encodeURIComponent(raw) : null;
   }
 
   var destination = resolveUrl() || (window.location.origin + HOME);

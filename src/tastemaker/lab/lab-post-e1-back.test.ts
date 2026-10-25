@@ -1,20 +1,36 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, it, expect, beforeEach } from "vitest";
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { renderLabPostHeaderClientScripts } from "../../../scripts/lab/lab-post-header.js";
 
-function mountAndClick(search: string, ossHref: string, skillsHref: string): string | undefined {
+function mountAndClick(opts: {
+  search: string;
+  historyLength?: number;
+  referrer?: string;
+}): string | "back" | undefined {
   document.body.innerHTML = `<header class="lab-post-header"><div class="lab-post-header__hdr"><button type="button" id="lab-post-back-btn" class="lab-post-back-btn" data-lab-section="posts">Back</button><span class="lab-post-header__vdiv"></span><div class="lab-post-split-chip"></div></div></header>`;
-  const code = renderLabPostHeaderClientScripts(ossHref, skillsHref)
+  const code = renderLabPostHeaderClientScripts()
     .replace(/^<script>\s*/i, "")
     .replace(/<\/script>\s*$/i, "");
   // eslint-disable-next-line no-eval
   eval(code);
-  let navigated: string | undefined;
-  const base = `https://example.com/lab/posts/x.html${search}`;
+  let navigated: string | "back" | undefined;
+  const back = vi.spyOn(window.history, "back").mockImplementation(() => {
+    navigated = "back";
+  });
+  Object.defineProperty(document, "referrer", {
+    configurable: true,
+    value: opts.referrer ?? "",
+  });
+  Object.defineProperty(window.history, "length", {
+    configurable: true,
+    value: opts.historyLength ?? 1,
+  });
+  const base = `https://example.com/lab/posts/x.html${opts.search}`;
   const loc = {
-    search,
+    search: opts.search,
+    origin: "https://example.com",
     assign(v: string) {
       navigated = v;
     },
@@ -27,8 +43,8 @@ function mountAndClick(search: string, ossHref: string, skillsHref: string): str
     },
   });
   Object.defineProperty(window, "location", { configurable: true, value: loc });
-  Object.defineProperty(window.history, "length", { configurable: true, value: 1 });
   document.getElementById("lab-post-back-btn")!.click();
+  back.mockRestore();
   return navigated;
 }
 
@@ -37,31 +53,29 @@ describe("renderLabPostHeaderClientScripts (jsdom)", () => {
     document.body.innerHTML = "";
   });
 
-  it("navigates to validated skills digest when from_list=skills", () => {
+  it("uses history.back when same-origin referrer and history length > 1", () => {
     expect(
-      mountAndClick("?from_list=skills&from_rank=2", "../briefings/2026-08-01.html", "../../skills/index.html"),
-    ).toBe("../../skills/index.html");
+      mountAndClick({
+        search: "",
+        historyLength: 3,
+        referrer: "https://example.com/briefings/2026-10-25.html",
+      }),
+    ).toBe("back");
   });
 
-  it("ignores hostile params and falls back to lab home", () => {
+  it("navigates to validated brief from param when history back is unavailable", () => {
     expect(
-      mountAndClick("?from_list=evil&from_rank=9", "../briefings/2026-08-01.html", "../../skills/index.html"),
-    ).toBe("../index.html");
+      mountAndClick({
+        search: "?from=briefings%2F2026-10-25.html%23repo-ponytail",
+        historyLength: 1,
+      }),
+    ).toBe("../../briefings/2026-10-25.html#repo-ponytail");
   });
 
-  it("rejects malicious or malformed attribution (same cases as former came-from gate)", () => {
-    const ossHref = "../briefings/2026-08-01.html";
-    const skillsHref = "../../skills/index.html";
-    const hostile = [
-      "?from_list=%22%3E%3Cscript%3Ealert(1)&from_rank=2",
-      "?from_list=skills&from_rank=3abc",
-      "?from_list=skills&from_rank=0",
-      "?from_list=skills&from_rank=11",
-      "?from_list=skills&from_rank=1%0d%0a",
-      "?from_list=skills&from_list=oss&from_rank=2",
-    ];
-    for (const search of hostile) {
-      expect(mountAndClick(search, ossHref, skillsHref), search).toBe("../index.html");
-    }
+  it("falls back to daily list when params are hostile", () => {
+    expect(mountAndClick({ search: "?from=//evil.com/briefings/2026-10-25.html" })).toBe(
+      "../../index.html",
+    );
+    expect(mountAndClick({ search: "?from_list=skills&from_rank=2" })).toBe("../../index.html");
   });
 });
