@@ -14,9 +14,9 @@ That is the whole test. [Firecrawl](https://github.com/firecrawl/firecrawl) is a
 
 | Piece | Before | After |
 |-------|--------|-------|
-| Web context | `DIGEST_ENRICH_WEB=1` with Jina Reader as the default | Same setting, plus `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` |
+| Web context | Web enrichment switch on, with Jina Reader as the default | Same switch, plus a setting that picks Firecrawl as the page fetcher |
 | Edition | Skills only | Skills only |
-| Secrets | Existing enrichment setup | `FIRECRAWL_API_KEY` in GitHub Actions |
+| Secrets | Existing enrichment setup | A Firecrawl API key in GitHub Actions |
 
 Production switched over on **Aug 1, 2026** by operator decision. The planned comparison window in `lab/experiments.json` (Aug 1 through Aug 14) was never used as a formal checkpoint. We chose to ship the fetcher switch rather than wait on click numbers that are always thin.
 
@@ -31,14 +31,14 @@ PostHog click through was never the main test for this switch. Editorial review 
 
 ## Outcome
 
-We **shipped** Firecrawl for Skills web context and archived the experiment record. Hacker News enrichment and ranking by seven day momentum stayed as they were. Later writing improvements (Ponytail, Humanizer) build on this layer. For the earlier chapter with Jina and Hacker News, see the [web context write up](EXP-20260628-web-enrich-skills.html).
+We **shipped** Firecrawl for Skills web context and archived the experiment record. Hacker News enrichment and ranking by 7 day momentum stayed as they were. Later writing improvements (Ponytail, Humanizer) build on this layer. For the earlier chapter with Jina and Hacker News, see the [web context write up](EXP-20260628-web-enrich-skills.html).
 
 ## Operator notes
 
 | Setting | What it does |
 |------|----------------|
-| `DIGEST_ENRICH_WEB=1` | Adds a web context block after ranking and before narration on Skills |
-| `DIGEST_ENRICH_WEB_PROVIDER=firecrawl` | Uses the Firecrawl v2 adapter instead of Jina Reader |
-| `DIGEST_ENRICH_SHADOW=0` | Runs the normal production path (not the side by side shadow run) |
+| Web enrichment switch | Adds a web context block after ranking and before narration on Skills |
+| Fetcher choice set to Firecrawl | Uses the Firecrawl v2 adapter instead of Jina Reader |
+| Shadow mode off | Runs the normal production path (not the side by side shadow run) |
 
-Requires `FIRECRAWL_API_KEY` in the Skills digest environment on GitHub Actions.
+Requires a Firecrawl API key in the Skills digest environment on GitHub Actions.

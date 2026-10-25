@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
@@ -66,16 +67,27 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(findLabProseBacktickViolations(wrapped)).toEqual([]);
   });
 
-  it("UX43 write-up tables wrap and env vars render as code without backticks", () => {
-    const md = `| Flag | Meaning |
+  it("UX43 write-up tables wrap and inline code renders without backticks", () => {
+    const md = `| Signal | Meaning |
 | --- | --- |
-| Web | \`DIGEST_ENRICH_WEB=1\` default |`;
+| Traffic | \`repo_click\` with \`section=skills\` |`;
     const html = prepareLabProseHtmlFromMarkdown(md);
     expect(html).toContain("lab-post-table-wrap");
     expect(html).toContain("<code");
-    expect(html).toContain("DIGEST_ENRICH_WEB=1");
+    expect(html).toContain("repo_click");
     expect(html).not.toContain("`");
-    expect(html).toContain('data-label="Flag"');
+    expect(html).toContain('data-label="Signal"');
+  });
+
+  it("Firecrawl post omits internal env flag names (Copywriter trimmed)", () => {
+    const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md");
+    const md = fs.readFileSync(mdPath, "utf8");
+    expect(md).not.toMatch(/DIGEST_ENRICH/);
+    expect(md).not.toContain("FIRECRAWL_API_KEY");
+    const html = prepareLabProseHtmlFromMarkdown(md);
+    expect(html).not.toMatch(/DIGEST_ENRICH/);
+    expect(html).not.toContain("FIRECRAWL_API_KEY");
+    expect(html).toContain("Web enrichment switch");
   });
 
   it("UX46 normalizes write up dates and about approximations", () => {
