@@ -65,6 +65,7 @@ function isSafeUrl(raw: string): boolean {
   const href = decodeBasicEntities(raw).trim();
   if (!href) return false;
   if (/^(javascript|data|vbscript):/i.test(href)) return false;
+  if (/^\/[\/\\]/.test(href)) return false;
   if (/^EXP-[0-9]{8}-[a-z0-9-]+\.html$/i.test(href)) return true;
   return /^(https?:\/\/|mailto:|\/|#|\.\.\/|\.\/)/i.test(href);
 }

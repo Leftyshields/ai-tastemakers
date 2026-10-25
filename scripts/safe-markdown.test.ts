@@ -66,4 +66,14 @@ describe("sanitizeHtml", () => {
     expect(html).not.toContain("javascript");
     expect(html).toContain("<span>x</span>");
   });
+
+  it("rejects protocol-relative and backslash-open href tricks", () => {
+    const evilProtocol = sanitizeHtml('<a href="//evil.com/lab/posts/x.html">x</a>');
+    expect(evilProtocol).not.toContain('href="//evil.com');
+    expect(evilProtocol).toContain(">x</a>");
+
+    const evilBackslash = sanitizeHtml('<a href="/\\evil.com/lab/posts/x.html">y</a>');
+    expect(evilBackslash).not.toContain('href="/\\evil.com');
+    expect(evilBackslash).toContain(">y</a>");
+  });
 });
