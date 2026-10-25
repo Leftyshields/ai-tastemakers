@@ -225,8 +225,8 @@
     @apply text-blue-800 dark:text-blue-300;
   }
 
-  .digest-lab-badge-blurb {
-    @apply font-sans;
+  .lab-post-panel__badge-blurb {
+    @apply mt-2 font-sans;
   }
 
   .new-repo-badge {

@@ -8,6 +8,7 @@ import {
   countLabPostPanelLeadOccurrences,
   extractLabPostLeadParagraph,
   firstResultSectionSentence,
+  labPostPanelLeadIsForbidden,
   labPostShowsLabTestedBadge,
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
@@ -70,13 +71,14 @@ describe("lab post header E1", () => {
     expect(html).toContain('<a href="');
   });
 
-  it("extracts firecrawl lead from copy constants", () => {
+  it("extracts firecrawl lead from post markdown (Copywriter rewrite, not legacy override)", () => {
     const md = fs.readFileSync(
       path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md"),
       "utf8",
     );
     const lead = extractLabPostLeadParagraph("EXP-20260716-firecrawl-enrich-skills", md);
-    expect(lead).toContain("Aug 1, 2026");
+    expect(lead).toBe("Shipped Aug 1, 2026.");
+    expect(lead!.toLowerCase()).not.toContain("we switched");
   });
 
   it("resolves verdict from experiments.json for ponytail", () => {
@@ -188,6 +190,39 @@ describe("lab post header E1", () => {
     expect(html).not.toContain('class="lab-post-split-chip"');
     expect(html).not.toContain('class="lab-post-header__vdiv"');
     expect(html).not.toContain("digest-lab-badge-blurb");
+    expect(html).toContain('class="lab-post-panel__lead"');
+    expect(extractLabPostLeadParagraph(exp.id, md)).toBe("Queued, not started.");
+  });
+
+  it("panel lead never shows queue rank or backlog labels", () => {
+    const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
+    for (const id of listLabWriteupPostIds(repoRoot)) {
+      const exp = loadExperimentsFile(repoRoot).experiments.find((e) => e.id === id);
+      if (!exp) continue;
+      const mdPath = path.join(repoRoot, "briefings/lab/posts", `${id}.md`);
+      const md = fs.readFileSync(mdPath, "utf8");
+      const titleMatch = md.match(/^#\s+(.+)$/m);
+      const title = titleMatch?.[1]?.trim() ?? exp.label;
+      const html = renderLabPostPageHeader({
+        experiment: exp,
+        title,
+        markdown: md,
+        postHref: `${id}.html`,
+        linkCtx,
+        writeupPostIds: [id],
+        repoRoot,
+        escape: (t) => t,
+      });
+      const panel = html.match(/<section class="lab-post-panel">[\s\S]*?<\/section>/i)?.[0] ?? "";
+      const leadMatch = panel.match(/class="lab-post-panel__lead"[^>]*>([^<]+)</);
+      if (leadMatch?.[1]) {
+        const lead = leadMatch[1];
+        expect(lead, `${id} lead`).not.toMatch(/#\d/);
+        expect(lead, `${id} lead`).not.toMatch(/\bRANK-\d/i);
+        expect(lead, `${id} lead`).not.toMatch(/backlog/i);
+        expect(labPostPanelLeadIsForbidden(lead), `${id} lead`).toBe(false);
+      }
+    }
   });
 
   it("stripLabPostLeadMarkdown removes literal asterisks", () => {
@@ -204,14 +239,19 @@ describe("lab post header E1", () => {
     expect(html).not.toContain("**");
     expect(html).toContain("lab-post-panel__lead");
     expect(html).toContain("Aug 1, 2026");
-    expect(html).not.toContain("Shipped Aug 1, 2026.");
+    expect(html).toContain("lab-post-panel__badge-blurb");
   });
 
   it("panel lead appears once in full post HTML (no duplicate body intro)", () => {
     const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
     for (const id of listLabWriteupPostIds(repoRoot)) {
       const exp = loadExperimentsFile(repoRoot).experiments.find((e) => e.id === id);
-      if (!exp?.sourceRepo) continue;
+      if (!exp) continue;
+      const leadCandidate = extractLabPostLeadParagraph(
+        id,
+        fs.readFileSync(path.join(repoRoot, "briefings/lab/posts", `${id}.md`), "utf8"),
+      );
+      if (!leadCandidate) continue;
       const mdPath = path.join(repoRoot, "briefings/lab/posts", `${id}.md`);
       const md = fs.readFileSync(mdPath, "utf8");
       const titleMatch = md.match(/^#\s+(.+)$/m);

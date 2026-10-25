@@ -177,9 +177,17 @@ export function countLabPostPanelLeadOccurrences(html: string): { lead: string |
 }
 
 export function renderDigestLabBadgeBlurbHtml(escape: (t: string) => string): string {
-  return `<p class="digest-lab-badge-blurb mb-6 font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">${escape(
+  return `<p class="digest-lab-badge-blurb lab-post-panel__badge-blurb mt-2 text-sm leading-relaxed text-stone-600 dark:text-stone-400">${escape(
     LAB_TESTED_BADGE_BLURB,
   )}</p>`;
+}
+
+/** Internal queue/rank copy must not appear in the reader-facing panel lead. */
+export function labPostPanelLeadIsForbidden(text: string): boolean {
+  if (/#\d/.test(text)) return true;
+  if (/\bRANK-\d/i.test(text)) return true;
+  if (/backlog/i.test(text)) return true;
+  return false;
 }
 
 /** Lab tested pill in the E1 split chip (done or running experiments only). */
@@ -235,29 +243,49 @@ export function extractLabPostLeadParagraph(
   markdown: string,
 ): string | null {
   const override = LAB_POST_LEAD[experimentId]?.trim();
-  if (override) return sanitizeVisibleCopy(stripLabPostLeadMarkdown(override));
+  if (override) {
+    const cleaned = sanitizeVisibleCopy(stripLabPostLeadMarkdown(override));
+    return labPostPanelLeadIsForbidden(cleaned) ? null : cleaned;
+  }
   const lines = markdown.split(/\r?\n/);
   let pastH1 = false;
-  const buf: string[] = [];
+  const paragraphs: string[] = [];
+  let buf: string[] = [];
+  const flushParagraph = (): void => {
+    if (buf.length > 0) {
+      paragraphs.push(buf.join(" "));
+      buf = [];
+    }
+  };
   for (const raw of lines) {
     const line = raw.trim();
     if (!pastH1) {
       if (/^#\s+/.test(line)) pastH1 = true;
       continue;
     }
+    if (/^##\s/.test(line)) {
+      flushParagraph();
+      break;
+    }
     if (!line) {
-      if (buf.length > 0) break;
+      flushParagraph();
       continue;
     }
-    if (/^##\s/.test(line)) break;
     buf.push(line);
-    if (line.endsWith(".") || line.endsWith("!") || line.endsWith("?")) break;
+    if (line.endsWith(".") || line.endsWith("!") || line.endsWith("?")) {
+      flushParagraph();
+    }
   }
-  if (buf.length === 0) return null;
-  let text = stripLabPostLeadMarkdown(buf.join(" "));
-  const sentence = text.split(/(?<=[.!?])\s+/)[0]?.trim();
-  if (!sentence) return null;
-  return sanitizeVisibleCopy(sentence);
+  flushParagraph();
+  for (const para of paragraphs) {
+    const text = stripLabPostLeadMarkdown(para);
+    const sentence = text.split(/(?<=[.!?])\s+/)[0]?.trim();
+    if (!sentence) continue;
+    const cleaned = sanitizeVisibleCopy(sentence);
+    if (labPostPanelLeadIsForbidden(cleaned)) continue;
+    return cleaned;
+  }
+  return null;
 }
 
 function renderLabPostSplitRepoLinkHtml(
@@ -397,10 +425,10 @@ export function renderLabPostPageHeader(opts: LabPostHeaderOptions): string {
   if (lead) {
     parts.push(`<p class="lab-post-panel__lead">${escape(lead)}</p>`);
   }
-  parts.push(`</section>`);
   if (repoKey && showsBadge) {
     parts.push(renderDigestLabBadgeBlurbHtml(escape));
   }
+  parts.push(`</section>`);
   parts.push(`</header>`, renderLabPostHeaderClientScripts(ossBackHref, skillsBackHref));
 
   return parts.join("");
@@ -450,6 +478,7 @@ export const LAB_POST_HEADER_ORDER_MARKERS = [
   "lab-post-panel__title",
   "lab-post-panel__status",
   "lab-post-panel__lead",
+  "digest-lab-badge-blurb",
 ] as const;
 
 export function findLabPostHeaderOrderViolations(html: string, pageRel: string): string[] {
