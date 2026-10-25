@@ -94,20 +94,48 @@ describe("UX45 lab tested badge", () => {
     expect(html).toContain("lab-tested-badge--running");
   });
 
-  it("links done experiments to lab history anchor", () => {
+  it("links done experiments to lab history anchor when no write up", () => {
     const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
     const badge = labBadgeForRepo(lookup, "DietrichGebert/ponytail")!;
     const href = resolveLabBadgeHref(badge, "../lab/", []);
     expect(href).toBe("../lab/index.html#lab-exp-EXP-20260802-ponytail-narration-skills");
     const html = renderLabTestedBadgePagesHtml(badge, href, escapeHtml);
-    expect(html).toContain('aria-label="Lab tested:');
+    expect(html).toContain('aria-label="Tested in the Lab. Read the');
+    expect(html).not.toContain('title="');
     expect(html).toContain('stroke="currentColor"');
+  });
+
+  it("links running experiments to lab-exp anchor when no write up", () => {
+    const href = resolveLabBadgeHref(
+      {
+        id: "EXP-20260913-humanizer-polish-skills",
+        title: "Humanizer",
+        status: "running",
+        repoKey: "blader/humanizer",
+      },
+      "../lab/",
+      [],
+    );
+    expect(href).toBe("../lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills");
+  });
+
+  it("links to write up post when markdown exists", () => {
+    const lookup = buildLabBadgeLookup(loadExperimentsFile(repoRoot).experiments);
+    const badge = labBadgeForRepo(lookup, "DietrichGebert/ponytail")!;
+    const writeups = ["EXP-20260802-ponytail-narration-skills"];
+    expect(resolveLabBadgeHref(badge, "../lab/", writeups)).toBe(
+      "../lab/posts/EXP-20260802-ponytail-narration-skills.html",
+    );
   });
 
   it("tracks lab_badge_click without repo_click on badge taps", () => {
     const prev = process.env.POSTHOG_KEY;
     process.env.POSTHOG_KEY = "phc_ci_lab_analytics_gate_only";
     expect(labBadgeClickTrackingScript()).toContain("lab_badge_click");
+    expect(labBadgeClickTrackingScript()).toContain("experiment_id");
+    expect(labBadgeClickTrackingScript()).toContain('surface: "pages"');
+    expect(labBadgeClickTrackingScript()).toContain('channel: "pages"');
+    expect(labBadgeClickTrackingScript()).toContain("source_repo");
     expect(digestRepoClickTrackingScript()).toContain('closest("a.lab-tested-badge")');
     process.env.POSTHOG_KEY = prev;
   });

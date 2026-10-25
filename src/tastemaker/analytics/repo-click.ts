@@ -91,6 +91,51 @@ export function parseGoRedirectQuery(search: string): Partial<GoRedirectQuery> {
   return { repo, section, pos: Number.isFinite(pos) ? pos : undefined, target, d };
 }
 
+export const LAB_BADGE_DEST_POST_RE =
+  /^\/(?:[A-Za-z0-9._-]+\/)?lab\/posts\/EXP-[0-9]{8}-[a-z0-9-]+\.html$/i;
+export const LAB_BADGE_DEST_INDEX_PATH_RE =
+  /^\/(?:[A-Za-z0-9._-]+\/)?lab\/index\.html$/i;
+export const LAB_BADGE_DEST_INDEX_HASH_RE = /^#lab-exp-EXP-[0-9]{8}-[a-z0-9-]+$/i;
+
+/** Shared allowlist check on a decoded absolute site path (optional #hash). */
+export function isAllowlistedLabBadgeDestDecoded(path: string): boolean {
+  if (!path.startsWith("/") || path.includes("://") || path.includes("..")) return false;
+  const hashIdx = path.indexOf("#");
+  const pathPart = hashIdx >= 0 ? path.slice(0, hashIdx) : path;
+  const hash = hashIdx >= 0 ? path.slice(hashIdx) : "";
+  const postOk = LAB_BADGE_DEST_POST_RE.test(pathPart);
+  const indexOk = LAB_BADGE_DEST_INDEX_PATH_RE.test(pathPart) && LAB_BADGE_DEST_INDEX_HASH_RE.test(hash);
+  return postOk || indexOk;
+}
+
+/** Regex sources embedded in /go client script — keep in sync via parity tests. */
+export function labBadgeDestGoInlineRegexSources(): {
+  postPath: string;
+  indexPath: string;
+  indexHash: string;
+} {
+  return {
+    postPath: LAB_BADGE_DEST_POST_RE.source,
+    indexPath: LAB_BADGE_DEST_INDEX_PATH_RE.source,
+    indexHash: LAB_BADGE_DEST_INDEX_HASH_RE.source,
+  };
+}
+
+/** Site path (with optional publish prefix) allowed for email lab badge /go dest=. Returns encoded path. */
+export function resolveAllowlistedLabBadgeDestPath(
+  dest: string | null | undefined,
+): string | null {
+  if (dest == null || !dest.trim()) return null;
+  let path = dest.trim();
+  try {
+    path = decodeURIComponent(path);
+  } catch {
+    return null;
+  }
+  if (!isAllowlistedLabBadgeDestDecoded(path)) return null;
+  return encodeURIComponent(path);
+}
+
 export interface LabBadgeEmailGoQuery {
   repo: string;
   section: EditionId;

@@ -6,6 +6,8 @@ import {
   digestDateFromCompact,
   normalizeRepoParam,
   resolveAllowlistedGithubUrl,
+  resolveAllowlistedLabBadgeDestPath,
+  buildLabBadgeEmailGoUrl,
 } from "./repo-click.js";
 
 describe("digest allowlist redirect", () => {
@@ -71,5 +73,24 @@ describe("email go URLs", () => {
   it("round trips compact digest dates", () => {
     expect(digestDateCompact("2026-06-06")).toBe("20260606");
     expect(digestDateFromCompact("20260606")).toBe("2026-06-06");
+  });
+
+  it("accepts lab/posts paths for lab badge email dest", () => {
+    const dest = "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html";
+    expect(resolveAllowlistedLabBadgeDestPath(dest)).toBe(encodeURIComponent(dest));
+    expect(resolveAllowlistedLabBadgeDestPath(encodeURIComponent(dest))).toBe(encodeURIComponent(dest));
+    expect(resolveAllowlistedLabBadgeDestPath("https://evil.com/lab/posts/x.html")).toBeNull();
+    const indexDest = "/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills";
+    expect(resolveAllowlistedLabBadgeDestPath(indexDest)).toBe(encodeURIComponent(indexDest));
+    const url = buildLabBadgeEmailGoUrl("https://example.com/app", {
+      repo: "firecrawl/firecrawl",
+      section: "skills",
+      rank: 3,
+      expId: "EXP-20260716-firecrawl-enrich-skills",
+      status: "done",
+      digestDate: "2026-08-01",
+      destPath: dest,
+    });
+    expect(url).toContain("dest=%2Fai-tastemakers%2Flab%2Fposts%2FEXP-20260716-firecrawl-enrich-skills.html");
   });
 });

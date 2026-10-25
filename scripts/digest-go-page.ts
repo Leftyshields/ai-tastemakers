@@ -1,7 +1,9 @@
 import {
   digestDateFromCompact,
+  labBadgeDestGoInlineRegexSources,
   parseGoRedirectQuery,
   resolveAllowlistedGithubUrl,
+  resolveAllowlistedLabBadgeDestPath,
   type RepoClickProperties,
 } from "../src/tastemaker/analytics/repo-click.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
@@ -22,6 +24,10 @@ export function renderGoRedirectPage(
   const posthog = posthogScriptHtml();
   const safeAllowlist = escapeScriptString(allowlistJson);
   const safeHome = escapeScriptString(homePath.startsWith("/") ? homePath : `/${homePath}`);
+  const labDestRe = labBadgeDestGoInlineRegexSources();
+  const safePostPathRe = escapeScriptString(labDestRe.postPath);
+  const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
+  const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -108,20 +114,41 @@ export function renderGoRedirectPage(
     return canonical;
   }
 
+  var LAB_DEST_POST_RE = new RegExp('${safePostPathRe}', 'i');
+  var LAB_DEST_INDEX_PATH_RE = new RegExp('${safeIndexPathRe}', 'i');
+  var LAB_DEST_INDEX_HASH_RE = new RegExp('${safeIndexHashRe}', 'i');
+
+  function isAllowlistedLabDest(raw) {
+    if (!raw) return null;
+    try { raw = decodeURIComponent(String(raw).trim()); } catch (e) { return null; }
+    if (!raw.startsWith("/") || raw.indexOf("://") >= 0 || raw.indexOf("..") >= 0) return null;
+    var hashIdx = raw.indexOf("#");
+    var pathPart = hashIdx >= 0 ? raw.slice(0, hashIdx) : raw;
+    var hash = hashIdx >= 0 ? raw.slice(hashIdx) : "";
+    var postOk = LAB_DEST_POST_RE.test(pathPart);
+    var indexOk = LAB_DEST_INDEX_PATH_RE.test(pathPart) && LAB_DEST_INDEX_HASH_RE.test(hash);
+    return (postOk || indexOk) ? encodeURIComponent(raw) : null;
+  }
+
   var destination = resolveUrl() || (window.location.origin + HOME);
   if (eventName === "lab_badge_click" && labDest) {
-    destination = window.location.origin + labDest;
+    var safeLabDest = isAllowlistedLabDest(labDest);
+    if (safeLabDest) destination = window.location.origin + decodeURIComponent(safeLabDest);
   }
   var continueLink = document.getElementById("continue-link");
   if (continueLink) continueLink.href = destination;
 
   if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
+    var normalizedRepo = normalizeRepo(repo) || "";
     captureOnce("lab_badge_click", {
+      experiment_id: parsed.exp,
       exp_id: parsed.exp,
-      repo: normalizeRepo(repo) || repo || "",
+      repo: normalizedRepo || repo || "",
+      source_repo: normalizedRepo,
       status: parsed.status || "",
       list: section,
       rank: rank,
+      surface: "email",
       channel: parsed.channel || "email"
     });
   } else {
@@ -159,6 +186,20 @@ export function resolveGoPageDestination(
   allowlist: Record<string, string>,
   homeUrl: string,
 ): string {
+  const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+  const event = params.get("event") || "";
+  const dest = params.get("dest");
+  if (event === "lab_badge_click" && dest) {
+    const allowed = resolveAllowlistedLabBadgeDestPath(dest);
+    if (allowed) {
+      try {
+        const home = new URL(homeUrl);
+        return `${home.origin}${decodeURIComponent(allowed)}`;
+      } catch {
+        return homeUrl;
+      }
+    }
+  }
   const parsed = parseGoRedirectQuery(search);
   const github = resolveAllowlistedGithubUrl(parsed.repo ?? null, allowlist);
   return github ?? homeUrl;

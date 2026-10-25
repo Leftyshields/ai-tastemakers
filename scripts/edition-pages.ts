@@ -29,6 +29,8 @@ import {
 import {
   defaultLabLinkContext,
   ensureLabLinkSections,
+  prepareLabPostArticleHtml,
+  renderLabPostBackLink,
   labLinkClickScript,
   type LabLinkContext,
   type LabLinkSection,
@@ -156,13 +158,20 @@ export function labBadgeClickTrackingScript(): string {
     var rank = parseInt(rankRaw, 10);
     var expId = badge.getAttribute("data-lab-badge-exp") || "";
     var status = badge.getAttribute("data-lab-badge-status") || "";
+    var sourceRepo = badge.getAttribute("data-lab-badge-source-repo") || "";
+    if (!sourceRepo && repo) {
+      sourceRepo = String(repo).trim().toLowerCase();
+    }
     if (!repo || (list !== "oss" && list !== "skills") || !Number.isFinite(rank) || !expId) return;
     posthog.capture("lab_badge_click", {
+      experiment_id: expId,
       exp_id: expId,
       repo: repo,
+      source_repo: sourceRepo,
       status: status,
       list: list,
       rank: rank,
+      surface: "pages",
       channel: "pages"
     }, { transport: "sendBeacon", send_instantly: true });
   }, true);
@@ -1957,19 +1966,22 @@ export async function buildLabSite(
       const listings: string[] = [];
       for (const file of postFiles) {
         const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
-        const html = prepareLabWriteupHtmlFromMarkdown(markdown);
+        let html = prepareLabWriteupHtmlFromMarkdown(markdown);
+        const postLinkCtx = defaultLabLinkContext(1, allowlist, asOfIsoDate);
+        html = prepareLabPostArticleHtml(html, postLinkCtx);
         const slug = file.replace(/\.md$/, "");
         const title = markdownH1(markdown, slug);
         listings.push(
           `<li class="mb-2"><a href="${slug}.html" class="text-blue-800 hover:underline dark:text-blue-400">${escapeHtml(title)}</a></li>`,
         );
-        const postBody = `${labNavHtml("posts", escapeHtml, 1)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
+        const postBody = `${labNavHtml("posts", escapeHtml, 1)}${renderLabPostBackLink(escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
           pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, {
             ...labShell,
             labNavActive: "posts",
             labNavDepth: 1,
+            labFallbackSection: "posts",
           }),
         );
       }

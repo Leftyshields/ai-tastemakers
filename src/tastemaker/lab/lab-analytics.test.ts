@@ -3,6 +3,8 @@ import {
   defaultLabLinkContext,
   findLabAnalyticsViolations,
   labLinkClickScript,
+  prepareLabPostArticleHtml,
+  renderLabPostBackLink,
   resolveLabToolHref,
 } from "../../../scripts/lab/lab-analytics.js";
 
@@ -15,6 +17,34 @@ describe("Lab UX42 analytics", () => {
 
   it("lab link script mentions lab_link_click event", () => {
     expect(labLinkClickScript()).toContain("lab_link_click");
+  });
+
+  it("Back to Lab link meets ~44px tap target", () => {
+    const esc = (t: string) => t;
+    expect(renderLabPostBackLink(esc)).toContain("min-h-11");
+    expect(renderLabPostBackLink(esc)).toContain("lab-post-back-link");
+  });
+
+  it("tags lab post body links and routes GitHub through go", () => {
+    const ctx = defaultLabLinkContext(1, { "firecrawl/firecrawl": "https://github.com/firecrawl/firecrawl" }, "2026-08-01");
+    const html = prepareLabPostArticleHtml(
+      '<p><a href="https://github.com/firecrawl/firecrawl">Firecrawl</a> and <a href="EXP-20260628-web-enrich-skills.html" data-lab-section="posts">prior</a></p>',
+      ctx,
+    );
+    expect(html).toContain("../../go/index.html?");
+    expect(html).toContain("firecrawl%2Ffirecrawl");
+    expect(html.match(/data-lab-section="posts"/g)?.length).toBe(2);
+  });
+
+  it("escapes resolved href values in lab post link rewrite", () => {
+    const ctx = defaultLabLinkContext(0, { "acme/demo": "https://github.com/acme/demo" }, "2026-08-01");
+    const html = prepareLabPostArticleHtml(
+      '<p><a href="https://github.com/acme/demo">x</a></p>',
+      ctx,
+    );
+    expect(html).toMatch(/href="[^"]*"/);
+    expect(html).not.toContain('href="../go/index.html?repo=acme/demo"');
+    expect(html).toContain("&amp;");
   });
 
   it("detects missing PostHog and tracking attrs", () => {

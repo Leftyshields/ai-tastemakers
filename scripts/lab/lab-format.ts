@@ -89,15 +89,123 @@ export function formatLabLastUpdatedPt(isoDate: string): string {
 export const LAB_PROSE_ARTICLE_CLASS =
   "brief-content lab-prose-capped prose prose-stone max-w-none font-sans dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans prose-p:font-sans prose-li:font-sans prose-code:font-sans prose-strong:font-sans";
 
+const LAB_POST_CODE_CLASS =
+  "lab-post-code rounded bg-stone-100 px-1 py-0.5 text-sm font-sans dark:bg-stone-800";
+
+function convertInlineBacktickMarkers(text: string): string {
+  return text.replace(/`([^`\n]+)`/g, `<code class="${LAB_POST_CODE_CLASS}">$1</code>`);
+}
+
 /** Turn leftover `inline` markers in text nodes into <code> (UX26). */
 export function stripLiteralBackticksToCode(html: string): string {
   return html.replace(/>([^<]*`[^`\n]+`[^<]*)</g, (_match, text: string) => {
-    const converted = text.replace(
-      /`([^`\n]+)`/g,
-      '<code class="rounded bg-stone-100 px-1 py-0.5 text-sm font-sans dark:bg-stone-800">$1</code>',
-    );
-    return `>${converted}<`;
+    return `>${convertInlineBacktickMarkers(text)}<`;
   });
+}
+
+const LAB_POST_INLINE_CODE_TAG = "span";
+
+function inlineCodeHtml(inner: string): string {
+  return `<${LAB_POST_INLINE_CODE_TAG} class="${LAB_POST_CODE_CLASS}">${inner}</${LAB_POST_INLINE_CODE_TAG}>`;
+}
+
+/** Table cells can sit beside inline tags; scan td/th inner HTML (UX43 stacked cells). */
+export function stripLiteralBackticksInTableCells(html: string): string {
+  return html.replace(/<t([dh])(\s[^>]*)?>([\s\S]*?)<\/t\1>/gi, (full, tag: string, attrs = "", inner: string) => {
+    let out = inner;
+    if (out.includes("`")) {
+      out = out.replace(/`([^`\n]+)`/g, (_m, code: string) => inlineCodeHtml(code));
+    }
+    out = out.replace(/<code(\s[^>]*)?>([\s\S]*?)<\/code>/gi, (_m, _attrs, code: string) =>
+      inlineCodeHtml(code),
+    );
+    if (out === inner) return full;
+    return `<t${tag}${attrs}>${out}</t${tag}>`;
+  });
+}
+
+function labPostCellVisibleText(cellHtml: string): string {
+  return cellHtml
+    .replace(/<(?:code|span)[^>]*class="[^"]*lab-post-code[^"]*"[\s\S]*?<\/(?:code|span)>/gi, "")
+    .replace(/<code[\s\S]*?<\/code>/gi, "")
+    .replace(/<[^>]+>/g, "");
+}
+
+/** Ensure inline <code> in write ups has lab styling (no typography backtick pseudo content). */
+export function normalizeLabPostCodeElements(html: string): string {
+  return html.replace(/<code(\s[^>]*)?>/gi, (tag) => {
+    if (/class="[^"]*lab-post-code/.test(tag)) return tag;
+    if (/class="/i.test(tag)) {
+      return tag.replace(/class="/i, `class="${LAB_POST_CODE_CLASS} `);
+    }
+    return `<code class="${LAB_POST_CODE_CLASS}">`;
+  });
+}
+
+function stripHtmlTags(fragment: string): string {
+  return fragment.replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim();
+}
+
+function escapeHtmlAttr(value: string): string {
+  return value.replace(/&/g, "&amp;").replace(/"/g, "&quot;").replace(/</g, "&lt;");
+}
+
+/** Plain text from table header HTML (single attr escape; avoids &amp;quot; double encoding). */
+function tableHeaderLabelPlainText(thInnerHtml: string): string {
+  const stripped = stripHtmlTags(thInnerHtml);
+  return stripped
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*34;/gi, '"')
+    .replace(/&amp;/gi, "&")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">");
+}
+
+/** Add data-label on cells for stacked mobile post tables (480px). */
+export function labelLabPostTableCells(html: string): string {
+  return html.replace(
+    /<div class="lab-post-table-wrap"><table class="lab-post-table">([\s\S]*?)<\/table><\/div>/gi,
+    (_full, inner: string) => {
+      const headers: string[] = [];
+      const thead = inner.match(/<thead>[\s\S]*?<\/thead>/i)?.[0] ?? "";
+      for (const m of thead.matchAll(/<th[^>]*>([\s\S]*?)<\/th>/gi)) {
+        headers.push(tableHeaderLabelPlainText(m[1] ?? ""));
+      }
+      if (headers.length === 0) {
+        return `<div class="lab-post-table-wrap"><table class="lab-post-table">${inner}</table></div>`;
+      }
+      let labeled = inner.replace(/<tbody>([\s\S]*?)<\/tbody>/i, (_tb, body: string) => {
+        const rows = body.replace(/<tr>([\s\S]*?)<\/tr>/gi, (_tr, row: string) => {
+          let col = 0;
+          const cells = row.replace(/<td(\s[^>]*)?>([\s\S]*?)<\/td>/gi, (_td, attrs = "", content: string) => {
+            const label = headers[col] ?? "";
+            col += 1;
+            const labelAttr = label ? ` data-label="${escapeHtmlAttr(label)}"` : "";
+            const mergedAttrs = attrs.includes("data-label") ? attrs : `${attrs}${labelAttr}`;
+            return `<td${mergedAttrs}>${content}</td>`;
+          });
+          return `<tr>${cells}</tr>`;
+        });
+        return `<tbody>${rows}</tbody>`;
+      });
+      return `<div class="lab-post-table-wrap"><table class="lab-post-table">${labeled}</table></div>`;
+    },
+  );
+}
+
+/** Scroll/stack-friendly table wrapper for lab post markdown tables (390px). */
+export function wrapLabPostTables(html: string): string {
+  const wrapped = html
+    .replace(/<table(\s[^>]*)?>/gi, (_m, attrs = "") => {
+      if (attrs.includes("lab-post-table-wrap")) return `<table${attrs}>`;
+      const cls = /class="([^"]*)"/i.exec(attrs);
+      const merged = cls
+        ? attrs.replace(/class="[^"]*"/i, `class="${cls[1]!.trim()} lab-post-table"`)
+        : `${attrs} class="lab-post-table"`;
+      return `<div class="lab-post-table-wrap"><table${merged}>`;
+    })
+    .replace(/<\/table>/gi, "</table></div>");
+  return labelLabPostTableCells(wrapped);
 }
 
 export function findLabProseBacktickViolations(html: string): string[] {
@@ -201,7 +309,13 @@ export function sanitizeVisibleCopy(text: string): string {
 
 /** Sanitize visible text nodes in static Lab markdown HTML (preserves tag structure). */
 export function sanitizeLabVisibleHtml(html: string): string {
-  return html.replace(/>([^<]+)</g, (match, text: string) => {
+  const tableBlocks: string[] = [];
+  const placeholder = (i: number) => `\u0000LAB_POST_TABLE_${i}\u0000`;
+  let withoutTables = html.replace(/<div class="lab-post-table-wrap">[\s\S]*?<\/div>/gi, (block) => {
+    tableBlocks.push(block);
+    return placeholder(tableBlocks.length - 1);
+  });
+  withoutTables = withoutTables.replace(/>([^<]+)</g, (match, text: string) => {
     if (!text.trim()) return match;
     const leading = text.match(/^\s*/)?.[0] ?? "";
     const trailing = text.match(/\s*$/)?.[0] ?? "";
@@ -209,6 +323,7 @@ export function sanitizeLabVisibleHtml(html: string): string {
     if (!core) return match;
     return `>${leading}${core}${trailing}<`;
   });
+  return withoutTables.replace(/\u0000LAB_POST_TABLE_(\d+)\u0000/g, (_m, idx: string) => tableBlocks[Number(idx)] ?? "");
 }
 
 /** Experiment ids with a markdown post under briefings/lab/posts/ (UX29). */
@@ -228,7 +343,48 @@ export function hasLabWriteupPost(repoRoot: string, experimentId: string, cache?
 }
 
 export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
-  return sanitizeLabVisibleHtml(stripLiteralBackticksToCode(renderSafeMarkdown(markdown)));
+  let html = renderSafeMarkdown(markdown);
+  html = stripLiteralBackticksToCode(html);
+  html = stripLiteralBackticksInTableCells(html);
+  html = normalizeLabPostCodeElements(html);
+  html = wrapLabPostTables(html);
+  return sanitizeLabVisibleHtml(html);
+}
+
+export function findLabPostTableWrapViolations(html: string, pageRel: string): string[] {
+  const article =
+    html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  if (!article.includes("<table")) return [];
+  const violations: string[] = [];
+  if (!article.includes("lab-post-table-wrap")) {
+    violations.push(`${pageRel}: lab post table missing lab-post-table-wrap`);
+  }
+  if (article.includes("<table") && !article.includes("lab-post-table")) {
+    violations.push(`${pageRel}: lab post table missing lab-post-table class`);
+  }
+  return violations;
+}
+
+/** Literal backticks in rendered lab post article (UX43 write-ups). */
+export function findLabPostBacktickViolations(html: string, pageRel: string): string[] {
+  const article =
+    html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  for (const m of article.matchAll(/<t[dh]\b[^>]*>([\s\S]*?)<\/t[dh]>/gi)) {
+    const text = labPostCellVisibleText(m[1] ?? "");
+    const idx = text.indexOf("`");
+    if (idx >= 0) {
+      return [
+        `${pageRel}: literal backtick in lab post table cell …${text.slice(Math.max(0, idx - 12), idx + 12)}…`,
+      ];
+    }
+  }
+  const withoutCode = article.replace(/<code[\s\S]*?<\/code>/gi, "");
+  const text = withoutCode.replace(/<[^>]+>/g, " ");
+  const idx = text.indexOf("`");
+  if (idx >= 0) {
+    return [`${pageRel}: literal backtick in lab post …${text.slice(Math.max(0, idx - 12), idx + 12)}…`];
+  }
+  return [];
 }
 
 const ISO_DATE_RE = /\b\d{4}-\d{2}-\d{2}\b/;

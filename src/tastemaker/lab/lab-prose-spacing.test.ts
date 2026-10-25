@@ -1,9 +1,11 @@
 import { describe, it, expect } from "vitest";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
   buildIsoDatePt,
+  findLabPostBacktickViolations,
   findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
@@ -45,7 +47,7 @@ describe("Lab UX26 UX28 UX29", () => {
     const writeupIds = new Set(listLabWriteupPostIds(repoRoot));
     expect(writeupIds.has("EXP-20260701-landing-layout")).toBe(false);
     expect(html).not.toContain("posts/EXP-20260701-landing-layout.html");
-    expect(html).not.toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
+    expect(html).toContain("posts/EXP-20260716-firecrawl-enrich-skills.html");
   });
 
   it("UX35 index intro is short and links About in nav", () => {
@@ -64,6 +66,65 @@ describe("Lab UX26 UX28 UX29", () => {
     const wrapped = `<article class="lab-prose-capped">${sample}</article>`;
     expect(findLabProseInlineSpacingViolations(wrapped)).toEqual([]);
     expect(findLabProseBacktickViolations(wrapped)).toEqual([]);
+  });
+
+  it("UX43 detects literal backticks inside stacked table cells", () => {
+    const bad = `<article class="lab-prose-capped"><div class="lab-post-table-wrap"><table class="lab-post-table"><tbody><tr><td data-label="We want">Better briefs</td><td data-label="What good looks like">see \`repo_click\` here</td></tr></tbody></table></div></article>`;
+    expect(findLabPostBacktickViolations(bad, "site/lab/posts/x.html")).toHaveLength(1);
+    expect(findLabPostBacktickViolations(bad, "site/lab/posts/x.html")[0]).toContain("table cell");
+
+    const md = `| We want | What "good" looks like |
+| --- | --- |
+| Better briefs | \`repo_click\` with \`section=skills\` |`;
+    const html = prepareLabProseHtmlFromMarkdown(md);
+    const wrapped = `<article class="lab-prose-capped">${html}</article>`;
+    expect(findLabPostBacktickViolations(wrapped, "site/lab/posts/x.html")).toEqual([]);
+    expect(html).toContain('data-label="What &quot;good&quot; looks like"');
+    expect(html).toContain('<span class="lab-post-code');
+    expect(html).not.toMatch(/<td[^>]*>[^<]*`/);
+  });
+
+  it("UX43 write-up tables wrap and inline code renders without backticks", () => {
+    const md = `| Signal | Meaning |
+| --- | --- |
+| Traffic | \`repo_click\` with \`section=skills\` |`;
+    const html = prepareLabProseHtmlFromMarkdown(md);
+    expect(html).toContain("lab-post-table-wrap");
+    expect(html).toContain("lab-post-code");
+    expect(html).toContain("repo_click");
+    expect(html).not.toContain("`");
+    expect(html).toContain('data-label="Signal"');
+  });
+
+  it("Firecrawl post v3 plain English copy (no env flag names)", () => {
+    const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md");
+    const md = fs.readFileSync(mdPath, "utf8");
+    expect(md).toContain("Better source pages for Skills briefs");
+    expect(md).not.toMatch(/DIGEST_ENRICH/);
+    expect(md).not.toContain("FIRECRAWL_API_KEY");
+    expect(md).not.toContain("## Operator notes");
+    expect(md).toContain("seven day momentum");
+    const html = prepareLabProseHtmlFromMarkdown(md);
+    expect(html).not.toMatch(/DIGEST_ENRICH/);
+    expect(html).not.toContain("FIRECRAWL_API_KEY");
+    expect(html).toContain("Sign of success");
+    expect(html).not.toContain("Operator notes");
+  });
+
+  it("UX43 Firecrawl post article matches built HTML backtick rules", () => {
+    const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md");
+    const md = fs.readFileSync(mdPath, "utf8");
+    const article = `<article class="brief-content lab-prose-capped prose">${prepareLabProseHtmlFromMarkdown(md)}</article>`;
+    const rel = "site/lab/posts/EXP-20260716-firecrawl-enrich-skills.html";
+    expect(findLabPostBacktickViolations(article, rel)).toEqual([]);
+    expect(article).toContain("lab-post-table-wrap");
+    expect(article).not.toContain('data-label="What &amp;quot;');
+
+    const builtPath = path.join(repoRoot, rel);
+    if (fs.existsSync(builtPath)) {
+      const page = fs.readFileSync(builtPath, "utf8");
+      expect(findLabPostBacktickViolations(page, rel)).toEqual([]);
+    }
   });
 
   it("UX46 normalizes write up dates and about approximations", () => {

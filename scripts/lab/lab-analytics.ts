@@ -33,6 +33,14 @@ export function defaultLabLinkContext(depth: 0 | 1 = 0, allowlist: Record<string
   return { goPrefix, allowlist, labDigestCompact: digestDateCompact(asOfIso) };
 }
 
+function escapeHtmlAttr(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function repoFromGithubHref(href: string): string | null {
   try {
     const u = new URL(href, "https://example.com");
@@ -43,6 +51,26 @@ function repoFromGithubHref(href: string): string | null {
   } catch {
     return null;
   }
+}
+
+export function renderLabPostBackLink(escapeHtml: (t: string) => string): string {
+  return `<p class="mb-4 font-sans text-sm"><a href="../index.html" class="lab-post-back-link inline-flex min-h-11 items-center py-2 text-blue-800 underline dark:text-blue-400" data-lab-section="posts">${escapeHtml("Back to Lab")}</a></p>`;
+}
+
+/** Lab write up article: track links and route allowlisted GitHub URLs through /go. */
+export function prepareLabPostArticleHtml(html: string, ctx: LabLinkContext): string {
+  const withLinks = html.replace(/<a\b([^>]*)>/gi, (full, attrs: string) => {
+    const hrefMatch = /\shref="([^"]+)"/i.exec(attrs);
+    if (!hrefMatch) return full;
+    const href = hrefMatch[1]!;
+    const resolved = resolveLabToolHref(href, ctx);
+    let newAttrs = attrs.replace(/\shref="[^"]+"/i, ` href="${escapeHtmlAttr(resolved)}"`);
+    if (!/data-lab-section=/.test(newAttrs)) {
+      newAttrs = ` data-lab-section="posts"${newAttrs}`;
+    }
+    return `<a${newAttrs}>`;
+  });
+  return ensureLabLinkSections(withLinks, "posts");
 }
 
 export function resolveLabToolHref(href: string, ctx: LabLinkContext): string {
