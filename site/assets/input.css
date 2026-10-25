@@ -106,6 +106,19 @@
     min-height: 2rem;
   }
 
+  /* L8: markdown prose tables on non-post Lab pages (methodology, shadow rubric, etc.) */
+  .lab-main .prose table:not(.lab-post-table) {
+    @apply my-4 block w-full overflow-x-auto text-sm;
+  }
+
+  .lab-main .prose table:not(.lab-post-table) thead th {
+    @apply whitespace-nowrap px-3 py-2 align-bottom;
+  }
+
+  .lab-main .prose table:not(.lab-post-table) tbody td {
+    @apply px-3 py-2 align-top;
+  }
+
   .lab-main .lab-post-table-wrap {
     @apply my-4 w-full max-w-full overflow-x-auto;
     -webkit-overflow-scrolling: touch;

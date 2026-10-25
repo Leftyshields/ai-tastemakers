@@ -25,7 +25,7 @@ function main(): void {
   }
   if (!process.env.POSTHOG_KEY?.trim()) {
     console.log(
-      "verify: UX42 note — rebuild uses POSTHOG_KEY from verify:genesis; without a real key, checks markup and lab_link_click wiring only (no live PostHog delivery).",
+      "verify: UX42 note. Rebuild uses POSTHOG_KEY from verify:genesis; without a real key, checks markup and lab_link_click wiring only (no live PostHog delivery).",
     );
   }
   let failed = false;
