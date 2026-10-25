@@ -15,6 +15,10 @@ const FIRECRAWL_POST = path.join(
   "site/lab/posts/EXP-20260716-firecrawl-enrich-skills.html",
 );
 const LONG_FIXTURE = path.join(repoRoot, "site/lab/posts/_fixture-e1-long-repo.html");
+const RANK_BOOTSTRAP_POST = path.join(
+  repoRoot,
+  "site/lab/posts/EXP-20260913-rank-bootstrap-skills.html",
+);
 
 async function shotViewport(
   absPath: string,
@@ -33,9 +37,10 @@ async function shotViewport(
   }, opts.scheme === "dark");
   await page.waitForFunction(() => {
     const hdr = document.querySelector(".lab-post-header__hdr");
-    const chip = document.querySelector(".lab-post-split-chip");
     const btn = document.getElementById("lab-post-back-btn");
-    if (!hdr || !chip || !btn) return true;
+    if (!hdr || !btn) return false;
+    const chip = document.querySelector(".lab-post-split-chip");
+    if (!chip) return true;
     return chip.getBoundingClientRect().height >= 40;
   });
   await page.screenshot({
@@ -53,7 +58,8 @@ function viewportForWidth(width: number): { height: number; deviceScaleFactor: n
 
 async function main(): Promise<void> {
   fs.mkdirSync(artifactDir, { recursive: true });
-  for (const p of [FIRECRAWL_POST, LONG_FIXTURE]) {
+  const allPaths = [FIRECRAWL_POST, LONG_FIXTURE, RANK_BOOTSTRAP_POST];
+  for (const p of allPaths) {
     if (!fs.existsSync(p)) {
       console.error(`missing ${p} (run npm run build:pages first)`);
       process.exit(1);
@@ -69,16 +75,27 @@ async function main(): Promise<void> {
     ["long-repo-post-390-dark.png", LONG_FIXTURE, 390],
     ["long-repo-post-desktop-light.png", LONG_FIXTURE, 1280],
     ["long-repo-post-desktop-dark.png", LONG_FIXTURE, 1280],
+    ["rank-bootstrap-post-390-dark.png", RANK_BOOTSTRAP_POST, 390],
   ];
 
-  for (const [name, abs, width] of shots) {
+  const filter = new Set(process.argv.slice(2));
+  const selected =
+    filter.size > 0 ? shots.filter(([name]) => filter.has(name)) : shots;
+  if (selected.length === 0) {
+    console.error("no matching screenshot names in argv");
+    process.exit(1);
+  }
+
+  for (const [name, abs, width] of selected) {
     const scheme = name.includes("dark") ? "dark" : "light";
     const { height, deviceScaleFactor } = viewportForWidth(width);
     await shotViewport(abs, name, { width, height, scheme, deviceScaleFactor });
     console.log(path.join(artifactDir, name));
   }
 
-  console.log(`verify: lab post header screenshots ok (${artifactDir}, 8 PNGs, viewport crop @ device scale)`);
+  console.log(
+    `verify: lab post header screenshots ok (${artifactDir}, ${selected.length} PNG(s), viewport crop @ device scale)`,
+  );
 }
 
 const isMain =
