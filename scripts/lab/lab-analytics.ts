@@ -33,6 +33,14 @@ export function defaultLabLinkContext(depth: 0 | 1 = 0, allowlist: Record<string
   return { goPrefix, allowlist, labDigestCompact: digestDateCompact(asOfIso) };
 }
 
+function escapeHtmlAttr(value: string): string {
+  return value
+    .replace(/&/g, "&amp;")
+    .replace(/"/g, "&quot;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
 function repoFromGithubHref(href: string): string | null {
   try {
     const u = new URL(href, "https://example.com");
@@ -56,7 +64,7 @@ export function prepareLabPostArticleHtml(html: string, ctx: LabLinkContext): st
     if (!hrefMatch) return full;
     const href = hrefMatch[1]!;
     const resolved = resolveLabToolHref(href, ctx);
-    let newAttrs = attrs.replace(/\shref="[^"]+"/i, ` href="${resolved}"`);
+    let newAttrs = attrs.replace(/\shref="[^"]+"/i, ` href="${escapeHtmlAttr(resolved)}"`);
     if (!/data-lab-section=/.test(newAttrs)) {
       newAttrs = ` data-lab-section="posts"${newAttrs}`;
     }

@@ -36,6 +36,17 @@ describe("Lab UX42 analytics", () => {
     expect(html.match(/data-lab-section="posts"/g)?.length).toBe(2);
   });
 
+  it("escapes resolved href values in lab post link rewrite", () => {
+    const ctx = defaultLabLinkContext(0, { "acme/demo": "https://github.com/acme/demo" }, "2026-08-01");
+    const html = prepareLabPostArticleHtml(
+      '<p><a href="https://github.com/acme/demo">x</a></p>',
+      ctx,
+    );
+    expect(html).toMatch(/href="[^"]*"/);
+    expect(html).not.toContain('href="../go/index.html?repo=acme/demo"');
+    expect(html).toContain("&amp;");
+  });
+
   it("detects missing PostHog and tracking attrs", () => {
     const bad = '<html><body><a href="x">y</a></body></html>';
     expect(findLabAnalyticsViolations(bad, "site/lab/x.html").length).toBeGreaterThan(0);

@@ -77,11 +77,11 @@ describe("email go URLs", () => {
 
   it("accepts lab/posts paths for lab badge email dest", () => {
     const dest = "/ai-tastemakers/lab/posts/EXP-20260716-firecrawl-enrich-skills.html";
-    expect(resolveAllowlistedLabBadgeDestPath(dest)).toBe(dest);
+    expect(resolveAllowlistedLabBadgeDestPath(dest)).toBe(encodeURIComponent(dest));
+    expect(resolveAllowlistedLabBadgeDestPath(encodeURIComponent(dest))).toBe(encodeURIComponent(dest));
     expect(resolveAllowlistedLabBadgeDestPath("https://evil.com/lab/posts/x.html")).toBeNull();
-    expect(resolveAllowlistedLabBadgeDestPath("/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills")).toBe(
-      "/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills",
-    );
+    const indexDest = "/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills";
+    expect(resolveAllowlistedLabBadgeDestPath(indexDest)).toBe(encodeURIComponent(indexDest));
     const url = buildLabBadgeEmailGoUrl("https://example.com/app", {
       repo: "firecrawl/firecrawl",
       section: "skills",
