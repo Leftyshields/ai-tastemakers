@@ -96,34 +96,34 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(html).toContain('data-label="Signal"');
   });
 
-  it("Firecrawl post omits internal env flag names (Copywriter trimmed)", () => {
+  it("Firecrawl post v3 plain English copy (no env flag names)", () => {
     const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md");
     const md = fs.readFileSync(mdPath, "utf8");
+    expect(md).toContain("Better source pages for Skills briefs");
     expect(md).not.toMatch(/DIGEST_ENRICH/);
     expect(md).not.toContain("FIRECRAWL_API_KEY");
-    expect(md).toContain("ranking by seven day momentum stayed as they were");
+    expect(md).not.toContain("## Operator notes");
+    expect(md).toContain("seven day momentum");
     const html = prepareLabProseHtmlFromMarkdown(md);
     expect(html).not.toMatch(/DIGEST_ENRICH/);
     expect(html).not.toContain("FIRECRAWL_API_KEY");
-    expect(html).toContain("Web enrichment switch");
-    expect(html).toContain("seven day momentum");
+    expect(html).toContain("Sign of success");
+    expect(html).not.toContain("Operator notes");
   });
 
-  it("UX43 Firecrawl post article matches built HTML backtick and data-label rules", () => {
+  it("UX43 Firecrawl post article matches built HTML backtick rules", () => {
     const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260716-firecrawl-enrich-skills.md");
     const md = fs.readFileSync(mdPath, "utf8");
     const article = `<article class="brief-content lab-prose-capped prose">${prepareLabProseHtmlFromMarkdown(md)}</article>`;
     const rel = "site/lab/posts/EXP-20260716-firecrawl-enrich-skills.html";
     expect(findLabPostBacktickViolations(article, rel)).toEqual([]);
+    expect(article).toContain("lab-post-table-wrap");
     expect(article).not.toContain('data-label="What &amp;quot;');
-    expect(article).toContain('data-label="What &quot;good&quot; looks like"');
-    expect(article).toContain('<span class="lab-post-code');
 
     const builtPath = path.join(repoRoot, rel);
     if (fs.existsSync(builtPath)) {
       const page = fs.readFileSync(builtPath, "utf8");
       expect(findLabPostBacktickViolations(page, rel)).toEqual([]);
-      expect(page).not.toContain('data-label="What &amp;quot;');
     }
   });
 

@@ -1,44 +1,32 @@
-# Deeper web context on Skills briefs
+# Better source pages for Skills briefs
 
-_**Shipped (Aug 1, 2026).** The Skills digest still adds web context after ranking, and Firecrawl now fetches the pages. We did not finish the formal before and after comparison window._
+_**Shipped Aug 1, 2026.** We switched the tool that reads web pages for our Skills briefs to Firecrawl, aiming for briefs that are more specific and accurate. We shipped it without running the planned before and after comparison._
 
-## The question, in plain English
+## What we tried
 
-Each Skills blurb already gets extra context once ranking is done: cleaned up text from the web plus Hacker News mentions, merged in before the writing (narrate) step. That setup started with Jina Reader as the default page fetcher.
+Every Skills brief is a short write-up about a GitHub project. After we pick the day's projects, we pull in extra background before writing: text from the project's web pages and mentions on Hacker News. A tool called Jina Reader did the page reading.
 
-We wanted to switch the fetcher to **Firecrawl** and leave everything else alone: ranking, discovery, and Hacker News enrichment. Our bet was that richer page context would make briefs more specific, more accurate, and more timely when reviewed against our shadow rubric, without introducing new made up facts.
-
-That is the whole test. [Firecrawl](https://github.com/firecrawl/firecrawl) is a project we featured on the list; we did not build their product into the digest. We changed one environment setting on the Skills digest command.
+We swapped in [Firecrawl](https://github.com/firecrawl/firecrawl), an open source project we had featured on the list, and changed nothing else. How we pick projects and how we use Hacker News stayed the same. Our bet: better page text would give the writer better material, so briefs would come out more specific, accurate, and current, without new made-up facts.
 
 ## What changed
 
-| Piece | Before | After |
+| Part | Before | After |
 |-------|--------|-------|
-| Web context | Web enrichment switch on, with Jina Reader as the default | Same switch, plus a setting that picks Firecrawl as the page fetcher |
-| Edition | Skills only | Skills only |
-| Secrets | Existing enrichment setup | A Firecrawl API key in GitHub Actions |
+| Page reader | Jina Reader | Firecrawl |
+| Which digest | Skills only | Skills only |
+| Setup needed | Existing setup | A Firecrawl API key in GitHub Actions |
 
-Production switched over on **Aug 1, 2026** by operator decision. The planned comparison window in `lab/experiments.json` (Aug 1 through Aug 14) was never used as a formal checkpoint. We chose to ship the fetcher switch rather than wait on click numbers that are always thin.
+We planned to compare results from Aug 1 through Aug 14. We never ran that comparison. Click numbers on Skills are always too thin to settle a question like this, so we decided to ship the switch on Aug 1 instead of waiting.
 
-## How we would have measured it
+## How we would have judged it
 
-| We want | What "good" looks like |
+| Goal | Sign of success |
 |---------|------------------------|
-| Better briefs | Most reviewed repos pass the shadow rubric: specific, accurate, timely |
-| Steady traffic | `repo_click` with `section=skills` as a secondary signal (known to be sparse) |
+| Better briefs | Most reviewed briefs pass our editors' checklist: specific, accurate, and current |
+| Steady traffic | Clicks on Skills projects hold steady (a minor signal, since the numbers are small) |
 
-PostHog click through was never the main test for this switch. Editorial review and brief quality were.
+Editor review was always the real test here. Clicks were a backup.
 
-## Outcome
+## Where it landed
 
-We **shipped** Firecrawl for Skills web context and archived the experiment record. Hacker News enrichment and ranking by seven day momentum stayed as they were. Later writing improvements (Ponytail, Humanizer) build on this layer. For the earlier chapter with Jina and Hacker News, see the [web context write up](EXP-20260628-web-enrich-skills.html).
-
-## Operator notes
-
-| Setting | What it does |
-|------|----------------|
-| Web enrichment switch | Adds a web context block after ranking and before narration on Skills |
-| Fetcher choice set to Firecrawl | Uses the Firecrawl v2 adapter instead of Jina Reader |
-| Shadow mode off | Runs the normal production path (not the side by side shadow run) |
-
-Requires a Firecrawl API key in the Skills digest environment on GitHub Actions.
+Firecrawl now reads the pages for every Skills brief, and the experiment is closed. Project ranking, still based on seven day momentum, and the Hacker News step did not change. Two later writing upgrades, Ponytail and Humanizer, build on this one. For the earlier step that first added web background with Jina and Hacker News, see the [earlier write-up](EXP-20260628-web-enrich-skills.html).
