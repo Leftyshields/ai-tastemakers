@@ -108,19 +108,57 @@
 
   .lab-post-header__hdr--wrapped .lab-post-split-chip {
     flex-basis: 100%;
+    @apply w-full max-w-full;
   }
 
   .lab-post-split-chip {
-    @apply inline-flex max-w-full items-stretch;
+    @apply inline-flex min-w-0 max-w-full flex-1 items-stretch;
   }
 
   .lab-post-split-chip__pill {
-    @apply min-h-11 shrink-0 rounded-l-xl rounded-r-none border-r-0 px-4;
+    @apply min-h-11 shrink-0 rounded-l-xl rounded-r-none border border-solid border-stone-400 border-r-0 bg-stone-100 px-4 dark:border-stone-500 dark:bg-[#1c1917];
+    border-width: 1.5px;
   }
 
   .lab-post-split-chip__repo {
-    @apply inline-flex min-h-11 min-w-0 flex-[0_1_auto] items-center break-words rounded-r-xl border border-solid border-stone-400 bg-stone-950 px-4 py-2 font-mono text-sm font-semibold leading-snug text-blue-700 underline decoration-blue-700 underline-offset-[3px] dark:border-stone-500 dark:bg-[#0c0a09] dark:text-blue-300 dark:decoration-blue-300;
+    @apply inline-flex min-h-11 min-w-0 flex-1 items-center justify-start break-words rounded-r-xl border border-solid border-stone-400 bg-stone-100 px-4 py-2 text-left font-mono text-sm font-semibold leading-snug text-blue-700 underline decoration-blue-700 underline-offset-[3px] dark:border-stone-500 dark:bg-[#0c0a09] dark:text-blue-300 dark:decoration-blue-300;
     border-width: 1.5px;
+  }
+
+  .lab-post-split-chip__owner-line {
+    @apply inline leading-snug;
+  }
+
+  .lab-post-split-chip__name {
+    @apply inline leading-snug;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo {
+    @apply flex-col items-start justify-center py-2;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__owner-line,
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__name {
+    @apply block w-full;
+  }
+
+  .lab-post-header__hdr--wrapped .lab-post-split-chip__repo wbr {
+    display: none;
+  }
+
+  @media (max-width: 480px) {
+    .lab-post-split-chip__repo {
+      @apply flex-col items-start justify-center py-2;
+    }
+
+    .lab-post-split-chip__owner-line,
+    .lab-post-split-chip__name {
+      @apply block w-full;
+    }
+
+    .lab-post-split-chip__repo wbr {
+      display: none;
+    }
   }
 
   .lab-post-split-chip__repo:focus-visible {

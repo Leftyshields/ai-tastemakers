@@ -175,12 +175,27 @@ export function resolveLabPostDigestBackHref(
   return LIST_INDEX_HREF.oss;
 }
 
+/** Strip markdown emphasis from lead source text (no literal asterisks in output). */
+export function stripLabPostLeadMarkdown(text: string): string {
+  let out = text.trim();
+  for (let i = 0; i < 8; i++) {
+    const prev = out;
+    out = out.replace(/^[_*~`]+|[_*~`]+$/g, "").trim();
+    out = out.replace(/\*\*([^*]+)\*\*/g, "$1");
+    out = out.replace(/\*([^*]+)\*/g, "$1");
+    out = out.replace(/__([^_]+)__/g, "$1");
+    out = out.replace(/_([^_]+)_/g, "$1");
+    if (out === prev) break;
+  }
+  return out.replace(/\*\*/g, "").replace(/\*/g, "").replace(/_/g, "").trim();
+}
+
 export function extractLabPostLeadParagraph(
   experimentId: string,
   markdown: string,
 ): string | null {
   const override = LAB_POST_LEAD[experimentId]?.trim();
-  if (override) return sanitizeVisibleCopy(override);
+  if (override) return sanitizeVisibleCopy(stripLabPostLeadMarkdown(override));
   const lines = markdown.split(/\r?\n/);
   let pastH1 = false;
   const buf: string[] = [];
@@ -199,10 +214,7 @@ export function extractLabPostLeadParagraph(
     if (line.endsWith(".") || line.endsWith("!") || line.endsWith("?")) break;
   }
   if (buf.length === 0) return null;
-  let text = buf.join(" ");
-  text = text.replace(/^[_*]+|[_*]+$/g, "").trim();
-  text = text.replace(/\*\*([^*]+)\*\*/g, "$1");
-  text = text.replace(/\*([^*]+)\*/g, "$1");
+  let text = stripLabPostLeadMarkdown(buf.join(" "));
   const sentence = text.split(/(?<=[.!?])\s+/)[0]?.trim();
   if (!sentence) return null;
   return sanitizeVisibleCopy(sentence);
@@ -219,7 +231,7 @@ function renderLabPostSplitRepoLinkHtml(
   const slash = displayFullName.indexOf("/");
   const inner =
     slash >= 0
-      ? `<span class="lab-post-split-chip__owner">${escape(displayFullName.slice(0, slash))}</span>/<wbr><span class="lab-post-split-chip__name">${escape(displayFullName.slice(slash + 1))}</span>`
+      ? `<span class="lab-post-split-chip__owner-line"><span class="lab-post-split-chip__owner">${escape(displayFullName.slice(0, slash))}</span>/</span><wbr><span class="lab-post-split-chip__name">${escape(displayFullName.slice(slash + 1))}</span>`
       : escape(displayFullName);
   return `<a href="${escape(resolved)}" class="lab-post-split-chip__repo" ${labLinkDataAttrs(opts)}>${inner}</a>`;
 }

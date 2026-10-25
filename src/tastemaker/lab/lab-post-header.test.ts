@@ -7,9 +7,12 @@ import {
   appendLabBadgeAttributionToHref,
   extractLabPostLeadParagraph,
   firstResultSectionSentence,
+  renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
   resolvePostVerdictLine,
+  stripLabPostLeadMarkdown,
 } from "../../../scripts/lab/lab-post-header.js";
+import { listLabWriteupPostIds } from "../../../scripts/lab/lab-format.js";
 import { defaultLabLinkContext } from "../../../scripts/lab/lab-analytics.js";
 import { LAB_BADGE_DEST_REJECTED_SAMPLES } from "../analytics/lab-badge-dest-samples.js";
 import {
@@ -53,6 +56,7 @@ describe("lab post header E1", () => {
     expect(html).toContain("lab-post-split-chip__pill");
     expect(html).toContain("lab-post-split-chip__repo");
     expect(html).toContain("firecrawl/firecrawl");
+    expect(html).toContain("lab-post-split-chip__owner-line");
     expect(html).toContain("<wbr>");
     expect(html).toContain('aria-current="page"');
     expect(html).not.toContain("Back to the daily list");
@@ -96,6 +100,50 @@ describe("lab post header E1", () => {
     expect(LAB_TESTED_BADGE_BLURB).toBe(
       "Tastemakers doesn't just report on AI tools. It tests them. Every Lab tested badge marks a repo whose idea was put to work on these lists and measured in the open.",
     );
+  });
+
+  it("stripLabPostLeadMarkdown removes literal asterisks", () => {
+    expect(stripLabPostLeadMarkdown("_**Shipped Aug 1, 2026.** Body._")).toBe("Shipped Aug 1, 2026. Body.");
+    expect(stripLabPostLeadMarkdown("no **bold** here")).toBe("no bold here");
+  });
+
+  it("long-repo fixture lead has no markdown artifacts", () => {
+    const html = renderLabPostLongNameFixtureHeader(
+      defaultLabLinkContext(1, {}, "2026-08-01"),
+      repoRoot,
+      (t) => t,
+    );
+    expect(html).not.toContain("**");
+    expect(html).toContain("lab-post-panel__lead");
+    expect(html).toContain("Aug 1, 2026");
+    expect(html).not.toContain("Shipped Aug 1, 2026.");
+  });
+
+  it("rendered post headers never contain literal ** in lead HTML", () => {
+    const linkCtx = defaultLabLinkContext(1, {}, "2026-08-01");
+    for (const id of listLabWriteupPostIds(repoRoot)) {
+      const exp = loadExperimentsFile(repoRoot).experiments.find((e) => e.id === id);
+      if (!exp?.sourceRepo) continue;
+      const mdPath = path.join(repoRoot, "briefings/lab/posts", `${id}.md`);
+      const md = fs.readFileSync(mdPath, "utf8");
+      const titleMatch = md.match(/^#\s+(.+)$/m);
+      const title = titleMatch?.[1]?.trim() ?? exp.label;
+      const html = renderLabPostPageHeader({
+        experiment: exp,
+        title,
+        markdown: md,
+        postHref: `${id}.html`,
+        linkCtx,
+        writeupPostIds: [id],
+        repoRoot,
+        escape: (t) => t,
+      });
+      expect(html, id).not.toMatch(/\*\*/);
+      const leadMatch = html.match(/class="lab-post-panel__lead"[^>]*>([^<]+)</);
+      if (leadMatch) {
+        expect(leadMatch[1], `${id} lead`).not.toContain("*");
+      }
+    }
   });
 
   it("parses What happened section sentence from ponytail post", () => {
