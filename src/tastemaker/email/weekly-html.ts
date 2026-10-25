@@ -1,8 +1,8 @@
 import type { WeeklyEmailCopy, WeeklyReview } from "../types.js";
 import { rankingModeLabel, renderBriefForEmail, renderBriefForPlainText } from "./html.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
+import type { OutboundDestRegistry } from "../analytics/outbound-dest-manifest.js";
 import {
-  outboundLinkSigningKeyFromEnv,
   rewriteOutboundLinksInHtml,
   rewriteOutboundLinksInPlainText,
   type OutboundRewriteContext,
@@ -119,11 +119,11 @@ export function weeklyEmailOutboundContext(
   siteUrl: string,
   review: WeeklyReview,
   githubAllowlist: Record<string, string>,
-  signingKey = outboundLinkSigningKeyFromEnv(),
+  destRegistry?: OutboundDestRegistry,
 ): OutboundRewriteContext {
   return {
     siteBaseUrl: siteUrl,
-    signingKey,
+    destRegistry,
     githubAllowlist,
     channel: "email",
     surface: "weekly_email",
@@ -137,6 +137,7 @@ export function renderWeeklyEmailHtml(
   siteUrl: string,
   unsubscribeUrlOverride?: string,
   githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const copy = resolveWeeklyEmail(review);
   const preheader = escapeHtml(weeklyEmailPreheader(review));
@@ -184,7 +185,7 @@ export function renderWeeklyEmailHtml(
   if (Object.keys(githubAllowlist).length === 0) return htmlBody;
   return rewriteOutboundLinksInHtml(
     htmlBody,
-    weeklyEmailOutboundContext(siteUrl, review, githubAllowlist),
+    weeklyEmailOutboundContext(siteUrl, review, githubAllowlist, destRegistry),
   );
 }
 
@@ -193,6 +194,7 @@ export function renderWeeklyEmailText(
   siteUrl: string,
   unsubscribeUrlOverride?: string,
   githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const copy = resolveWeeklyEmail(review);
   const ossUrl = ossTop10Url(siteUrl, review.week_end);
@@ -221,7 +223,7 @@ export function renderWeeklyEmailText(
   if (Object.keys(githubAllowlist).length > 0) {
     text = rewriteOutboundLinksInPlainText(
       text,
-      weeklyEmailOutboundContext(siteUrl, review, githubAllowlist),
+      weeklyEmailOutboundContext(siteUrl, review, githubAllowlist, destRegistry),
     );
   }
   return text;

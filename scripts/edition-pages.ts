@@ -38,8 +38,8 @@ import {
 import { renderToolsPageHtml } from "./lab/render-tools-page.js";
 import { labAboutRedirectScript } from "./lab/lab-about-redirect.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
+import type { OutboundDestRegistry } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 import {
-  outboundLinkSigningKeyFromEnv,
   rewriteOutboundLinksInHtml,
   type OutboundRewriteContext,
 } from "../src/tastemaker/analytics/rewrite-outbound-links.js";
@@ -1505,11 +1505,12 @@ export async function buildMonthlySite(
   siteDir: string,
   escapeHtml: (t: string) => string,
   siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
   const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
   const outboundMonthly: OutboundRewriteContext = {
     siteBaseUrl,
-    signingKey: outboundLinkSigningKeyFromEnv(),
+    destRegistry,
     githubAllowlist,
     channel: "pages",
     surface: "monthly_page",
@@ -1575,11 +1576,12 @@ export async function buildWeeklySite(
   siteDir: string,
   escapeHtml: (t: string) => string,
   siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
   const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
   const outboundWeekly: OutboundRewriteContext = {
     siteBaseUrl,
-    signingKey: outboundLinkSigningKeyFromEnv(),
+    destRegistry,
     githubAllowlist,
     channel: "pages",
     surface: "weekly_page",
@@ -1635,6 +1637,7 @@ export async function buildEditionSite(
   edition: EditionDefinition,
   escapeHtml: (t: string) => string,
   siteBaseUrl?: string,
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
   const briefingsDir = briefingsDirForEdition(repoRoot, edition);
   const badgeLookup = loadLabBadgeLookup(repoRoot);
@@ -1655,7 +1658,7 @@ export async function buildEditionSite(
     siteBaseUrl?.trim() || "https://leftyshields.github.io/ai-tastemakers";
   const outboundPagesBase: OutboundRewriteContext = {
     siteBaseUrl: pagesSiteBase,
-    signingKey: outboundLinkSigningKeyFromEnv(),
+    destRegistry,
     githubAllowlist,
     channel: "pages",
     surface: "daily_brief",
@@ -1824,6 +1827,7 @@ export async function buildLabSite(
   escapeHtml: (t: string) => string,
   asOfIsoDate: string = buildIsoDatePt(),
   siteBaseUrl?: string,
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
   const labSiteDir = path.join(siteDir, "lab");
   await fs.mkdir(labSiteDir, { recursive: true });
@@ -1840,7 +1844,7 @@ export async function buildLabSite(
     siteBaseUrl?.trim() || "https://leftyshields.github.io/ai-tastemakers";
   const labOutbound: OutboundRewriteContext = {
     siteBaseUrl: labSiteBase,
-    signingKey: outboundLinkSigningKeyFromEnv(),
+    destRegistry,
     githubAllowlist: allowlist,
     channel: "pages",
     surface: "lab",

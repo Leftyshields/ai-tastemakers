@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
+import { OUTBOUND_DEST_MANIFEST_SITE_REL } from "../src/tastemaker/analytics/outbound-email-manifest-guard.js";
 import { findUntrackedExternalHrefs } from "../src/tastemaker/analytics/rewrite-outbound-links.js";
 import { renderDigestEmailHtml } from "../src/tastemaker/email/html.js";
 import { renderWeeklyEmailHtml } from "../src/tastemaker/email/weekly-html.js";
@@ -71,6 +72,12 @@ async function main(): Promise<void> {
   const htmlFiles = listHtmlFiles(siteDir);
   if (htmlFiles.length === 0) {
     console.error("verify-outbound-links: no site HTML (run build:pages first)");
+    process.exit(1);
+  }
+
+  const manifestPath = path.join(repoRoot, OUTBOUND_DEST_MANIFEST_SITE_REL);
+  if (!fs.existsSync(manifestPath)) {
+    console.error(`verify-outbound-links: missing ${OUTBOUND_DEST_MANIFEST_SITE_REL} (run build:pages first)`);
     process.exit(1);
   }
 

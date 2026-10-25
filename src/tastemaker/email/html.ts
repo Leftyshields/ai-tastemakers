@@ -18,8 +18,8 @@ import {
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { appendLabBadgeAttributionToHref } from "../../../scripts/lab/lab-post-header.js";
+import type { OutboundDestRegistry } from "../analytics/outbound-dest-manifest.js";
 import {
-  outboundLinkSigningKeyFromEnv,
   rewriteOutboundLinksInHtml,
   rewriteOutboundLinksInPlainText,
   type OutboundRewriteContext,
@@ -134,11 +134,11 @@ export function digestEmailOutboundContext(
   dateLabel: string,
   section: EditionId,
   githubAllowlist: Record<string, string>,
-  signingKey = outboundLinkSigningKeyFromEnv(),
+  destRegistry?: OutboundDestRegistry,
 ): OutboundRewriteContext {
   return {
     siteBaseUrl: siteUrl,
-    signingKey,
+    destRegistry,
     githubAllowlist,
     channel: "email",
     surface: "daily_email",
@@ -155,6 +155,7 @@ export function renderDigestEmailHtml(
   section: EditionId = "oss",
   badgeLookup?: ReadonlyMap<string, LabBadgeInfo>,
   githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const bootstrapNote = digest.ranking_mode === "delta_7d" ? "" : bootstrapNoteHtml();
   const preheader = escapeHtml(digestEmailPreheader(digest));
@@ -264,7 +265,7 @@ export function renderDigestEmailHtml(
   if (Object.keys(githubAllowlist).length === 0) return htmlBody;
   return rewriteOutboundLinksInHtml(
     htmlBody,
-    digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist),
+    digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist, destRegistry),
   );
 }
 
@@ -276,6 +277,7 @@ export function renderDigestEmailText(
   section: EditionId = "oss",
   badgeLookup?: ReadonlyMap<string, LabBadgeInfo>,
   githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const lines: string[] = [
     `AI TASTEMAKERS — Daily Brief — ${dateLabel}`,
@@ -303,7 +305,7 @@ export function renderDigestEmailText(
       Object.keys(githubAllowlist).length > 0
         ? rewriteOutboundLinksInPlainText(
             repo.html_url,
-            digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist),
+            digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist, destRegistry),
           )
         : repo.html_url;
     lines.push(
@@ -329,7 +331,7 @@ export function renderDigestEmailText(
   if (Object.keys(githubAllowlist).length > 0) {
     text = rewriteOutboundLinksInPlainText(
       text,
-      digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist),
+      digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist, destRegistry),
     );
   }
   return text;

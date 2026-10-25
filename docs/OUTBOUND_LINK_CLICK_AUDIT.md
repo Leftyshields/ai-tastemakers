@@ -101,7 +101,7 @@ Add one module (e.g. `src/tastemaker/analytics/rewrite-outbound-links.ts`) used 
 
 - Same-origin relative URLs (`/`, `../`, `#`) → optional lightweight `site_link_click` or exempt (product decision).
 - `https://github.com/{allowlisted}` → `/go/?…` (pages: still fire `repo_click` on redirect page **or** keep client listener but href must be `/go` for parity with email).
-- Other `https://` externals → `/go/?event=outbound_link_click&dest=…` (new allowlisted dest encoding) **or** extend `/go` with generic outbound event—one redirect handler, one PostHog event family.
+- Other `https://` externals → `/go/?event=outbound_link_click&dest=…` with destination allowed only if its SHA-256 hash appears in `site/assets/outbound-link-dests.json` (built and deployed with Pages). No client-side signing secrets.
 - `mailto:`, `tel:`, unsubscribe → exempt.
 
 Run rewriter **last** before write/send so LLM markdown cannot skip it.
@@ -119,6 +119,15 @@ New script e.g. `scripts/verify-outbound-links.ts`:
 Optionally fail if edition briefing HTML contains `href="https://github.com` outside `/go` (strict mode Brian may want).
 
 Wire into `verify:genesis` or `npm test` fixture—**do not** run `digest.yml`.
+
+### Deploy / send ordering (generic outbound links)
+
+1. Generate or update digest content (daily `digest.json`, weekly narrative, etc.).
+2. Run `npm run build:pages` — collects every outbound `dest` from static HTML **and** from rendered daily/weekly email previews (last three OSS digests + fixtures), writes `site/assets/outbound-link-dests.json`, and embeds the hash set in `/go/index.html`.
+3. **Deploy GitHub Pages** (commit/push `site/` or let the Pages workflow build and publish) so live `/go` and the manifest match the links in the email you are about to send.
+4. Send email — `sendDigestEmail` / `sendWeeklyDigestEmail` refuse to send if any `/go` outbound dest in the rendered message is missing from the on-disk manifest (forces step 2–3 before Resend).
+
+Emails already in inboxes keep working until their links are clicked; clicks only succeed after the matching manifest is live on Pages.
 
 ### 3. Smallest incremental rollout
 

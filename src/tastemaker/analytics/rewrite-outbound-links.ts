@@ -5,13 +5,14 @@ import {
   normalizeRepoParam,
   resolveAllowlistedGithubUrl,
 } from "./repo-click.js";
-import { isSafeExternalHttpUrl, signOutboundDestination } from "./outbound-link-sign.js";
+import { isSafeExternalHttpUrl, type OutboundDestRegistry } from "./outbound-dest-manifest.js";
 
 export type OutboundLinkChannel = "pages" | "email";
 
 export interface OutboundRewriteContext {
   siteBaseUrl: string;
-  signingKey: string;
+  /** When set, every generic outbound dest is registered for the published manifest. */
+  destRegistry?: OutboundDestRegistry;
   githubAllowlist: Record<string, string>;
   channel: OutboundLinkChannel;
   surface: string;
@@ -113,17 +114,15 @@ export function buildPagesRepoGoUrl(
 export function buildGenericOutboundGoUrl(
   siteBaseUrl: string,
   destination: string,
-  ctx: Pick<OutboundRewriteContext, "signingKey" | "channel" | "surface">,
+  ctx: Pick<OutboundRewriteContext, "destRegistry" | "channel" | "surface">,
 ): string | null {
   if (!isSafeExternalHttpUrl(destination)) return null;
-  const sig = signOutboundDestination(destination, ctx.signingKey);
-  if (!sig) return null;
+  ctx.destRegistry?.register(destination);
   const params = new URLSearchParams({
     event: "outbound_link_click",
     dest: destination,
     surface: ctx.surface,
     channel: ctx.channel,
-    sig,
   });
   return `${goBase(siteBaseUrl)}${params.toString()}`;
 }
@@ -187,12 +186,23 @@ export function rewriteOutboundLinksInPlainText(text: string, ctx: OutboundRewri
   });
 }
 
-export function outboundLinkSigningKeyFromEnv(): string {
-  return (
-    process.env.OUTBOUND_LINK_SIGNING_KEY?.trim() ||
-    process.env.POSTHOG_KEY?.trim() ||
-    "dev-outbound-link-signing-key"
-  );
+const OUTBOUND_DEST_FROM_GO_RE =
+  /[?&]event=outbound_link_click(?:&|$)[^"']*[&?]dest=([^"&']+)/gi;
+
+/** Collect raw destination URLs from rewritten /go outbound_link_click links. */
+export function collectOutboundDestsFromTrackedContent(content: string): string[] {
+  const dests: string[] = [];
+  let m: RegExpExecArray | null;
+  while ((m = OUTBOUND_DEST_FROM_GO_RE.exec(content)) !== null) {
+    const raw = m[1];
+    if (!raw) continue;
+    try {
+      dests.push(decodeURIComponent(raw.replace(/&amp;/g, "&")));
+    } catch {
+      dests.push(raw);
+    }
+  }
+  return dests;
 }
 
 /** Returns raw external http(s) hrefs that are not routed through /go. */

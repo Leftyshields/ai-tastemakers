@@ -7,11 +7,10 @@ import {
   resolveAllowlistedLabBadgeDestPath,
   type RepoClickProperties,
 } from "../src/tastemaker/analytics/repo-click.js";
-import { outboundGoVerifyClientScript } from "../src/tastemaker/analytics/outbound-go-client.js";
 import {
-  isSafeExternalHttpUrl,
-  verifyOutboundDestination,
-} from "../src/tastemaker/analytics/outbound-link-sign.js";
+  outboundDestClientHelpersScript,
+  resolveOutboundDestFromManifest,
+} from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
 
 function escapeHtml(text: string): string {
@@ -22,10 +21,16 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function manifestHashMapJson(sortedHashes: string[]): string {
+  const map: Record<string, true> = {};
+  for (const h of sortedHashes) map[h] = true;
+  return JSON.stringify(map);
+}
+
 export function renderGoRedirectPage(
   allowlist: Record<string, string>,
   homePath = "/",
-  signingKey = "",
+  manifestDestHashes: string[] = [],
 ): string {
   const allowlistJson = JSON.stringify(allowlist);
   const posthog = posthogScriptHtml();
@@ -36,7 +41,8 @@ export function renderGoRedirectPage(
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
   const attributionParser = labBadgeAttributionClientParserSource();
-  const outboundVerify = outboundGoVerifyClientScript(signingKey);
+  const safeManifest = escapeScriptString(manifestHashMapJson(manifestDestHashes));
+  const destHelpers = outboundDestClientHelpersScript();
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -63,6 +69,7 @@ export function renderGoRedirectPage(
   <script>
 (function () {
   var ALLOWLIST = JSON.parse('${safeAllowlist}');
+  var MANIFEST_HASHES = JSON.parse('${safeManifest}');
   var HOME = '${safeHome}';
   var captured = false;
 
@@ -80,7 +87,7 @@ export function renderGoRedirectPage(
     window.location.replace(url);
   }
 
-  ${outboundVerify}
+  ${destHelpers}
 
   var params = new URLSearchParams(window.location.search);
   var eventName = params.get("event") || "";
@@ -95,8 +102,7 @@ export function renderGoRedirectPage(
     status: params.get("status"),
     dest: params.get("dest"),
     channel: params.get("channel"),
-    surface: params.get("surface"),
-    sig: params.get("sig")
+    surface: params.get("surface")
   };
 
   var repo = parsed.repo;
@@ -224,9 +230,9 @@ export function renderGoRedirectPage(
     setTimeout(go, 300);
   }
 
-  if (eventName === "outbound_link_click" && parsed.dest && parsed.sig) {
-    verifyOutboundSig(parsed.dest, parsed.sig).then(function (ok) {
-      if (ok) finishOutbound(parsed.dest, parsed.surface || "");
+  if (eventName === "outbound_link_click" && parsed.dest) {
+    resolveManifestOutbound(parsed.dest, MANIFEST_HASHES).then(function (allowed) {
+      if (allowed) finishOutbound(allowed, parsed.surface || "");
       else setTimeout(go, 300);
     });
   } else {
@@ -243,20 +249,14 @@ export function resolveGoPageDestination(
   search: string,
   allowlist: Record<string, string>,
   homeUrl: string,
-  signingKey = "",
+  manifestHashes: ReadonlySet<string> = new Set(),
 ): string {
   const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
   const event = params.get("event") || "";
   const dest = params.get("dest");
-  const sig = params.get("sig") ?? "";
   if (event === "outbound_link_click" && dest) {
-    if (
-      isSafeExternalHttpUrl(dest) &&
-      verifyOutboundDestination(dest, sig, signingKey)
-    ) {
-      return dest;
-    }
-    return homeUrl;
+    const resolved = resolveOutboundDestFromManifest(dest, manifestHashes);
+    return resolved ?? homeUrl;
   }
   if (event === "lab_badge_click" && dest) {
     const allowed = resolveAllowlistedLabBadgeDestPath(dest);
