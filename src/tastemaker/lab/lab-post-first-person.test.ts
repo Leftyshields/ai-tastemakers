@@ -16,9 +16,11 @@ describe("lab post first-person gate", () => {
     expect(hits.some((s) => /\bus\b/i.test(s))).toBe(true);
   });
 
-  it("ignores shared chrome outside main", () => {
-    const html = `<header><p>How we pick repos globally.</p></header><main><p>The post body is neutral.</p></main>`;
-    expect(findLabPostFirstPersonSentences(html)).toEqual([]);
+  it("flags the Lab shell tagline under the site header", () => {
+    const html = `<header class="mb-8 border-b"><h1>Lab</h1><p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">Public notes on how we pick repos, test pipeline changes, and measure what readers engage with.</p></header><main><p>The post body is neutral.</p></main>`;
+    expect(findLabPostFirstPersonSentences(html)).toEqual([
+      "Public notes on how we pick repos, test pipeline changes, and measure what readers engage with.",
+    ]);
   });
 
   it("excludes blockquote, q, code, pre, and HTML comments", () => {

@@ -516,8 +516,15 @@ function decodeHtmlEntities(text: string): string {
     .replace(/&amp;/gi, "&");
 }
 
-/** Visible plain text from HTML after first-person exclusions (Lab page `<main>` only). */
-export function labPostVisiblePlainText(html: string): string {
+function labShellTaglinePlain(html: string): string {
+  const m = html.match(
+    /<header class="mb-8[\s\S]*?<p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">([\s\S]*?)<\/p>/i,
+  );
+  if (!m?.[1]) return "";
+  return decodeHtmlEntities(m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+}
+
+function labMainVisiblePlain(html: string): string {
   const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] ?? html;
   const withoutNav = main.replace(/<nav[\s\S]*?<\/nav>/gi, " ");
   const stripped = stripLabPostHtmlForFirstPersonScan(withoutNav);
@@ -525,6 +532,13 @@ export function labPostVisiblePlainText(html: string): string {
   blockAware = blockAware.replace(/<(?:br|hr)\s*\/?>/gi, ". ");
   const noTags = blockAware.replace(/<[^>]+>/g, " ");
   return decodeHtmlEntities(noTags).replace(/\s+/g, " ").trim();
+}
+
+/** Visible plain text from Lab layout tagline plus `<main>` after first-person exclusions. */
+export function labPostVisiblePlainText(html: string): string {
+  const tagline = labShellTaglinePlain(html);
+  const mainText = labMainVisiblePlain(html);
+  return [tagline, mainText].filter(Boolean).join(" ").trim();
 }
 
 function splitPlainIntoSentences(text: string): string[] {
