@@ -3,6 +3,7 @@
 # Aligns with project-genesis .cursor/skills/verify (npm test + run-path).
 set -e
 cd "$(dirname "$0")/.."
+TSX="${TSX:-./node_modules/.bin/tsx}"
 echo "verify: npm test"
 npm test
 echo "verify: genesis run-path (.genome)"
@@ -54,5 +55,5 @@ echo "verify: lab PostHog and link tracking (UX42)"
 POSTHOG_KEY="${POSTHOG_KEY:-phc_ci_lab_analytics_gate_only}" DIGEST_AS_OF_DATE="${DIGEST_AS_OF_DATE:-2026-10-19}" npm run build:pages >/dev/null
 npx tsx scripts/verify-lab-analytics.ts
 echo "verify: site SEO (sitemap, feeds, h1, json-ld)"
-npx tsx scripts/verify-site-seo.ts
+"$TSX" scripts/verify-site-seo.ts
 echo "verify: ok"

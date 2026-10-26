@@ -29,6 +29,7 @@ export function normalizeCanonicalPath(p: string): string {
 
 export function googleSiteVerificationMetaHtml(escapeHtml: (t: string) => string): string {
   const token = process.env.GOOGLE_SITE_VERIFICATION?.trim() ?? "";
+  if (!token) return "";
   return `<meta name="google-site-verification" content="${escapeHtml(token)}">`;
 }
 
