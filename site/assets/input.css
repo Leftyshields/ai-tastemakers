@@ -279,7 +279,9 @@
   }
 
   .lab-nav-scroll-wrap {
-    @apply relative max-w-full min-w-0;
+    --lab-nav-fade-width: 2rem;
+    @apply relative box-border max-w-full min-w-0 overflow-hidden;
+    padding-right: var(--lab-nav-fade-width);
   }
 
   .lab-nav-scroll-wrap::after {
@@ -288,14 +290,25 @@
     right: 0;
     top: 0;
     bottom: 0;
-    width: 2.25rem;
+    width: var(--lab-nav-fade-width);
+    min-width: 24px;
     pointer-events: none;
-    z-index: 1;
-    background: linear-gradient(to right, rgb(255 252 248 / 0), rgb(255 252 248) 72%);
+    z-index: 2;
+    background: linear-gradient(
+      to right,
+      rgb(255 252 248 / 0) 0%,
+      rgb(255 252 248 / 0.85) 35%,
+      rgb(255 252 248) 100%
+    );
   }
 
   :is(.dark, .dark *) .lab-nav-scroll-wrap::after {
-    background: linear-gradient(to right, rgb(28 25 23 / 0), rgb(28 25 23) 72%);
+    background: linear-gradient(
+      to right,
+      rgb(28 25 23 / 0) 0%,
+      rgb(28 25 23 / 0.88) 35%,
+      rgb(28 25 23) 100%
+    );
   }
 
   .lab-nav-scroll-wrap:has(.lab-nav--combined[data-scroll-end="true"])::after {
@@ -305,7 +318,9 @@
   .lab-nav--combined {
     @apply relative flex w-full min-w-0 max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1;
     scroll-snap-type: x mandatory;
-    scroll-padding-inline-end: 1.5rem;
+    scroll-padding-inline-end: var(--lab-nav-fade-width);
+    margin-right: calc(-1 * var(--lab-nav-fade-width));
+    padding-right: calc(var(--lab-nav-fade-width) + 0.75rem);
     -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
@@ -1096,4 +1111,31 @@
 .dark .home-index-edition-nav a.home-index-tab--idle:hover {
   border-color: var(--color-stone-500);
   color: var(--color-stone-100);
+}
+
+/* Lab nav pills (UX50): light fill on active; dark matches home tabs (outline only). */
+:root {
+  --lab-nav-active-bg: var(--color-blue-50);
+  --lab-nav-active-border: var(--color-blue-800);
+  --lab-nav-active-fg: var(--color-blue-900);
+}
+
+html.dark {
+  --lab-nav-active-bg: transparent;
+  --lab-nav-active-border: var(--color-blue-400);
+  --lab-nav-active-fg: var(--color-blue-200);
+}
+
+.lab-nav a.lab-nav-pill--active[aria-current="page"] {
+  border-width: 1px;
+  border-color: var(--lab-nav-active-border);
+  background-color: var(--lab-nav-active-bg) !important;
+  color: var(--lab-nav-active-fg) !important;
+  font-weight: var(--font-weight-semibold);
+}
+
+.lab-nav-scroll-wrap .lab-nav--combined a.lab-nav-pill--active[aria-current="page"] {
+  border-color: var(--lab-nav-active-border) !important;
+  background-color: var(--lab-nav-active-bg) !important;
+  color: var(--lab-nav-active-fg) !important;
 }

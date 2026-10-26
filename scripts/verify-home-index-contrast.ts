@@ -6,8 +6,10 @@ import { CONTRAST_CHECK_JS, HOME_INDEX_ACTIVE_TAB_DARK_JS } from "./color-contra
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const HOME_PAGES = ["site/index.html", "site/skills/index.html"];
+const LAB_ACTIVE_TAB_PAGES = ["site/lab/index.html"];
 const CONTRAST_ROOTS = [".home-index-main", ".home-index-edition-nav"];
 const MIN_RATIO = 4.5;
+const HOME_ACTIVE_TAB_SELECTOR = '.home-index-edition-nav a[aria-current="page"]';
 
 async function main(): Promise<void> {
   const browser = await chromium.launch();
@@ -37,7 +39,7 @@ async function main(): Promise<void> {
         }
         if (mode === "dark") {
           const tabFailures = (await page.evaluate(
-            `${HOME_INDEX_ACTIVE_TAB_DARK_JS}(${MIN_RATIO})`,
+            `${HOME_INDEX_ACTIVE_TAB_DARK_JS}(${MIN_RATIO}, ${JSON.stringify(HOME_ACTIVE_TAB_SELECTOR)})`,
           )) as string[];
           for (const f of tabFailures) {
             allFailures.push(`[${rel} dark ${width}px active-tab] ${f}`);
@@ -45,6 +47,33 @@ async function main(): Promise<void> {
         }
         await page.close();
       }
+    }
+  }
+
+  for (const rel of LAB_ACTIVE_TAB_PAGES) {
+    const abs = path.join(repoRoot, rel);
+    if (!fs.existsSync(abs)) {
+      console.error(`missing ${rel} (run npm run build:pages first)`);
+      process.exit(1);
+    }
+    const fileUrl = `file://${abs}`;
+    for (const width of [390, 1280]) {
+      const labTabSelector =
+        width === 390
+          ? '.lab-nav--combined a[aria-current="page"]'
+          : '.lab-nav--section a[aria-current="page"]';
+      const page = await browser.newPage({ viewport: { width, height: 900 } });
+      await page.goto(fileUrl, { waitUntil: "networkidle" });
+      await page.evaluate(() => {
+        document.documentElement.classList.add("dark");
+      });
+      const tabFailures = (await page.evaluate(
+        `${HOME_INDEX_ACTIVE_TAB_DARK_JS}(${MIN_RATIO}, ${JSON.stringify(labTabSelector)})`,
+      )) as string[];
+      for (const f of tabFailures) {
+        allFailures.push(`[${rel} dark ${width}px lab-active-tab] ${f}`);
+      }
+      await page.close();
     }
   }
 
@@ -57,7 +86,7 @@ async function main(): Promise<void> {
     process.exit(1);
   }
   console.log(
-    "verify: home index contrast ok (light and dark, 390 and desktop, active tab dark gate)",
+    "verify: home index contrast ok (light and dark, 390 and desktop, home + lab active tab dark gate)",
   );
 }
 

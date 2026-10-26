@@ -455,6 +455,21 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
   };
 }
 
+function labNavPill(
+  href: string,
+  label: string,
+  isActive: boolean,
+  escapeHtml: (t: string) => string,
+  trackAttr = "",
+): string {
+  const base =
+    "lab-nav-pill inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline";
+  const active = "lab-nav-pill--active font-semibold";
+  const idle =
+    "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+  return `<a href="${href}" class="${base} ${isActive ? active : idle}"${trackAttr}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+}
+
 function labNavPillsHtml(
   active: LabNavActive,
   escapeHtml: (t: string) => string,
@@ -466,7 +481,7 @@ function labNavPillsHtml(
   const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
   const pill = (href: string, label: string, isActive: boolean) =>
-    editionNavPill(href, label, isActive, escapeHtml, "", ' data-lab-section="nav"');
+    labNavPill(href, label, isActive, escapeHtml, ' data-lab-section="nav"');
 
   return [
     pill(labHomeHref, "Lab home", active === "home"),
@@ -499,8 +514,8 @@ export function labMobileCombinedNavHtml(
     <nav aria-label="Lab and editions" class="lab-nav lab-nav--combined">
       ${labNavPillsHtml(active, escapeHtml, depth)}
       <span class="lab-nav__divider shrink-0" aria-hidden="true"></span>
-      ${editionNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, "", track)}
-      ${editionNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, "", track)}
+      ${labNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, track)}
+      ${labNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, track)}
     </nav>
   </div>`;
 }
@@ -1310,6 +1325,7 @@ function contentCard(
   title: string,
   bodyHtml: string,
   paddingClass: string,
+  escapeHtml: (t: string) => string,
   options?: { archiveHeading?: boolean },
 ): string {
   const idAttr = sectionId ? ` id="${sectionId}"` : "";
@@ -1318,22 +1334,28 @@ function contentCard(
     : "mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
   return `
     <section${idAttr} class="content-card ${CONTENT_CARD_CLASS} ${paddingClass}">
-      <h2 class="${h2Class}">${title}</h2>
+      <h2 class="${h2Class}">${escapeHtml(title)}</h2>
       ${bodyHtml}
     </section>`;
 }
 
-function sidebarCard(sectionId: string | undefined, title: string, bodyHtml: string): string {
-  return contentCard(sectionId, title, bodyHtml, "p-5");
+function sidebarCard(
+  sectionId: string | undefined,
+  title: string,
+  bodyHtml: string,
+  escapeHtml: (t: string) => string,
+): string {
+  return contentCard(sectionId, title, bodyHtml, "p-5", escapeHtml);
 }
 
 function mainBlockCard(
   sectionId: string | undefined,
   title: string,
   bodyHtml: string,
+  escapeHtml: (t: string) => string,
   options?: { archiveHeading?: boolean },
 ): string {
-  return contentCard(sectionId, title, bodyHtml, "p-6", options);
+  return contentCard(sectionId, title, bodyHtml, "p-6", escapeHtml, options);
 }
 
 function wrapUpSecondaryCtaHtml(wrap?: WrapUpArchive): string {
@@ -1382,13 +1404,13 @@ function howItWorksMainBlockHtml(): string {
         <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
       </ol>`;
-  return mainBlockCard(undefined, "How it works", body);
+  return mainBlockCard(undefined, "How it works", body, (t) => t);
 }
 
 function skillsAboutMainBlockHtml(): string {
   const body = `
       <p class="m-0 text-sm leading-relaxed text-stone-600 dark:text-stone-400">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics &mdash; then rank by 7-day star momentum with Claude briefs.</p>`;
-  return mainBlockCard(undefined, "About this digest", body);
+  return mainBlockCard(undefined, "About this digest", body, (t) => t);
 }
 
 function weeklyListItems(
@@ -1429,7 +1451,7 @@ function weeklyMainBlock(wrap: WrapUpArchive): string {
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref, wrap.weekLabels)}</ul>`;
-  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body);
+  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body, (t) => t);
 }
 
 function monthlyMainBlock(wrap: WrapUpArchive): string {
@@ -1437,23 +1459,27 @@ function monthlyMainBlock(wrap: WrapUpArchive): string {
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${monthlyListItems(wrap.months, wrap.monthHref)}</ul>`;
-  return mainBlockCard("monthly-archive", "Monthly rollups", body);
+  return mainBlockCard("monthly-archive", "Monthly rollups", body, (t) => t);
 }
 
-function siblingEditionPromoSidebar(paths: SitePaths, sibling: "oss" | "skills"): string {
+function siblingEditionPromoSidebar(
+  paths: SitePaths,
+  sibling: "oss" | "skills",
+  escapeHtml: (t: string) => string,
+): string {
   if (sibling === "skills") {
     const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Skill Tastemakers</a></h3>
       <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Browse skills digest &rarr;</a>`;
-    return sidebarCard(undefined, "Also from Tastemakers", body);
+    return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
   }
 
   const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">AI Tastemakers</a></h3>
       <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">Browse OSS digest &rarr;</a>`;
-  return sidebarCard(undefined, "Also from Tastemakers", body);
+  return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
 }
 
 function indexLayoutGrid(mainHtml: string, sidebarHtml: string): string {
@@ -1517,6 +1543,7 @@ async function archiveMonthGridHtml(
       "archive",
       sectionTitle,
       `<p class="m-0 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(emptyMessage)}</p>`,
+      escapeHtml,
       { archiveHeading: true },
     );
   }
@@ -1528,7 +1555,7 @@ async function archiveMonthGridHtml(
   );
 
   const body = `<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">${tiles.join("\n")}</div>`;
-  return mainBlockCard("archive", sectionTitle, body, { archiveHeading: true });
+  return mainBlockCard("archive", sectionTitle, body, escapeHtml, { archiveHeading: true });
 }
 
 function ossHeroActionsV2(paths: SitePaths, latest: string | undefined, wrapUp?: WrapUpArchive): string {
