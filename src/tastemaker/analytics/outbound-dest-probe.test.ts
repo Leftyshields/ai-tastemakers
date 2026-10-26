@@ -16,6 +16,14 @@ describe("isBlockedProbeIpAddress", () => {
     expect(isBlockedProbeIpAddress("::1")).toBe(true);
     expect(isBlockedProbeIpAddress("fc00::1")).toBe(true);
     expect(isBlockedProbeIpAddress("fd12::1")).toBe(true);
+    expect(isBlockedProbeIpAddress("::")).toBe(true);
+    expect(isBlockedProbeIpAddress("100.64.0.1")).toBe(true);
+  });
+
+  it("blocks IPv4-mapped IPv6 literals (embedded private/loopback)", () => {
+    expect(isBlockedProbeIpAddress("::ffff:127.0.0.1")).toBe(true);
+    expect(isBlockedProbeIpAddress("::ffff:10.0.0.1")).toBe(true);
+    expect(isBlockedProbeIpAddress("0:0:0:0:0:ffff:127.0.0.1")).toBe(true);
   });
 
   it("allows public addresses", () => {
@@ -39,6 +47,30 @@ describe("assertSafeOutboundProbeUrl", () => {
     vi.spyOn(dns, "lookup").mockResolvedValue([{ address: "10.0.0.55", family: 4 }] as never);
     await expect(assertSafeOutboundProbeUrl("https://innocent.example/path")).rejects.toThrow(
       /blocked address 10.0.0.55/,
+    );
+  });
+
+  it("blocks IPv4-mapped IPv6 in URL literals", async () => {
+    await expect(assertSafeOutboundProbeUrl("https://[::ffff:127.0.0.1]/x")).rejects.toThrow(
+      /blocked IP literal/,
+    );
+    await expect(assertSafeOutboundProbeUrl("https://[::ffff:10.0.0.1]/x")).rejects.toThrow(
+      /blocked IP literal/,
+    );
+  });
+
+  it("blocks when DNS returns IPv4-mapped private addresses", async () => {
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "::ffff:10.0.0.1", family: 6 },
+    ] as never);
+    await expect(assertSafeOutboundProbeUrl("https://mapped.example/path")).rejects.toThrow(
+      /blocked address ::ffff:10.0.0.1/,
+    );
+    vi.spyOn(dns, "lookup").mockResolvedValue([
+      { address: "::ffff:127.0.0.1", family: 6 },
+    ] as never);
+    await expect(assertSafeOutboundProbeUrl("https://loopback-mapped.example/path")).rejects.toThrow(
+      /blocked address ::ffff:127.0.0.1/,
     );
   });
 });
