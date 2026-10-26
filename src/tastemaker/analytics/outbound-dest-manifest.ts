@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import { promises as fs } from "node:fs";
+import type { DnsLookupFn } from "./outbound-dest-probe.js";
+import { probeHttpsEndpointReachability } from "./outbound-dest-probe.js";
 
 const UNSAFE_SCHEME =
   /^(javascript:|data:|vbscript:)/i;
@@ -64,28 +66,6 @@ export interface OutboundDestManifestFile {
   dest_hashes: string[];
 }
 
-async function httpsEndpointReachable(normalizedHttpsUrl: string): Promise<boolean> {
-  const tryRequest = async (method: "HEAD" | "GET"): Promise<boolean> => {
-    const res = await fetch(normalizedHttpsUrl, {
-      method,
-      redirect: "follow",
-      signal: AbortSignal.timeout(12_000),
-      headers: method === "GET" ? { Range: "bytes=0-0" } : undefined,
-    });
-    return res.status < 500;
-  };
-  try {
-    if (await tryRequest("HEAD")) return true;
-  } catch {
-    /* fall through */
-  }
-  try {
-    return await tryRequest("GET");
-  } catch {
-    return false;
-  }
-}
-
 export class OutboundDestRegistry {
   private readonly hashes = new Set<string>();
   /** Normalized https URLs upgraded from http:// inputs during this build. */
@@ -120,18 +100,31 @@ export class OutboundDestRegistry {
     return this.hashes.has(outboundDestHash(normalized));
   }
 
-  /** Fail the build when an http:// link was upgraded but the host does not speak HTTPS. */
-  async verifyHttpUpgrades(): Promise<void> {
-    const failed: string[] = [];
-    for (const normalized of this.httpUpgradedNormalized) {
-      if (!(await httpsEndpointReachable(normalized))) {
-        failed.push(normalized);
+  dropNormalizedDest(normalized: string): void {
+    this.hashes.delete(outboundDestHash(normalized));
+    this.httpUpgradedNormalized.delete(normalized);
+  }
+
+  /** Probe http→https upgrades; drop failures with warnings (never fail the build). */
+  async verifyHttpUpgrades(options?: {
+    warn?: (message: string) => void;
+    fetchImpl?: typeof fetch;
+    lookup?: DnsLookupFn;
+  }): Promise<void> {
+    const warn = options?.warn ?? ((message: string) => console.warn(message));
+    const fetchImpl = options?.fetchImpl ?? fetch;
+    const lookup = options?.lookup;
+
+    for (const normalized of [...this.httpUpgradedNormalized]) {
+      const result = await probeHttpsEndpointReachability(normalized, fetchImpl, lookup);
+      if (result === "ok") continue;
+      this.dropNormalizedDest(normalized);
+      if (result === "blocked") {
+        warn(`outbound manifest: dropped http upgrade (blocked probe target): ${normalized}`);
+      } else {
+        warn(`outbound manifest: dropped http upgrade (HTTPS unreachable): ${normalized}`);
       }
     }
-    if (failed.length === 0) return;
-    throw new Error(
-      `Outbound manifest: http→https upgrade failed (host does not respond over HTTPS):\n${failed.map((u) => `  - ${u}`).join("\n")}`,
-    );
   }
 
   toSortedHashes(): string[] {

@@ -1,5 +1,6 @@
+import dns from "node:dns/promises";
 import vm from "node:vm";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi, afterEach } from "vitest";
 import {
   normalizeOutboundDest,
   outboundDestClientHelpersScript,
@@ -91,10 +92,43 @@ describe("resolveGoPageDestination dest param decoding", () => {
 });
 
 describe("OutboundDestRegistry http upgrade", () => {
-  it("registers https hash from http input (verified at build via verifyHttpUpgrades)", async () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
+  it("keeps manifest entry when HTTPS probe succeeds", async () => {
     const r = new OutboundDestRegistry();
     expect(r.register("http://example.com/path")).toBe(true);
+    const fetchImpl = vi.fn(async () => new Response(null, { status: 200 })) as typeof fetch;
+    vi.spyOn(dns, "lookup").mockResolvedValue([{ address: "93.184.216.34", family: 4 }] as never);
+    await r.verifyHttpUpgrades({ fetchImpl });
     expect(r.hasRawDest("https://example.com/path")).toBe(true);
-    await expect(r.verifyHttpUpgrades()).resolves.toBeUndefined();
+    expect(fetchImpl).toHaveBeenCalled();
+  });
+
+  it("drops unreachable http upgrade with a warning instead of failing the build", async () => {
+    const r = new OutboundDestRegistry();
+    r.register("http://example.com/dead");
+    const warnings: string[] = [];
+    const fetchImpl = vi.fn(async () => {
+      throw new Error("connection refused");
+    }) as typeof fetch;
+    vi.spyOn(dns, "lookup").mockResolvedValue([{ address: "93.184.216.34", family: 4 }] as never);
+    await expect(
+      r.verifyHttpUpgrades({ warn: (m) => warnings.push(m), fetchImpl }),
+    ).resolves.toBeUndefined();
+    expect(r.hasRawDest("https://example.com/dead")).toBe(false);
+    expect(warnings.some((w) => w.includes("HTTPS unreachable"))).toBe(true);
+  });
+
+  it("drops blocked probe targets (loopback) with a warning", async () => {
+    const r = new OutboundDestRegistry();
+    r.register("http://127.0.0.1/internal");
+    const warnings: string[] = [];
+    const fetchImpl = vi.fn() as typeof fetch;
+    await r.verifyHttpUpgrades({ warn: (m) => warnings.push(m), fetchImpl });
+    expect(r.hasRawDest("https://127.0.0.1/internal")).toBe(false);
+    expect(warnings.some((w) => w.includes("blocked probe target"))).toBe(true);
+    expect(fetchImpl).not.toHaveBeenCalled();
   });
 });
