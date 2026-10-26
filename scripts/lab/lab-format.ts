@@ -83,13 +83,129 @@ export function repairGfmTableDelimiterRows(markdown: string): string {
   });
 }
 
+export type LabWriteupFrontMatter = {
+  lead?: string;
+};
+
+/** Optional YAML front matter at the top of Lab write-ups (`lead:` for panel copy). */
+export function splitLabWriteupFrontMatter(markdown: string): {
+  frontMatter: LabWriteupFrontMatter;
+  body: string;
+} {
+  const trimmed = markdown.replace(/^\uFEFF/, "");
+  if (!trimmed.startsWith("---")) {
+    return { frontMatter: {}, body: markdown };
+  }
+  const end = trimmed.indexOf("\n---", 3);
+  if (end < 0) {
+    return { frontMatter: {}, body: markdown };
+  }
+  const yamlBlock = trimmed.slice(3, end).trim();
+  const body = trimmed.slice(end + 4).replace(/^\r?\n/, "");
+  const frontMatter: LabWriteupFrontMatter = {};
+  const lines = yamlBlock.split(/\r?\n/);
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i] ?? "";
+    if (!line.startsWith("lead:")) continue;
+    let rest = line.slice(5).trim();
+    if (rest === "|" || rest === ">") {
+      const folded: string[] = [];
+      for (i++; i < lines.length; i++) {
+        const next = lines[i] ?? "";
+        if (/^[A-Za-z0-9_-]+:/.test(next)) {
+          i--;
+          break;
+        }
+        folded.push(next.replace(/^\s{2,}/, ""));
+      }
+      frontMatter.lead = folded.join(" ").trim();
+      break;
+    }
+    if (
+      (rest.startsWith('"') && rest.endsWith('"')) ||
+      (rest.startsWith("'") && rest.endsWith("'"))
+    ) {
+      frontMatter.lead = rest
+        .slice(1, -1)
+        .replace(/\\"/g, '"')
+        .replace(/\\'/g, "'");
+    } else {
+      frontMatter.lead = rest;
+    }
+    break;
+  }
+  return { frontMatter, body };
+}
+
+export function stripLabWriteupFrontMatter(markdown: string): string {
+  return splitLabWriteupFrontMatter(markdown).body;
+}
+
+const LAB_WRITEUP_LEAD_FILENAME = /^EXP-[A-Za-z0-9_-]+\.md$/;
+const LAB_WRITEUP_LEAD_ID = /^EXP-[A-Za-z0-9_-]+$/;
+
+/** Copywriter panel leads keyed by write-up post id (`briefings/lab/lab-leads.md`). */
+export function loadLabWriteupLeadsCatalog(
+  repoRoot: string,
+): Readonly<Record<string, string>> {
+  const catalogPath = path.join(repoRoot, "briefings/lab/lab-leads.md");
+  if (!fs.existsSync(catalogPath)) {
+    throw new Error(`missing ${path.relative(repoRoot, catalogPath)}`);
+  }
+  const out: Record<string, string> = {};
+  let pendingId: string | null = null;
+  for (const raw of fs.readFileSync(catalogPath, "utf8").split(/\r?\n/)) {
+    const line = raw.trim();
+    if (!line || line.startsWith("#")) continue;
+    if (LAB_WRITEUP_LEAD_FILENAME.test(line)) {
+      pendingId = line.slice(0, -".md".length);
+      continue;
+    }
+    if (line.startsWith("lead:")) {
+      const lead = line.slice(5).trim();
+      if (pendingId && lead) out[pendingId] = lead;
+      pendingId = null;
+      continue;
+    }
+    const colon = line.indexOf(":");
+    if (colon <= 0) continue;
+    const id = line.slice(0, colon).trim();
+    const lead = line.slice(colon + 1).trim();
+    if (LAB_WRITEUP_LEAD_ID.test(id) && lead) out[id] = lead;
+  }
+  return out;
+}
+
+const LINK_DEST_PLACEHOLDER = "\u0000LINKDEST";
+
+/** Keep markdown link destinations intact while normalizing visible ISO dates in prose. */
+export function shieldMarkdownLinkDestinations(markdown: string): { text: string; dests: string[] } {
+  const dests: string[] = [];
+  const text = markdown.replace(/\]\(([^)\n]+)\)/g, (_full, dest: string) => {
+    const idx = dests.length;
+    dests.push(dest);
+    return `]${LINK_DEST_PLACEHOLDER}${idx}\u0000)`;
+  });
+  return { text, dests };
+}
+
+export function restoreMarkdownLinkDestinations(markdown: string, dests: string[]): string {
+  return markdown.replace(
+    new RegExp(`\\]${LINK_DEST_PLACEHOLDER}(\\d+)\\u0000\\)`, "g"),
+    (_, idx: string) => `](${dests[Number(idx)] ?? ""})`,
+  );
+}
+
 /** Normalize write up markdown before render (dates, approximations). */
 export function normalizeLabWriteupMarkdown(markdown: string): string {
-  let s = markdown;
+  let s = stripLabWriteupFrontMatter(markdown);
   s = repairGfmTableDelimiterRows(s);
+  const shielded = shieldMarkdownLinkDestinations(s);
+  s = shielded.text;
   s = s.replace(/\bKept\s*\(\s*(\d{4}-\d{2}-\d{2})\s*\)/gi, (_, iso: string) => `Kept on ${formatReaderDatePt(iso)}`);
   s = s.replace(/~\s*(?=\d)/g, "about ");
   s = s.replace(/\b(\d{4}-\d{2}-\d{2})\b/g, (_, iso: string) => formatReaderDatePt(iso));
+  s = restoreMarkdownLinkDestinations(s, shielded.dests);
   return s;
 }
 
@@ -377,6 +493,24 @@ export function prepareLabProseHtmlFromMarkdown(markdown: string): string {
   return sanitizeLabVisibleHtml(html);
 }
 
+/** Unparsed markdown links leaked as literal `[text](url)` in rendered HTML (UX43). */
+export function findLabPostUnrenderedMarkdownLinkViolations(html: string, pageRel: string): string[] {
+  const article =
+    html.match(/class="[^"]*lab-prose-capped[^"]*"[\s\S]*?<\/article>/i)?.[0] ?? html;
+  let stripped = article.replace(/<pre[\s\S]*?<\/pre>/gi, "");
+  stripped = stripped.replace(/<code[\s\S]*?<\/code>/gi, "");
+  stripped = stripped.replace(/<a\b[\s\S]*?<\/a>/gi, "");
+  const text = stripped.replace(/<[^>]+>/g, " ");
+  const violations: string[] = [];
+  if (/\]\s*\(/.test(text)) {
+    violations.push(`${pageRel}: raw markdown link "]( " in rendered lab HTML`);
+  }
+  if (/\[[^\]]+\]\s*\(/.test(text)) {
+    violations.push(`${pageRel}: raw markdown link "[...](" in rendered lab HTML`);
+  }
+  return violations;
+}
+
 /** Unparsed markdown tables: pipe rows leaked outside rendered <table> (UX43). */
 export function findLabPostUnrenderedTableViolations(html: string, pageRel: string): string[] {
   const article =
@@ -484,6 +618,111 @@ export function findLabProseInlineSpacingViolations(html: string): string[] {
     violations.push(`…${m[0]}…`);
   }
   return violations;
+}
+
+export const LAB_POST_FIRST_PERSON_WORD_RE = /\b(we|our|us)\b/gi;
+
+const LAB_POST_EXCLUDED_INLINE_RE =
+  /<(blockquote|q|code|pre)\b[^>]*>[\s\S]*?<\/\1>/gi;
+
+/** Remove third-party repo names/descriptions marked for the first-person gate. */
+export function stripLabThirdPartyHtml(html: string): string {
+  let s = html;
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(
+      /<([a-z][a-z0-9]*)\b[^>]*\bdata-third-party(?:=[^>\s]+)?[^>]*>[\s\S]*?<\/\1>/gi,
+      " ",
+    );
+  }
+  return s;
+}
+
+/** Remove HTML comments and reader-excluded elements before first-person scan. */
+export function stripLabPostHtmlForFirstPersonScan(html: string): string {
+  let s = html.replace(/<!--[\s\S]*?-->/g, " ");
+  s = s.replace(/<script[\s\S]*?<\/script>/gi, " ");
+  s = s.replace(/<style[\s\S]*?<\/style>/gi, " ");
+  s = stripLabThirdPartyHtml(s);
+  let prev = "";
+  while (prev !== s) {
+    prev = s;
+    s = s.replace(LAB_POST_EXCLUDED_INLINE_RE, " ");
+  }
+  return s;
+}
+
+function decodeHtmlEntities(text: string): string {
+  return text
+    .replace(/&#(\d+);/g, (_, n: string) => String.fromCharCode(Number(n)))
+    .replace(/&#x([0-9a-f]+);/gi, (_, h: string) => String.fromCharCode(parseInt(h, 16)))
+    .replace(/&quot;/gi, '"')
+    .replace(/&#0*39;/gi, "'")
+    .replace(/&apos;/gi, "'")
+    .replace(/&lt;/gi, "<")
+    .replace(/&gt;/gi, ">")
+    .replace(/&amp;/gi, "&");
+}
+
+function labShellTaglinePlain(html: string): string {
+  const m = html.match(
+    /<header class="mb-8[\s\S]*?<p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">([\s\S]*?)<\/p>/i,
+  );
+  if (!m?.[1]) return "";
+  return decodeHtmlEntities(m[1].replace(/<[^>]+>/g, " ").replace(/\s+/g, " ").trim());
+}
+
+function labMainVisiblePlain(html: string): string {
+  const main = html.match(/<main[\s\S]*?<\/main>/i)?.[0] ?? html;
+  const withoutNav = main.replace(/<nav[\s\S]*?<\/nav>/gi, " ");
+  const stripped = stripLabPostHtmlForFirstPersonScan(withoutNav);
+  let blockAware = stripped.replace(/<\/(?:p|h[1-6]|li|td|th|figcaption|dt|dd)>/gi, ". ");
+  blockAware = blockAware.replace(/<(?:br|hr)\s*\/?>/gi, ". ");
+  const noTags = blockAware.replace(/<[^>]+>/g, " ");
+  return decodeHtmlEntities(noTags).replace(/\s+/g, " ").trim();
+}
+
+/** Visible plain text from Lab layout tagline plus `<main>` after first-person exclusions. */
+export function labPostVisiblePlainText(html: string): string {
+  const tagline = labShellTaglinePlain(html);
+  const mainText = labMainVisiblePlain(html);
+  return [tagline, mainText].filter(Boolean).join(" ").trim();
+}
+
+function splitPlainIntoSentences(text: string): string[] {
+  const parts = text.split(/(?<=[.!?])\s+/);
+  const out: string[] = [];
+  for (const part of parts) {
+    const trimmed = part.trim();
+    if (trimmed) out.push(trimmed);
+  }
+  return out;
+}
+
+/** Skip “US” when it heads a region name (example: US East). */
+export function isUsGeographicProperNoun(text: string, matchIndex: number): boolean {
+  if (text.slice(matchIndex, matchIndex + 2) !== "US") return false;
+  const after = text.slice(matchIndex + 2);
+  return /^\s+(?:East|West|Central)\b/.test(after);
+}
+
+function sentenceContainsFirstPerson(sentence: string): boolean {
+  const re = new RegExp(LAB_POST_FIRST_PERSON_WORD_RE.source, LAB_POST_FIRST_PERSON_WORD_RE.flags);
+  let m: RegExpExecArray | null;
+  while ((m = re.exec(sentence)) !== null) {
+    if (!isUsGeographicProperNoun(sentence, m.index)) return true;
+  }
+  return false;
+}
+
+/** Sentences in rendered Lab HTML that contain we / our / us (with exclusions). */
+export function findLabPostFirstPersonSentences(html: string): string[] {
+  const plain = labPostVisiblePlainText(html);
+  if (!plain) return [];
+  return splitPlainIntoSentences(plain)
+    .map((sentence) => sentence.replace(/\.{2,}/g, "."))
+    .filter((sentence) => sentenceContainsFirstPerson(sentence));
 }
 
 export function isoTitleAttr(iso: string | null): string {

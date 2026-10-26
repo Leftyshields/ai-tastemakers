@@ -1,3 +1,5 @@
+import { stripEmDashesFromProse } from "./brief-voice.js";
+
 /** Labels Claude is required to emit. Publish path keeps only these. */
 export const BRIEF_SECTION_LABELS = [
   "**What it does:**",
@@ -97,12 +99,12 @@ export function sanitizeBriefOutput(brief: string | null): string | null {
 
   const parts: string[] = [];
   for (const label of BRIEF_SECTION_LABELS) {
-    const body = stripInjectionAsides(extractBriefSection(trimmed, label));
+    const body = stripEmDashesFromProse(stripInjectionAsides(extractBriefSection(trimmed, label)));
     if (body) parts.push(`${label} ${body}`);
   }
-  if (parts.length > 0) return parts.join("\n\n");
+  if (parts.length > 0) return stripEmDashesFromProse(parts.join("\n\n"));
 
-  const stripped = stripInjectionAsides(trimmed);
+  const stripped = stripEmDashesFromProse(stripInjectionAsides(trimmed));
   if (!stripped || INJECTION_ASIDE.test(stripped) || looksLikeInjection(stripped)) {
     return null;
   }

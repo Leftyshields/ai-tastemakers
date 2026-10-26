@@ -11,7 +11,7 @@
     "weekly": "tsx src/tastemaker/weekly-cli.ts",
     "monthly": "tsx src/tastemaker/monthly-cli.ts",
     "build:digest": "tsc -p tsconfig.json",
-    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
+    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify && tsx scripts/stamp-css-cache-bust.ts",
     "inventory:tools": "tsx src/tastemaker/inventory-cli.ts",
     "experiment": "tsx src/tastemaker/experiments-cli.ts",
     "experiment:reminders": "tsx src/tastemaker/experiment-reminders-cli.ts",
@@ -41,7 +41,7 @@
     "playwright": "1.49.0",
     "sharp": "^0.34.5",
     "tailwindcss": "^4.3.0",
-    "tsx": "^4.19.3",
+    "tsx": "4.22.4",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
   }

@@ -1,3 +1,7 @@
+---
+lead: "Closed Sep 26, 2026, and kept. The Skills list now repeats far fewer of yesterday's top picks, with repeats in the top 10 down from 70% to 37.5%, so readers see more new projects each day."
+---
+
 # Less-repeated Skills picks
 
 _**Closed Sep 26, 2026.** This experiment made the Skills list repeat fewer of the previous day's top picks. Repeats in the top 10 dropped from 70% to 37.5%, and the change stayed on after the test closed._
@@ -43,7 +47,10 @@ The traffic numbers stay humble. In the two weeks before the change, Skills page
 
 The Lab kept the change. It is still on for Skills.
 
-Sample lists from before the change: [Aug 30](../../skills/briefings/2026-08-30.html) · [Sep 1](../../skills/briefings/2026-09-01.html) · [Sep 12](../../skills/briefings/2026-09-12.html)
+### Compare two lists
+
+- **Before:** [Sep 12, 2026](../../skills/briefings/2026-09-12.html), the last list before the change. Notice how many top 10 names carry over from the day before.
+- **After:** [Sep 13, 2026](../../skills/briefings/2026-09-13.html), the first list with the change. Notice more new names in the top 10, including projects marked NEW.
 
 ## References
 

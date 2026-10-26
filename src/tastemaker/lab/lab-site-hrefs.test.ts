@@ -19,7 +19,7 @@ describe("site internal hrefs (UX30 link checker)", () => {
     const page = path.join(repoRoot, "site/lab/index.html");
     if (!fs.existsSync(page)) return;
     const html = fs.readFileSync(page, "utf8");
-    expect(html).toContain("How we run experiments");
+    expect(html).toContain("How experiments work");
     expect(findInternalHrefViolations(html, page)).toEqual([]);
   });
 });

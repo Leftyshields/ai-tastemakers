@@ -1,3 +1,7 @@
+---
+lead: "Queued, not started, and planned for Nov 22 to Dec 19, 2026. Showing the writer its past \"Why now\" lines should give returning projects a fresh angle instead of the same old line."
+---
+
 # Fresher "Why now" lines on repeats
 
 _**Queued, not started.** This experiment will help the Skills writer avoid repeating itself when a project comes back to the list. It is planned for Nov 22 to Dec 19, 2026._
@@ -10,7 +14,7 @@ This experiment will show Claude the "Why now" lines it already wrote for that p
 
 The earlier less-repeated picks test made the list itself repeat less. This one works on the writing when a repeat does show up.
 
-The idea comes from two projects that help AI assistants remember past work so they don't repeat themselves. Hermes Agent first appeared on the OSS list on Jun 14, 2026. ECC first appeared on the OSS list on Jun 14, 2026. The digest does not run either one. This test borrows the habit.
+The idea comes from two projects that help AI assistants remember past work so they don't repeat themselves. Hermes Agent and ECC both first appeared on the OSS list on Jun 14, 2026. The digest does not run either one. This test borrows the habit.
 
 ## The change
 

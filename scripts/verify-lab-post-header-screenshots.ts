@@ -1,82 +1,111 @@
 /**
- * UX47 / PR 53: Playwright screenshots for Ponytail post and digest badge.
+ * Design E1: Playwright viewport screenshots (device scale, not full page or element-only).
  * Writes PNGs under /opt/cursor/artifacts/screenshots (not committed).
  */
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { chromium } from "playwright";
+import { listLabWriteupPostIds } from "./lab/lab-format.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const artifactDir = "/opt/cursor/artifacts/screenshots";
 
-const PONYTAIL_POST = path.join(
-  repoRoot,
-  "site/lab/posts/EXP-20260802-ponytail-narration-skills.html",
-);
-const PONYTAIL_DIGEST = path.join(repoRoot, "site/skills/briefings/2026-08-22.html");
+const FIRECRAWL_ID = "EXP-20260716-firecrawl-enrich-skills";
+const FIRECRAWL_POST = path.join(repoRoot, "site/lab/posts", `${FIRECRAWL_ID}.html`);
+const LONG_FIXTURE = path.join(repoRoot, "site/lab/posts/_fixture-e1-long-repo.html");
 
-async function shot(
+async function shotViewport(
   absPath: string,
   filename: string,
-  opts: {
-    width: number;
-    scheme: "light" | "dark";
-    search?: string;
-    clipSelector?: string;
-  },
+  opts: { width: number; height: number; scheme: "light" | "dark"; deviceScaleFactor: number },
 ): Promise<void> {
   const browser = await chromium.launch();
   const page = await browser.newPage({
-    viewport: { width: opts.width, height: 900 },
+    viewport: { width: opts.width, height: opts.height },
+    deviceScaleFactor: opts.deviceScaleFactor,
     colorScheme: opts.scheme,
   });
-  await page.goto(`file://${absPath}${opts.search ?? ""}`, { waitUntil: "networkidle" });
-  if (opts.clipSelector) {
-    const el = page.locator(opts.clipSelector).first();
-    await el.scrollIntoViewIfNeeded();
-    await el.screenshot({ path: path.join(artifactDir, filename) });
-  } else {
-    await page.screenshot({ path: path.join(artifactDir, filename), fullPage: false });
-  }
+  await page.goto(`file://${absPath}`, { waitUntil: "networkidle" });
+  await page.evaluate((dark) => {
+    document.documentElement.classList.toggle("dark", dark);
+  }, opts.scheme === "dark");
+  await page.waitForFunction(() => {
+    const hdr = document.querySelector(".lab-post-header__hdr");
+    const btn = document.getElementById("lab-post-back-btn");
+    if (!hdr || !btn) return false;
+    const chip =
+      document.querySelector(".lab-post-split-chip") ||
+      document.querySelector(".lab-post-header__repo-link");
+    if (!chip) return true;
+    const h = chip.getBoundingClientRect().height;
+    const minH = chip.classList.contains("lab-post-header__repo-link") ? 32 : 40;
+    return h >= minH;
+  });
+  await page.screenshot({
+    path: path.join(artifactDir, filename),
+    fullPage: false,
+    animations: "disabled",
+  });
   await browser.close();
+}
+
+function viewportForWidth(width: number): { height: number; deviceScaleFactor: number } {
+  if (width <= 390) return { height: 844, deviceScaleFactor: 3 };
+  return { height: 900, deviceScaleFactor: 2 };
 }
 
 async function main(): Promise<void> {
   fs.mkdirSync(artifactDir, { recursive: true });
-  for (const p of [PONYTAIL_POST, PONYTAIL_DIGEST]) {
+
+  const expIds = listLabWriteupPostIds(repoRoot).filter((id) => id.startsWith("EXP-"));
+  const expPosts = expIds.map((id) => path.join(repoRoot, "site/lab/posts", `${id}.html`));
+
+  const allPaths = [...expPosts, LONG_FIXTURE];
+  for (const p of allPaths) {
     if (!fs.existsSync(p)) {
       console.error(`missing ${p} (run npm run build:pages first)`);
       process.exit(1);
     }
   }
 
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-light.png", { width: 390, scheme: "light" });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-dark.png", { width: 390, scheme: "dark" });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-desktop-light.png", { width: 1280, scheme: "light" });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-desktop-dark.png", { width: 1280, scheme: "dark" });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-from-skills-rank-3.png", {
-    width: 390,
-    scheme: "light",
-    search: "?from_list=skills&from_rank=3",
-  });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-bad-params.png", {
-    width: 390,
-    scheme: "light",
-    search: "?from_list=evil&from_rank=99",
-  });
-  await shot(PONYTAIL_POST, "pr53-ponytail-post-390-no-params.png", {
-    width: 390,
-    scheme: "light",
-    search: "",
-  });
-  await shot(PONYTAIL_DIGEST, "pr53-digest-ponytail-badge-390.png", {
-    width: 390,
-    scheme: "light",
-    clipSelector: 'article.digest-repo-card[data-repo="DietrichGebert/ponytail"]',
-  });
+  const shots: Array<[string, string, number, "light" | "dark"]> = [];
 
-  console.log(`verify: lab post header screenshots ok (${artifactDir})`);
+  for (const id of expIds) {
+    const abs = path.join(repoRoot, "site/lab/posts", `${id}.html`);
+    shots.push([`${id}-390-dark.png`, abs, 390, "dark"]);
+  }
+  shots.push([`${FIRECRAWL_ID}-desktop-light.png`, FIRECRAWL_POST, 1280, "light"]);
+
+  // Genesis UX47 regression set (Firecrawl + long-repo fixture).
+  shots.push(
+    ["firecrawl-post-390-light.png", FIRECRAWL_POST, 390, "light"],
+    ["firecrawl-post-390-dark.png", FIRECRAWL_POST, 390, "dark"],
+    ["firecrawl-post-desktop-light.png", FIRECRAWL_POST, 1280, "light"],
+    ["firecrawl-post-desktop-dark.png", FIRECRAWL_POST, 1280, "dark"],
+    ["long-repo-post-390-light.png", LONG_FIXTURE, 390, "light"],
+    ["long-repo-post-390-dark.png", LONG_FIXTURE, 390, "dark"],
+    ["long-repo-post-desktop-light.png", LONG_FIXTURE, 1280, "light"],
+    ["long-repo-post-desktop-dark.png", LONG_FIXTURE, 1280, "dark"],
+  );
+
+  const filter = new Set(process.argv.slice(2));
+  const selected =
+    filter.size > 0 ? shots.filter(([name]) => filter.has(name)) : shots;
+  if (selected.length === 0) {
+    console.error("no matching screenshot names in argv");
+    process.exit(1);
+  }
+
+  for (const [name, abs, width, scheme] of selected) {
+    const { height, deviceScaleFactor } = viewportForWidth(width);
+    await shotViewport(abs, name, { width, height, scheme, deviceScaleFactor });
+    console.log(path.join(artifactDir, name));
+  }
+
+  console.log(
+    `verify: lab post header screenshots ok (${artifactDir}, ${selected.length} PNG(s), viewport crop @ device scale)`,
+  );
 }
 
 const isMain =

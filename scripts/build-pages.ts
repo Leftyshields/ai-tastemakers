@@ -23,6 +23,9 @@ import { buildIsoDatePt } from "./lab/lab-format.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
+if (process.env.SITE_LANDING_LAYOUT_V2 == null || process.env.SITE_LANDING_LAYOUT_V2 === "") {
+  process.env.SITE_LANDING_LAYOUT_V2 = "1";
+}
 const SITE_DIR = path.join(ROOT, "site");
 
 interface FirebaseWebConfig {

@@ -36,7 +36,7 @@ describe("Lab methodology layout (round 7 revised)", () => {
     expect(nav).not.toContain("about.html");
   });
 
-  it("places How we run experiments link after the loop strip with PostHog section", () => {
+  it("places How experiments work link after the loop strip with PostHog section", () => {
     const article = applyLabIntroVonRestorff(
       prepareLabProseHtmlFromMarkdown(fs.readFileSync(path.join(repoRoot, "briefings/lab/index.md"), "utf8")),
     );
@@ -46,7 +46,7 @@ describe("Lab methodology layout (round 7 revised)", () => {
     expect(loopEnd).toBeGreaterThan(-1);
     expect(methodologyPos).toBeGreaterThan(loopEnd);
     expect(block).toContain("lab-experiments-how");
-    expect(block).toContain("How we run experiments");
+    expect(block).toContain("How experiments work");
     expect(block).toContain('data-lab-section="about"');
     expect(block).toContain("evaluates them");
     expect(block).toContain("almost automatically");

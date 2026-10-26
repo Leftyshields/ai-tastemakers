@@ -1,3 +1,7 @@
+---
+lead: "Closed Jul 18, 2026, and kept. Skills briefs now draw on each project's web pages and Hacker News mentions, which made them more timely without costing accuracy, though traffic was too thin to show a click lift."
+---
+
 # Richer Skills briefs
 
 _**Closed Jul 18, 2026.** This experiment gave the Skills writer extra background from each project's web pages and Hacker News before writing. The change stayed on after the test closed._
