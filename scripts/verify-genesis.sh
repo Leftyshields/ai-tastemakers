@@ -67,4 +67,6 @@ echo "verify: home index contrast light and dark (UX49)"
 "$TSX" scripts/verify-home-index-contrast.ts
 echo "verify: home index screenshots (UX49 artifacts)"
 "$TSX" scripts/verify-home-index-screenshots.ts
+echo "verify: site sitemap gate (Search Console verification HTML)"
+"$TSX" scripts/verify-site-sitemap-gate.ts
 echo "verify: ok"

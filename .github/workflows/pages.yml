@@ -24,6 +24,8 @@ on:
       - "scripts/index-layout-helpers.ts"
       - "firebase/**"
       - "site/assets/**"
+      - "site/google65a429d15bd1a67c.html"
+      - "scripts/site-verification-pages.ts"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 

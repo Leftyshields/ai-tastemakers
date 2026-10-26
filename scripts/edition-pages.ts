@@ -91,6 +91,7 @@ import {
   buildHomeIndexMainHtml,
   HOME_EDITION_TAGLINES,
 } from "./home-index-layout.js";
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
 
@@ -115,6 +116,7 @@ async function listHtmlFiles(dir: string): Promise<string[]> {
     if (entry.isDirectory()) {
       results.push(...(await listHtmlFiles(full)));
     } else if (entry.name.endsWith(".html")) {
+      if (isSiteGateExemptHtmlFile(full)) continue;
       results.push(full);
     }
   }
