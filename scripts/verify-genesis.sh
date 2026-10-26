@@ -56,4 +56,6 @@ echo "verify: lab badge action row layout (UX45)"
 echo "verify: lab PostHog and link tracking (UX42)"
 POSTHOG_KEY="${POSTHOG_KEY:-phc_ci_lab_analytics_gate_only}" DIGEST_AS_OF_DATE="${DIGEST_AS_OF_DATE:-2026-10-19}" npm run build:pages >/dev/null
 "$TSX" scripts/verify-lab-analytics.ts
+echo "verify: site sitemap gate (Search Console verification HTML)"
+"$TSX" scripts/verify-site-sitemap-gate.ts
 echo "verify: ok"
