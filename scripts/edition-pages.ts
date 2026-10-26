@@ -73,10 +73,10 @@ import {
 import type { Digest } from "../src/tastemaker/types.js";
 import {
   archiveBackLinkLabel,
-  daysArchivePageTitle,
+  daysArchiveIntroForEdition,
   DAYS_ARCHIVE_EMPTY,
-  DAYS_ARCHIVE_INTRO,
   DAYS_ARCHIVE_META_DESCRIPTION,
+  DAYS_ARCHIVE_PAGE_TITLE,
   DAYS_ARCHIVE_SECTION_HEADING,
   MONTHLY_INDEX_INTRO,
   MONTHLY_INDEX_META_DESCRIPTION,
@@ -384,13 +384,15 @@ function editionNavPill(
   trackAttr = "",
   homeIndexNav = false,
 ): string {
-  const base =
-    "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
+  const base = homeIndexNav
+    ? "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline"
+    : "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
   const active = homeIndexNav
-    ? "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-400 dark:bg-transparent dark:text-blue-300"
+    ? "home-index-tab--active"
     : "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
-  const idle =
-    "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+  const idle = homeIndexNav
+    ? "home-index-tab--idle"
+    : "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
   return `<a href="${href}" class="${base} ${isActive ? active : idle}${extraClass ? ` ${extraClass}` : ""}"${trackAttr}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
 }
 
@@ -1595,18 +1597,20 @@ async function buildBriefingsArchiveIndexPage(
     dates,
     paths,
     briefingsDir,
-    DAYS_ARCHIVE_EMPTY[edition.id],
+    DAYS_ARCHIVE_EMPTY,
     escapeHtml,
     DAYS_ARCHIVE_SECTION_HEADING,
   );
-  const intro = `<p class="mb-6 max-w-[40rem] text-base leading-relaxed text-stone-600 dark:text-stone-400">${escapeHtml(DAYS_ARCHIVE_INTRO[edition.id])}</p>`;
+  const earliestDate = dates.length > 0 ? dates[dates.length - 1] : undefined;
+  const introText = daysArchiveIntroForEdition(edition.id, earliestDate);
+  const intro = `<p class="mb-6 max-w-[40rem] text-base leading-relaxed text-stone-600 dark:text-stone-400">${escapeHtml(introText)}</p>`;
   const body = `${archiveIndexBackNav(paths.home, edition.id, escapeHtml)}
       ${intro}
       ${archiveGrid}`;
   await fs.writeFile(
     path.join(siteRoot, "briefings", "index.html"),
     pageShell(
-      daysArchivePageTitle(edition.name),
+      DAYS_ARCHIVE_PAGE_TITLE[edition.id],
       body,
       paths,
       brand,

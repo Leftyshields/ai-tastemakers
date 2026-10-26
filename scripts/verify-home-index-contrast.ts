@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { chromium } from "playwright";
-import { CONTRAST_CHECK_JS } from "./color-contrast-runtime.js";
+import { CONTRAST_CHECK_JS, HOME_INDEX_ACTIVE_TAB_DARK_JS } from "./color-contrast-runtime.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const HOME_PAGES = ["site/index.html", "site/skills/index.html"];
@@ -35,6 +35,14 @@ async function main(): Promise<void> {
             allFailures.push(`[${rel} ${mode} ${width}px ${rootSelector}] ${f}`);
           }
         }
+        if (mode === "dark") {
+          const tabFailures = (await page.evaluate(
+            `${HOME_INDEX_ACTIVE_TAB_DARK_JS}(${MIN_RATIO})`,
+          )) as string[];
+          for (const f of tabFailures) {
+            allFailures.push(`[${rel} dark ${width}px active-tab] ${f}`);
+          }
+        }
         await page.close();
       }
     }
@@ -48,7 +56,9 @@ async function main(): Promise<void> {
     if (allFailures.length > 40) console.error(`  …and ${allFailures.length - 40} more`);
     process.exit(1);
   }
-  console.log("verify: home index contrast ok (light and dark, 390 and desktop)");
+  console.log(
+    "verify: home index contrast ok (light and dark, 390 and desktop, active tab dark gate)",
+  );
 }
 
 main().catch((err) => {
