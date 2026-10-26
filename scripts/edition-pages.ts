@@ -381,6 +381,14 @@ function editionNavFor(siteSegment: string, depth: 0 | 1): EditionNav {
 
 export type LabNavActive = "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts";
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function editionNavPill(
   href: string,
   label: string,
@@ -850,7 +858,7 @@ export function pageShell(
   paths: SitePaths,
   brand: { name: string; tagline: string },
   description?: string,
-  escapeHtml: (t: string) => string = (t) => t,
+  escapeHtml: (t: string) => string = escapeHtml,
   options?: {
     labLayout?: boolean;
     labNavActive?: LabNavActive;
@@ -1404,13 +1412,13 @@ function howItWorksMainBlockHtml(): string {
         <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
       </ol>`;
-  return mainBlockCard(undefined, "How it works", body, (t) => t);
+  return mainBlockCard(undefined, "How it works", body, escapeHtml);
 }
 
 function skillsAboutMainBlockHtml(): string {
   const body = `
       <p class="m-0 text-sm leading-relaxed text-stone-600 dark:text-stone-400">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics &mdash; then rank by 7-day star momentum with Claude briefs.</p>`;
-  return mainBlockCard(undefined, "About this digest", body, (t) => t);
+  return mainBlockCard(undefined, "About this digest", body, escapeHtml);
 }
 
 function weeklyListItems(
@@ -1451,7 +1459,7 @@ function weeklyMainBlock(wrap: WrapUpArchive): string {
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref, wrap.weekLabels)}</ul>`;
-  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body, (t) => t);
+  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body, escapeHtml);
 }
 
 function monthlyMainBlock(wrap: WrapUpArchive): string {
@@ -1459,7 +1467,7 @@ function monthlyMainBlock(wrap: WrapUpArchive): string {
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${monthlyListItems(wrap.months, wrap.monthHref)}</ul>`;
-  return mainBlockCard("monthly-archive", "Monthly rollups", body, (t) => t);
+  return mainBlockCard("monthly-archive", "Monthly rollups", body, escapeHtml);
 }
 
 function siblingEditionPromoSidebar(
