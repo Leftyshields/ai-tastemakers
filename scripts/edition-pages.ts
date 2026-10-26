@@ -52,7 +52,17 @@ import {
   type BriefFeedEntry,
   type PageSeoOptions,
 } from "./seo-helpers.js";
-import { applyTemplate, seoPage } from "./seo-copy.js";
+import {
+  applyTemplate,
+  buildSeoDescriptionFromTemplate,
+  buildSeoTitleFromTemplate,
+  formatSeoDateLabel,
+  formatSeoDateShort,
+  metaDescriptionFromLead,
+  seoPage,
+  topPickShortName,
+  parseWeeklyReviewDateRange,
+} from "./seo-copy.js";
 import { briefOgImagePath, EDITION_TAGLINES, writeBriefOgPng } from "./generate-brief-og.js";
 import {
   groupDatesByMonth,
@@ -68,6 +78,7 @@ import { loadExperimentsFile } from "./lab/validate-experiments.js";
 import {
   renderLabPostLongNameFixtureHeader,
   renderLabPostPageHeader,
+  extractLabPostLeadParagraph,
   stripLabPostIntroParagraphFromArticleHtml,
   stripLeadingH1FromArticleHtml,
 } from "./lab/lab-post-header.js";
@@ -1643,7 +1654,7 @@ export async function buildMonthlySite(
     await fs.writeFile(
       path.join(outDir, `${monthId}.html`),
       pageShell(
-        applyTemplate(monthlyCopy.titleTemplate ?? `Monthly Rollup — ${monthId}`, { monthId }),
+        applyTemplate(monthlyCopy.titleTemplate ?? `Monthly Rollup: ${monthId}`, { monthId }),
         body,
         paths,
         brand,
@@ -1713,14 +1724,33 @@ export async function buildWeeklySite(
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
     const weeklyCopy = seoPage("weekly_review");
+    const range = parseWeeklyReviewDateRange(markdown);
+    const site = weeklyCopy.siteName ?? "AI Tastemakers";
+    const startLabel = range ? formatSeoDateShort(range.start) : weekId;
+    const endLabel = range ? formatSeoDateShort(range.end) : weekId;
+    const year = range ? String(range.year) : weekId.slice(0, 4);
+    const weeklyTitle = weeklyCopy.titleTemplate
+      ? buildSeoTitleFromTemplate(weeklyCopy.titleTemplate, {
+          Site: site,
+          startLabel,
+          endLabel,
+        })
+      : `${site} Weekly Review: ${weekId}`;
+    const weeklyDescription = weeklyCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(weeklyCopy.descriptionTemplate, {
+          startLabel,
+          endLabel,
+          year,
+        })
+      : weeklyCopy.description;
     await fs.writeFile(
       path.join(outDir, `${weekId}.html`),
       pageShell(
-        applyTemplate(weeklyCopy.titleTemplate ?? `Weekly Review — ${weekId}`, { weekId }),
+        weeklyTitle,
         body,
         paths,
         brand,
-        weeklyCopy.description,
+        weeklyDescription,
         escapeHtml,
         {
           siteBaseUrl,
@@ -1797,8 +1827,15 @@ export async function buildEditionSite(
       : `briefings/${date}.html`;
 
     const briefCopy = seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss");
-    let description: string | undefined = applyTemplate(briefCopy.descriptionFallback ?? "", { date });
-    let pageTitle = applyTemplate(briefCopy.titleTemplate ?? `Daily Brief — ${date}`, { date });
+    const siteName = edition.id === "skills" ? "Skill Tastemakers" : "AI Tastemakers";
+    const dateLabel = formatSeoDateLabel(date);
+    let topPick = "the top pick";
+    let description: string | undefined = briefCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(briefCopy.descriptionTemplate, { dateLabel, topPick })
+      : undefined;
+    let pageTitle = briefCopy.titleTemplate
+      ? buildSeoTitleFromTemplate(briefCopy.titleTemplate, { Site: siteName, dateLabel })
+      : `${siteName}: Top Picks for ${dateLabel}`;
     let seo: PageSeoOptions | undefined;
     if (siteBaseUrl) {
       try {
@@ -1807,9 +1844,22 @@ export async function buildEditionSite(
           repos: Array<{ full_name: string; brief?: string | null }>;
           generated_at?: string;
         };
-        description = briefSocialDescription(digest.repos);
+        if (digest.repos[0]?.full_name) {
+          topPick = topPickShortName(digest.repos[0].full_name);
+        }
+        if (briefCopy.descriptionTemplate) {
+          description = buildSeoDescriptionFromTemplate(briefCopy.descriptionTemplate, {
+            dateLabel,
+            topPick,
+          });
+        }
         const socialTitle = briefSocialTitle(date);
-        pageTitle = applyTemplate(briefCopy.titleTemplate ?? `Daily Brief — ${date}`, { date });
+        if (briefCopy.titleTemplate) {
+          pageTitle = buildSeoTitleFromTemplate(briefCopy.titleTemplate, {
+            Site: siteName,
+            dateLabel,
+          });
+        }
         const ogImageRel = briefOgImagePath(edition.siteSegment, date);
         const ogImageAbs = `${siteBaseUrl.replace(/\/+$/, "")}/${ogImageRel}`;
         const ogOutPath = path.join(
@@ -1949,29 +1999,35 @@ export async function collectBriefFeedEntries(
     const canonicalPath = edition.siteSegment
       ? `${edition.siteSegment}/briefings/${date}.html`
       : `briefings/${date}.html`;
-    let summary = applyTemplate(
-      seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").descriptionFallback ?? "",
-      { date },
-    );
+    const briefCopy = seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss");
+    const siteName = edition.id === "skills" ? "Skill Tastemakers" : "AI Tastemakers";
+    const dateLabel = formatSeoDateLabel(date);
+    let topPick = "the top pick";
+    let summary = briefCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(briefCopy.descriptionTemplate, { dateLabel, topPick })
+      : "";
     let updatedIso: string | undefined;
     try {
       const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
       const digest = JSON.parse(digestRaw) as {
-        repos: Array<{ brief?: string | null }>;
+        repos: Array<{ full_name?: string; brief?: string | null }>;
         generated_at?: string;
       };
-      summary = briefSocialDescription(digest.repos);
+      if (digest.repos[0]?.full_name) {
+        topPick = topPickShortName(digest.repos[0].full_name);
+      }
+      if (briefCopy.descriptionTemplate) {
+        summary = buildSeoDescriptionFromTemplate(briefCopy.descriptionTemplate, { dateLabel, topPick });
+      }
       if (digest.generated_at) updatedIso = digest.generated_at;
     } catch {
       /* markdown-only day */
     }
     entries.push({
       date,
-      title: applyTemplate(
-        seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").titleTemplate ??
-          `Daily Brief — ${date}`,
-        { date },
-      ),
+      title: briefCopy.titleTemplate
+        ? buildSeoTitleFromTemplate(briefCopy.titleTemplate, { Site: siteName, dateLabel })
+        : `${siteName}: Top Picks for ${dateLabel}`,
       summary,
       canonicalPath,
       updatedIso,
@@ -2262,8 +2318,14 @@ export async function buildLabSite(
           : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
         const postBody = `${labNavHtml("posts", escapeHtml, 1)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
         const labPostCopy = seoPage("lab_post");
-        const postDescription = applyTemplate(labPostCopy.descriptionTemplate ?? "", { title });
-        const postTitle = applyTemplate(labPostCopy.titleTemplate ?? "{title} · Lab", { title });
+        const leadForMeta =
+          exp != null ? extractLabPostLeadParagraph(exp.id, markdown) : extractLabPostLeadParagraph(slug, markdown);
+        const postTitle = labPostCopy.titleTemplate
+          ? buildSeoTitleFromTemplate(labPostCopy.titleTemplate, { postTitle: title })
+          : `${title} | Tastemakers Lab`;
+        const postDescription = leadForMeta
+          ? metaDescriptionFromLead(leadForMeta)
+          : metaDescriptionFromLead(title);
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
           pageShell(postTitle, postBody, labSitePaths(1), brand, postDescription, escapeHtml, {

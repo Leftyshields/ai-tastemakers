@@ -2,6 +2,12 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
+import {
+  EM_DASH,
+  SEO_DESCRIPTION_MAX,
+  SEO_TITLE_MAX,
+  validateSeoCopyFile,
+} from "./seo-copy.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(repoRoot, "site");
@@ -123,6 +129,18 @@ function validateJsonLdOnPage(html: string, rel: string): string[] {
   return issues;
 }
 
+function checkSeoText(text: string, rel: string, kind: "title" | "description"): string[] {
+  const issues: string[] = [];
+  if (text.includes(EM_DASH)) {
+    issues.push(`${rel}: ${kind} contains U+2014 em dash`);
+  }
+  const max = kind === "title" ? SEO_TITLE_MAX : SEO_DESCRIPTION_MAX;
+  if (text.length > max) {
+    issues.push(`${rel}: ${kind} length ${text.length} exceeds max ${max}`);
+  }
+  return issues;
+}
+
 function validateHtmlPages(): { ok: boolean; messages: string[] } {
   const messages: string[] = [];
   const htmlFiles = listHtmlFiles(siteDir);
@@ -130,21 +148,55 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
     const rel = path.relative(siteDir, abs);
     const html = fs.readFileSync(abs, "utf8");
     const dom = new JSDOM(html);
-    const h1s = dom.window.document.querySelectorAll("h1");
+    const doc = dom.window.document;
+    const h1s = doc.querySelectorAll("h1");
     if (h1s.length !== 1) {
       messages.push(`${rel}: expected exactly 1 h1, found ${h1s.length}`);
     }
-    const alternates = dom.window.document.querySelectorAll('link[rel="alternate"][type="application/atom+xml"]');
+    const alternates = doc.querySelectorAll('link[rel="alternate"][type="application/atom+xml"]');
     if (alternates.length < 2) {
       messages.push(`${rel}: expected 2 Atom feed alternate links, found ${alternates.length}`);
+    }
+    const titleEl = doc.querySelector("title");
+    if (titleEl?.textContent) {
+      messages.push(...checkSeoText(titleEl.textContent.trim(), rel, "title"));
+    }
+    const metaDesc = doc.querySelector('meta[name="description"]');
+    const descContent = metaDesc?.getAttribute("content");
+    if (descContent?.trim()) {
+      messages.push(...checkSeoText(descContent.trim(), rel, "description"));
     }
     messages.push(...validateJsonLdOnPage(html, rel));
   }
   return { ok: messages.length === 0, messages };
 }
 
+function validateFeedSeoCopy(): string[] {
+  const messages: string[] = [];
+  for (const rel of ["feeds/ai.xml", "feeds/skills.xml"]) {
+    const abs = path.join(siteDir, rel);
+    if (!fs.existsSync(abs)) continue;
+    const xml = fs.readFileSync(abs, "utf8");
+    const dom = new JSDOM(xml, { contentType: "application/xml" });
+    const title = dom.window.document.querySelector("feed > title")?.textContent?.trim() ?? "";
+    const subtitle = dom.window.document.querySelector("feed > subtitle")?.textContent?.trim() ?? "";
+    messages.push(...checkSeoText(title, rel, "title"));
+    messages.push(...checkSeoText(subtitle, rel, "description"));
+  }
+  return messages;
+}
+
 function main(): void {
   let failed = false;
+
+  const copyIssues = validateSeoCopyFile();
+  if (copyIssues.length > 0) {
+    failed = true;
+    console.error("verify: seo-copy.json failed:");
+    for (const m of copyIssues) console.error(`  ${m}`);
+  } else {
+    console.log("verify: seo-copy.json ok (length + no U+2014)");
+  }
 
   const sitemap = validateSitemap();
   console.log(`verify: sitemap ${sitemap.urlCount} URL(s)`);
@@ -164,6 +216,12 @@ function main(): void {
     }
   }
   console.log(`verify: atom feeds — ${feedResults.join("; ")}`);
+
+  const feedSeoIssues = validateFeedSeoCopy();
+  if (feedSeoIssues.length > 0) {
+    failed = true;
+    for (const m of feedSeoIssues) console.error(`  ${m}`);
+  }
 
   const html = validateHtmlPages();
   const jsonLdIssues = html.messages.filter(
