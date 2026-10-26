@@ -70,6 +70,7 @@ import {
   splitDailyBriefMarkdown,
 } from "../src/tastemaker/pages/brief-cards.js";
 import type { Digest } from "../src/tastemaker/types.js";
+import { isSiteGateExemptHtmlBasename } from "./site-verification-pages.js";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
 
@@ -94,6 +95,7 @@ async function listHtmlFiles(dir: string): Promise<string[]> {
     if (entry.isDirectory()) {
       results.push(...(await listHtmlFiles(full)));
     } else if (entry.name.endsWith(".html")) {
+      if (isSiteGateExemptHtmlBasename(entry.name)) continue;
       results.push(full);
     }
   }
