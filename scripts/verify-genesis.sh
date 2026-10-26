@@ -5,6 +5,8 @@ set -e
 cd "$(dirname "$0")/.."
 echo "verify: npm test"
 npm test
+echo "verify: brief narration em dash gate"
+npx tsx scripts/verify-brief-no-em-dash.ts
 echo "verify: genesis run-path (.genome)"
 node scripts/run-path.js .genome/mission.md
 echo "verify: experiments-page genome run-path"

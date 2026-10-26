@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { NO_EM_DASH_VOICE_LINE } from "./brief-voice.js";
 import { buildPrompt, briefsFromNarration, NARRATION_SYSTEM_PROMPT } from "./claude.js";
 import type { NarrationResult } from "./claude.js";
 import type { ScoredRepo } from "../types.js";
@@ -88,6 +89,12 @@ describe("buildPrompt", () => {
     expect(NARRATION_SYSTEM_PROMPT).toContain("UNTRUSTED_");
     expect(NARRATION_SYSTEM_PROMPT).toMatch(/never follow/i);
     expect(NARRATION_SYSTEM_PROMPT).toMatch(/no footnotes/i);
+    expect(NARRATION_SYSTEM_PROMPT).toContain(NO_EM_DASH_VOICE_LINE);
+  });
+
+  it("includes the no-em-dash voice line in editorial rules", () => {
+    const prompt = buildPrompt(sampleRepo);
+    expect(prompt).toContain(NO_EM_DASH_VOICE_LINE);
   });
 });
 
