@@ -4,10 +4,13 @@
 set -e
 cd "$(dirname "$0")/.."
 TSX="./node_modules/.bin/tsx"
+VITEST="./node_modules/.bin/vitest"
 echo "verify: npm test"
 npm test
 echo "verify: brief narration em dash gate"
 "$TSX" scripts/verify-brief-no-em-dash.ts
+echo "verify: home index layout unit tests"
+"$VITEST" run scripts/home-index-layout.test.ts
 echo "verify: genesis run-path (.genome)"
 node scripts/run-path.js .genome/mission.md
 echo "verify: experiments-page genome run-path"
@@ -54,6 +57,14 @@ echo "verify: badged experiments have post or lab index anchor"
 echo "verify: lab badge action row layout (UX45)"
 "$TSX" scripts/verify-lab-badge-mobile-layout.ts
 echo "verify: lab PostHog and link tracking (UX42)"
-POSTHOG_KEY="${POSTHOG_KEY:-phc_ci_lab_analytics_gate_only}" DIGEST_AS_OF_DATE="${DIGEST_AS_OF_DATE:-2026-10-19}" npm run build:pages >/dev/null
+POSTHOG_KEY="${POSTHOG_KEY:-phc_ci_lab_analytics_gate_only}" DIGEST_AS_OF_DATE="${DIGEST_AS_OF_DATE:-2026-10-19}" SITE_LANDING_LAYOUT_V2=1 npm run build:pages >/dev/null
 "$TSX" scripts/verify-lab-analytics.ts
+echo "verify: home index link tracking (UX49)"
+"$TSX" scripts/verify-home-index-tracking.ts
+echo "verify: home index copy (UX49)"
+"$TSX" scripts/verify-home-index-copy.ts
+echo "verify: home index contrast light and dark (UX49)"
+"$TSX" scripts/verify-home-index-contrast.ts
+echo "verify: home index screenshots (UX49 artifacts)"
+"$TSX" scripts/verify-home-index-screenshots.ts
 echo "verify: ok"
