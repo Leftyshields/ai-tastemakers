@@ -1953,7 +1953,7 @@ export async function buildEditionSite(
 
   const indexDescription =
     edition.id === "skills"
-      ? "Daily top AI agent skills on GitHub — Claude Code plugins and research skills ranked by momentum."
+      ? "Daily top AI agent skills on GitHub. Claude Code plugins and research skills ranked by momentum."
       : "Daily curated briefings on trending AI-derivative open source on GitHub.";
   const indexCanonical = edition.siteSegment ? `${edition.siteSegment}/index.html` : "index.html";
   await fs.writeFile(
@@ -1967,7 +1967,7 @@ export async function buildEditionSite(
             canonicalPath: indexCanonical,
             ogType: "website",
             ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
-            ogImageAlt: `${edition.name} — daily curated AI repos`,
+            ogImageAlt: `${edition.name}. Daily curated AI repos`,
           }
         : undefined,
     }),
