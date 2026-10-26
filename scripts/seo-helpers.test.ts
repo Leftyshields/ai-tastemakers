@@ -2,10 +2,12 @@ import { describe, it, expect } from "vitest";
 import { briefOgCardSvg, defaultOgCardSvg } from "./generate-brief-og.js";
 import { OG } from "./og-theme.js";
 import {
+  absoluteCanonicalUrl,
   briefMetaDescription,
   briefSocialDescription,
   briefSocialTitle,
   extractBriefSection,
+  normalizeCanonicalPath,
 } from "./seo-helpers.js";
 
 describe("brief social metadata", () => {
@@ -52,6 +54,16 @@ describe("OG card SVG (site dark theme)", () => {
     const svg = defaultOgCardSvg();
     expect(svg).toContain("AI Tastemakers");
     expect(svg).toContain("Curated daily briefings");
+  });
+});
+
+describe("canonical paths", () => {
+  it("maps index.html to site root", () => {
+    expect(normalizeCanonicalPath("index.html")).toBe("");
+    expect(normalizeCanonicalPath("skills/index.html")).toBe("skills/");
+    expect(absoluteCanonicalUrl("https://example.com/ai-tastemakers", "index.html")).toBe(
+      "https://example.com/ai-tastemakers/",
+    );
   });
 });
 

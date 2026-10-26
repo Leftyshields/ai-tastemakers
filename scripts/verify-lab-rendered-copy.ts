@@ -31,10 +31,16 @@ function main(): void {
       console.error(`forbidden copy in ${rel}:`);
       for (const v of violations) console.error(`  …${v}…`);
     }
-    if (rel === "site/lab/methodology.html") {
-      if (!html.includes('rel="canonical"') || !html.includes("/lab/methodology.html")) {
+    if (rel === "site/lab/methodology.html" || rel === "site/lab/index.html") {
+      if (!html.includes('rel="canonical"')) {
         failed = true;
         console.error(`missing canonical link in ${rel}`);
+      }
+      const expected =
+        rel === "site/lab/methodology.html" ? "/lab/methodology.html" : "/lab/";
+      if (!html.includes(expected)) {
+        failed = true;
+        console.error(`unexpected canonical target in ${rel} (want ${expected})`);
       }
     }
   }

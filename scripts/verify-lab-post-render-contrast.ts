@@ -146,7 +146,13 @@ const CHECK_JS = `
     var td = document.querySelector(".lab-content table td, .lab-main table td");
     failures = failures.concat(checkContrast(td, "table cell", true));
   } else {
-    failures = failures.concat(checkContrast(document.querySelector("header h1"), "h1", false));
+    failures = failures.concat(
+      checkContrast(
+        document.querySelector("main h1") ?? document.querySelector("header .site-brand"),
+        "h1",
+        false,
+      ),
+    );
     var lead = document.querySelector(".lab-intro article p, .lab-intro .brief-content p");
     failures = failures.concat(checkContrast(lead, "lead", false));
     var td = document.querySelector(".lab-table td");

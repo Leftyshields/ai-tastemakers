@@ -8,11 +8,19 @@ import {
   buildLabSite,
   buildMonthlySite,
   buildWeeklySite,
+  collectBriefFeedEntries,
   editionSitePaths,
   pageShell,
   verifyPosthogInBuiltSite,
 } from "./edition-pages.js";
-import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
+import { EDITIONS } from "../src/tastemaker/editions.js";
+import { seoPage } from "./seo-copy.js";
+import {
+  writeBriefAtomFeed,
+  writeLlmsTxtFiles,
+  writeRobotsTxt,
+  writeSitemapFromSiteDir,
+} from "./seo-helpers.js";
 import { writeDefaultOgPng } from "./generate-brief-og.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import { renderGoRedirectPage } from "./digest-go-page.js";
@@ -234,7 +242,7 @@ async function buildSubscribePage(): Promise<void> {
 
     <section class="mb-8">
       <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily email</p>
-      <h2 class="mb-4 font-sans text-2xl font-bold tracking-tight">Subscribe to AI Tastemakers</h2>
+      <h1 class="mb-4 font-sans text-2xl font-bold tracking-tight">Subscribe to AI Tastemakers</h1>
       <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
         One email each morning with the top ten AI-derivative repos gaining momentum on GitHub&mdash;ranked by 7-day star growth, with a short Claude-written brief for each pick.
       </p>
@@ -278,15 +286,26 @@ async function buildSubscribePage(): Promise<void> {
 
     ${subscribeFormScript(firebase)}`;
 
+  const subscribeCopy = seoPage("subscribe");
+  const siteBaseUrl =
+    process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";
   await fs.writeFile(
     path.join(SITE_DIR, "subscribe.html"),
     pageShell(
-      "Subscribe · Tastemakers",
+      subscribeCopy.title ?? "Subscribe · Tastemakers",
       body,
       paths,
       brand,
-      "Get the AI Tastemakers daily digest by email — top trending AI open source repos with Claude briefs.",
+      subscribeCopy.description,
       escapeHtml,
+      {
+        siteBaseUrl,
+        seo: {
+          siteBaseUrl,
+          canonicalPath: "subscribe.html",
+          ogType: "website",
+        },
+      },
     ),
   );
 }
@@ -307,7 +326,7 @@ async function buildUnsubscribePage(): Promise<void> {
     <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
 
     <section class="mb-8">
-      <h2 class="mb-4 font-sans text-2xl font-bold tracking-tight">Unsubscribe from AI Tastemakers</h2>
+      <h1 class="mb-4 font-sans text-2xl font-bold tracking-tight">Unsubscribe from AI Tastemakers</h1>
       <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
         Enter the email address that receives the daily digest. We&rsquo;ll remove it from the mailing list immediately.
       </p>
@@ -343,15 +362,26 @@ async function buildUnsubscribePage(): Promise<void> {
 
     ${unsubscribeFormScript(firebase, loadTastemakersUnsubscribeApiUrl())}`;
 
+  const unsubscribeCopy = seoPage("unsubscribe");
+  const siteBaseUrl =
+    process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";
   await fs.writeFile(
     path.join(SITE_DIR, "unsubscribe.html"),
     pageShell(
-      "Unsubscribe · Tastemakers",
+      unsubscribeCopy.title ?? "Unsubscribe · Tastemakers",
       body,
       paths,
       brand,
-      "Unsubscribe from the AI Tastemakers daily digest email.",
+      unsubscribeCopy.description,
       escapeHtml,
+      {
+        siteBaseUrl,
+        seo: {
+          siteBaseUrl,
+          canonicalPath: "unsubscribe.html",
+          ogType: "website",
+        },
+      },
     ),
   );
 }
@@ -375,9 +405,9 @@ async function main(): Promise<void> {
   for (const edition of allEditions()) {
     total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml, siteBaseUrl);
   }
-  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml);
+  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml, siteBaseUrl);
   total += weeklyCount;
-  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml);
+  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml, siteBaseUrl);
   total += monthlyCount;
 
   await buildSubscribePage();
@@ -401,11 +431,51 @@ async function main(): Promise<void> {
   await fs.mkdir(path.join(SITE_DIR, "go"), { recursive: true });
   await fs.writeFile(
     path.join(SITE_DIR, "go", "index.html"),
-    renderGoRedirectPage(allowlist, siteHomePath),
+    renderGoRedirectPage(allowlist, siteHomePath, siteBaseUrl),
     "utf8",
   );
   const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl);
+
+  const aiFeedEntries = await collectBriefFeedEntries(ROOT, EDITIONS.oss);
+  const skillsFeedEntries = await collectBriefFeedEntries(ROOT, EDITIONS.skills);
+  const feedAiCopy = seoPage("feed_ai");
+  const feedSkillsCopy = seoPage("feed_skills");
+  await writeBriefAtomFeed(
+    SITE_DIR,
+    siteBaseUrl,
+    "feeds/ai.xml",
+    feedAiCopy.title ?? "AI Tastemakers daily briefs",
+    feedAiCopy.description ?? "Atom feed of AI Tastemakers daily briefings.",
+    `${siteBaseUrl.replace(/\/+$/, "")}/feeds/ai.xml`,
+    aiFeedEntries,
+  );
+  await writeBriefAtomFeed(
+    SITE_DIR,
+    siteBaseUrl,
+    "feeds/skills.xml",
+    feedSkillsCopy.title ?? "Skill Tastemakers daily briefs",
+    feedSkillsCopy.description ?? "Atom feed of Skill Tastemakers daily briefings.",
+    `${siteBaseUrl.replace(/\/+$/, "")}/feeds/skills.xml`,
+    skillsFeedEntries,
+  );
+
+  const llmsCopy = seoPage("llms_txt");
+  const latestAi = aiFeedEntries[0];
+  await writeLlmsTxtFiles(SITE_DIR, siteBaseUrl, {
+    summary: llmsCopy.summary ?? "",
+    fullIntro: llmsCopy.full_intro ?? "",
+    latestBriefPath: latestAi?.canonicalPath,
+    archivePath: "",
+    labPath: "lab/",
+    methodologyPath: "lab/methodology.html",
+    recentBriefLinks: aiFeedEntries.slice(0, 14).map((e) => ({
+      date: e.date,
+      path: e.canonicalPath,
+      title: e.title,
+    })),
+  });
+
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);

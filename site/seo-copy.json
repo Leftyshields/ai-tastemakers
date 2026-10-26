@@ -1,0 +1,87 @@
+{
+  "_draft_notice": "DRAFT COPY — Copywriter will rewrite every title, description, h1, and llms string below. Do not treat as final marketing copy.",
+  "pages": {
+    "home_oss": {
+      "title": "AI Tastemakers — Daily GitHub momentum digest",
+      "description": "Daily top ten AI-derivative open source repos on GitHub, ranked by seven-day star growth with builder-focused briefs.",
+      "h1": "AI Tastemakers"
+    },
+    "home_skills": {
+      "title": "Skill Tastemakers — Daily agent skills digest",
+      "description": "Daily top ten AI agent skills on GitHub — Claude Code plugins and installable capabilities ranked by momentum.",
+      "h1": "Skill Tastemakers"
+    },
+    "brief_oss": {
+      "titleTemplate": "Daily Brief — {date} · AI Tastemakers",
+      "descriptionFallback": "Curated AI open source repo picks for {date} with builder-focused summaries."
+    },
+    "brief_skills": {
+      "titleTemplate": "Daily Brief — {date} · Skill Tastemakers",
+      "descriptionFallback": "Curated agent skill repo picks for {date} with builder-focused summaries."
+    },
+    "lab_index": {
+      "title": "Lab · Tastemakers",
+      "description": "Public notes on digest pipeline experiments, engagement measurement, and what changed on AI Tastemakers.",
+      "h1": "Tastemakers Lab"
+    },
+    "lab_methodology": {
+      "title": "Methodology · Tastemakers Lab",
+      "description": "How AI Tastemakers runs calendar experiments, measures reader engagement, and publishes results on the Lab.",
+      "h1": "Methodology"
+    },
+    "lab_post": {
+      "titleTemplate": "{title} · Lab",
+      "descriptionTemplate": "Lab write-up: {title} — experiment notes and outcomes from Tastemakers Lab."
+    },
+    "lab_tools": {
+      "title": "Evaluated tools · Lab",
+      "description": "Tools from the daily digest inventory that Tastemakers Lab has evaluated or queued for experiments.",
+      "h1": "Evaluated tools"
+    },
+    "lab_experiments": {
+      "title": "Experiments · Lab",
+      "description": "Public record of digest and homepage experiments: what changed, whether it shipped, and what is live today.",
+      "h1": "Experiments"
+    },
+    "lab_tokens": {
+      "title": "Narration cost and quality · Lab",
+      "description": "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
+      "h1": "Narration cost and quality"
+    },
+    "lab_posts_index": {
+      "title": "Posts · Lab",
+      "description": "Experiment write-ups and tool trials published from Tastemakers Lab.",
+      "h1": "Lab posts"
+    },
+    "subscribe": {
+      "title": "Subscribe · Tastemakers",
+      "description": "Get the AI Tastemakers daily digest by email — top trending AI open source repos with Claude briefs.",
+      "h1": "Subscribe to AI Tastemakers"
+    },
+    "unsubscribe": {
+      "title": "Unsubscribe · Tastemakers",
+      "description": "Remove an email address from the AI Tastemakers daily digest mailing list.",
+      "h1": "Unsubscribe from AI Tastemakers"
+    },
+    "weekly_review": {
+      "titleTemplate": "Weekly Review — {weekId} · Tastemakers",
+      "description": "One week of AI open source, written for executives first, then builders, then the numbers."
+    },
+    "monthly_rollup": {
+      "titleTemplate": "Monthly Rollup — {monthId} · Tastemakers",
+      "description": "Monthly editorial synthesis across weekly Tastemakers reviews."
+    },
+    "feed_ai": {
+      "title": "AI Tastemakers daily briefs",
+      "description": "Atom feed of daily AI open source briefings from AI Tastemakers."
+    },
+    "feed_skills": {
+      "title": "Skill Tastemakers daily briefs",
+      "description": "Atom feed of daily agent skill briefings from Skill Tastemakers."
+    },
+    "llms_txt": {
+      "summary": "AI Tastemakers publishes daily GitHub momentum digests for AI-derivative open source and for agent skills, plus a public Lab on pipeline experiments and engagement.",
+      "full_intro": "This site is generated from the ai-tastemakers repository. Daily briefs rank repos by seven-day star growth and include Claude-written summaries. The Lab documents experiments on digest writing, layout, and discovery."
+    }
+  }
+}

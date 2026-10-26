@@ -42,10 +42,17 @@ import {
   briefMetaDescription,
   briefSocialDescription,
   briefSocialTitle,
+  breadcrumbJsonLd,
   buildSeoHeadHtml,
   defaultOgImageUrl,
+  feedAlternateLinksHtml,
+  googleSiteVerificationMetaHtml,
+  itemListJsonLd,
+  websiteJsonLd,
+  type BriefFeedEntry,
   type PageSeoOptions,
 } from "./seo-helpers.js";
+import { applyTemplate, seoPage } from "./seo-copy.js";
 import { briefOgImagePath, EDITION_TAGLINES, writeBriefOgPng } from "./generate-brief-og.js";
 import {
   groupDatesByMonth,
@@ -632,6 +639,7 @@ async function buildLabMarkdownPage(
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
+    const markdownHasH1 = /^#\s+/m.test(markdown);
     let html = prepareLabProseHtmlFromMarkdown(markdown);
     if (htmlName === "methodology.html") {
       html = html.replace(
@@ -641,18 +649,55 @@ async function buildLabMarkdownPage(
       html = `<h2 class="mb-6 font-sans text-lg font-bold tracking-tight">Methodology</h2>${html}`;
     }
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
+    const methodologyCopy = seoPage("lab_methodology");
     const seo =
       siteBaseUrl && htmlName === "methodology.html"
-        ? { siteBaseUrl, canonicalPath: "lab/methodology.html" }
+        ? {
+            siteBaseUrl,
+            canonicalPath: "lab/methodology.html",
+            ogType: "website",
+            ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            jsonLd: websiteJsonLd(
+              siteBaseUrl,
+              methodologyCopy.h1 ?? "Methodology",
+              methodologyCopy.description ?? pageTitle,
+            ),
+          }
         : undefined;
+    const pageCopy =
+      htmlName === "methodology.html" ? methodologyCopy : { title: pageTitle, description: pageTitle, h1: pageTitle };
+    const genericSeo =
+      siteBaseUrl && htmlName !== "methodology.html"
+        ? {
+            siteBaseUrl,
+            canonicalPath: `lab/${htmlName}`,
+            ogType: "website",
+            ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+          }
+        : seo;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
-      pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, {
-        ...labShell,
-        labNavActive: navActive,
-        labFallbackSection: "about",
-        seo,
-      }),
+      pageShell(
+        (htmlName === "methodology.html" ? methodologyCopy.title : pageCopy.title) ?? pageTitle,
+        body,
+        labSitePaths(),
+        brand,
+        htmlName === "methodology.html" ? methodologyCopy.description : pageCopy.description,
+        escapeHtml,
+        {
+          ...labShell,
+          labNavActive: navActive,
+          labFallbackSection: "about",
+          seo: genericSeo,
+          siteBaseUrl,
+          documentH1:
+            htmlName === "methodology.html"
+              ? methodologyCopy.h1
+              : markdownHasH1
+                ? undefined
+                : pageCopy.h1,
+        },
+      ),
     );
     return true;
   } catch {
@@ -666,6 +711,7 @@ async function writeLabAboutRedirectPage(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
+  siteBaseUrl?: string,
 ): Promise<void> {
   const body = `${labNavHtml("methodology", escapeHtml)}<p class="font-sans text-sm text-stone-700 dark:text-stone-300">This page moved to <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a>.</p>${labAboutRedirectScript()}${labPublishFooterHtml(escapeHtml)}`;
   await fs.writeFile(
@@ -675,6 +721,15 @@ async function writeLabAboutRedirectPage(
       labNavActive: "methodology",
       labFallbackSection: "about",
       metaRefresh: "methodology.html",
+      siteBaseUrl: undefined,
+      documentH1: "About",
+      seo: siteBaseUrl
+        ? {
+            siteBaseUrl,
+            canonicalPath: "lab/about.html",
+            noindex: true,
+          }
+        : undefined,
     }),
   );
 }
@@ -699,6 +754,7 @@ async function buildShadowPages(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
+  siteBaseUrl?: string,
 ): Promise<number> {
   const runsDir = path.join(repoRoot, "data", "experiments", "runs");
   const shadowSiteDir = path.join(labSiteDir, "shadow");
@@ -728,7 +784,13 @@ async function buildShadowPages(
           brand,
           "Side-by-side control vs treatment blurbs from a digest pipeline shadow run.",
           escapeHtml,
-          { ...labShell, labNavActive: "experiments", labNavDepth: 2 },
+          {
+            ...labShell,
+            labNavActive: "experiments",
+            labNavDepth: 2,
+            siteBaseUrl,
+            documentH1: `Shadow run ${runId.slice(0, 8)}`,
+          },
         ),
       );
       count++;
@@ -792,6 +854,9 @@ export function pageShell(
     labNavDepth?: 0 | 1 | 2;
     wideIndex?: boolean;
     seo?: PageSeoOptions;
+    siteBaseUrl?: string;
+    documentH1?: string;
+    documentH1Visible?: boolean;
     labFallbackSection?: LabLinkSection;
     labPostShell?: boolean;
     metaRefresh?: string;
@@ -799,6 +864,9 @@ export function pageShell(
 ): string {
   const safeTitle = escapeHtml(title);
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
+  const siteBase = options?.siteBaseUrl ?? options?.seo?.siteBaseUrl;
+  const feedAlternates = siteBase ? feedAlternateLinksHtml(siteBase, escapeHtml) : "";
+  const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const refreshMeta = options?.metaRefresh
     ? `<meta http-equiv="refresh" content="0;url=${escapeHtml(options.metaRefresh)}">`
     : "";
@@ -822,7 +890,13 @@ export function pageShell(
     : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12`;
   const labFallback = options?.labFallbackSection ?? "about";
   const labBody = labLayout ? ensureLabLinkSections(body, labFallback) : body;
-  const mainHtml = labLayout ? `<main class="lab-main">${labBody}</main>` : body;
+  const h1Class = options?.documentH1Visible ? "font-sans text-2xl font-bold tracking-tight mb-6" : "sr-only";
+  const documentH1 = options?.documentH1
+    ? `<h1 class="${h1Class}">${escapeHtml(options.documentH1)}</h1>`
+    : "";
+  const mainHtml = labLayout
+    ? `<main class="lab-main">${documentH1}${labBody}</main>`
+    : `${documentH1}${body}`;
   const footerMt = labLayout ? "mt-10" : "mt-16";
 
   return `<!DOCTYPE html>
@@ -833,6 +907,8 @@ export function pageShell(
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${safeTitle}</title>
   ${refreshMeta}
+  ${gscMeta}
+  ${feedAlternates}
   ${headMeta}
   <link rel="stylesheet" href="${paths.css}">
   ${posthogScriptHtml()}
@@ -840,9 +916,9 @@ export function pageShell(
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="${shellClass}">
     <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-700">
-      <h1 class="font-sans text-2xl font-bold tracking-tight">
+      <div class="site-brand font-sans text-2xl font-bold tracking-tight">
         <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400"${labLayout ? ' data-lab-section="nav"' : ""}>${escapeHtml(brand.name)}</a>
-      </h1>
+      </div>
       <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brand.tagline)}</p>
       ${nav}
       ${mobileLabNav}
@@ -1533,6 +1609,7 @@ export async function buildMonthlySite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
+  siteBaseUrl?: string,
 ): Promise<number> {
   const months = await listMonthlyReviewMonths(repoRoot);
   const outDir = path.join(siteDir, "monthly");
@@ -1562,15 +1639,27 @@ export async function buildMonthlySite(
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}#monthly-archive">All monthly rollups</a>
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+    const monthlyCopy = seoPage("monthly_rollup");
     await fs.writeFile(
       path.join(outDir, `${monthId}.html`),
       pageShell(
-        `Monthly Rollup — ${monthId}`,
+        applyTemplate(monthlyCopy.titleTemplate ?? `Monthly Rollup — ${monthId}`, { monthId }),
         body,
         paths,
         brand,
-        "Monthly editorial synthesis across weekly Tastemakers reviews.",
+        monthlyCopy.description,
         escapeHtml,
+        {
+          siteBaseUrl,
+          seo: siteBaseUrl
+            ? {
+                siteBaseUrl,
+                canonicalPath: `monthly/${monthId}.html`,
+                ogType: "article",
+                ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+              }
+            : undefined,
+        },
       ),
     );
   }
@@ -1593,6 +1682,7 @@ export async function buildWeeklySite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
+  siteBaseUrl?: string,
 ): Promise<number> {
   const weeks = await listWeeklyReviewWeeks(repoRoot);
   const outDir = path.join(siteDir, "weekly");
@@ -1622,15 +1712,27 @@ export async function buildWeeklySite(
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}#weekly-archive">All weekly reviews</a>
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+    const weeklyCopy = seoPage("weekly_review");
     await fs.writeFile(
       path.join(outDir, `${weekId}.html`),
       pageShell(
-        `Weekly Review — ${weekId}`,
+        applyTemplate(weeklyCopy.titleTemplate ?? `Weekly Review — ${weekId}`, { weekId }),
         body,
         paths,
         brand,
-        "One week of AI open source, written for executives first, then builders, then the numbers.",
+        weeklyCopy.description,
         escapeHtml,
+        {
+          siteBaseUrl,
+          seo: siteBaseUrl
+            ? {
+                siteBaseUrl,
+                canonicalPath: `weekly/${weekId}.html`,
+                ogType: "article",
+                ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+              }
+            : undefined,
+        },
       ),
     );
   }
@@ -1694,18 +1796,20 @@ export async function buildEditionSite(
       ? `${edition.siteSegment}/briefings/${date}.html`
       : `briefings/${date}.html`;
 
-    let description: string | undefined = `${edition.name} daily brief for ${date} — curated AI repo picks with builder-focused summaries.`;
-    let pageTitle = `Daily Brief — ${date} · ${edition.name}`;
+    const briefCopy = seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss");
+    let description: string | undefined = applyTemplate(briefCopy.descriptionFallback ?? "", { date });
+    let pageTitle = applyTemplate(briefCopy.titleTemplate ?? `Daily Brief — ${date}`, { date });
     let seo: PageSeoOptions | undefined;
     if (siteBaseUrl) {
       try {
         const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
         const digest = JSON.parse(digestRaw) as {
           repos: Array<{ full_name: string; brief?: string | null }>;
+          generated_at?: string;
         };
         description = briefSocialDescription(digest.repos);
         const socialTitle = briefSocialTitle(date);
-        pageTitle = `Daily Brief — ${date} · ${edition.name}`;
+        pageTitle = applyTemplate(briefCopy.titleTemplate ?? `Daily Brief — ${date}`, { date });
         const ogImageRel = briefOgImagePath(edition.siteSegment, date);
         const ogImageAbs = `${siteBaseUrl.replace(/\/+$/, "")}/${ogImageRel}`;
         const ogOutPath = path.join(
@@ -1721,6 +1825,8 @@ export async function buildEditionSite(
           editionTagline: EDITION_TAGLINES[edition.id],
           repos: digest.repos.map((r) => r.full_name),
         });
+        const homePath = edition.siteSegment ? `${edition.siteSegment}/` : "";
+        const homeName = edition.id === "skills" ? "Skill Tastemakers" : "AI Tastemakers";
         seo = {
           siteBaseUrl,
           canonicalPath,
@@ -1728,14 +1834,20 @@ export async function buildEditionSite(
           ogTitle: socialTitle,
           ogImageUrl: ogImageAbs,
           ogImageAlt: `Top repo picks · ${date}`,
-          jsonLd: articleJsonLd(
-            siteBaseUrl,
-            canonicalPath,
-            pageTitle,
-            description,
-            `${date}T08:00:00-07:00`,
-            ogImageAbs,
-          ),
+          jsonLd: [
+            articleJsonLd(
+              siteBaseUrl,
+              canonicalPath,
+              pageTitle,
+              description,
+              `${date}T08:00:00-07:00`,
+              ogImageAbs,
+            ),
+            breadcrumbJsonLd(siteBaseUrl, [
+              { name: homeName, path: homePath },
+              { name: socialTitle, path: canonicalPath },
+            ]),
+          ],
         };
       } catch {
         seo = {
@@ -1760,6 +1872,7 @@ export async function buildEditionSite(
       path.join(briefOutDir, `${date}.html`),
       pageShell(pageTitle, body, paths, brand, description, escapeHtml, {
         seo,
+        siteBaseUrl,
       }),
     );
   }
@@ -1784,15 +1897,19 @@ export async function buildEditionSite(
       ? skillsIndexBody(indexPaths, dates, edition, dates[0], wrapUp)
       : ossIndexBody(indexPaths, dates, dates[0], wrapUp);
 
-  const indexDescription =
-    edition.id === "skills"
-      ? "Daily top AI agent skills on GitHub — Claude Code plugins and research skills ranked by momentum."
-      : "Daily curated briefings on trending AI-derivative open source on GitHub.";
-  const indexCanonical = edition.siteSegment ? `${edition.siteSegment}/index.html` : "index.html";
+  const homeCopy = seoPage(edition.id === "skills" ? "home_skills" : "home_oss");
+  const indexCanonical = edition.siteSegment ? `${edition.siteSegment}/` : "";
+  const recentBriefPaths = dates
+    .slice(0, 10)
+    .map((d) =>
+      edition.siteSegment ? `${edition.siteSegment}/briefings/${d}.html` : `briefings/${d}.html`,
+    );
   await fs.writeFile(
     path.join(siteRoot, "index.html"),
-    pageShell(edition.name, indexBody, indexPaths, brand, indexDescription, escapeHtml, {
+    pageShell(homeCopy.title ?? edition.name, indexBody, indexPaths, brand, homeCopy.description, escapeHtml, {
       wideIndex: useV2,
+      documentH1: homeCopy.h1 ?? edition.name,
+      siteBaseUrl,
       seo: siteBaseUrl
         ? {
             siteBaseUrl,
@@ -1800,12 +1917,67 @@ export async function buildEditionSite(
             ogType: "website",
             ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
             ogImageAlt: `${edition.name} — daily curated AI repos`,
+            jsonLd: [
+              websiteJsonLd(
+                siteBaseUrl,
+                homeCopy.h1 ?? edition.name,
+                homeCopy.description ?? edition.tagline,
+              ),
+              itemListJsonLd(
+                siteBaseUrl,
+                `${homeCopy.h1 ?? edition.name} recent daily briefs`,
+                recentBriefPaths,
+              ),
+            ],
           }
         : undefined,
     }),
   );
 
   return dates.length;
+}
+
+export async function collectBriefFeedEntries(
+  repoRoot: string,
+  edition: EditionDefinition,
+  limit = 60,
+): Promise<BriefFeedEntry[]> {
+  const briefingsDir = briefingsDirForEdition(repoRoot, edition);
+  const dates = (await listBriefingDates(briefingsDir)).slice(0, limit);
+  const entries: BriefFeedEntry[] = [];
+  for (const date of dates) {
+    const canonicalPath = edition.siteSegment
+      ? `${edition.siteSegment}/briefings/${date}.html`
+      : `briefings/${date}.html`;
+    let summary = applyTemplate(
+      seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").descriptionFallback ?? "",
+      { date },
+    );
+    let updatedIso: string | undefined;
+    try {
+      const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
+      const digest = JSON.parse(digestRaw) as {
+        repos: Array<{ brief?: string | null }>;
+        generated_at?: string;
+      };
+      summary = briefSocialDescription(digest.repos);
+      if (digest.generated_at) updatedIso = digest.generated_at;
+    } catch {
+      /* markdown-only day */
+    }
+    entries.push({
+      date,
+      title: applyTemplate(
+        seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").titleTemplate ??
+          `Daily Brief — ${date}`,
+        { date },
+      ),
+      summary,
+      canonicalPath,
+      updatedIso,
+    });
+  }
+  return entries;
 }
 
 function markdownH1(markdown: string, fallback: string): string {
@@ -1870,29 +2042,71 @@ export async function buildLabSite(
     siteBaseUrl,
   );
 
-  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell);
+  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell, siteBaseUrl);
 
-  const labIndexDescription =
-    "How AI Tastemakers measures site engagement, runs digest pipeline experiments, and publishes results openly.";
+  const labIndexCopy = seoPage("lab_index");
+  const labIndexSeo: PageSeoOptions | undefined = siteBaseUrl
+    ? {
+        siteBaseUrl,
+        canonicalPath: "lab/",
+        ogType: "website",
+        ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+        jsonLd: websiteJsonLd(
+          siteBaseUrl,
+          labIndexCopy.h1 ?? "Tastemakers Lab",
+          labIndexCopy.description ?? labIndexCopy.title ?? "Lab",
+        ),
+      }
+    : undefined;
 
   await fs.writeFile(
     path.join(labSiteDir, "index.html"),
-    pageShell("Lab · Tastemakers", indexBody, paths, brand, labIndexDescription, escapeHtml, {
-      ...labShell,
-      labNavActive: "home",
-      labFallbackSection: "hero",
-    }),
+    pageShell(
+      labIndexCopy.title ?? "Lab · Tastemakers",
+      indexBody,
+      paths,
+      brand,
+      labIndexCopy.description,
+      escapeHtml,
+      {
+        ...labShell,
+        labNavActive: "home",
+        labFallbackSection: "hero",
+        seo: labIndexSeo,
+        siteBaseUrl,
+        documentH1: labIndexCopy.h1,
+      },
+    ),
   );
 
   const toolsBody = `${labNavHtml("tools", escapeHtml)}${renderToolsPageHtml(repoRoot, linkCtx, escapeHtml)}${labPublishFooterHtml(escapeHtml)}`;
 
+  const labToolsCopy = seoPage("lab_tools");
   await fs.writeFile(
     path.join(labSiteDir, "tools.html"),
-    pageShell("Evaluated tools · Lab", toolsBody, paths, brand, undefined, escapeHtml, {
-      ...labShell,
-      labNavActive: "tools",
-      labFallbackSection: "tools",
-    }),
+    pageShell(
+      labToolsCopy.title ?? "Evaluated tools · Lab",
+      toolsBody,
+      paths,
+      brand,
+      labToolsCopy.description,
+      escapeHtml,
+      {
+        ...labShell,
+        labNavActive: "tools",
+        labFallbackSection: "tools",
+        siteBaseUrl,
+        documentH1: labToolsCopy.h1,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/tools.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+      },
+    ),
   );
 
   await writeExperimentsData(repoRoot, labSiteDir);
@@ -1926,16 +2140,30 @@ export async function buildLabSite(
     path.join(labSiteDir, "experiments.js"),
   );
 
+  const labExperimentsCopy = seoPage("lab_experiments");
   await fs.writeFile(
     path.join(labSiteDir, "experiments.html"),
     pageShell(
-      "Experiments · Lab",
+      labExperimentsCopy.title ?? "Experiments · Lab",
       experimentsBody,
       paths,
       brand,
-      "Public record of digest and homepage experiments: what we changed, whether we kept it, and what is live today.",
+      labExperimentsCopy.description,
       escapeHtml,
-      { ...labShell, labNavActive: "experiments" },
+      {
+        ...labShell,
+        labNavActive: "experiments",
+        siteBaseUrl,
+        documentH1: labExperimentsCopy.h1,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/experiments.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+      },
     ),
   );
 
@@ -1945,16 +2173,30 @@ export async function buildLabSite(
   const experiments = await loadAllExperiments(repoRoot);
   const tokenBody = `${labNavHtml("tokens", escapeHtml)}${renderTokenUsagePage(tokenData, experiments, escapeHtml)}`;
 
+  const labTokensCopy = seoPage("lab_tokens");
   await fs.writeFile(
     path.join(labSiteDir, "token-usage.html"),
     pageShell(
-      "Narration cost & quality · Lab",
+      labTokensCopy.title ?? "Narration cost & quality · Lab",
       tokenBody,
       paths,
       brand,
-      "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
+      labTokensCopy.description,
       escapeHtml,
-      { ...labShell, labNavActive: "tokens" },
+      {
+        ...labShell,
+        labNavActive: "tokens",
+        siteBaseUrl,
+        documentH1: labTokensCopy.h1,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/token-usage.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+      },
     ),
   );
 
@@ -1968,9 +2210,17 @@ export async function buildLabSite(
     escapeHtml,
     labShell,
     "experiments",
+    siteBaseUrl,
   );
 
-  const shadowCount = await buildShadowPages(repoRoot, labSiteDir, brand, escapeHtml, labShell);
+  const shadowCount = await buildShadowPages(
+    repoRoot,
+    labSiteDir,
+    brand,
+    escapeHtml,
+    labShell,
+    siteBaseUrl,
+  );
 
   await fs.mkdir(path.join(labSiteDir, "posts"), { recursive: true });
   const postsDir = path.join(repoRoot, "briefings", "lab", "posts");
@@ -2011,14 +2261,41 @@ export async function buildLabSite(
             })
           : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
         const postBody = `${labNavHtml("posts", escapeHtml, 1)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
+        const labPostCopy = seoPage("lab_post");
+        const postDescription = applyTemplate(labPostCopy.descriptionTemplate ?? "", { title });
+        const postTitle = applyTemplate(labPostCopy.titleTemplate ?? "{title} · Lab", { title });
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
-          pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, {
+          pageShell(postTitle, postBody, labSitePaths(1), brand, postDescription, escapeHtml, {
             ...labShell,
             labNavActive: "posts",
             labNavDepth: 1,
             labFallbackSection: "posts",
             labPostShell: true,
+            siteBaseUrl,
+            seo: siteBaseUrl
+              ? {
+                  siteBaseUrl,
+                  canonicalPath: `lab/posts/${slug}.html`,
+                  ogType: "article",
+                  ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                  jsonLd: [
+                    articleJsonLd(
+                      siteBaseUrl,
+                      `lab/posts/${slug}.html`,
+                      title,
+                      postDescription,
+                      `${asOfIsoDate}T12:00:00Z`,
+                      defaultOgImageUrl(siteBaseUrl),
+                    ),
+                    breadcrumbJsonLd(siteBaseUrl, [
+                      { name: "Tastemakers Lab", path: "lab/" },
+                      { name: "Posts", path: "lab/posts/" },
+                      { name: title, path: `lab/posts/${slug}.html` },
+                    ]),
+                  ],
+                }
+              : undefined,
           }),
         );
       }
@@ -2032,6 +2309,7 @@ export async function buildLabSite(
           labNavDepth: 1,
           labFallbackSection: "posts",
           labPostShell: true,
+          siteBaseUrl,
         }),
       );
       postsBody += `<ul class="font-sans text-sm leading-relaxed">${listings.join("")}</ul>`;
@@ -2039,13 +2317,32 @@ export async function buildLabSite(
   } catch {
     postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Write-ups appear here after we finish an experiment or try a tool from the digest.</p>`;
   }
+  const labPostsIndexCopy = seoPage("lab_posts_index");
   await fs.writeFile(
     path.join(labSiteDir, "posts", "index.html"),
-    pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, {
-      ...labShell,
-      labNavActive: "posts",
-      labNavDepth: 1,
-    }),
+    pageShell(
+      labPostsIndexCopy.title ?? "Posts · Lab",
+      postsBody,
+      labSitePaths(1),
+      brand,
+      labPostsIndexCopy.description,
+      escapeHtml,
+      {
+        ...labShell,
+        labNavActive: "posts",
+        labNavDepth: 1,
+        siteBaseUrl,
+        documentH1: labPostsIndexCopy.h1,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/posts/",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+      },
+    ),
   );
 
   return 5 + shadowCount + 1;
