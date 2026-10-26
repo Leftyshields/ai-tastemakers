@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { findInternalHrefViolations, SITE_PUBLISH_PREFIX } from "./verify-lab-internal-hrefs.js";
-import { isSiteGateExemptHtmlBasename } from "./site-verification-pages.js";
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 function listSiteHtmlFiles(dir: string, out: string[] = []): string[] {
   if (!fs.existsSync(dir)) return out;
@@ -24,8 +24,7 @@ function siteRel(siteDir: string, abs: string): string {
 export function runH1Gate(siteDir: string): string[] {
   const errors: string[] = [];
   for (const abs of listSiteHtmlFiles(siteDir)) {
-    const base = path.basename(abs);
-    if (isSiteGateExemptHtmlBasename(base)) continue;
+    if (isSiteGateExemptHtmlFile(abs)) continue;
     const html = fs.readFileSync(abs, "utf8");
     if (!/<h1\b/i.test(html)) {
       errors.push(`h1 gate: ${siteRel(siteDir, abs)} missing <h1>`);
@@ -68,8 +67,7 @@ export function runUntrackedLinkGate(siteDir: string): string[] {
   }
 
   for (const abs of pages) {
-    const base = path.basename(abs);
-    if (isSiteGateExemptHtmlBasename(base)) continue;
+    if (isSiteGateExemptHtmlFile(abs)) continue;
     const rel = siteRel(siteDir, abs);
     if (!tracked.has(rel)) {
       errors.push(`untracked-link gate: no inbound internal link to ${rel}`);

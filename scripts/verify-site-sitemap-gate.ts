@@ -4,7 +4,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { isSiteGateExemptHtmlBasename } from "./site-verification-pages.js";
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteRoot = path.join(repoRoot, "site");
@@ -29,8 +29,7 @@ export function runSitemapGate(siteDir = siteRoot): string[] {
   }
   const xml = fs.readFileSync(sitemapPath, "utf8");
   for (const abs of listSiteHtmlFiles(siteDir)) {
-    const base = path.basename(abs);
-    if (!isSiteGateExemptHtmlBasename(base)) continue;
+    if (!isSiteGateExemptHtmlFile(abs)) continue;
     const rel = path.relative(siteDir, abs).split(path.sep).join("/");
     if (xml.includes(rel) || xml.includes(encodeURI(rel))) {
       errors.push(`sitemap gate: ${rel} must not appear in sitemap.xml`);

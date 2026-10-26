@@ -1,4 +1,4 @@
-import { isGoogleSiteVerificationHtmlFile } from "./site-verification-pages.js";
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 export interface PageSeoOptions {
   /** Site-relative path, e.g. `briefings/2026-08-01.html` or `skills/briefings/2026-08-01.html` */
@@ -204,7 +204,7 @@ export async function writeSitemapFromSiteDir(siteDir: string, siteBaseUrl: stri
       if (ent.isDirectory()) {
         await walk(full, rel);
       } else if (ent.name.endsWith(".html") || ent.name.endsWith(".png")) {
-        if (ent.name.endsWith(".html") && isGoogleSiteVerificationHtmlFile(ent.name)) continue;
+        if (ent.name.endsWith(".html") && isSiteGateExemptHtmlFile(full)) continue;
         urls.push(`${base}/${rel}`);
       }
     }

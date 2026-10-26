@@ -35,4 +35,12 @@ describe("site root gates exempt Google Search Console verification HTML", () =>
     expect(runUntrackedLinkGate(tmp)).toEqual([]);
     fs.rmSync(tmp, { recursive: true, force: true });
   });
+
+  it("h1 gate does not skip verification basename when content is wrong", () => {
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), "h1-gate-"));
+    fs.writeFileSync(path.join(tmp, GOOGLE_SITE_VERIFICATION_HTML), "not the verification line\n");
+    const errors = runH1Gate(tmp);
+    expect(errors.some((e) => e.includes(GOOGLE_SITE_VERIFICATION_HTML))).toBe(true);
+    fs.rmSync(tmp, { recursive: true, force: true });
+  });
 });
