@@ -16,6 +16,8 @@ import {
   weeklyEmailSubject,
 } from "./weekly-html.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
+import { collectDigestRepoAllowlist } from "../analytics/digest-allowlist.js";
+import { assertRenderedEmailAllowedByManifest } from "../analytics/outbound-email-manifest-guard.js";
 
 export async function shouldSendDigestEmail(config: AppConfig): Promise<boolean> {
   if (!config.resendApiKey || !config.digestEmailFrom) return false;
@@ -60,6 +62,7 @@ export async function sendDigestEmail(
 
   const resend = new Resend(config.resendApiKey);
   const subject = digestEmailSubject(dateLabel);
+  const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
 
   for (const record of records) {
@@ -74,6 +77,8 @@ export async function sendDigestEmail(
       config.digestSiteUrl,
       unsubscribeUrl,
       config.editionId,
+      undefined,
+      githubAllowlist,
     );
     const text = renderDigestEmailText(
       digest,
@@ -81,7 +86,10 @@ export async function sendDigestEmail(
       config.digestSiteUrl,
       unsubscribeUrl,
       config.editionId,
+      undefined,
+      githubAllowlist,
     );
+    await assertRenderedEmailAllowedByManifest(config.rootDir, html, text);
     const { data, error } = await resend.emails.send({
       from: config.digestEmailFrom,
       to: [record.email],
@@ -122,6 +130,7 @@ export async function sendWeeklyDigestEmail(
 
   const resend = new Resend(config.resendApiKey);
   const subject = weeklyEmailSubject(review);
+  const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
 
   for (const record of records) {
@@ -130,12 +139,25 @@ export async function sendWeeklyDigestEmail(
       record.email,
       record.unsubscribeToken,
     );
+    const weeklyHtml = renderWeeklyEmailHtml(
+      review,
+      config.digestSiteUrl,
+      unsubscribeUrl,
+      githubAllowlist,
+    );
+    const weeklyText = renderWeeklyEmailText(
+      review,
+      config.digestSiteUrl,
+      unsubscribeUrl,
+      githubAllowlist,
+    );
+    await assertRenderedEmailAllowedByManifest(config.rootDir, weeklyHtml, weeklyText);
     const { data, error } = await resend.emails.send({
       from: config.digestEmailFrom,
       to: [record.email],
       subject,
-      html: renderWeeklyEmailHtml(review, config.digestSiteUrl, unsubscribeUrl),
-      text: renderWeeklyEmailText(review, config.digestSiteUrl, unsubscribeUrl),
+      html: weeklyHtml,
+      text: weeklyText,
       headers: {
         "List-Unsubscribe": `<${unsubscribeUrl}>`,
       },

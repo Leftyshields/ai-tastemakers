@@ -75,4 +75,6 @@ echo "verify: lab header mobile screenshots (390 scroll start/end)"
 "$TSX" scripts/capture-lab-header-390.ts
 echo "verify: site sitemap gate (Search Console verification HTML)"
 "$TSX" scripts/verify-site-sitemap-gate.ts
+echo "verify: outbound link tracking (/go) on site and email fixtures"
+"$TSX" scripts/verify-outbound-links.ts
 echo "verify: ok"

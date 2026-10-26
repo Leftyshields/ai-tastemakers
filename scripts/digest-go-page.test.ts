@@ -1,5 +1,10 @@
 import { describe, it, expect } from "vitest";
 import { renderGoRedirectPage, resolveGoPageDestination } from "./digest-go-page.js";
+import {
+  OutboundDestRegistry,
+  outboundDestHash,
+  normalizeOutboundDest,
+} from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 
 describe("renderGoRedirectPage", () => {
   it("includes a single capture guard and Continue to GitHub fallback", () => {
@@ -15,11 +20,16 @@ describe("renderGoRedirectPage", () => {
 
 describe("resolveGoPageDestination", () => {
   const allowlist = { "acme/demo": "https://github.com/acme/demo" };
+  const home = "https://example.com/";
+
+  function manifestWith(...dests: string[]): Set<string> {
+    const r = new OutboundDestRegistry();
+    for (const d of dests) r.register(d);
+    return new Set(r.toSortedHashes());
+  }
 
   it("rejects non github repo params", () => {
-    expect(
-      resolveGoPageDestination("?repo=javascript:alert(1)", allowlist, "https://example.com/"),
-    ).toBe("https://example.com/");
+    expect(resolveGoPageDestination("?repo=javascript:alert(1)", allowlist, home)).toBe(home);
   });
 
   it("resolves lab badge dest to lab post on site origin", () => {
@@ -50,8 +60,59 @@ describe("resolveGoPageDestination", () => {
       resolveGoPageDestination(
         "?event=lab_badge_click&dest=https://evil.com/phish",
         allowlist,
-        "https://example.com/",
+        home,
       ),
-    ).toBe("https://example.com/");
+    ).toBe(home);
+  });
+
+  it("redirects when dest hash is in manifest (manifest hit)", () => {
+    const dest = "https://docs.example.com/guide";
+    const manifest = manifestWith(dest);
+    expect(
+      resolveGoPageDestination(
+        `?event=outbound_link_click&dest=${encodeURIComponent(dest)}`,
+        allowlist,
+        home,
+        manifest,
+      ),
+    ).toBe(normalizeOutboundDest(dest));
+  });
+
+  it("rejects forged dest not in manifest", () => {
+    const manifest = manifestWith("https://docs.example.com/guide");
+    expect(
+      resolveGoPageDestination(
+        "?event=outbound_link_click&dest=https://evil.com/phish",
+        allowlist,
+        home,
+        manifest,
+      ),
+    ).toBe(home);
+  });
+
+  it("rejects tampered dest (listed URL with path changed)", () => {
+    const allowed = "https://docs.example.com/guide";
+    const manifest = manifestWith(allowed);
+    const tampered = "https://docs.example.com/guide/evil";
+    expect(
+      resolveGoPageDestination(
+        `?event=outbound_link_click&dest=${encodeURIComponent(tampered)}`,
+        allowlist,
+        home,
+        manifest,
+      ),
+    ).toBe(home);
+    expect(outboundDestHash(normalizeOutboundDest(allowed)!)).not.toBe(
+      outboundDestHash(normalizeOutboundDest(tampered)!),
+    );
+  });
+});
+
+describe("renderGoRedirectPage outbound", () => {
+  it("includes outbound_link_click capture and manifest lookup", () => {
+    const html = renderGoRedirectPage({}, "/", ["abc123"]);
+    expect(html).toContain("outbound_link_click");
+    expect(html).toContain("resolveManifestOutbound");
+    expect(html).toContain("MANIFEST_HASHES");
   });
 });

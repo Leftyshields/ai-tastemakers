@@ -16,6 +16,8 @@ import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
 import { writeDefaultOgPng } from "./generate-brief-og.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import { renderGoRedirectPage } from "./digest-go-page.js";
+import { OutboundDestRegistry, writeOutboundDestManifest } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
+import { registerEmailOutboundDestsForManifest } from "../src/tastemaker/analytics/register-email-outbound-dests.js";
 import { assertExperimentsValid } from "./lab/validate-experiments.js";
 import { buildIsoDatePt } from "./lab/lab-format.js";
 
@@ -220,7 +222,11 @@ form.addEventListener("submit", async function (event) {
 </script>`;
 }
 
-async function buildSubscribePage(): Promise<void> {
+async function buildSubscribePage(
+  siteBaseUrl: string,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): Promise<void> {
   const paths = editionSitePaths("", 0);
   paths.editionNav.active = undefined;
   const brand = {
@@ -290,11 +296,24 @@ async function buildSubscribePage(): Promise<void> {
       brand,
       "Get the AI Tastemakers daily digest by email — top trending AI open source repos with Claude briefs.",
       escapeHtml,
+      {
+        outboundRewrite: {
+          siteBaseUrl,
+          destRegistry,
+          githubAllowlist,
+          channel: "pages",
+          surface: "subscribe",
+        },
+      },
     ),
   );
 }
 
-async function buildUnsubscribePage(): Promise<void> {
+async function buildUnsubscribePage(
+  siteBaseUrl: string,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): Promise<void> {
   const paths = editionSitePaths("", 0);
   paths.editionNav.active = undefined;
   const brand = {
@@ -355,6 +374,15 @@ async function buildUnsubscribePage(): Promise<void> {
       brand,
       "Unsubscribe from the AI Tastemakers daily digest email.",
       escapeHtml,
+      {
+        outboundRewrite: {
+          siteBaseUrl,
+          destRegistry,
+          githubAllowlist,
+          channel: "pages",
+          surface: "unsubscribe",
+        },
+      },
     ),
   );
 }
@@ -373,20 +401,20 @@ async function main(): Promise<void> {
 
   const siteBaseUrl =
     process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+  const allowlist = await collectDigestRepoAllowlist(ROOT);
+  const destRegistry = new OutboundDestRegistry();
 
   let total = 0;
   for (const edition of allEditions()) {
-    total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml, siteBaseUrl);
+    total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml, siteBaseUrl, destRegistry);
   }
-  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml);
+  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml, siteBaseUrl, destRegistry);
   total += weeklyCount;
-  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml);
+  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml, siteBaseUrl, destRegistry);
   total += monthlyCount;
 
-  await buildSubscribePage();
-  await buildUnsubscribePage();
-
-  const allowlist = await collectDigestRepoAllowlist(ROOT);
+  await buildSubscribePage(siteBaseUrl, allowlist, destRegistry);
+  await buildUnsubscribePage(siteBaseUrl, allowlist, destRegistry);
   const siteHomePath = (() => {
     try {
       const pathname = new URL(siteBaseUrl).pathname.replace(/\/+$/, "");
@@ -401,14 +429,22 @@ async function main(): Promise<void> {
     `${JSON.stringify(allowlist, null, 0)}\n`,
     "utf8",
   );
+  const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
+  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl, destRegistry);
+
+  await registerEmailOutboundDestsForManifest(destRegistry, ROOT, siteBaseUrl, allowlist);
+  await destRegistry.verifyHttpUpgrades();
+
+  const manifestPath = path.join(SITE_DIR, "assets", "outbound-link-dests.json");
+  await writeOutboundDestManifest(manifestPath, destRegistry);
+  const manifestHashes = destRegistry.toSortedHashes();
+
   await fs.mkdir(path.join(SITE_DIR, "go"), { recursive: true });
   await fs.writeFile(
     path.join(SITE_DIR, "go", "index.html"),
-    renderGoRedirectPage(allowlist, siteHomePath),
+    renderGoRedirectPage(allowlist, siteHomePath, manifestHashes),
     "utf8",
   );
-  const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
-  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl);
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);
