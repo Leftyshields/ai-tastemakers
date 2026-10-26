@@ -827,4 +827,248 @@
   #export-markdown {
     @apply mt-6 rounded-full border border-stone-300 px-4 py-2 text-sm font-semibold text-stone-700 hover:bg-stone-50 dark:border-stone-600 dark:text-stone-200 dark:hover:bg-stone-800;
   }
+
+  .home-index-shell {
+    @apply max-w-6xl bg-[#fffcf8] dark:bg-stone-900;
+  }
+
+  .home-index-main .nw {
+    white-space: nowrap;
+  }
+
+  .home-index-main .muted {
+    @apply text-stone-600 dark:text-stone-400;
+  }
+
+  .home-index-main .sec {
+    @apply mt-10;
+  }
+
+  .home-index-main h2.h {
+    @apply mb-4 font-sans text-[0.8125rem] font-semibold uppercase tracking-widest text-stone-600 dark:text-stone-400;
+  }
+
+  .home-index-main .hero h2 {
+    @apply mb-3 max-w-[40rem] font-sans text-[1.75rem] font-bold leading-tight tracking-tight md:text-4xl;
+  }
+
+  .home-index-main .hero p {
+    @apply max-w-[40rem] text-[1.0625rem] leading-relaxed;
+  }
+
+  .home-index-main .ctas {
+    @apply mt-6 flex flex-wrap gap-3;
+  }
+
+  .home-index-main .btn {
+    @apply inline-flex min-h-11 items-center rounded-full border border-transparent px-6 font-sans text-[0.9375rem] font-semibold no-underline;
+  }
+
+  .home-index-main .btn-p {
+    @apply bg-blue-800 text-white dark:bg-blue-600;
+  }
+
+  .home-index-main .btn-s {
+    @apply border-stone-300 bg-white text-stone-800 dark:border-stone-600 dark:bg-stone-900 dark:text-stone-100;
+  }
+
+  .home-index-main .picks {
+    @apply grid list-none gap-3 p-0;
+    align-items: stretch;
+  }
+
+  @media (min-width: 768px) {
+    .home-index-main .picks {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .home-index-main .picks {
+      grid-template-columns: repeat(5, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .home-index-main .picks li.d {
+      display: none;
+    }
+  }
+
+  .home-index-main .card {
+    display: grid;
+    grid-template-rows: 1.25rem 2.6rem 1.25rem calc(3.45rem + 6px) 3.95rem;
+    align-content: start;
+    gap: 0.5rem;
+    box-sizing: border-box;
+    height: 100%;
+    @apply rounded-xl border border-stone-200 bg-white p-4 text-inherit no-underline dark:border-stone-700 dark:bg-stone-950/40;
+  }
+
+  .home-index-main .card:hover {
+    @apply border-blue-300 dark:border-blue-400;
+  }
+
+  .home-index-main .card .rk {
+    @apply overflow-hidden font-sans text-sm font-bold leading-5 text-blue-800 whitespace-nowrap dark:text-blue-300;
+  }
+
+  .home-index-main .card .rn {
+    @apply overflow-hidden font-sans text-base font-semibold leading-[1.3rem] dark:text-stone-100;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow-wrap: normal;
+    word-break: normal;
+  }
+
+  .home-index-main .card .st {
+    @apply overflow-hidden text-ellipsis font-sans text-[0.8125rem] font-semibold leading-5 whitespace-nowrap text-green-800 dark:text-green-300;
+  }
+
+  .home-index-main .card .sum {
+    @apply m-0 text-sm leading-[1.3125rem];
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .home-index-main .card .wwl {
+    @apply m-0 pt-1.5 text-[0.8125rem] font-semibold leading-[1.15rem];
+  }
+
+  .home-index-main .wwk {
+    @apply text-xs font-normal text-stone-600 dark:text-stone-400;
+  }
+
+  .home-index-main .wwt {
+    @apply text-[13px] font-medium text-stone-700 dark:text-stone-300;
+  }
+
+  .home-index-main .labl {
+    @apply ml-2 font-sans text-[0.8125rem] font-semibold text-stone-600 dark:text-stone-400;
+  }
+
+  .home-index-main .labl::before {
+    content: "·";
+    margin-right: 0.25rem;
+  }
+
+  .home-index-main .more {
+    @apply mt-2 inline-flex min-h-11 items-center font-sans text-[0.9375rem] font-semibold text-blue-800 no-underline dark:text-blue-300;
+  }
+
+  .home-index-main .rows {
+    @apply m-0;
+  }
+
+  .home-index-main .row {
+    @apply grid gap-1 border-t border-stone-200 py-5 dark:border-stone-800;
+    align-items: baseline;
+  }
+
+  .home-index-main .row:last-child {
+    @apply border-b border-stone-200 dark:border-stone-800;
+  }
+
+  @media (min-width: 768px) {
+    .home-index-main .row {
+      grid-template-columns: 17rem minmax(0, 1fr);
+      gap: 2rem;
+    }
+
+    .home-index-main .rows .row dt {
+      @apply text-[1.1875rem] whitespace-nowrap;
+    }
+  }
+
+  .home-index-main .rows .row dt {
+    @apply pt-0 font-sans text-[1.0625rem] font-bold leading-snug text-stone-900 normal-case tracking-normal dark:text-stone-100;
+  }
+
+  .home-index-main .rows .row dt .em {
+    font-size: 1.2em;
+  }
+
+  .home-index-main .row dd {
+    @apply m-0;
+  }
+
+  .home-index-main .row dd p {
+    @apply mb-1 max-w-[40rem] leading-relaxed;
+  }
+
+  .home-index-main .tl {
+    @apply inline-flex min-h-11 items-center font-sans text-[0.9375rem] font-semibold text-blue-800 no-underline hover:underline dark:text-blue-300;
+  }
+
+  .home-index-main .arch {
+    @apply flex flex-wrap gap-x-6;
+  }
+
+  .home-index-main .arch a {
+    @apply inline-flex min-h-11 items-center justify-start border-0 p-0 text-[0.9375rem];
+  }
+
+  .home-index-main details {
+    @apply border-0;
+  }
+
+  .home-index-main summary {
+    @apply flex min-h-11 cursor-pointer items-center p-0 font-sans text-[0.9375rem] font-semibold text-blue-800 dark:text-blue-300;
+  }
+
+  .home-index-main details p {
+    @apply p-0;
+  }
+
+  .home-index-edition-nav a {
+    @apply min-h-11;
+  }
+
+  .home-index-edition-nav .home-index-tab--active {
+    @apply border border-blue-800 bg-blue-50 font-semibold text-blue-900;
+  }
+
+  .dark .home-index-edition-nav .home-index-tab--active {
+    @apply border-blue-400 bg-transparent font-semibold text-blue-200;
+  }
+
+  .home-index-edition-nav .home-index-tab--idle {
+    @apply border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900;
+  }
+
+  .dark .home-index-edition-nav .home-index-tab--idle {
+    @apply border-stone-600 text-stone-400 hover:border-stone-500 hover:text-stone-100;
+  }
+
+  @media (max-width: 767.98px) {
+    .home-index-main .card .wwl:empty {
+      display: none;
+    }
+
+    .home-index-main .card:has(.wwl:empty) {
+      grid-template-rows: 1.25rem 2.6rem 1.25rem 3.95rem;
+    }
+  }
+}
+
+/* Home index edition tabs (UX49): dark active = 1px blue outline, no light pill fill. */
+.dark .home-index-edition-nav a.home-index-tab--active[aria-current="page"] {
+  border-width: 1px;
+  border-color: var(--color-blue-400);
+  background-color: transparent !important;
+  color: var(--color-blue-200);
+  font-weight: var(--font-weight-semibold);
+}
+
+.dark .home-index-edition-nav a.home-index-tab--idle {
+  border-color: var(--color-stone-600);
+  color: var(--color-stone-300);
+}
+
+.dark .home-index-edition-nav a.home-index-tab--idle:hover {
+  border-color: var(--color-stone-500);
+  color: var(--color-stone-100);
 }
