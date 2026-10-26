@@ -1,3 +1,5 @@
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
+
 export interface PageSeoOptions {
   /** Site-relative path, e.g. `briefings/2026-08-01.html` or `skills/briefings/2026-08-01.html` */
   canonicalPath?: string;
@@ -306,6 +308,7 @@ export async function collectSitemapEntriesFromSiteDir(
       if (ent.isDirectory()) {
         await walk(full, rel);
       } else if (ent.name.endsWith(".html")) {
+        if (isSiteGateExemptHtmlFile(full)) continue;
         const stat = await fs.stat(full);
         entries.push({
           loc: sitemapLocFromSiteRel(siteBaseUrl, rel),

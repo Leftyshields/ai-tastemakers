@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import { listExperimentIds, loadExperiment } from "../experiments/load.js";
 import type { WeeklyAggregate, WeeklyEmailCopy, WeeklyNarrative } from "../types.js";
+import { NO_EM_DASH_VOICE_LINE, stripEmDashesFromProse } from "./brief-voice.js";
 
 export const WEEKLY_SECTION_HEADERS = [
   { key: "executive" as const, title: "For executives" },
@@ -64,6 +65,8 @@ export const WEEKLY_SYSTEM_PROMPT = [
   "- For AI generalists: 1–2 short paragraphs. What changed in the builder stack. Explain the notable projects in plain language. You may name repos. Skip star counts and day-streak lists.",
   "- The numbers: 1–3 sentences on how to read the stats (what is skewed, what is a real streak). Do not repeat the JSON tables; we will append those.",
   "",
+  NO_EM_DASH_VOICE_LINE,
+  "",
   "Respond in English using exactly these markdown section headers in order (## Header):",
   ...WEEKLY_SECTION_HEADERS.map((s) => `## ${s.title}`),
 ].join("\n");
@@ -96,6 +99,14 @@ function appendSection(current: string, incoming: string): string {
   return `${current}\n\n${incoming}`;
 }
 
+function sanitizeWeeklyNarrative(narrative: WeeklyNarrative): WeeklyNarrative {
+  return {
+    executive: stripEmDashesFromProse(narrative.executive),
+    generalist: stripEmDashesFromProse(narrative.generalist),
+    statistician: stripEmDashesFromProse(narrative.statistician),
+  };
+}
+
 export function parseWeeklyNarrative(text: string): WeeklyNarrative {
   const empty = emptyWeeklyNarrative();
   const trimmed = text.trim();
@@ -121,10 +132,10 @@ export function parseWeeklyNarrative(text: string): WeeklyNarrative {
   }
 
   if (!narrative.executive && !narrative.generalist && !narrative.statistician) {
-    return { ...empty, executive: trimmed };
+    return sanitizeWeeklyNarrative({ ...empty, executive: trimmed });
   }
 
-  return narrative;
+  return sanitizeWeeklyNarrative(narrative);
 }
 
 export async function narrateWeekly(
@@ -203,7 +214,8 @@ RULES:
 - Trending measures attention, not adoption or spend. Frame the so-what as what attention concentrated on and what that suggests, and say so plainly once. No quantified cost or adoption claim you cannot back from public numbers.
 - Use the same name for each list everywhere: AI Tastemakers and Skill Tastemakers.
 - Quiet week: say so plainly and keep it short. Never manufacture a thesis.
-- No em dashes. No hype words (revolutionary, game-changer, unlock, supercharge). Plain, direct, opinionated. Semicolons over dashes.
+- ${NO_EM_DASH_VOICE_LINE}
+- No hype words (revolutionary, game-changer, unlock, supercharge). Plain, direct, opinionated. Semicolons over dashes.
 - The site page keeps the full layered version. This email is the short story.`;
 
 export function parseWeeklyEmailMarkdown(text: string): WeeklyEmailCopy | null {
@@ -223,7 +235,10 @@ export function parseWeeklyEmailMarkdown(text: string): WeeklyEmailCopy | null {
     sections.body ||
     [sections["the tell"], sections.evidence, sections.watch].filter(Boolean).join("\n\n");
   if (!verdict || !body) return null;
-  return { verdict, body };
+  return {
+    verdict: stripEmDashesFromProse(verdict),
+    body: stripEmDashesFromProse(body),
+  };
 }
 
 export function coerceWeeklyEmail(raw: unknown): WeeklyEmailCopy | undefined {

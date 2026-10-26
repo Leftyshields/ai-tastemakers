@@ -1,6 +1,9 @@
 import { describe, it, expect } from "vitest";
 import { briefOgCardSvg, defaultOgCardSvg } from "./generate-brief-og.js";
 import { OG } from "./og-theme.js";
+import fs from "node:fs/promises";
+import os from "node:os";
+import path from "node:path";
 import {
   absoluteCanonicalUrl,
   briefMetaDescription,
@@ -8,7 +11,12 @@ import {
   briefSocialTitle,
   extractBriefSection,
   normalizeCanonicalPath,
+  writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
+import {
+  GOOGLE_SITE_VERIFICATION_HTML,
+  GOOGLE_SITE_VERIFICATION_LINE,
+} from "./site-verification-pages.js";
 
 describe("brief social metadata", () => {
   it("uses Why now hook only — no repo list in description", () => {
@@ -64,6 +72,46 @@ describe("canonical paths", () => {
     expect(absoluteCanonicalUrl("https://example.com/ai-tastemakers", "index.html")).toBe(
       "https://example.com/ai-tastemakers/",
     );
+  });
+});
+
+describe("writeSitemapFromSiteDir", () => {
+  it("omits the exact Search Console verification file when content matches", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "sitemap-gate-"));
+    await fs.writeFile(
+      path.join(tmp, GOOGLE_SITE_VERIFICATION_HTML),
+      `${GOOGLE_SITE_VERIFICATION_LINE}\n`,
+    );
+    await fs.writeFile(path.join(tmp, "index.html"), "<!DOCTYPE html><html><body><h1>Home</h1></body></html>");
+    const count = await writeSitemapFromSiteDir(tmp, "https://example.com/ai-tastemakers");
+    const xml = await fs.readFile(path.join(tmp, "sitemap.xml"), "utf8");
+    expect(count).toBe(1);
+    expect(xml).toContain("https://example.com/ai-tastemakers/");
+    expect(xml).not.toContain(GOOGLE_SITE_VERIFICATION_HTML);
+    expect(xml).toMatch(/<lastmod>/);
+    await fs.rm(tmp, { recursive: true, force: true });
+  });
+
+  it("includes verification basename in sitemap when content does not match", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "sitemap-gate-"));
+    await fs.writeFile(path.join(tmp, GOOGLE_SITE_VERIFICATION_HTML), "google-site-verification: tampered\n");
+    await fs.writeFile(path.join(tmp, "index.html"), "<!DOCTYPE html><html><body><h1>Home</h1></body></html>");
+    const count = await writeSitemapFromSiteDir(tmp, "https://example.com/ai-tastemakers");
+    const xml = await fs.readFile(path.join(tmp, "sitemap.xml"), "utf8");
+    expect(count).toBe(2);
+    expect(xml).toContain(GOOGLE_SITE_VERIFICATION_HTML);
+    await fs.rm(tmp, { recursive: true, force: true });
+  });
+
+  it("does not omit other google-prefixed HTML names from the sitemap", async () => {
+    const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "sitemap-gate-"));
+    const other = "googledeadbeef.html";
+    await fs.writeFile(path.join(tmp, other), `${GOOGLE_SITE_VERIFICATION_LINE}\n`);
+    const count = await writeSitemapFromSiteDir(tmp, "https://example.com/ai-tastemakers");
+    const xml = await fs.readFile(path.join(tmp, "sitemap.xml"), "utf8");
+    expect(count).toBe(1);
+    expect(xml).toContain(other);
+    await fs.rm(tmp, { recursive: true, force: true });
   });
 });
 

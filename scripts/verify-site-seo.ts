@@ -8,6 +8,7 @@ import {
   SEO_TITLE_MAX,
   validateSeoCopyFile,
 } from "./seo-copy.js";
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(repoRoot, "site");
@@ -145,6 +146,7 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
   const messages: string[] = [];
   const htmlFiles = listHtmlFiles(siteDir);
   for (const abs of htmlFiles) {
+    if (isSiteGateExemptHtmlFile(abs)) continue;
     const rel = path.relative(siteDir, abs);
     const html = fs.readFileSync(abs, "utf8");
     const dom = new JSDOM(html);
@@ -152,6 +154,11 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
     const h1s = doc.querySelectorAll("h1");
     if (h1s.length !== 1) {
       messages.push(`${rel}: expected exactly 1 h1, found ${h1s.length}`);
+    } else {
+      const h1 = h1s[0]!;
+      if (h1.classList.contains("sr-only")) {
+        messages.push(`${rel}: h1 must be the visible page headline (sr-only not allowed)`);
+      }
     }
     const alternates = doc.querySelectorAll('link[rel="alternate"][type="application/atom+xml"]');
     if (alternates.length < 2) {

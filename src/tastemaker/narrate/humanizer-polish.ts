@@ -1,6 +1,7 @@
 import Anthropic from "@anthropic-ai/sdk";
 import type { ScoredRepo } from "../types.js";
 import type { TokenUsage } from "../quality/tokens.js";
+import { NO_EM_DASH_VOICE_LINE } from "./brief-voice.js";
 import { sanitizeBriefOutput, BRIEF_SECTION_LABELS } from "./sanitize.js";
 import { extractUsage } from "./claude.js";
 
@@ -13,6 +14,7 @@ export const HUMANIZER_POLISH_SYSTEM_PROMPT = [
   "Keep the three labeled sections and their order. Each section stays one to two sentences.",
   "Make jargon understandable: if a repo name or term assumes specialist knowledge, add a short plain phrase on what it is and why a builder would care.",
   "Output only valid JSON matching the requested schema. No markdown fences or commentary.",
+  NO_EM_DASH_VOICE_LINE,
 ].join(" ");
 
 export interface HumanizerPolishItem {
