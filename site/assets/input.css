@@ -274,30 +274,45 @@
     @apply mt-0;
   }
 
+  header:has(.lab-nav-scroll-wrap) {
+    @apply min-w-0 max-w-full overflow-x-hidden;
+  }
+
+  .lab-nav-scroll-wrap {
+    @apply relative max-w-full min-w-0;
+  }
+
+  .lab-nav-scroll-wrap::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 0;
+    bottom: 0;
+    width: 2.25rem;
+    pointer-events: none;
+    z-index: 1;
+    background: linear-gradient(to right, rgb(255 252 248 / 0), rgb(255 252 248) 72%);
+  }
+
+  :is(.dark, .dark *) .lab-nav-scroll-wrap::after {
+    background: linear-gradient(to right, rgb(28 25 23 / 0), rgb(28 25 23) 72%);
+  }
+
+  .lab-nav-scroll-wrap:has(.lab-nav--combined[data-scroll-end="true"])::after {
+    opacity: 0;
+  }
+
   .lab-nav--combined {
-    @apply relative flex flex-nowrap items-center gap-2 overflow-x-auto pb-1;
+    @apply relative flex w-full min-w-0 max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1;
     scroll-snap-type: x mandatory;
+    scroll-padding-inline-end: 1.5rem;
+    -webkit-overflow-scrolling: touch;
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
 
   .lab-nav--combined::-webkit-scrollbar {
     display: none;
-  }
-
-  .lab-nav--combined::after {
-    content: "";
-    position: sticky;
-    right: 0;
-    flex: 0 0 1.5rem;
-    align-self: stretch;
-    margin-left: -1.5rem;
-    pointer-events: none;
-    background: linear-gradient(to right, transparent, #fffcf8 85%);
-  }
-
-  :is(.dark, .dark *) .lab-nav--combined::after {
-    background: linear-gradient(to right, transparent, rgb(28 25 23 / 0.95) 85%);
   }
 
   .lab-nav__divider {
@@ -985,6 +1000,16 @@
 
   .home-index-main .rows .row dt {
     @apply pt-0 font-sans text-[1.0625rem] font-bold leading-snug text-stone-900 normal-case tracking-normal dark:text-stone-100;
+  }
+
+  .home-index-main .archive-sh {
+    @apply font-sans text-[1.0625rem] font-bold leading-snug text-stone-900 normal-case tracking-normal dark:text-stone-100;
+  }
+
+  @media (min-width: 768px) {
+    .home-index-main .archive-sh {
+      @apply text-[1.1875rem];
+    }
   }
 
   .home-index-main .rows .row dt .em {

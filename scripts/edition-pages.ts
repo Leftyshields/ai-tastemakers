@@ -90,8 +90,12 @@ import {
 import {
   buildHomeIndexMainHtml,
   HOME_EDITION_TAGLINES,
+  type HomeWrapUpArchive,
 } from "./home-index-layout.js";
+import { loadWeekRangeLabels } from "./week-review-date-range.js";
 import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
+
+const ARCHIVE_SECTION_HEADING_CLASS = "archive-sh";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
 
@@ -491,16 +495,18 @@ export function labMobileCombinedNavHtml(
   depth: 0 | 1 | 2 = 0,
 ): string {
   const track = ' data-lab-section="nav"';
-  return `<nav aria-label="Lab and editions" class="lab-nav lab-nav--combined mt-4 min-[640px]:hidden">
+  return `<div class="lab-nav-scroll-wrap mt-4 min-[640px]:hidden">
+    <nav aria-label="Lab and editions" class="lab-nav lab-nav--combined">
       ${labNavPillsHtml(active, escapeHtml, depth)}
       <span class="lab-nav__divider shrink-0" aria-hidden="true"></span>
       ${editionNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, "", track)}
       ${editionNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, "", track)}
-    </nav>`;
+    </nav>
+  </div>`;
 }
 
 export function labNavScrollScript(): string {
-  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}})();</script>`;
+  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;function sync(){var atEnd=n.scrollWidth-n.scrollLeft-n.clientWidth<4;n.setAttribute("data-scroll-end",atEnd?"true":"false");}sync();n.addEventListener("scroll",sync,{passive:true});window.addEventListener("resize",sync);var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});sync();}catch(e){}})();</script>`;
 }
 
 export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
@@ -957,6 +963,7 @@ export interface WrapUpArchive {
   monthlyLatest?: string;
   weeklyGeneratedAt?: string;
   monthlyGeneratedAt?: string;
+  weekLabels: Map<string, string>;
   weekHref: (weekId: string) => string;
   monthHref: (monthId: string) => string;
 }
@@ -986,6 +993,7 @@ export async function buildWrapUpArchive(
     siteSegment ? `../weekly/${weekId}.html` : `weekly/${weekId}.html`;
   const monthHref = (monthId: string) =>
     siteSegment ? `../monthly/${monthId}.html` : `monthly/${monthId}.html`;
+  const weekLabels = weeks.length > 0 ? await loadWeekRangeLabels(repoRoot, weeks) : new Map();
 
   return {
     weeks,
@@ -994,8 +1002,22 @@ export async function buildWrapUpArchive(
     monthlyLatest,
     weeklyGeneratedAt,
     monthlyGeneratedAt,
+    weekLabels,
     weekHref,
     monthHref,
+  };
+}
+
+function archiveIndexMainWrap(inner: string): string {
+  return `<div class="home-index-main">${inner}</div>`;
+}
+
+function homeWrapUpFromArchive(wrap?: WrapUpArchive): HomeWrapUpArchive | undefined {
+  if (!wrap) return undefined;
+  return {
+    weeklyLatest: wrap.weeklyLatest,
+    weekHref: wrap.weekHref,
+    weekRangeLabel: wrap.weeklyLatest ? wrap.weekLabels.get(wrap.weeklyLatest) : undefined,
   };
 }
 
@@ -1031,6 +1053,7 @@ function wrapUpCtaHtml(wrap?: WrapUpArchive): string {
 function monthlyArchiveSection(
   months: string[],
   monthHref: (monthId: string) => string,
+  options?: { archiveIndex?: boolean },
 ): string {
   if (months.length === 0) return "";
   const items = months
@@ -1043,9 +1066,15 @@ function monthlyArchiveSection(
         </li>`,
     )
     .join("\n");
+  const h2Class = options?.archiveIndex
+    ? ARCHIVE_SECTION_HEADING_CLASS
+    : "mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
+  const sectionClass = options?.archiveIndex
+    ? "sec scroll-mt-8"
+    : "mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800";
   return `
-    <section id="monthly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${MONTHLY_INDEX_SECTION_HEADING}</h2>
+    <section id="monthly-archive" class="${sectionClass}">
+      <h2 class="${h2Class} mb-4">${MONTHLY_INDEX_SECTION_HEADING}</h2>
       <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${items}</ul>
     </section>`;
@@ -1073,28 +1102,35 @@ function formatDisplayDate(isoDate: string): string {
   });
 }
 
-function formatWeekLabel(weekId: string): string {
-  return weekId.replace("-W", " · Week ");
-}
-
 function weeklyArchiveSection(
   weeks: string[],
   weekHref: (weekId: string) => string,
+  weekLabels: Map<string, string>,
+  options?: { archiveIndex?: boolean },
 ): string {
   if (weeks.length === 0) return "";
   const items = weeks
-    .map(
-      (w) =>
-        `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
+    .map((w) => {
+      const label = weekLabels.get(w);
+      if (!label) {
+        throw new Error(`missing week range label for ${w}`);
+      }
+      return `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
           <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}">
-            ${formatWeekLabel(w)}
+            ${label}
           </a>
-        </li>`,
-    )
+        </li>`;
+    })
     .join("\n");
+  const h2Class = options?.archiveIndex
+    ? ARCHIVE_SECTION_HEADING_CLASS
+    : "mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
+  const sectionClass = options?.archiveIndex
+    ? "sec scroll-mt-8"
+    : "mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800";
   return `
-    <section id="weekly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${WEEKLY_INDEX_SECTION_HEADING}</h2>
+    <section id="weekly-archive" class="${sectionClass}">
+      <h2 class="${h2Class} mb-4">${WEEKLY_INDEX_SECTION_HEADING}</h2>
       <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${items}</ul>
     </section>`;
@@ -1166,7 +1202,7 @@ function ossIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>
-    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref, wrapUp.weekLabels) : ""}
     ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "skills")}`;
 }
@@ -1240,7 +1276,7 @@ function skillsIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.</li>"}</ul>
     </section>
-    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref, wrapUp.weekLabels) : ""}
     ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "oss")}`;
 }
@@ -1274,11 +1310,15 @@ function contentCard(
   title: string,
   bodyHtml: string,
   paddingClass: string,
+  options?: { archiveHeading?: boolean },
 ): string {
   const idAttr = sectionId ? ` id="${sectionId}"` : "";
+  const h2Class = options?.archiveHeading
+    ? `${ARCHIVE_SECTION_HEADING_CLASS} mb-4`
+    : "mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
   return `
     <section${idAttr} class="content-card ${CONTENT_CARD_CLASS} ${paddingClass}">
-      <h2 class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${title}</h2>
+      <h2 class="${h2Class}">${title}</h2>
       ${bodyHtml}
     </section>`;
 }
@@ -1287,8 +1327,13 @@ function sidebarCard(sectionId: string | undefined, title: string, bodyHtml: str
   return contentCard(sectionId, title, bodyHtml, "p-5");
 }
 
-function mainBlockCard(sectionId: string | undefined, title: string, bodyHtml: string): string {
-  return contentCard(sectionId, title, bodyHtml, "p-6");
+function mainBlockCard(
+  sectionId: string | undefined,
+  title: string,
+  bodyHtml: string,
+  options?: { archiveHeading?: boolean },
+): string {
+  return contentCard(sectionId, title, bodyHtml, "p-6", options);
 }
 
 function wrapUpSecondaryCtaHtml(wrap?: WrapUpArchive): string {
@@ -1346,16 +1391,23 @@ function skillsAboutMainBlockHtml(): string {
   return mainBlockCard(undefined, "About this digest", body);
 }
 
-function weeklyListItems(weeks: string[], weekHref: (weekId: string) => string): string {
+function weeklyListItems(
+  weeks: string[],
+  weekHref: (weekId: string) => string,
+  weekLabels: Map<string, string>,
+): string {
   return weeks
-    .map(
-      (w) =>
-        `<li class="border-b border-stone-200 py-2.5 last:border-0 dark:border-stone-800">
+    .map((w) => {
+      const label = weekLabels.get(w);
+      if (!label) {
+        throw new Error(`missing week range label for ${w}`);
+      }
+      return `<li class="border-b border-stone-200 py-2.5 last:border-0 dark:border-stone-800">
           <a class="font-sans text-sm font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}" data-index-cta="weekly">
-            ${formatWeekLabel(w)}
+            ${label}
           </a>
-        </li>`,
-    )
+        </li>`;
+    })
     .join("\n");
 }
 
@@ -1376,7 +1428,7 @@ function weeklyMainBlock(wrap: WrapUpArchive): string {
   if (wrap.weeks.length === 0) return "";
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
-      <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref)}</ul>`;
+      <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref, wrap.weekLabels)}</ul>`;
   return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body);
 }
 
@@ -1465,6 +1517,7 @@ async function archiveMonthGridHtml(
       "archive",
       sectionTitle,
       `<p class="m-0 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(emptyMessage)}</p>`,
+      { archiveHeading: true },
     );
   }
 
@@ -1475,7 +1528,7 @@ async function archiveMonthGridHtml(
   );
 
   const body = `<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">${tiles.join("\n")}</div>`;
-  return mainBlockCard("archive", sectionTitle, body);
+  return mainBlockCard("archive", sectionTitle, body, { archiveHeading: true });
 }
 
 function ossHeroActionsV2(paths: SitePaths, latest: string | undefined, wrapUp?: WrapUpArchive): string {
@@ -1527,7 +1580,7 @@ async function ossIndexBodyV2(
     latestDate: latest,
     briefingsDir,
     badgeLookup,
-    wrapUp,
+    wrapUp: homeWrapUpFromArchive(wrapUp),
     escapeHtml,
     repoRoot,
   });
@@ -1551,7 +1604,7 @@ async function skillsIndexBodyV2(
     latestDate: latest,
     briefingsDir,
     badgeLookup,
-    wrapUp,
+    wrapUp: homeWrapUpFromArchive(wrapUp),
     escapeHtml,
     repoRoot,
   });
@@ -1607,8 +1660,7 @@ async function buildBriefingsArchiveIndexPage(
   const introText = daysArchiveIntroForEdition(edition.id, earliestDate);
   const intro = `<p class="mb-6 max-w-[40rem] text-base leading-relaxed text-stone-600 dark:text-stone-400">${escapeHtml(introText)}</p>`;
   const body = `${archiveIndexBackNav(paths.home, edition.id, escapeHtml)}
-      ${intro}
-      ${archiveGrid}`;
+      ${archiveIndexMainWrap(`${intro}${archiveGrid}`)}`;
   await fs.writeFile(
     path.join(siteRoot, "briefings", "index.html"),
     pageShell(
@@ -1687,7 +1739,7 @@ export async function buildMonthlySite(
       : brand;
     const indexBody = useV2
       ? `${archiveIndexBackNav(paths.home, "oss", escapeHtml)}
-      ${monthlyArchiveSection(months, (m) => `${m}.html`)}`
+      ${archiveIndexMainWrap(monthlyArchiveSection(months, (m) => `${m}.html`, { archiveIndex: true }))}`
       : `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
@@ -1771,19 +1823,20 @@ export async function buildWeeklySite(
 
   if (weeks.length > 0) {
     const useV2 = landingLayoutV2Enabled();
+    const weekLabels = await loadWeekRangeLabels(repoRoot, weeks);
     const indexBrand = useV2
       ? { name: "AI Tastemakers", tagline: HOME_EDITION_TAGLINES.oss }
       : brand;
     const indexBody = useV2
       ? `${archiveIndexBackNav(paths.home, "oss", escapeHtml)}
-      ${weeklyArchiveSection(weeks, (w) => `${w}.html`)}`
+      ${archiveIndexMainWrap(weeklyArchiveSection(weeks, (w) => `${w}.html`, weekLabels, { archiveIndex: true }))}`
       : `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
       </nav>
-      ${weeklyArchiveSection(weeks, (w) => `${w}.html`)}`;
+      ${weeklyArchiveSection(weeks, (w) => `${w}.html`, weekLabels)}`;
     await fs.writeFile(
       path.join(outDir, "index.html"),
       pageShell(
