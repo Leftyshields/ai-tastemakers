@@ -128,7 +128,7 @@ export const CONTRAST_CHECK_JS = `
 
 /** Dark-mode active home index tab: no light pill fill; label vs effective bg >= minRatio. */
 export const HOME_INDEX_ACTIVE_TAB_DARK_JS = `
-(function(minRatio) {
+(function(minRatio, tabSelectorArg) {
   function parseRgbString(css) {
     var m = css.match(/rgba?\\(([^)]+)\\)/);
     if (!m) return null;
@@ -218,8 +218,25 @@ export const HOME_INDEX_ACTIVE_TAB_DARK_JS = `
     return { r: 1, g: 1, b: 1, a: 1 };
   }
   if (!document.documentElement.classList.contains("dark")) return [];
-  var tab = document.querySelector(".home-index-edition-nav a[aria-current=\\"page\\"]");
-  if (!tab) return ["missing .home-index-edition-nav a[aria-current=page]"];
+  var tab = null;
+  if (tabSelectorArg === "__lab_visible__") {
+    var candidates = document.querySelectorAll(".lab-nav a[aria-current=\\"page\\"]");
+    for (var i = 0; i < candidates.length; i++) {
+      if (candidates[i].offsetParent !== null) {
+        tab = candidates[i];
+        break;
+      }
+    }
+    if (!tab && candidates.length) tab = candidates[0];
+    if (!tab) return ["missing visible lab nav active tab"];
+  } else {
+    var tabSelector =
+      typeof tabSelectorArg === "string" && tabSelectorArg
+        ? tabSelectorArg
+        : ".home-index-edition-nav a[aria-current=\\"page\\"]";
+    tab = document.querySelector(tabSelector);
+    if (!tab) return ["missing active tab: " + tabSelector];
+  }
   var cs = getComputedStyle(tab);
   var bgCss = cs.backgroundColor;
   var bgDirect = cssToRgb(bgCss);

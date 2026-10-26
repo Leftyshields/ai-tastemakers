@@ -3,9 +3,9 @@ import {
   extractWorksWithTools,
   formatWorksWithLine,
   countLabDoneExperiments,
-  isoWeekDateRangeLabel,
   briefSummaryForPick,
 } from "./home-index-layout.js";
+import { formatWeekReviewDateRange } from "./week-review-date-range.js";
 import type { LabExperimentEntry } from "./lab/validate-experiments.js";
 
 describe("home-index-layout", () => {
@@ -31,8 +31,8 @@ describe("home-index-layout", () => {
     expect(countLabDoneExperiments(ex)).toBe(2);
   });
 
-  it("formats ISO week as Oct 19 to 25 for 2026-W43", () => {
-    expect(isoWeekDateRangeLabel("2026-W43")).toBe("Oct 19 to 25");
+  it("formats weekly review JSON dates as Oct 19 to 25", () => {
+    expect(formatWeekReviewDateRange("2026-10-19", "2026-10-25")).toBe("Oct 19 to 25");
   });
 
   it("briefSummaryForPick strips markdown and truncates", () => {

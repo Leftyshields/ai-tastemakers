@@ -90,8 +90,12 @@ import {
 import {
   buildHomeIndexMainHtml,
   HOME_EDITION_TAGLINES,
+  type HomeWrapUpArchive,
 } from "./home-index-layout.js";
+import { loadWeekRangeLabels } from "./week-review-date-range.js";
 import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
+
+const ARCHIVE_SECTION_HEADING_CLASS = "archive-sh";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
 
@@ -377,6 +381,14 @@ function editionNavFor(siteSegment: string, depth: 0 | 1): EditionNav {
 
 export type LabNavActive = "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts";
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function editionNavPill(
   href: string,
   label: string,
@@ -451,6 +463,21 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
   };
 }
 
+function labNavPill(
+  href: string,
+  label: string,
+  isActive: boolean,
+  escapeHtml: (t: string) => string,
+  trackAttr = "",
+): string {
+  const base =
+    "lab-nav-pill inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline";
+  const active = "lab-nav-pill--active font-semibold";
+  const idle =
+    "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+  return `<a href="${href}" class="${base} ${isActive ? active : idle}"${trackAttr}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+}
+
 function labNavPillsHtml(
   active: LabNavActive,
   escapeHtml: (t: string) => string,
@@ -462,7 +489,7 @@ function labNavPillsHtml(
   const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
   const pill = (href: string, label: string, isActive: boolean) =>
-    editionNavPill(href, label, isActive, escapeHtml, "", ' data-lab-section="nav"');
+    labNavPill(href, label, isActive, escapeHtml, ' data-lab-section="nav"');
 
   return [
     pill(labHomeHref, "Lab home", active === "home"),
@@ -491,16 +518,18 @@ export function labMobileCombinedNavHtml(
   depth: 0 | 1 | 2 = 0,
 ): string {
   const track = ' data-lab-section="nav"';
-  return `<nav aria-label="Lab and editions" class="lab-nav lab-nav--combined mt-4 min-[640px]:hidden">
+  return `<div class="lab-nav-scroll-wrap mt-4 min-[640px]:hidden">
+    <nav aria-label="Lab and editions" class="lab-nav lab-nav--combined">
       ${labNavPillsHtml(active, escapeHtml, depth)}
       <span class="lab-nav__divider shrink-0" aria-hidden="true"></span>
-      ${editionNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, "", track)}
-      ${editionNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, "", track)}
-    </nav>`;
+      ${labNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, track)}
+      ${labNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, track)}
+    </nav>
+  </div>`;
 }
 
 export function labNavScrollScript(): string {
-  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}})();</script>`;
+  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;function sync(){var atEnd=n.scrollWidth-n.scrollLeft-n.clientWidth<4;n.setAttribute("data-scroll-end",atEnd?"true":"false");}sync();n.addEventListener("scroll",sync,{passive:true});window.addEventListener("resize",sync);var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});sync();}catch(e){}})();</script>`;
 }
 
 export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
@@ -829,7 +858,7 @@ export function pageShell(
   paths: SitePaths,
   brand: { name: string; tagline: string },
   description?: string,
-  escapeHtml: (t: string) => string = (t) => t,
+  escapeHtml: (t: string) => string = escapeHtml,
   options?: {
     labLayout?: boolean;
     labNavActive?: LabNavActive;
@@ -957,6 +986,7 @@ export interface WrapUpArchive {
   monthlyLatest?: string;
   weeklyGeneratedAt?: string;
   monthlyGeneratedAt?: string;
+  weekLabels: Map<string, string>;
   weekHref: (weekId: string) => string;
   monthHref: (monthId: string) => string;
 }
@@ -986,6 +1016,7 @@ export async function buildWrapUpArchive(
     siteSegment ? `../weekly/${weekId}.html` : `weekly/${weekId}.html`;
   const monthHref = (monthId: string) =>
     siteSegment ? `../monthly/${monthId}.html` : `monthly/${monthId}.html`;
+  const weekLabels = weeks.length > 0 ? await loadWeekRangeLabels(repoRoot, weeks) : new Map();
 
   return {
     weeks,
@@ -994,8 +1025,22 @@ export async function buildWrapUpArchive(
     monthlyLatest,
     weeklyGeneratedAt,
     monthlyGeneratedAt,
+    weekLabels,
     weekHref,
     monthHref,
+  };
+}
+
+function archiveIndexMainWrap(inner: string): string {
+  return `<div class="home-index-main">${inner}</div>`;
+}
+
+function homeWrapUpFromArchive(wrap?: WrapUpArchive): HomeWrapUpArchive | undefined {
+  if (!wrap) return undefined;
+  return {
+    weeklyLatest: wrap.weeklyLatest,
+    weekHref: wrap.weekHref,
+    weekRangeLabel: wrap.weeklyLatest ? wrap.weekLabels.get(wrap.weeklyLatest) : undefined,
   };
 }
 
@@ -1031,6 +1076,7 @@ function wrapUpCtaHtml(wrap?: WrapUpArchive): string {
 function monthlyArchiveSection(
   months: string[],
   monthHref: (monthId: string) => string,
+  options?: { archiveIndex?: boolean },
 ): string {
   if (months.length === 0) return "";
   const items = months
@@ -1043,9 +1089,15 @@ function monthlyArchiveSection(
         </li>`,
     )
     .join("\n");
+  const h2Class = options?.archiveIndex
+    ? ARCHIVE_SECTION_HEADING_CLASS
+    : "mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
+  const sectionClass = options?.archiveIndex
+    ? "sec scroll-mt-8"
+    : "mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800";
   return `
-    <section id="monthly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${MONTHLY_INDEX_SECTION_HEADING}</h2>
+    <section id="monthly-archive" class="${sectionClass}">
+      <h2 class="${h2Class} mb-4">${MONTHLY_INDEX_SECTION_HEADING}</h2>
       <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${items}</ul>
     </section>`;
@@ -1073,28 +1125,35 @@ function formatDisplayDate(isoDate: string): string {
   });
 }
 
-function formatWeekLabel(weekId: string): string {
-  return weekId.replace("-W", " · Week ");
-}
-
 function weeklyArchiveSection(
   weeks: string[],
   weekHref: (weekId: string) => string,
+  weekLabels: Map<string, string>,
+  options?: { archiveIndex?: boolean },
 ): string {
   if (weeks.length === 0) return "";
   const items = weeks
-    .map(
-      (w) =>
-        `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
+    .map((w) => {
+      const label = weekLabels.get(w);
+      if (!label) {
+        throw new Error(`missing week range label for ${w}`);
+      }
+      return `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
           <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}">
-            ${formatWeekLabel(w)}
+            ${label}
           </a>
-        </li>`,
-    )
+        </li>`;
+    })
     .join("\n");
+  const h2Class = options?.archiveIndex
+    ? ARCHIVE_SECTION_HEADING_CLASS
+    : "mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
+  const sectionClass = options?.archiveIndex
+    ? "sec scroll-mt-8"
+    : "mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800";
   return `
-    <section id="weekly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${WEEKLY_INDEX_SECTION_HEADING}</h2>
+    <section id="weekly-archive" class="${sectionClass}">
+      <h2 class="${h2Class} mb-4">${WEEKLY_INDEX_SECTION_HEADING}</h2>
       <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${items}</ul>
     </section>`;
@@ -1166,7 +1225,7 @@ function ossIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>
-    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref, wrapUp.weekLabels) : ""}
     ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "skills")}`;
 }
@@ -1240,7 +1299,7 @@ function skillsIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.</li>"}</ul>
     </section>
-    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref, wrapUp.weekLabels) : ""}
     ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "oss")}`;
 }
@@ -1274,21 +1333,37 @@ function contentCard(
   title: string,
   bodyHtml: string,
   paddingClass: string,
+  escapeHtml: (t: string) => string,
+  options?: { archiveHeading?: boolean },
 ): string {
   const idAttr = sectionId ? ` id="${sectionId}"` : "";
+  const h2Class = options?.archiveHeading
+    ? `${ARCHIVE_SECTION_HEADING_CLASS} mb-4`
+    : "mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
   return `
     <section${idAttr} class="content-card ${CONTENT_CARD_CLASS} ${paddingClass}">
-      <h2 class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${title}</h2>
+      <h2 class="${h2Class}">${escapeHtml(title)}</h2>
       ${bodyHtml}
     </section>`;
 }
 
-function sidebarCard(sectionId: string | undefined, title: string, bodyHtml: string): string {
-  return contentCard(sectionId, title, bodyHtml, "p-5");
+function sidebarCard(
+  sectionId: string | undefined,
+  title: string,
+  bodyHtml: string,
+  escapeHtml: (t: string) => string,
+): string {
+  return contentCard(sectionId, title, bodyHtml, "p-5", escapeHtml);
 }
 
-function mainBlockCard(sectionId: string | undefined, title: string, bodyHtml: string): string {
-  return contentCard(sectionId, title, bodyHtml, "p-6");
+function mainBlockCard(
+  sectionId: string | undefined,
+  title: string,
+  bodyHtml: string,
+  escapeHtml: (t: string) => string,
+  options?: { archiveHeading?: boolean },
+): string {
+  return contentCard(sectionId, title, bodyHtml, "p-6", escapeHtml, options);
 }
 
 function wrapUpSecondaryCtaHtml(wrap?: WrapUpArchive): string {
@@ -1337,25 +1412,32 @@ function howItWorksMainBlockHtml(): string {
         <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
       </ol>`;
-  return mainBlockCard(undefined, "How it works", body);
+  return mainBlockCard(undefined, "How it works", body, escapeHtml);
 }
 
 function skillsAboutMainBlockHtml(): string {
   const body = `
       <p class="m-0 text-sm leading-relaxed text-stone-600 dark:text-stone-400">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics &mdash; then rank by 7-day star momentum with Claude briefs.</p>`;
-  return mainBlockCard(undefined, "About this digest", body);
+  return mainBlockCard(undefined, "About this digest", body, escapeHtml);
 }
 
-function weeklyListItems(weeks: string[], weekHref: (weekId: string) => string): string {
+function weeklyListItems(
+  weeks: string[],
+  weekHref: (weekId: string) => string,
+  weekLabels: Map<string, string>,
+): string {
   return weeks
-    .map(
-      (w) =>
-        `<li class="border-b border-stone-200 py-2.5 last:border-0 dark:border-stone-800">
+    .map((w) => {
+      const label = weekLabels.get(w);
+      if (!label) {
+        throw new Error(`missing week range label for ${w}`);
+      }
+      return `<li class="border-b border-stone-200 py-2.5 last:border-0 dark:border-stone-800">
           <a class="font-sans text-sm font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}" data-index-cta="weekly">
-            ${formatWeekLabel(w)}
+            ${label}
           </a>
-        </li>`,
-    )
+        </li>`;
+    })
     .join("\n");
 }
 
@@ -1376,8 +1458,8 @@ function weeklyMainBlock(wrap: WrapUpArchive): string {
   if (wrap.weeks.length === 0) return "";
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
-      <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref)}</ul>`;
-  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body);
+      <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref, wrap.weekLabels)}</ul>`;
+  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body, escapeHtml);
 }
 
 function monthlyMainBlock(wrap: WrapUpArchive): string {
@@ -1385,23 +1467,27 @@ function monthlyMainBlock(wrap: WrapUpArchive): string {
   const body = `
       <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${monthlyListItems(wrap.months, wrap.monthHref)}</ul>`;
-  return mainBlockCard("monthly-archive", "Monthly rollups", body);
+  return mainBlockCard("monthly-archive", "Monthly rollups", body, escapeHtml);
 }
 
-function siblingEditionPromoSidebar(paths: SitePaths, sibling: "oss" | "skills"): string {
+function siblingEditionPromoSidebar(
+  paths: SitePaths,
+  sibling: "oss" | "skills",
+  escapeHtml: (t: string) => string,
+): string {
   if (sibling === "skills") {
     const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Skill Tastemakers</a></h3>
       <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Browse skills digest &rarr;</a>`;
-    return sidebarCard(undefined, "Also from Tastemakers", body);
+    return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
   }
 
   const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">AI Tastemakers</a></h3>
       <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">Browse OSS digest &rarr;</a>`;
-  return sidebarCard(undefined, "Also from Tastemakers", body);
+  return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
 }
 
 function indexLayoutGrid(mainHtml: string, sidebarHtml: string): string {
@@ -1465,6 +1551,8 @@ async function archiveMonthGridHtml(
       "archive",
       sectionTitle,
       `<p class="m-0 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(emptyMessage)}</p>`,
+      escapeHtml,
+      { archiveHeading: true },
     );
   }
 
@@ -1475,7 +1563,7 @@ async function archiveMonthGridHtml(
   );
 
   const body = `<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">${tiles.join("\n")}</div>`;
-  return mainBlockCard("archive", sectionTitle, body);
+  return mainBlockCard("archive", sectionTitle, body, escapeHtml, { archiveHeading: true });
 }
 
 function ossHeroActionsV2(paths: SitePaths, latest: string | undefined, wrapUp?: WrapUpArchive): string {
@@ -1527,7 +1615,7 @@ async function ossIndexBodyV2(
     latestDate: latest,
     briefingsDir,
     badgeLookup,
-    wrapUp,
+    wrapUp: homeWrapUpFromArchive(wrapUp),
     escapeHtml,
     repoRoot,
   });
@@ -1551,7 +1639,7 @@ async function skillsIndexBodyV2(
     latestDate: latest,
     briefingsDir,
     badgeLookup,
-    wrapUp,
+    wrapUp: homeWrapUpFromArchive(wrapUp),
     escapeHtml,
     repoRoot,
   });
@@ -1607,8 +1695,7 @@ async function buildBriefingsArchiveIndexPage(
   const introText = daysArchiveIntroForEdition(edition.id, earliestDate);
   const intro = `<p class="mb-6 max-w-[40rem] text-base leading-relaxed text-stone-600 dark:text-stone-400">${escapeHtml(introText)}</p>`;
   const body = `${archiveIndexBackNav(paths.home, edition.id, escapeHtml)}
-      ${intro}
-      ${archiveGrid}`;
+      ${archiveIndexMainWrap(`${intro}${archiveGrid}`)}`;
   await fs.writeFile(
     path.join(siteRoot, "briefings", "index.html"),
     pageShell(
@@ -1687,7 +1774,7 @@ export async function buildMonthlySite(
       : brand;
     const indexBody = useV2
       ? `${archiveIndexBackNav(paths.home, "oss", escapeHtml)}
-      ${monthlyArchiveSection(months, (m) => `${m}.html`)}`
+      ${archiveIndexMainWrap(monthlyArchiveSection(months, (m) => `${m}.html`, { archiveIndex: true }))}`
       : `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
@@ -1771,19 +1858,20 @@ export async function buildWeeklySite(
 
   if (weeks.length > 0) {
     const useV2 = landingLayoutV2Enabled();
+    const weekLabels = await loadWeekRangeLabels(repoRoot, weeks);
     const indexBrand = useV2
       ? { name: "AI Tastemakers", tagline: HOME_EDITION_TAGLINES.oss }
       : brand;
     const indexBody = useV2
       ? `${archiveIndexBackNav(paths.home, "oss", escapeHtml)}
-      ${weeklyArchiveSection(weeks, (w) => `${w}.html`)}`
+      ${archiveIndexMainWrap(weeklyArchiveSection(weeks, (w) => `${w}.html`, weekLabels, { archiveIndex: true }))}`
       : `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
       </nav>
-      ${weeklyArchiveSection(weeks, (w) => `${w}.html`)}`;
+      ${weeklyArchiveSection(weeks, (w) => `${w}.html`, weekLabels)}`;
     await fs.writeFile(
       path.join(outDir, "index.html"),
       pageShell(
