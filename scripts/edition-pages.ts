@@ -53,6 +53,7 @@ import {
   defaultOgImageUrl,
   feedAlternateLinksHtml,
   googleSiteVerificationMetaHtml,
+  digestRepoItemListJsonLd,
   itemListJsonLd,
   websiteJsonLd,
   type BriefFeedEntry,
@@ -96,8 +97,8 @@ import type { Digest } from "../src/tastemaker/types.js";
 import {
   archiveBackLinkLabel,
   daysArchiveIntroForEdition,
+  daysArchiveMetaForEdition,
   DAYS_ARCHIVE_EMPTY,
-  DAYS_ARCHIVE_META_DESCRIPTION,
   DAYS_ARCHIVE_PAGE_TITLE,
   DAYS_ARCHIVE_SECTION_HEADING,
   MONTHLY_INDEX_INTRO,
@@ -154,10 +155,10 @@ export async function verifyPosthogInBuiltSite(siteDir: string): Promise<number>
   if (!posthogAnalyticsEnabled()) {
     if (process.env.GITHUB_ACTIONS === "true") {
       throw new Error(
-        "POSTHOG_KEY is required for GitHub Pages deploy — all HTML pages must ship with analytics.",
+        "POSTHOG_KEY is required for GitHub Pages deploy: all HTML pages must ship with analytics.",
       );
     }
-    console.warn("Warning: POSTHOG_KEY not set — built HTML has no PostHog snippet.");
+    console.warn("Warning: POSTHOG_KEY not set: built HTML has no PostHog snippet.");
     return 0;
   }
 
@@ -552,7 +553,7 @@ function formatTokenUsage(usage?: { input_tokens: number; output_tokens: number 
 
 function renderBriefMarkdown(brief: string | null | undefined): string {
   if (!brief?.trim()) {
-    return '<p class="text-stone-500">—</p>';
+    return '<p class="text-stone-500">-</p>';
   }
   return renderSafeMarkdown(brief);
 }
@@ -614,7 +615,7 @@ export function renderShadowCompareBody(
 
   const notice =
     shadow.enrich_web_requested && !hasSideBySide
-      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output — repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
+      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output: repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
       : "";
 
   const usageBanner =
@@ -691,6 +692,10 @@ async function buildLabMarkdownPage(
         : undefined;
     const pageCopy =
       htmlName === "methodology.html" ? methodologyCopy : { title: pageTitle, description: pageTitle, h1: pageTitle };
+    const genericDescription =
+      htmlName === "methodology.html"
+        ? methodologyCopy.description
+        : metaDescriptionFromLead(pageTitle);
     const genericSeo =
       siteBaseUrl && htmlName !== "methodology.html"
         ? {
@@ -707,7 +712,7 @@ async function buildLabMarkdownPage(
         body,
         labSitePaths(),
         brand,
-        htmlName === "methodology.html" ? methodologyCopy.description : pageCopy.description,
+        htmlName === "methodology.html" ? methodologyCopy.description : genericDescription,
         escapeHtml,
         {
           ...labShell,
@@ -827,6 +832,15 @@ async function buildShadowPages(
             documentH1: `Shadow run ${runId.slice(0, 8)}`,
             documentH1Visible: true,
             outboundRewrite: { ...outboundRewrite, surface: "shadow" },
+            seo: siteBaseUrl
+              ? {
+                  siteBaseUrl,
+                  canonicalPath: `lab/shadow/${runId}.html`,
+                  noindex: true,
+                  ogType: "website",
+                  ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                }
+              : undefined,
           },
         ),
       );
@@ -1303,7 +1317,7 @@ function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): strin
     <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
       <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a></h2>
-      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills: Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}">Browse skills digest &rarr;</a>
     </section>`;
   }
@@ -1312,7 +1326,7 @@ function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): strin
     <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
       <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}">AI Tastemakers</a></h2>
-      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos: agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}">Browse OSS digest &rarr;</a>
     </section>`;
 }
@@ -1325,7 +1339,7 @@ function skillsIndexBody(
   wrapUp?: WrapUpArchive,
 ): string {
   const inspiration = edition.inspiration
-    ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a> — installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
+    ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a>, installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
     : "";
 
   const weeklyCta = wrapUpCtaHtml(wrapUp);
@@ -1360,7 +1374,7 @@ function skillsIndexBody(
       <div class="mt-6">${heroActions}</div>
     </section>
     <section class="mb-12 text-base leading-relaxed text-stone-600 dark:text-stone-400">
-      <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics — then rank by 7-day star momentum with Claude briefs.</p>
+      <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics, then rank by 7-day star momentum with Claude briefs.</p>
     </section>
     <section id="archive" class="mb-4 scroll-mt-8">
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
@@ -1545,14 +1559,14 @@ function siblingEditionPromoSidebar(
   if (sibling === "skills") {
     const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Skill Tastemakers</a></h3>
-      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills: Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Browse skills digest &rarr;</a>`;
     return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
   }
 
   const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">AI Tastemakers</a></h3>
-      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos: agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">Browse OSS digest &rarr;</a>`;
   return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
 }
@@ -1772,7 +1786,7 @@ async function buildBriefingsArchiveIndexPage(
       body,
       paths,
       brand,
-      DAYS_ARCHIVE_META_DESCRIPTION,
+      daysArchiveMetaForEdition(edition.id),
       escapeHtml,
       {
         wideIndex: true,
@@ -1784,8 +1798,8 @@ async function buildBriefingsArchiveIndexPage(
           ? {
               siteBaseUrl,
               canonicalPath: edition.siteSegment
-                ? `${edition.siteSegment}/briefings/`
-                : "briefings/",
+                ? `${edition.siteSegment}/briefings/index.html`
+                : "briefings/index.html",
               ogType: "website",
               ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
             }
@@ -1851,6 +1865,9 @@ export async function buildMonthlySite(
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
     const monthlyCopy = seoPage("monthly_rollup");
+    const monthlyDescription = monthlyCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(monthlyCopy.descriptionTemplate, { monthId })
+      : monthlyCopy.description;
     await fs.writeFile(
       path.join(outDir, `${monthId}.html`),
       pageShell(
@@ -1861,7 +1878,7 @@ export async function buildMonthlySite(
         body,
         paths,
         brand,
-        monthlyCopy.description,
+        monthlyDescription,
         escapeHtml,
         {
           siteBaseUrl,
@@ -1963,7 +1980,7 @@ export async function buildWeeklySite(
 
   const brand = {
     name: "Tastemakers Weekly",
-    tagline: "Strategy, then the stack, then the numbers — one week of AI open source.",
+    tagline: "Strategy, then the stack, then the numbers for one week of AI open source.",
   };
   const paths = weeklyPagePaths();
 
@@ -1990,6 +2007,7 @@ export async function buildWeeklySite(
     let rangeLabel = weekId;
     let startLabel = weekId;
     let endLabel = weekId;
+    let year = weekId.slice(0, 4);
     try {
       const weekJsonRaw = await fs.readFile(
         path.join(repoRoot, "briefings", "weekly", weekId, "weekly_review.json"),
@@ -2000,6 +2018,7 @@ export async function buildWeeklySite(
         rangeLabel = formatWeekReviewDateRange(weekJson.week_start, weekJson.week_end);
         startLabel = formatSeoDateShort(weekJson.week_start);
         endLabel = formatSeoDateShort(weekJson.week_end);
+        year = weekJson.week_end.slice(0, 4);
       }
     } catch {
       const range = parseWeeklyReviewDateRange(markdown);
@@ -2007,33 +2026,39 @@ export async function buildWeeklySite(
         rangeLabel = formatWeekReviewDateRange(range.start, range.end);
         startLabel = formatSeoDateShort(range.start);
         endLabel = formatSeoDateShort(range.end);
+        year = String(range.year);
       }
     }
+    const weeklyVars: Record<string, string> = {
+      Site: site,
+      weekId,
+      startLabel,
+      endLabel,
+      year,
+    };
     const weeklyTitle = weeklyCopy.titleTemplate
-      ? buildSeoTitleFromTemplate(weeklyCopy.titleTemplate, { Site: site, startLabel, endLabel })
+      ? buildSeoTitleFromTemplate(weeklyCopy.titleTemplate, weeklyVars, ["startLabel", "endLabel"])
       : `Weekly Review: ${rangeLabel}`;
+    const weeklyDescription = weeklyCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(weeklyCopy.descriptionTemplate, weeklyVars, [
+          "startLabel",
+          "endLabel",
+        ])
+      : weeklyCopy.description;
     await fs.writeFile(
       path.join(outDir, `${weekId}.html`),
-      pageShell(
-        weeklyTitle,
-        body,
-        paths,
-        brand,
-        weeklyCopy.description,
-        escapeHtml,
-        {
-          siteBaseUrl,
-          seo: siteBaseUrl
-            ? {
-                siteBaseUrl,
-                canonicalPath: `weekly/${weekId}.html`,
-                ogType: "article",
-                ogImageUrl: defaultOgImageUrl(siteBaseUrl),
-              }
-            : undefined,
-          outboundRewrite: outboundWeekly,
-        },
-      ),
+      pageShell(weeklyTitle, body, paths, brand, weeklyDescription, escapeHtml, {
+        siteBaseUrl,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: `weekly/${weekId}.html`,
+              ogType: "article",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+        outboundRewrite: outboundWeekly,
+      }),
     );
   }
 
@@ -2210,6 +2235,11 @@ export async function buildEditionSite(
         });
         const homePath = edition.siteSegment ? `${edition.siteSegment}/` : "";
         const homeName = edition.id === "skills" ? "Skill Tastemakers" : "AI Tastemakers";
+        const repoFullNames = digest.repos.map((r) => r.full_name).filter(Boolean);
+        const digestListName =
+          edition.id === "skills"
+            ? `Claude skills and agent skills · ${dateLabel}`
+            : `Trending open source AI projects · ${dateLabel}`;
         seo = {
           siteBaseUrl,
           canonicalPath,
@@ -2222,7 +2252,7 @@ export async function buildEditionSite(
               siteBaseUrl,
               canonicalPath,
               pageTitle,
-              description,
+              description ?? "",
               `${date}T08:00:00-07:00`,
               ogImageAbs,
             ),
@@ -2230,6 +2260,7 @@ export async function buildEditionSite(
               { name: homeName, path: homePath },
               { name: socialTitle, path: canonicalPath },
             ]),
+            digestRepoItemListJsonLd(repoFullNames, digestListName),
           ],
         };
       } catch {
@@ -2694,8 +2725,18 @@ export async function buildLabSite(
           : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
         const postBody = `${labNavHtml("posts", escapeHtml, 1)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
         const labPostCopy = seoPage("lab_post");
-        const postDescription = applyTemplate(labPostCopy.descriptionTemplate ?? "", { title });
-        const postTitle = applyTemplate(labPostCopy.titleTemplate ?? "{title} · Lab", { title });
+        const postVars = { title, postTitle: title };
+        const leadLine =
+          markdown
+            .split(/\n/)
+            .map((line) => line.trim())
+            .find((line) => line && !line.startsWith("#")) ?? title;
+        const postDescription = labPostCopy.descriptionTemplate
+          ? buildSeoDescriptionFromTemplate(labPostCopy.descriptionTemplate, postVars, ["postTitle", "title"])
+          : metaDescriptionFromLead(leadLine);
+        const postTitle = labPostCopy.titleTemplate
+          ? buildSeoTitleFromTemplate(labPostCopy.titleTemplate, postVars, ["postTitle", "title"])
+          : `${title} · Lab`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
           pageShell(postTitle, postBody, labSitePaths(1), brand, postDescription, escapeHtml, {
@@ -2736,15 +2777,32 @@ export async function buildLabSite(
       const fixtureBody = `${labNavHtml("posts", escapeHtml, 1)}${fixtureHeader}<article class="${LAB_PROSE_ARTICLE_CLASS}"><p>Long repo name header fixture for verify screenshots.</p></article>`;
       await fs.writeFile(
         path.join(labSiteDir, "posts", "_fixture-e1-long-repo.html"),
-        pageShell("Long repo header fixture · Lab", fixtureBody, labSitePaths(1), brand, undefined, escapeHtml, {
-          ...labShell,
-          labNavActive: "posts",
-          labNavDepth: 1,
-          labFallbackSection: "posts",
-          labPostShell: true,
-          siteBaseUrl,
-          outboundRewrite: labOutbound,
-        }),
+        pageShell(
+          "Long repo header fixture · Lab",
+          fixtureBody,
+          labSitePaths(1),
+          brand,
+          "Internal layout fixture for lab post header screenshots.",
+          escapeHtml,
+          {
+            ...labShell,
+            labNavActive: "posts",
+            labNavDepth: 1,
+            labFallbackSection: "posts",
+            labPostShell: true,
+            siteBaseUrl,
+            outboundRewrite: labOutbound,
+            seo: siteBaseUrl
+              ? {
+                  siteBaseUrl,
+                  canonicalPath: "lab/posts/_fixture-e1-long-repo.html",
+                  noindex: true,
+                  ogType: "website",
+                  ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                }
+              : undefined,
+          },
+        ),
       );
       postsBody += `<ul class="font-sans text-sm leading-relaxed">${listings.join("")}</ul>`;
     }

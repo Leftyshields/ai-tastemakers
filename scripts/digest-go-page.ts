@@ -12,7 +12,11 @@ import {
   resolveOutboundDestFromManifest,
 } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
-import { feedAlternateLinksHtml, googleSiteVerificationMetaHtml } from "./seo-helpers.js";
+import {
+  absoluteCanonicalUrl,
+  feedAlternateLinksHtml,
+  googleSiteVerificationMetaHtml,
+} from "./seo-helpers.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -54,6 +58,9 @@ export function renderGoRedirectPage(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Continue to GitHub</title>
+  <meta name="description" content="Redirect to an allowlisted GitHub repository from AI Tastemakers outbound tracking.">
+  <link rel="canonical" href="${escapeHtml(absoluteCanonicalUrl(siteBaseUrl, "go/index.html"))}">
+  <meta name="robots" content="noindex, nofollow">
   ${gscMeta}
   ${feedAlternates}
   ${posthog}

@@ -83,6 +83,28 @@ export function itemListJsonLd(
   };
 }
 
+/** GitHub `owner/repo` slug allowed in digest ItemList URLs. */
+export const GITHUB_REPO_FULL_NAME_RE = /^[\w.-]+\/[\w.-]+$/;
+
+/** ItemList of GitHub repo URLs for a daily digest page. */
+export function digestRepoItemListJsonLd(
+  fullNames: string[],
+  listName: string,
+): Record<string, unknown> {
+  const valid = fullNames
+    .map((name) => name.trim())
+    .filter((name) => GITHUB_REPO_FULL_NAME_RE.test(name));
+  return {
+    "@type": "ItemList",
+    name: listName,
+    itemListElement: valid.map((fullName, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `https://github.com/${fullName.replace(/^\/+/, "")}`,
+    })),
+  };
+}
+
 export function breadcrumbJsonLd(
   siteBaseUrl: string,
   crumbs: Array<{ name: string; path: string }>,
@@ -142,7 +164,7 @@ export function briefSocialDescription(
   const hook =
     whyNow ||
     whatItDoes ||
-    "Curated GitHub repos ranked by 7-day momentum — builder-focused summaries.";
+    "A free daily digest of trending open source AI projects on GitHub, ranked by recent star growth, with a short brief for builders on each one.";
   return hook.slice(0, 200);
 }
 
@@ -175,7 +197,7 @@ export function buildSeoHeadHtml(
     parts.push(`<meta name="description" content="${escapeHtml(description)}">`);
   }
 
-  if (!seo?.siteBaseUrl || !seo.canonicalPath) {
+  if (!seo?.siteBaseUrl || seo.canonicalPath === undefined) {
     return parts.join("\n  ");
   }
 

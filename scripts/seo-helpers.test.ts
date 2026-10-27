@@ -11,12 +11,17 @@ import {
   briefSocialTitle,
   extractBriefSection,
   normalizeCanonicalPath,
+  digestRepoItemListJsonLd,
   writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
 import {
   GOOGLE_SITE_VERIFICATION_HTML,
   GOOGLE_SITE_VERIFICATION_LINE,
 } from "./site-verification-pages.js";
+import { EM_DASH } from "./seo-copy.js";
+
+const BRIEF_SOCIAL_DESCRIPTION_FALLBACK =
+  "A free daily digest of trending open source AI projects on GitHub, ranked by recent star growth, with a short brief for builders on each one.";
 
 describe("brief social metadata", () => {
   it("uses Why now hook only — no repo list in description", () => {
@@ -40,6 +45,14 @@ describe("brief social metadata", () => {
       { full_name: "acme/demo", brief: "**Why now:** Trending this week." },
     ]);
     expect(desc).toContain("Trending");
+  });
+
+  it("uses copywriter fallback when brief has no Why now or What it does", () => {
+    const desc = briefSocialDescription([
+      { brief: "**Build with it:** Wire into CI only." },
+    ]);
+    expect(desc).toBe(BRIEF_SOCIAL_DESCRIPTION_FALLBACK);
+    expect(desc.includes(EM_DASH)).toBe(false);
   });
 });
 
@@ -112,6 +125,22 @@ describe("writeSitemapFromSiteDir", () => {
     expect(count).toBe(1);
     expect(xml).toContain(other);
     await fs.rm(tmp, { recursive: true, force: true });
+  });
+});
+
+describe("digestRepoItemListJsonLd", () => {
+  it("skips repo slugs that do not match owner/repo pattern", () => {
+    const list = digestRepoItemListJsonLd(
+      ["acme/demo", "bad slug", "../evil/repo", "ok-name/tool.v2"],
+      "Test list",
+    );
+    expect(list.itemListElement).toHaveLength(2);
+    expect((list.itemListElement as Array<{ url: string }>)[0]?.url).toBe(
+      "https://github.com/acme/demo",
+    );
+    expect((list.itemListElement as Array<{ url: string }>)[1]?.url).toBe(
+      "https://github.com/ok-name/tool.v2",
+    );
   });
 });
 

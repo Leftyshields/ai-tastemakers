@@ -15,6 +15,8 @@ describe("renderGoRedirectPage", () => {
     expect(html).toContain('captureOnce("lab_badge_click"');
     expect(html).toContain('eventName === "lab_badge_click"');
     expect(html).toContain("<noscript>");
+    expect(html).toContain('name="robots" content="noindex, nofollow"');
+    expect(html).toContain('rel="canonical"');
   });
 });
 

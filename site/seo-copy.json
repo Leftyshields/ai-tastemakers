@@ -1,23 +1,23 @@
 {
-  "_notice": "Final SEO copy from Copywriter. Templates use {placeholders} filled at build time.",
+  "_notice": "Copywriter approved. Templates use {placeholders} filled at build time.",
   "pages": {
     "home_oss": {
-      "title": "AI Tastemakers: Open Source AI Projects Taking Off",
-      "description": "Every morning, the 10 open source AI projects gaining the most GitHub stars this week, each with a short brief on why it matters now.",
+      "title": "Trending Open Source AI Projects | Daily AI GitHub Digest",
+      "description": "Free daily AI GitHub digest of trending open source AI projects. Ten fast-rising repos each morning with briefs for builders exploring agents and tools.",
       "h1": "AI Tastemakers"
     },
     "home_skills": {
-      "title": "Skill Tastemakers: AI Agent Skills Taking Off",
-      "description": "Every morning, the AI agent skills gaining the most GitHub stars this week, with a short brief and one thing to try today.",
+      "title": "Claude Skills and Agent Skills | Daily GitHub Digest",
+      "description": "Daily digest of trending Claude skills and agent skills on GitHub. Each pick includes a short brief and one thing to try on Claude Code, Cursor, or Codex.",
       "h1": "Skill Tastemakers"
     },
     "brief_oss": {
-      "titleTemplate": "{Site}: Top Picks for {dateLabel}",
-      "descriptionTemplate": "The open source AI projects gaining the most GitHub stars as of {dateLabel}, led by {topPick}. What each does and why now."
+      "titleTemplate": "{Site} Daily AI GitHub Digest · {dateLabel}",
+      "descriptionTemplate": "Daily AI GitHub digest for {dateLabel}: trending open source AI projects ranked by recent GitHub star growth, led by {topPick}. What each does and why now."
     },
     "brief_skills": {
-      "titleTemplate": "{Site}: Top Picks for {dateLabel}",
-      "descriptionTemplate": "The open source AI projects gaining the most GitHub stars as of {dateLabel}, led by {topPick}. What each does and why now."
+      "titleTemplate": "{Site} Claude Skills Digest · {dateLabel}",
+      "descriptionTemplate": "Daily Claude skills digest for {dateLabel}: trending agent skills on GitHub, led by {topPick}. What each skill does and why builders are trying it now."
     },
     "lab_index": {
       "title": "Lab | Tastemakers",
@@ -30,7 +30,8 @@
       "h1": "Methodology"
     },
     "lab_post": {
-      "titleTemplate": "{postTitle} | Tastemakers Lab"
+      "titleTemplate": "{postTitle} | Tastemakers Lab",
+      "descriptionTemplate": "Lab write-up: {postTitle}. Experiment notes from Tastemakers digest and site tests."
     },
     "lab_tools": {
       "title": "Evaluated tools | Lab",
@@ -64,20 +65,20 @@
     },
     "weekly_review": {
       "siteName": "AI Tastemakers",
-      "titleTemplate": "{Site} Weekly Review: {startLabel} to {endLabel}",
-      "descriptionTemplate": "The week's biggest open source AI projects from {startLabel} to {endLabel}, {year}, and what builders can take from them."
+      "titleTemplate": "{Site} Weekly Review: {startLabel} to {endLabel}, {year}",
+      "descriptionTemplate": "Weekly roundup of trending open source AI projects from {startLabel} to {endLabel}, {year}, and what builders can take from the week on AI Tastemakers."
     },
     "monthly_rollup": {
       "titleTemplate": "Monthly Rollup: {monthId} | Tastemakers",
-      "description": "Monthly editorial synthesis across weekly Tastemakers reviews."
+      "descriptionTemplate": "Monthly rollup for {monthId}: trends across four weeks of AI Tastemakers and Skill Tastemakers reviews."
     },
     "feed_ai": {
-      "title": "AI Tastemakers: Daily Open Source AI Picks",
-      "description": "Every morning, the open source AI projects and agent skills gaining the most GitHub stars this week, with a short brief on each."
+      "title": "AI Tastemakers: Trending Open Source AI Projects",
+      "description": "A free daily digest of the fastest-rising open source AI projects on GitHub, with a short brief on what each does and why it matters now."
     },
     "feed_skills": {
-      "title": "AI Tastemakers: Daily Open Source AI Picks",
-      "description": "Every morning, the open source AI projects and agent skills gaining the most GitHub stars this week, with a short brief on each."
+      "title": "AI Tastemakers: Trending Claude Skills",
+      "description": "A free daily digest of trending Claude skills and agent skills on GitHub, with a short brief and one thing to try in Claude Code, Cursor, or Codex."
     },
     "llms_txt": {
       "summary": "AI Tastemakers publishes a daily pick of the open source AI projects gaining the most GitHub stars over the past 7 days, each with a short brief on what it does and why it matters now. Its sister list, Skill Tastemakers, does the same for agent skills, the add-ons that teach tools like Claude Code, Cursor, and Codex new tricks. Weekly reviews and monthly rollups sum up the trends. The Tastemakers Lab tests changes to the site in the open and publishes every result, good or bad. Written for builders deciding what to try next.",

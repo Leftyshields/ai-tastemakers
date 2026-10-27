@@ -2,16 +2,17 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
-import {
-  EM_DASH,
-  SEO_DESCRIPTION_MAX,
-  SEO_TITLE_MAX,
-  validateSeoCopyFile,
-} from "./seo-copy.js";
+import { validateSeoCopyFile } from "./seo-copy.js";
+import { checkSeoText } from "./site-seo-text-gate.js";
+import { absoluteCanonicalUrl, normalizeCanonicalPath } from "./seo-helpers.js";
+import { isSiteSeoGateExemptHtmlFile } from "./site-seo-exempt-pages.js";
 import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteDir = path.join(repoRoot, "site");
+
+const SITE_BASE_URL =
+  process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";
 
 const ALLOWED_JSON_LD_TYPES = new Set([
   "WebSite",
@@ -34,6 +35,29 @@ function listHtmlFiles(dir: string): string[] {
   return out;
 }
 
+function sitemapLocPath(loc: string): string {
+  try {
+    const base = new URL(SITE_BASE_URL);
+    const url = new URL(loc);
+    if (url.origin !== base.origin) return loc;
+    let p = url.pathname;
+    const basePath = base.pathname.replace(/\/+$/, "");
+    if (basePath && p.startsWith(basePath)) {
+      p = p.slice(basePath.length) || "/";
+    }
+    return p.replace(/^\/+/, "");
+  } catch {
+    return loc;
+  }
+}
+
+function isSitemapHtmlPageLoc(loc: string): boolean {
+  const p = sitemapLocPath(loc);
+  if (!p) return true;
+  if (p.endsWith("/")) return true;
+  return /\.html$/i.test(p);
+}
+
 function validateSitemap(): { ok: boolean; urlCount: number; messages: string[] } {
   const messages: string[] = [];
   const sitemapPath = path.join(siteDir, "sitemap.xml");
@@ -41,14 +65,20 @@ function validateSitemap(): { ok: boolean; urlCount: number; messages: string[] 
     return { ok: false, urlCount: 0, messages: ["missing site/sitemap.xml"] };
   }
   const xml = fs.readFileSync(sitemapPath, "utf8");
-  if (/\.png/i.test(xml)) {
-    messages.push("sitemap contains PNG URL");
-  }
   const urlBlocks = xml.match(/<url>[\s\S]*?<\/url>/g) ?? [];
   if (urlBlocks.length === 0) {
     messages.push("sitemap has no url entries");
   }
   for (const block of urlBlocks) {
+    const locMatch = block.match(/<loc>([^<]+)<\/loc>/);
+    const loc = locMatch?.[1]?.trim() ?? "";
+    if (!loc) {
+      messages.push("sitemap url missing loc");
+      continue;
+    }
+    if (!isSitemapHtmlPageLoc(loc)) {
+      messages.push(`sitemap loc is not an HTML page URL: ${loc}`);
+    }
     if (!/<lastmod>/.test(block)) {
       messages.push(`sitemap url missing lastmod: ${block.slice(0, 80)}…`);
     }
@@ -97,10 +127,10 @@ function walkJsonLdNodes(node: unknown, issues: string[], pathLabel: string): vo
   }
 }
 
-function validateJsonLdOnPage(html: string, rel: string): string[] {
+function validateJsonLdOnDocument(doc: Document, rel: string): { issues: string[]; types: Set<string> } {
   const issues: string[] = [];
-  const dom = new JSDOM(html);
-  const scripts = dom.window.document.querySelectorAll('script[type="application/ld+json"]');
+  const types = new Set<string>();
+  const scripts = doc.querySelectorAll('script[type="application/ld+json"]');
   for (const script of scripts) {
     const raw = script.textContent?.trim();
     if (!raw) {
@@ -119,6 +149,17 @@ function validateJsonLdOnPage(html: string, rel: string): string[] {
       continue;
     }
     const root = parsed as Record<string, unknown>;
+    const visitTypes = (node: unknown) => {
+      if (node == null || typeof node !== "object") return;
+      if (Array.isArray(node)) {
+        node.forEach(visitTypes);
+        return;
+      }
+      const obj = node as Record<string, unknown>;
+      if (typeof obj["@type"] === "string") types.add(obj["@type"]);
+      for (const value of Object.values(obj)) visitTypes(value);
+    };
+    visitTypes(parsed);
     if (root["@graph"]) {
       walkJsonLdNodes(root["@graph"], issues, `${rel}@graph`);
     } else if (root["@type"]) {
@@ -127,27 +168,31 @@ function validateJsonLdOnPage(html: string, rel: string): string[] {
       issues.push(`${rel}: ld+json missing @type or @graph`);
     }
   }
-  return issues;
+  return { issues, types };
 }
 
-function checkSeoText(text: string, rel: string, kind: "title" | "description"): string[] {
-  const issues: string[] = [];
-  if (text.includes(EM_DASH)) {
-    issues.push(`${rel}: ${kind} contains U+2014 em dash`);
-  }
-  const max = kind === "title" ? SEO_TITLE_MAX : SEO_DESCRIPTION_MAX;
-  if (text.length > max) {
-    issues.push(`${rel}: ${kind} length ${text.length} exceeds max ${max}`);
-  }
-  return issues;
+function expectedCanonicalForRel(rel: string): string {
+  return absoluteCanonicalUrl(SITE_BASE_URL, rel);
+}
+
+function isDailyDigestRel(rel: string): boolean {
+  return /^(skills\/)?briefings\/\d{4}-\d{2}-\d{2}\.html$/.test(rel);
+}
+
+function isHomeRel(rel: string): boolean {
+  return rel === "index.html" || rel === "skills/index.html";
 }
 
 function validateHtmlPages(): { ok: boolean; messages: string[] } {
   const messages: string[] = [];
   const htmlFiles = listHtmlFiles(siteDir);
+  const indexableTitles = new Map<string, string[]>();
+  const indexableDescriptions = new Map<string, string[]>();
+
   for (const abs of htmlFiles) {
     if (isSiteGateExemptHtmlFile(abs)) continue;
-    const rel = path.relative(siteDir, abs);
+    const rel = path.relative(siteDir, abs).split(path.sep).join("/");
+    const seoExempt = isSiteSeoGateExemptHtmlFile(abs, siteDir);
     const html = fs.readFileSync(abs, "utf8");
     const dom = new JSDOM(html);
     const doc = dom.window.document;
@@ -164,30 +209,112 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
     if (alternates.length < 2) {
       messages.push(`${rel}: expected 2 Atom feed alternate links, found ${alternates.length}`);
     }
+
     const titleEl = doc.querySelector("title");
-    if (titleEl?.textContent) {
-      messages.push(...checkSeoText(titleEl.textContent.trim(), rel, "title"));
+    const title = titleEl?.textContent?.trim() ?? "";
+    if (!title) {
+      messages.push(`${rel}: missing <title>`);
+    } else {
+      messages.push(...checkSeoText(title, rel, "title"));
     }
+
     const metaDesc = doc.querySelector('meta[name="description"]');
-    const descContent = metaDesc?.getAttribute("content");
-    if (descContent?.trim()) {
-      messages.push(...checkSeoText(descContent.trim(), rel, "description"));
+    const descContent = metaDesc?.getAttribute("content")?.trim() ?? "";
+    if (!descContent) {
+      if (!seoExempt) messages.push(`${rel}: missing meta description`);
+    } else {
+      messages.push(...checkSeoText(descContent, rel, "description"));
     }
-    const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute("content");
-    if (ogTitle?.trim()) {
-      messages.push(...checkSeoText(ogTitle.trim(), rel, "title"));
+
+    const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute("content")?.trim() ?? "";
+    const ogDesc =
+      doc.querySelector('meta[property="og:description"]')?.getAttribute("content")?.trim() ?? "";
+    if (ogTitle) {
+      messages.push(...checkSeoText(ogTitle, rel, "title"));
     }
-    const ogDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute("content");
-    if (ogDesc?.trim()) {
-      messages.push(...checkSeoText(ogDesc.trim(), rel, "description"));
+    if (ogDesc) {
+      messages.push(...checkSeoText(ogDesc, rel, "description"));
     }
-    messages.push(...validateJsonLdOnPage(html, rel));
+
+    const robots = doc.querySelector('meta[name="robots"]')?.getAttribute("content") ?? "";
+    const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href")?.trim() ?? "";
+    const ogUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute("content")?.trim() ?? "";
+
+    if (!seoExempt) {
+      if (/noindex/i.test(robots)) {
+        messages.push(`${rel}: unexpected noindex on indexable page`);
+      }
+      if (!canonical) {
+        messages.push(`${rel}: missing canonical link`);
+      } else {
+        const expected = expectedCanonicalForRel(rel);
+        if (canonical !== expected) {
+          messages.push(`${rel}: canonical ${canonical} (expected ${expected})`);
+        }
+        try {
+          const canonUrl = new URL(canonical);
+          const baseUrl = new URL(SITE_BASE_URL);
+          if (canonUrl.origin !== baseUrl.origin) {
+            messages.push(`${rel}: canonical origin ${canonUrl.origin} differs from site base`);
+          }
+          if (/\/index\.html$/i.test(canonUrl.pathname) && rel.endsWith("index.html")) {
+            const norm = normalizeCanonicalPath(rel);
+            if (norm === "" || norm.endsWith("/")) {
+              messages.push(`${rel}: canonical should use directory URL, not index.html`);
+            }
+          }
+        } catch {
+          messages.push(`${rel}: canonical is not a valid URL`);
+        }
+      }
+      if (!ogTitle) messages.push(`${rel}: missing og:title`);
+      if (!ogDesc) messages.push(`${rel}: missing og:description`);
+      if (!ogUrl) messages.push(`${rel}: missing og:url`);
+      if (title) {
+        if (!indexableTitles.has(title)) indexableTitles.set(title, []);
+        indexableTitles.get(title)!.push(rel);
+      }
+      if (descContent) {
+        if (!indexableDescriptions.has(descContent)) indexableDescriptions.set(descContent, []);
+        indexableDescriptions.get(descContent)!.push(rel);
+      }
+    } else if (!/noindex/i.test(robots)) {
+      messages.push(`${rel}: utility page must have noindex robots meta`);
+    }
+
+    const jsonLd = validateJsonLdOnDocument(doc, rel);
+    messages.push(...jsonLd.issues);
+
+    if (!seoExempt) {
+      const types = jsonLd.types;
+      if (isHomeRel(rel) && !types.has("WebSite")) {
+        messages.push(`${rel}: missing JSON-LD WebSite`);
+      }
+      if (isDailyDigestRel(rel) && !types.has("ItemList")) {
+        messages.push(`${rel}: missing JSON-LD ItemList`);
+      }
+    }
   }
+
+  for (const [title, pages] of indexableTitles) {
+    if (pages.length > 1) {
+      messages.push(`duplicate title (${pages.length} pages): "${title.slice(0, 48)}…" → ${pages.slice(0, 4).join(", ")}${pages.length > 4 ? "…" : ""}`);
+    }
+  }
+  for (const [desc, pages] of indexableDescriptions) {
+    if (pages.length > 1) {
+      messages.push(
+        `duplicate meta description (${pages.length} pages): "${desc.slice(0, 40)}…" → ${pages.slice(0, 3).join(", ")}${pages.length > 3 ? "…" : ""}`,
+      );
+    }
+  }
+
   return { ok: messages.length === 0, messages };
 }
 
 function validateFeedSeoCopy(): string[] {
   const messages: string[] = [];
+  const feedTitles = new Map<string, string[]>();
   for (const rel of ["feeds/ai.xml", "feeds/skills.xml"]) {
     const abs = path.join(siteDir, rel);
     if (!fs.existsSync(abs)) continue;
@@ -197,6 +324,15 @@ function validateFeedSeoCopy(): string[] {
     const subtitle = dom.window.document.querySelector("feed > subtitle")?.textContent?.trim() ?? "";
     messages.push(...checkSeoText(title, rel, "title"));
     messages.push(...checkSeoText(subtitle, rel, "description"));
+    if (title) {
+      if (!feedTitles.has(title)) feedTitles.set(title, []);
+      feedTitles.get(title)!.push(rel);
+    }
+  }
+  for (const [title, feeds] of feedTitles) {
+    if (feeds.length > 1) {
+      messages.push(`duplicate atom feed title: "${title}" in ${feeds.join(", ")}`);
+    }
   }
   return messages;
 }
@@ -246,7 +382,7 @@ function main(): void {
     console.log("verify: rendered meta em dash ok (title, og:title, og:description)");
   }
   const jsonLdIssues = html.messages.filter(
-    (m) => m.includes("ld+json") || m.includes("@type") || m.includes("@graph"),
+    (m) => m.includes("ld+json") || m.includes("@type") || m.includes("@graph") || m.includes("JSON-LD"),
   );
   const otherHtml = html.messages.filter((m) => !jsonLdIssues.includes(m));
   if (jsonLdIssues.length > 0) {
@@ -259,7 +395,8 @@ function main(): void {
   }
   if (otherHtml.length > 0) {
     failed = true;
-    for (const m of otherHtml) console.error(`  ${m}`);
+    for (const m of otherHtml.slice(0, 50)) console.error(`  ${m}`);
+    if (otherHtml.length > 50) console.error(`  … and ${otherHtml.length - 50} more`);
   }
 
   if (failed) process.exit(1);
