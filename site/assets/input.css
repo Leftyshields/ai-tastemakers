@@ -1094,6 +1094,16 @@
   }
 }
 
+/* Daily brief edition tabs: dark active matches home (outline only, no slate fill). */
+.dark header nav[aria-label="Tastemakers editions"]:not(.home-index-edition-nav)
+  a.edition-nav-tab--active[aria-current="page"] {
+  border-width: 1px;
+  border-color: var(--color-blue-400);
+  background-color: transparent !important;
+  color: var(--color-blue-200);
+  font-weight: var(--font-weight-semibold);
+}
+
 /* Home index edition tabs (UX49): dark active = 1px blue outline, no light pill fill. */
 .dark .home-index-edition-nav a.home-index-tab--active[aria-current="page"] {
   border-width: 1px;
