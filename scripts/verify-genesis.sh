@@ -3,7 +3,7 @@
 # Aligns with project-genesis .cursor/skills/verify (npm test + run-path).
 set -e
 cd "$(dirname "$0")/.."
-TSX="./node_modules/.bin/tsx"
+TSX="${TSX:-./node_modules/.bin/tsx}"
 VITEST="./node_modules/.bin/vitest"
 echo "verify: npm test"
 npm test
@@ -75,6 +75,8 @@ echo "verify: lab header mobile screenshots (390 scroll start/end)"
 "$TSX" scripts/capture-lab-header-390.ts
 echo "verify: site sitemap gate (Search Console verification HTML)"
 "$TSX" scripts/verify-site-sitemap-gate.ts
+echo "verify: site SEO (sitemap, feeds, h1, json-ld)"
+"$TSX" scripts/verify-site-seo.ts
 echo "verify: outbound link tracking (/go) on site and email fixtures"
 "$TSX" scripts/verify-outbound-links.ts
 echo "verify: ok"

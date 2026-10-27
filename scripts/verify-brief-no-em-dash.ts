@@ -1,6 +1,8 @@
 /**
  * Gate: new brief prose must not contain U+2014 after publish-path sanitization.
  * Does not scan archived briefings/ (many pre-policy digests still have em dashes).
+ * Built-site rendered meta (document title, og:title, og:description) is scanned for U+2014
+ * in verify-site-seo.ts (same em dash rules as seo-copy).
  */
 import { NO_EM_DASH_VOICE_LINE, containsEmDash, stripEmDashesFromProse } from "../src/tastemaker/narrate/brief-voice.js";
 import { sanitizeBriefOutput } from "../src/tastemaker/narrate/sanitize.js";

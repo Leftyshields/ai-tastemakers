@@ -878,7 +878,7 @@
     @apply mb-4 font-sans text-[0.8125rem] font-semibold uppercase tracking-widest text-stone-600 dark:text-stone-400;
   }
 
-  .home-index-main .hero h2 {
+  .home-index-main .hero h1 {
     @apply mb-3 max-w-[40rem] font-sans text-[1.75rem] font-bold leading-tight tracking-tight md:text-4xl;
   }
 

@@ -12,6 +12,7 @@ import {
   resolveOutboundDestFromManifest,
 } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
+import { feedAlternateLinksHtml, googleSiteVerificationMetaHtml } from "./seo-helpers.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -30,10 +31,13 @@ function manifestHashMapJson(sortedHashes: string[]): string {
 export function renderGoRedirectPage(
   allowlist: Record<string, string>,
   homePath = "/",
+  siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
   manifestDestHashes: string[] = [],
 ): string {
   const allowlistJson = JSON.stringify(allowlist);
   const posthog = posthogScriptHtml();
+  const feedAlternates = feedAlternateLinksHtml(siteBaseUrl, escapeHtml);
+  const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const safeAllowlist = escapeScriptString(allowlistJson);
   const safeHome = escapeScriptString(homePath.startsWith("/") ? homePath : `/${homePath}`);
   const labDestRe = labBadgeDestGoInlineRegexSources();
@@ -50,6 +54,8 @@ export function renderGoRedirectPage(
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <title>Continue to GitHub</title>
+  ${gscMeta}
+  ${feedAlternates}
   ${posthog}
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #fafaf9; color: #1c1917; }
@@ -60,6 +66,7 @@ export function renderGoRedirectPage(
 </head>
 <body>
   <main>
+    <h1 style="font-size:1.125rem;margin:0 0 0.75rem;font-weight:600">Continue to GitHub</h1>
     <p>Opening GitHub</p>
     <p><a id="continue-link" href="${escapeHtml(homePath)}">Continue to GitHub</a></p>
   </main>

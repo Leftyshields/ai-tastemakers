@@ -110,7 +110,9 @@ describe("resolveGoPageDestination", () => {
 
 describe("renderGoRedirectPage outbound", () => {
   it("includes outbound_link_click capture and manifest lookup", () => {
-    const html = renderGoRedirectPage({}, "/", ["abc123"]);
+    const html = renderGoRedirectPage({}, "/", "https://leftyshields.github.io/ai-tastemakers", [
+      "abc123",
+    ]);
     expect(html).toContain("outbound_link_click");
     expect(html).toContain("resolveManifestOutbound");
     expect(html).toContain("MANIFEST_HASHES");

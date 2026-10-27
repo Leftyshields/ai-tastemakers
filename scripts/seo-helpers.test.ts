@@ -5,10 +5,12 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import {
+  absoluteCanonicalUrl,
   briefMetaDescription,
   briefSocialDescription,
   briefSocialTitle,
   extractBriefSection,
+  normalizeCanonicalPath,
   writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
 import {
@@ -63,6 +65,16 @@ describe("OG card SVG (site dark theme)", () => {
   });
 });
 
+describe("canonical paths", () => {
+  it("maps index.html to site root", () => {
+    expect(normalizeCanonicalPath("index.html")).toBe("");
+    expect(normalizeCanonicalPath("skills/index.html")).toBe("skills/");
+    expect(absoluteCanonicalUrl("https://example.com/ai-tastemakers", "index.html")).toBe(
+      "https://example.com/ai-tastemakers/",
+    );
+  });
+});
+
 describe("writeSitemapFromSiteDir", () => {
   it("omits the exact Search Console verification file when content matches", async () => {
     const tmp = await fs.mkdtemp(path.join(os.tmpdir(), "sitemap-gate-"));
@@ -74,8 +86,9 @@ describe("writeSitemapFromSiteDir", () => {
     const count = await writeSitemapFromSiteDir(tmp, "https://example.com/ai-tastemakers");
     const xml = await fs.readFile(path.join(tmp, "sitemap.xml"), "utf8");
     expect(count).toBe(1);
-    expect(xml).toContain("index.html");
+    expect(xml).toContain("https://example.com/ai-tastemakers/");
     expect(xml).not.toContain(GOOGLE_SITE_VERIFICATION_HTML);
+    expect(xml).toMatch(/<lastmod>/);
     await fs.rm(tmp, { recursive: true, force: true });
   });
 

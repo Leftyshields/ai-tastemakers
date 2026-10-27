@@ -385,7 +385,7 @@ export async function buildHomeIndexMainHtml(options: {
   const experiments = loadExperimentsFile(repoRoot).experiments;
   const doneCount = countLabDoneExperiments(experiments);
 
-  const hero = `<section class="hero sec"><h2>${escapeHtml(HOME_HERO_HEADLINES[edition])}</h2><p class="muted">${escapeHtml(HOME_HERO_SUBLINES[edition])}</p>
+  const hero = `<section class="hero sec"><h1>${escapeHtml(HOME_HERO_HEADLINES[edition])}</h1><p class="muted">${escapeHtml(HOME_HERO_SUBLINES[edition])}</p>
 <div class="ctas">${latestDate ? `<a href="${paths.brief(latestDate)}" class="btn btn-p" data-index-cta="today_brief">Read today&rsquo;s picks</a>` : ""}${edition === "oss" || edition === "skills" ? `<a href="${paths.subscribe}" class="btn btn-s" data-index-cta="subscribe">Get the daily email</a>` : ""}</div></section>`;
 
   let picksSection = "";
