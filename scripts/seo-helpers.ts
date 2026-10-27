@@ -83,6 +83,22 @@ export function itemListJsonLd(
   };
 }
 
+/** ItemList of GitHub repo URLs for a daily digest page. */
+export function digestRepoItemListJsonLd(
+  fullNames: string[],
+  listName: string,
+): Record<string, unknown> {
+  return {
+    "@type": "ItemList",
+    name: listName,
+    itemListElement: fullNames.map((fullName, index) => ({
+      "@type": "ListItem",
+      position: index + 1,
+      url: `https://github.com/${fullName.replace(/^\/+/, "")}`,
+    })),
+  };
+}
+
 export function breadcrumbJsonLd(
   siteBaseUrl: string,
   crumbs: Array<{ name: string; path: string }>,
@@ -175,7 +191,7 @@ export function buildSeoHeadHtml(
     parts.push(`<meta name="description" content="${escapeHtml(description)}">`);
   }
 
-  if (!seo?.siteBaseUrl || !seo.canonicalPath) {
+  if (!seo?.siteBaseUrl || seo.canonicalPath === undefined) {
     return parts.join("\n  ");
   }
 

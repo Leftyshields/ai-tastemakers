@@ -10,6 +10,13 @@ export const DAYS_ARCHIVE_PAGE_TITLE: Record<EditionId, string> = {
 export const DAYS_ARCHIVE_META_DESCRIPTION =
   "Every daily Tastemakers list in one calendar. Pick a date to see that morning's top 10 picks and why each one mattered.";
 
+export function daysArchiveMetaForEdition(editionId: EditionId): string {
+  if (editionId === "skills") {
+    return "Skill Tastemakers daily Claude skills lists in one calendar. Pick a date for that morning's top 10 agent skills.";
+  }
+  return "AI Tastemakers daily open source AI lists in one calendar. Pick a date for that morning's top 10 trending repos.";
+}
+
 export const DAYS_ARCHIVE_SECTION_HEADING = "Every daily list";
 
 export const DAYS_ARCHIVE_EMPTY =
