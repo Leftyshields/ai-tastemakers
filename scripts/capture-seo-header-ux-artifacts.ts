@@ -108,19 +108,28 @@ async function captureSet(
   return saved;
 }
 
-function pixelDiff(pathA: string, pathB: string, diffPath: string): number {
+const PIXELMATCH_THRESHOLD = 0.1;
+
+function pixelDiff(pathA: string, pathB: string, diffPath: string): {
+  pixelmatchPixels: number;
+  rawDiffPixels: number;
+  threshold: number;
+} {
   const imgA = PNG.sync.read(fs.readFileSync(pathA));
   const imgB = PNG.sync.read(fs.readFileSync(pathB));
   if (imgA.width !== imgB.width || imgA.height !== imgB.height) {
     throw new Error(`size mismatch ${path.basename(pathA)}: ${imgA.width}x${imgA.height} vs ${imgB.width}x${imgB.height}`);
   }
   const diff = new PNG({ width: imgA.width, height: imgA.height });
-  const mismatched = pixelmatch(imgA.data, imgB.data, diff.data, imgA.width, imgA.height, {
-    threshold: 0.1,
+  const rawDiffPixels = pixelmatch(imgA.data, imgB.data, diff.data, imgA.width, imgA.height, {
+    threshold: 0,
+  });
+  const pixelmatchPixels = pixelmatch(imgA.data, imgB.data, diff.data, imgA.width, imgA.height, {
+    threshold: PIXELMATCH_THRESHOLD,
   });
   fs.mkdirSync(path.dirname(diffPath), { recursive: true });
   fs.writeFileSync(diffPath, PNG.sync.write(diff));
-  return mismatched;
+  return { pixelmatchPixels, rawDiffPixels, threshold: PIXELMATCH_THRESHOLD };
 }
 
 function buildMainWorktree(): string {
@@ -156,7 +165,12 @@ async function main(): Promise<void> {
   await captureFromRoot(mainWt, pages, beforeDir, "before");
 
   await fs.promises.mkdir(diffDir, { recursive: true });
-  const diffReport: Array<{ file: string; mismatchedPixels: number }> = [];
+  const diffReport: Array<{
+    file: string;
+    pixelmatchPixels: number;
+    rawDiffPixels: number;
+    threshold: number;
+  }> = [];
   let failed = false;
   for (const afterPath of afterShots) {
     const base = path.basename(afterPath).replace(/^after-/, "before-");
@@ -167,10 +181,12 @@ async function main(): Promise<void> {
       failed = true;
       continue;
     }
-    const mismatched = pixelDiff(beforePath, afterPath, diffPath);
-    diffReport.push({ file: base, mismatchedPixels: mismatched });
-    console.log(`  diff ${base}: ${mismatched} px`);
-    if (mismatched > 0) failed = true;
+    const diff = pixelDiff(beforePath, afterPath, diffPath);
+    diffReport.push({ file: base, ...diff });
+    console.log(
+      `  diff ${base}: pixelmatch=${diff.pixelmatchPixels} px (threshold ${diff.threshold}), raw=${diff.rawDiffPixels} px`,
+    );
+    if (diff.pixelmatchPixels > 0) failed = true;
   }
 
   const reportPath = path.join(artifactRoot, "header-pixel-diff-report.json");

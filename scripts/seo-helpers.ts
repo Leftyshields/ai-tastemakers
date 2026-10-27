@@ -83,15 +83,21 @@ export function itemListJsonLd(
   };
 }
 
+/** GitHub `owner/repo` slug allowed in digest ItemList URLs. */
+export const GITHUB_REPO_FULL_NAME_RE = /^[\w.-]+\/[\w.-]+$/;
+
 /** ItemList of GitHub repo URLs for a daily digest page. */
 export function digestRepoItemListJsonLd(
   fullNames: string[],
   listName: string,
 ): Record<string, unknown> {
+  const valid = fullNames
+    .map((name) => name.trim())
+    .filter((name) => GITHUB_REPO_FULL_NAME_RE.test(name));
   return {
     "@type": "ItemList",
     name: listName,
-    itemListElement: fullNames.map((fullName, index) => ({
+    itemListElement: valid.map((fullName, index) => ({
       "@type": "ListItem",
       position: index + 1,
       url: `https://github.com/${fullName.replace(/^\/+/, "")}`,

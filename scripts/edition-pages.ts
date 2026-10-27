@@ -115,7 +115,7 @@ import {
   HOME_EDITION_TAGLINES,
   type HomeWrapUpArchive,
 } from "./home-index-layout.js";
-import { loadWeekRangeLabels } from "./week-review-date-range.js";
+import { formatWeekReviewDateRange, loadWeekRangeLabels } from "./week-review-date-range.js";
 import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 const ARCHIVE_SECTION_HEADING_CLASS = "archive-sh";
@@ -155,10 +155,10 @@ export async function verifyPosthogInBuiltSite(siteDir: string): Promise<number>
   if (!posthogAnalyticsEnabled()) {
     if (process.env.GITHUB_ACTIONS === "true") {
       throw new Error(
-        "POSTHOG_KEY is required for GitHub Pages deploy — all HTML pages must ship with analytics.",
+        "POSTHOG_KEY is required for GitHub Pages deploy: all HTML pages must ship with analytics.",
       );
     }
-    console.warn("Warning: POSTHOG_KEY not set — built HTML has no PostHog snippet.");
+    console.warn("Warning: POSTHOG_KEY not set: built HTML has no PostHog snippet.");
     return 0;
   }
 
@@ -553,7 +553,7 @@ function formatTokenUsage(usage?: { input_tokens: number; output_tokens: number 
 
 function renderBriefMarkdown(brief: string | null | undefined): string {
   if (!brief?.trim()) {
-    return '<p class="text-stone-500">—</p>';
+    return '<p class="text-stone-500">-</p>';
   }
   return renderSafeMarkdown(brief);
 }
@@ -615,7 +615,7 @@ export function renderShadowCompareBody(
 
   const notice =
     shadow.enrich_web_requested && !hasSideBySide
-      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output — repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
+      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output: repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
       : "";
 
   const usageBanner =
@@ -1317,7 +1317,7 @@ function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): strin
     <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
       <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a></h2>
-      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills: Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}">Browse skills digest &rarr;</a>
     </section>`;
   }
@@ -1326,7 +1326,7 @@ function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): strin
     <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
       <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}">AI Tastemakers</a></h2>
-      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos: agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}">Browse OSS digest &rarr;</a>
     </section>`;
 }
@@ -1339,7 +1339,7 @@ function skillsIndexBody(
   wrapUp?: WrapUpArchive,
 ): string {
   const inspiration = edition.inspiration
-    ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a> — installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
+    ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a>, installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
     : "";
 
   const weeklyCta = wrapUpCtaHtml(wrapUp);
@@ -1374,7 +1374,7 @@ function skillsIndexBody(
       <div class="mt-6">${heroActions}</div>
     </section>
     <section class="mb-12 text-base leading-relaxed text-stone-600 dark:text-stone-400">
-      <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics — then rank by 7-day star momentum with Claude briefs.</p>
+      <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics, then rank by 7-day star momentum with Claude briefs.</p>
     </section>
     <section id="archive" class="mb-4 scroll-mt-8">
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
@@ -1559,14 +1559,14 @@ function siblingEditionPromoSidebar(
   if (sibling === "skills") {
     const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Skill Tastemakers</a></h3>
-      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills: Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Browse skills digest &rarr;</a>`;
     return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
   }
 
   const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">AI Tastemakers</a></h3>
-      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos: agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">Browse OSS digest &rarr;</a>`;
   return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
 }
@@ -1871,7 +1871,10 @@ export async function buildMonthlySite(
     await fs.writeFile(
       path.join(outDir, `${monthId}.html`),
       pageShell(
-        applyTemplate(monthlyCopy.titleTemplate ?? `Monthly Rollup — ${monthId}`, { monthId }),
+        applyTemplate(
+          monthlyCopy.titleTemplate ?? `Monthly Rollup: {monthId} | Tastemakers`,
+          { monthId },
+        ),
         body,
         paths,
         brand,
@@ -1977,7 +1980,7 @@ export async function buildWeeklySite(
 
   const brand = {
     name: "Tastemakers Weekly",
-    tagline: "Strategy, then the stack, then the numbers — one week of AI open source.",
+    tagline: "Strategy, then the stack, then the numbers for one week of AI open source.",
   };
   const paths = weeklyPagePaths();
 
@@ -2000,18 +2003,42 @@ export async function buildWeeklySite(
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
     const weeklyCopy = seoPage("weekly_review");
-    const range = parseWeeklyReviewDateRange(markdown);
-    const siteName = weeklyCopy.siteName ?? "AI Tastemakers";
+    const site = weeklyCopy.siteName ?? "AI Tastemakers";
+    let rangeLabel = weekId;
+    let startLabel = weekId;
+    let endLabel = weekId;
+    let year = weekId.slice(0, 4);
+    try {
+      const weekJsonRaw = await fs.readFile(
+        path.join(repoRoot, "briefings", "weekly", weekId, "weekly_review.json"),
+        "utf8",
+      );
+      const weekJson = JSON.parse(weekJsonRaw) as { week_start?: string; week_end?: string };
+      if (weekJson.week_start && weekJson.week_end) {
+        rangeLabel = formatWeekReviewDateRange(weekJson.week_start, weekJson.week_end);
+        startLabel = formatSeoDateShort(weekJson.week_start);
+        endLabel = formatSeoDateShort(weekJson.week_end);
+        year = weekJson.week_end.slice(0, 4);
+      }
+    } catch {
+      const range = parseWeeklyReviewDateRange(markdown);
+      if (range) {
+        rangeLabel = formatWeekReviewDateRange(range.start, range.end);
+        startLabel = formatSeoDateShort(range.start);
+        endLabel = formatSeoDateShort(range.end);
+        year = String(range.year);
+      }
+    }
     const weeklyVars: Record<string, string> = {
-      Site: siteName,
+      Site: site,
       weekId,
-      startLabel: range ? formatSeoDateShort(range.start) : weekId,
-      endLabel: range ? formatSeoDateShort(range.end) : weekId,
-      year: range ? String(range.year) : weekId.slice(0, 4),
+      startLabel,
+      endLabel,
+      year,
     };
     const weeklyTitle = weeklyCopy.titleTemplate
       ? buildSeoTitleFromTemplate(weeklyCopy.titleTemplate, weeklyVars, ["startLabel", "endLabel"])
-      : `Weekly Review — ${weekId}`;
+      : `Weekly Review: ${rangeLabel}`;
     const weeklyDescription = weeklyCopy.descriptionTemplate
       ? buildSeoDescriptionFromTemplate(weeklyCopy.descriptionTemplate, weeklyVars, [
           "startLabel",
@@ -2166,7 +2193,7 @@ export async function buildEditionSite(
       : undefined;
     let pageTitle = briefCopy.titleTemplate
       ? buildSeoTitleFromTemplate(briefCopy.titleTemplate, { Site: siteName, dateLabel })
-      : `${siteName}: Top Picks for ${dateLabel}`;
+      : `Daily Brief: ${dateLabel}`;
     let seo: PageSeoOptions | undefined;
     if (siteBaseUrl) {
       try {
@@ -2384,8 +2411,8 @@ export async function collectBriefFeedEntries(
       date,
       title: applyTemplate(
         seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").titleTemplate ??
-          `Daily Brief — ${date}`,
-        { date },
+          `Daily Brief: {dateLabel}`,
+        { date, dateLabel: formatSeoDateLabel(date) },
       ),
       summary,
       canonicalPath,

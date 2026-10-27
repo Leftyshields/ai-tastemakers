@@ -11,6 +11,7 @@ import {
   briefSocialTitle,
   extractBriefSection,
   normalizeCanonicalPath,
+  digestRepoItemListJsonLd,
   writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
 import {
@@ -112,6 +113,22 @@ describe("writeSitemapFromSiteDir", () => {
     expect(count).toBe(1);
     expect(xml).toContain(other);
     await fs.rm(tmp, { recursive: true, force: true });
+  });
+});
+
+describe("digestRepoItemListJsonLd", () => {
+  it("skips repo slugs that do not match owner/repo pattern", () => {
+    const list = digestRepoItemListJsonLd(
+      ["acme/demo", "bad slug", "../evil/repo", "ok-name/tool.v2"],
+      "Test list",
+    );
+    expect(list.itemListElement).toHaveLength(2);
+    expect((list.itemListElement as Array<{ url: string }>)[0]?.url).toBe(
+      "https://github.com/acme/demo",
+    );
+    expect((list.itemListElement as Array<{ url: string }>)[1]?.url).toBe(
+      "https://github.com/ok-name/tool.v2",
+    );
   });
 });
 

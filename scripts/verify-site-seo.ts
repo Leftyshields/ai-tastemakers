@@ -2,12 +2,8 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
-import {
-  EM_DASH,
-  SEO_DESCRIPTION_MAX,
-  SEO_TITLE_MAX,
-  validateSeoCopyFile,
-} from "./seo-copy.js";
+import { validateSeoCopyFile } from "./seo-copy.js";
+import { checkSeoText } from "./site-seo-text-gate.js";
 import { absoluteCanonicalUrl, normalizeCanonicalPath } from "./seo-helpers.js";
 import { isSiteSeoGateExemptHtmlFile } from "./site-seo-exempt-pages.js";
 import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
@@ -175,18 +171,6 @@ function validateJsonLdOnDocument(doc: Document, rel: string): { issues: string[
   return { issues, types };
 }
 
-function checkSeoText(text: string, rel: string, kind: "title" | "description"): string[] {
-  const issues: string[] = [];
-  if (text.includes(EM_DASH)) {
-    issues.push(`${rel}: ${kind} contains U+2014 em dash`);
-  }
-  const max = kind === "title" ? SEO_TITLE_MAX : SEO_DESCRIPTION_MAX;
-  if (text.length > max) {
-    issues.push(`${rel}: ${kind} length ${text.length} exceeds max ${max}`);
-  }
-  return issues;
-}
-
 function expectedCanonicalForRel(rel: string): string {
   return absoluteCanonicalUrl(SITE_BASE_URL, rel);
 }
@@ -242,11 +226,18 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
       messages.push(...checkSeoText(descContent, rel, "description"));
     }
 
-    const robots = doc.querySelector('meta[name="robots"]')?.getAttribute("content") ?? "";
-    const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href")?.trim() ?? "";
     const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute("content")?.trim() ?? "";
     const ogDesc =
       doc.querySelector('meta[property="og:description"]')?.getAttribute("content")?.trim() ?? "";
+    if (ogTitle) {
+      messages.push(...checkSeoText(ogTitle, rel, "title"));
+    }
+    if (ogDesc) {
+      messages.push(...checkSeoText(ogDesc, rel, "description"));
+    }
+
+    const robots = doc.querySelector('meta[name="robots"]')?.getAttribute("content") ?? "";
+    const canonical = doc.querySelector('link[rel="canonical"]')?.getAttribute("href")?.trim() ?? "";
     const ogUrl = doc.querySelector('meta[property="og:url"]')?.getAttribute("content")?.trim() ?? "";
 
     if (!seoExempt) {
@@ -384,6 +375,12 @@ function main(): void {
   }
 
   const html = validateHtmlPages();
+  const emDashMeta = html.messages.filter((m) => m.includes("U+2014"));
+  if (emDashMeta.length > 0) {
+    console.error(`verify: rendered meta em dash failed (${emDashMeta.length} issue(s))`);
+  } else {
+    console.log("verify: rendered meta em dash ok (title, og:title, og:description)");
+  }
   const jsonLdIssues = html.messages.filter(
     (m) => m.includes("ld+json") || m.includes("@type") || m.includes("@graph") || m.includes("JSON-LD"),
   );
