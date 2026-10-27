@@ -1,5 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Digest } from "../types.js";
+import { OUTBOUND_DEST_MANIFEST_SITE_REL } from "../analytics/outbound-email-manifest-guard.js";
 
 const sendMock = vi.fn();
 
@@ -48,6 +51,12 @@ const baseConfig = {
 beforeEach(() => {
   sendMock.mockReset();
   sendMock.mockResolvedValue({ data: { id: "msg_123" }, error: null });
+  const manifestPath = path.join("/tmp", OUTBOUND_DEST_MANIFEST_SITE_REL);
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+  fs.writeFileSync(
+    manifestPath,
+    `${JSON.stringify({ schema_version: 1, generated_at: "2026-01-01T00:00:00.000Z", dest_hashes: [] }, null, 2)}\n`,
+  );
 });
 
 describe("parseFromAddress", () => {

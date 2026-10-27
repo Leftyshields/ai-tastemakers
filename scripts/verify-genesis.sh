@@ -67,8 +67,16 @@ echo "verify: home index contrast light and dark (UX49)"
 "$TSX" scripts/verify-home-index-contrast.ts
 echo "verify: home index screenshots (UX49 artifacts)"
 "$TSX" scripts/verify-home-index-screenshots.ts
+echo "verify: archive index screenshots (390 and desktop)"
+"$TSX" scripts/verify-archive-index-screenshots.ts
+echo "verify: lab header mobile nav (390px scroll and fade)"
+"$TSX" scripts/verify-lab-header-mobile-nav.ts
+echo "verify: lab header mobile screenshots (390 scroll start/end)"
+"$TSX" scripts/capture-lab-header-390.ts
 echo "verify: site sitemap gate (Search Console verification HTML)"
 "$TSX" scripts/verify-site-sitemap-gate.ts
 echo "verify: site SEO (sitemap, feeds, h1, json-ld)"
 "$TSX" scripts/verify-site-seo.ts
+echo "verify: outbound link tracking (/go) on site and email fixtures"
+"$TSX" scripts/verify-outbound-links.ts
 echo "verify: ok"

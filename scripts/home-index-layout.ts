@@ -18,6 +18,7 @@ export interface HomeIndexPaths {
 export interface HomeWrapUpArchive {
   weeklyLatest?: string;
   weekHref: (weekId: string) => string;
+  weekRangeLabel?: string;
 }
 
 /** Agent hosts and tools matched in brief copy (longest phrases first). */
@@ -247,9 +248,12 @@ function labRowBody(edition: EditionId, doneCount: number): string {
   return `Tastemakers doesn't just report on AI tools. It tests them, with ${n} ${testWord} done so far.`;
 }
 
-function weeklyRowBody(edition: EditionId, weekId: string | undefined): string {
-  const range = weekId ? isoWeekDateRangeLabel(weekId) : null;
-  const label = range ?? "This week";
+function weeklyRowBody(
+  edition: EditionId,
+  weekId: string | undefined,
+  weekRangeLabel: string | undefined,
+): string {
+  const label = weekRangeLabel ?? "This week";
   if (edition === "skills") {
     return `${label}: the week's standout agent skills and one thing worth trying from each.`;
   }
@@ -294,6 +298,7 @@ function homeRowsHtml(
 ): string {
   const weekId = wrapUp?.weeklyLatest;
   const weekHref = weekId && wrapUp ? wrapUp.weekHref(weekId) : "#";
+  const weekRangeLabel = wrapUp?.weekRangeLabel;
   const cross = crossEditionRow(edition, paths);
   const rows: Array<{ emoji: string; label: string; body: string; action: string }> = [
     {
@@ -305,7 +310,7 @@ function homeRowsHtml(
     {
       emoji: "📅",
       label: "This week",
-      body: weeklyRowBody(edition, weekId),
+      body: weeklyRowBody(edition, weekId, weekRangeLabel),
       action: weekId ? rowLink(weekHref, "weekly", "Read the review", escapeHtml) : "",
     },
     {

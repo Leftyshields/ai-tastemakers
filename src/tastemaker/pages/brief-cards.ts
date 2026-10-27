@@ -13,6 +13,11 @@ import {
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { resolveLabBadgeHrefForDigestCard } from "../../../scripts/lab/lab-post-header.js";
+import {
+  buildPagesRepoGoUrl,
+  rewriteOutboundLinksInHtml,
+  type OutboundRewriteContext,
+} from "../analytics/rewrite-outbound-links.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -72,11 +77,42 @@ export function renderDigestRepoCard(
   rankingMode: RankingMode,
   escape: (t: string) => string = escapeHtml,
   badgeContext?: DigestRepoCardBadgeContext,
+  outbound?: OutboundRewriteContext,
 ): string {
-  const githubUrl = escape(repo.html_url);
+  const titleHrefRaw =
+    outbound?.siteBaseUrl
+      ? buildPagesRepoGoUrl(outbound.siteBaseUrl, {
+          repo: repo.full_name,
+          section,
+          position: repo.rank,
+          target: "title",
+          digestDate,
+        })
+      : repo.html_url;
+  const buttonHrefRaw =
+    outbound?.siteBaseUrl
+      ? buildPagesRepoGoUrl(outbound.siteBaseUrl, {
+          repo: repo.full_name,
+          section,
+          position: repo.rank,
+          target: "button",
+          digestDate,
+        })
+      : repo.html_url;
+  const titleHref = escape(titleHrefRaw);
+  const buttonHref = escape(buttonHrefRaw);
   const meta = escape(formatMeta(repo, rankingMode));
+  let briefInner = repo.brief ? renderSafeMarkdown(repo.brief) : "";
+  if (outbound && briefInner) {
+    briefInner = rewriteOutboundLinksInHtml(briefInner, {
+      ...outbound,
+      defaultPosition: repo.rank,
+      section,
+      digestDate,
+    });
+  }
   const briefHtml = repo.brief
-    ? `<div class="digest-repo-card__body brief-content prose prose-stone max-w-none dark:prose-invert prose-sm prose-a:text-blue-800 dark:prose-a:text-blue-400">${renderSafeMarkdown(repo.brief)}</div>`
+    ? `<div class="digest-repo-card__body brief-content prose prose-stone max-w-none dark:prose-invert prose-sm prose-a:text-blue-800 dark:prose-a:text-blue-400">${briefInner}</div>`
     : `<p class="digest-repo-card__body mb-0 text-stone-500">—</p>`;
   const ariaLabel = escape(`View ${repo.full_name} on GitHub`);
 
@@ -96,13 +132,13 @@ export function renderDigestRepoCard(
   }
 
   const actionsRow = labBadgeHtml
-    ? `<div class="digest-repo-card__actions flex flex-wrap items-center gap-2">${`<a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`}${labBadgeHtml}</div>`
-    : `<a href="${githubUrl}" class="digest-repo-card__cta inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`;
+    ? `<div class="digest-repo-card__actions flex flex-wrap items-center gap-2">${`<a href="${buttonHref}" class="digest-repo-card__cta inline-flex min-h-11 shrink-0 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`}${labBadgeHtml}</div>`
+    : `<a href="${buttonHref}" class="digest-repo-card__cta inline-flex min-h-11 items-center justify-center rounded-lg bg-blue-800 px-4 py-2.5 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500" target="_blank" rel="noopener" aria-label="${ariaLabel}">View on GitHub <span class="digest-repo-card__cta-icon ml-1.5" aria-hidden="true">↗</span></a>`;
 
   return `<article class="digest-repo-card group relative mb-8 cursor-pointer rounded-xl border border-stone-200 bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md dark:border-stone-700 dark:bg-stone-950/40 dark:hover:border-blue-600" data-repo="${escape(repo.full_name)}" data-section="${section}" data-position="${repo.rank}" data-digest-date="${escape(digestDate)}">
   <h2 class="digest-repo-card__heading mb-2 scroll-mt-20 font-sans text-lg font-semibold tracking-tight">
     <span class="mr-1 text-stone-500">${repo.rank}.</span>
-    <a href="${githubUrl}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>${newBadgeHtml(repo.is_new)}
+    <a href="${titleHref}" class="digest-repo-card__title-link text-blue-800 no-underline hover:underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:text-blue-400" target="_blank" rel="noopener">${escape(repo.full_name)}</a>${newBadgeHtml(repo.is_new)}
   </h2>
   <p class="digest-repo-card__meta mb-3 font-sans text-sm text-stone-500 dark:text-stone-400">${meta}</p>
   ${briefHtml}
@@ -120,9 +156,18 @@ export function renderDigestBriefArticle(
   escape: (t: string) => string = escapeHtml,
   badgeContext?: DigestRepoCardBadgeContext,
   experiments?: readonly LabExperimentEntry[],
+  outbound?: OutboundRewriteContext,
 ): string {
+  let headerInner = headerMarkdown ? renderSafeMarkdown(headerMarkdown) : "";
+  if (outbound && headerInner) {
+    headerInner = rewriteOutboundLinksInHtml(headerInner, {
+      ...outbound,
+      section,
+      digestDate,
+    });
+  }
   const headerHtml = headerMarkdown
-    ? `<div class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${renderSafeMarkdown(headerMarkdown)}</div>`
+    ? `<div class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400 prose-headings:font-sans">${headerInner}</div>`
     : "";
   const labBlurb =
     experiments && digestBriefHasLabBadges(digest.repos, experiments)
@@ -130,10 +175,22 @@ export function renderDigestBriefArticle(
       : "";
   const cards = digest.repos
     .map((repo) =>
-      renderDigestRepoCard(repo, section, digestDate, digest.ranking_mode, escape, badgeContext),
+      renderDigestRepoCard(
+        repo,
+        section,
+        digestDate,
+        digest.ranking_mode,
+        escape,
+        badgeContext,
+        outbound ? { ...outbound, section, digestDate } : undefined,
+      ),
     )
     .join("\n");
-  return `${headerHtml}\n${labBlurb}\n<div class="digest-repo-list mt-8">${cards}</div>`;
+  let article = `${headerHtml}\n${labBlurb}\n<div class="digest-repo-list mt-8">${cards}</div>`;
+  if (outbound) {
+    article = rewriteOutboundLinksInHtml(article, { ...outbound, section, digestDate });
+  }
+  return article;
 }
 
 /** Preserve legacy NEW span markup when splitting markdown headers. */

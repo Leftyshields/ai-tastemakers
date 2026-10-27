@@ -15,6 +15,13 @@ const RENDERED_INDEX_PAGES = [
   "site/monthly/index.html",
 ];
 
+const ARCHIVE_INDEX_PAGES = [
+  "site/briefings/index.html",
+  "site/skills/briefings/index.html",
+  "site/weekly/index.html",
+  "site/monthly/index.html",
+];
+
 function extractHomeMainText(html: string): string {
   const match = html.match(/<div class="home-index-main">([\s\S]*?)<\/div><script>/);
   return match?.[1] ?? "";
@@ -39,6 +46,19 @@ function main(): void {
     if (/[\u2014]/.test(visible) || /&mdash;/.test(visible)) {
       failed = true;
       console.error(`${rel}: em dash (U+2014 or &mdash;) in rendered index page`);
+    }
+  }
+
+  for (const rel of ARCHIVE_INDEX_PAGES) {
+    const abs = path.join(repoRoot, rel);
+    if (!fs.existsSync(abs)) {
+      console.error(`missing ${rel} (run SITE_LANDING_LAYOUT_V2=1 npm run build:pages first)`);
+      process.exit(1);
+    }
+    const visible = stripScriptsAndStyles(fs.readFileSync(abs, "utf8"));
+    if (/Week \d+/.test(visible)) {
+      failed = true;
+      console.error(`${rel}: week-number label (Week \\d+) in rendered archive index page`);
     }
   }
 

@@ -7,6 +7,10 @@ import {
   resolveAllowlistedLabBadgeDestPath,
   type RepoClickProperties,
 } from "../src/tastemaker/analytics/repo-click.js";
+import {
+  outboundDestClientHelpersScript,
+  resolveOutboundDestFromManifest,
+} from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
 import { feedAlternateLinksHtml, googleSiteVerificationMetaHtml } from "./seo-helpers.js";
 
@@ -18,10 +22,17 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function manifestHashMapJson(sortedHashes: string[]): string {
+  const map: Record<string, true> = {};
+  for (const h of sortedHashes) map[h] = true;
+  return JSON.stringify(map);
+}
+
 export function renderGoRedirectPage(
   allowlist: Record<string, string>,
   homePath = "/",
   siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
+  manifestDestHashes: string[] = [],
 ): string {
   const allowlistJson = JSON.stringify(allowlist);
   const posthog = posthogScriptHtml();
@@ -34,6 +45,8 @@ export function renderGoRedirectPage(
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
   const attributionParser = labBadgeAttributionClientParserSource();
+  const safeManifest = escapeScriptString(manifestHashMapJson(manifestDestHashes));
+  const destHelpers = outboundDestClientHelpersScript();
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -63,6 +76,7 @@ export function renderGoRedirectPage(
   <script>
 (function () {
   var ALLOWLIST = JSON.parse('${safeAllowlist}');
+  var MANIFEST_HASHES = JSON.parse('${safeManifest}');
   var HOME = '${safeHome}';
   var captured = false;
 
@@ -80,6 +94,8 @@ export function renderGoRedirectPage(
     window.location.replace(url);
   }
 
+  ${destHelpers}
+
   var params = new URLSearchParams(window.location.search);
   var eventName = params.get("event") || "";
   var parsed = {
@@ -92,7 +108,8 @@ export function renderGoRedirectPage(
     exp: params.get("exp"),
     status: params.get("status"),
     dest: params.get("dest"),
-    channel: params.get("channel")
+    channel: params.get("channel"),
+    surface: params.get("surface")
   };
 
   var repo = parsed.repo;
@@ -150,41 +167,50 @@ export function renderGoRedirectPage(
     return (postOk || indexOk) ? encodeURIComponent(raw) : null;
   }
 
+  var clickChannel = parsed.channel === "pages" ? "pages" : "email";
+  var clickSource = parsed.channel === "pages" ? "direct" : "email";
+
   var destination = resolveUrl() || (window.location.origin + HOME);
   if (eventName === "lab_badge_click" && labDest) {
     var safeLabDest = isAllowlistedLabDest(labDest);
     if (safeLabDest) destination = window.location.origin + decodeURIComponent(safeLabDest);
   }
+
   var continueLink = document.getElementById("continue-link");
   if (continueLink) continueLink.href = destination;
 
-  if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
-    var normalizedRepo = normalizeRepo(repo) || "";
-    captureOnce("lab_badge_click", {
-      experiment_id: parsed.exp,
-      exp_id: parsed.exp,
-      repo: normalizedRepo || repo || "",
-      source_repo: normalizedRepo,
-      status: parsed.status || "",
-      list: section,
-      rank: rank,
-      surface: "email",
-      channel: parsed.channel || "email"
-    });
-  } else {
+  function captureForQuery() {
+    if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
+      var normalizedRepo = normalizeRepo(repo) || "";
+      captureOnce("lab_badge_click", {
+        experiment_id: parsed.exp,
+        exp_id: parsed.exp,
+        repo: normalizedRepo || repo || "",
+        source_repo: normalizedRepo,
+        status: parsed.status || "",
+        list: section,
+        rank: rank,
+        surface: "email",
+        channel: parsed.channel || "email"
+      });
+      return;
+    }
+    if (eventName === "outbound_link_click") return;
     var githubTarget = resolveUrl();
     if (githubTarget && section && Number.isFinite(pos)) {
       captureOnce("repo_click", {
         repo: normalizeRepo(repo),
         section: section,
-        channel: "email",
+        channel: clickChannel,
         position: pos,
         target: target,
         digest_date: digestDate,
-        source: "email"
+        source: clickSource
       });
     }
   }
+
+  captureForQuery();
 
   var done = false;
   function go() {
@@ -193,7 +219,32 @@ export function renderGoRedirectPage(
     forward(destination);
   }
 
-  setTimeout(go, 300);
+  function finishOutbound(destUrl, surface) {
+    if (!isSafeExternalUrl(destUrl)) {
+      setTimeout(go, 300);
+      return;
+    }
+    destination = destUrl;
+    if (continueLink) continueLink.href = destination;
+    var host = "";
+    try { host = new URL(destUrl).hostname; } catch (e) {}
+    captureOnce("outbound_link_click", {
+      destination: destUrl,
+      host: host,
+      surface: surface || "",
+      channel: clickChannel
+    });
+    setTimeout(go, 300);
+  }
+
+  if (eventName === "outbound_link_click" && parsed.dest) {
+    resolveManifestOutbound(parsed.dest, MANIFEST_HASHES).then(function (allowed) {
+      if (allowed) finishOutbound(allowed, parsed.surface || "");
+      else setTimeout(go, 300);
+    });
+  } else {
+    setTimeout(go, 300);
+  }
 })();
   </script>
 </body>
@@ -205,10 +256,15 @@ export function resolveGoPageDestination(
   search: string,
   allowlist: Record<string, string>,
   homeUrl: string,
+  manifestHashes: ReadonlySet<string> = new Set(),
 ): string {
   const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
   const event = params.get("event") || "";
   const dest = params.get("dest");
+  if (event === "outbound_link_click" && dest) {
+    const resolved = resolveOutboundDestFromManifest(dest, manifestHashes);
+    return resolved ?? homeUrl;
+  }
   if (event === "lab_badge_click" && dest) {
     const allowed = resolveAllowlistedLabBadgeDestPath(dest);
     if (allowed) {
