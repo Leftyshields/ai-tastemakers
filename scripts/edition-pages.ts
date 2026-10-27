@@ -374,7 +374,7 @@ function editionNavPill(
     : "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
   const active = homeIndexNav
     ? "home-index-tab--active"
-    : "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
+    : "border-blue-800 bg-blue-50 font-semibold text-blue-900 edition-nav-tab--active";
   const idle = homeIndexNav
     ? "home-index-tab--idle"
     : "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
