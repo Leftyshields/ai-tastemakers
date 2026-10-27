@@ -164,7 +164,7 @@ export function briefSocialDescription(
   const hook =
     whyNow ||
     whatItDoes ||
-    "Curated GitHub repos ranked by 7-day momentum — builder-focused summaries.";
+    "A free daily digest of trending open source AI projects on GitHub, ranked by recent star growth, with a short brief for builders on each one.";
   return hook.slice(0, 200);
 }
 
