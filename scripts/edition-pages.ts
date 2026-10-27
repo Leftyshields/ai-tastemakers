@@ -114,7 +114,7 @@ import {
   HOME_EDITION_TAGLINES,
   type HomeWrapUpArchive,
 } from "./home-index-layout.js";
-import { loadWeekRangeLabels } from "./week-review-date-range.js";
+import { formatWeekReviewDateRange, loadWeekRangeLabels } from "./week-review-date-range.js";
 import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 
 const ARCHIVE_SECTION_HEADING_CLASS = "archive-sh";
@@ -1854,7 +1854,10 @@ export async function buildMonthlySite(
     await fs.writeFile(
       path.join(outDir, `${monthId}.html`),
       pageShell(
-        applyTemplate(monthlyCopy.titleTemplate ?? `Monthly Rollup — ${monthId}`, { monthId }),
+        applyTemplate(
+          monthlyCopy.titleTemplate ?? `Monthly Rollup: {monthId} | Tastemakers`,
+          { monthId },
+        ),
         body,
         paths,
         brand,
@@ -1983,10 +1986,36 @@ export async function buildWeeklySite(
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
     const weeklyCopy = seoPage("weekly_review");
+    const site = weeklyCopy.siteName ?? "AI Tastemakers";
+    let rangeLabel = weekId;
+    let startLabel = weekId;
+    let endLabel = weekId;
+    try {
+      const weekJsonRaw = await fs.readFile(
+        path.join(repoRoot, "briefings", "weekly", weekId, "weekly_review.json"),
+        "utf8",
+      );
+      const weekJson = JSON.parse(weekJsonRaw) as { week_start?: string; week_end?: string };
+      if (weekJson.week_start && weekJson.week_end) {
+        rangeLabel = formatWeekReviewDateRange(weekJson.week_start, weekJson.week_end);
+        startLabel = formatSeoDateShort(weekJson.week_start);
+        endLabel = formatSeoDateShort(weekJson.week_end);
+      }
+    } catch {
+      const range = parseWeeklyReviewDateRange(markdown);
+      if (range) {
+        rangeLabel = formatWeekReviewDateRange(range.start, range.end);
+        startLabel = formatSeoDateShort(range.start);
+        endLabel = formatSeoDateShort(range.end);
+      }
+    }
+    const weeklyTitle = weeklyCopy.titleTemplate
+      ? buildSeoTitleFromTemplate(weeklyCopy.titleTemplate, { Site: site, startLabel, endLabel })
+      : `Weekly Review: ${rangeLabel}`;
     await fs.writeFile(
       path.join(outDir, `${weekId}.html`),
       pageShell(
-        applyTemplate(weeklyCopy.titleTemplate ?? `Weekly Review — ${weekId}`, { weekId }),
+        weeklyTitle,
         body,
         paths,
         brand,
@@ -2139,7 +2168,7 @@ export async function buildEditionSite(
       : undefined;
     let pageTitle = briefCopy.titleTemplate
       ? buildSeoTitleFromTemplate(briefCopy.titleTemplate, { Site: siteName, dateLabel })
-      : `${siteName}: Top Picks for ${dateLabel}`;
+      : `Daily Brief: ${dateLabel}`;
     let seo: PageSeoOptions | undefined;
     if (siteBaseUrl) {
       try {
@@ -2351,8 +2380,8 @@ export async function collectBriefFeedEntries(
       date,
       title: applyTemplate(
         seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").titleTemplate ??
-          `Daily Brief — ${date}`,
-        { date },
+          `Daily Brief: {dateLabel}`,
+        { date, dateLabel: formatSeoDateLabel(date) },
       ),
       summary,
       canonicalPath,

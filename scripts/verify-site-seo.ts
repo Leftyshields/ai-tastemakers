@@ -173,6 +173,14 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
     if (descContent?.trim()) {
       messages.push(...checkSeoText(descContent.trim(), rel, "description"));
     }
+    const ogTitle = doc.querySelector('meta[property="og:title"]')?.getAttribute("content");
+    if (ogTitle?.trim()) {
+      messages.push(...checkSeoText(ogTitle.trim(), rel, "title"));
+    }
+    const ogDesc = doc.querySelector('meta[property="og:description"]')?.getAttribute("content");
+    if (ogDesc?.trim()) {
+      messages.push(...checkSeoText(ogDesc.trim(), rel, "description"));
+    }
     messages.push(...validateJsonLdOnPage(html, rel));
   }
   return { ok: messages.length === 0, messages };
@@ -231,6 +239,12 @@ function main(): void {
   }
 
   const html = validateHtmlPages();
+  const emDashMeta = html.messages.filter((m) => m.includes("U+2014"));
+  if (emDashMeta.length > 0) {
+    console.error(`verify: rendered meta em dash failed (${emDashMeta.length} issue(s))`);
+  } else {
+    console.log("verify: rendered meta em dash ok (title, og:title, og:description)");
+  }
   const jsonLdIssues = html.messages.filter(
     (m) => m.includes("ld+json") || m.includes("@type") || m.includes("@graph"),
   );
