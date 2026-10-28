@@ -284,6 +284,38 @@
     padding-right: var(--lab-nav-fade-width);
   }
 
+  .lab-nav-scroll-wrap::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0;
+    bottom: 0;
+    width: var(--lab-nav-fade-width);
+    min-width: 24px;
+    pointer-events: none;
+    z-index: 2;
+    opacity: 0;
+    background: linear-gradient(
+      to left,
+      rgb(255 252 248 / 0) 0%,
+      rgb(255 252 248 / 0.85) 35%,
+      rgb(255 252 248) 100%
+    );
+  }
+
+  :is(.dark, .dark *) .lab-nav-scroll-wrap::before {
+    background: linear-gradient(
+      to left,
+      rgb(28 25 23 / 0) 0%,
+      rgb(28 25 23 / 0.88) 35%,
+      rgb(28 25 23) 100%
+    );
+  }
+
+  .lab-nav-scroll-wrap:has(.lab-nav--combined[data-scroll-start="false"])::before {
+    opacity: 1;
+  }
+
   .lab-nav-scroll-wrap::after {
     content: "";
     position: absolute;
@@ -317,7 +349,7 @@
 
   .lab-nav--combined {
     @apply relative flex w-full min-w-0 max-w-full flex-nowrap items-center gap-1.5 overflow-x-auto pb-1;
-    scroll-snap-type: x mandatory;
+    scroll-snap-type: x proximity;
     scroll-padding-inline-end: var(--lab-nav-fade-width);
     margin-right: calc(-1 * var(--lab-nav-fade-width));
     padding-right: calc(var(--lab-nav-fade-width) + 0.75rem);
