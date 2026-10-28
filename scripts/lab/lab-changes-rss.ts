@@ -1,4 +1,6 @@
 import path from "node:path";
+import { JSDOM } from "jsdom";
+import { EM_DASH } from "../seo-copy.js";
 import { digestDateCompact } from "../../src/tastemaker/analytics/repo-click.js";
 import type { OutboundDestRegistry } from "../../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { absoluteCanonicalUrl } from "../seo-helpers.js";
@@ -17,19 +19,19 @@ export const LAB_CHANGES_RSS_REL = "feeds/lab-changes.xml";
 export const LAB_CHANGES_RSS_COPY = {
   channelTitle: "Tastemakers Lab changes",
   channelDescription:
-    "Lab verdict updates for AI Tastemakers, a daily digest of fast rising open source AI projects on GitHub with short builder briefs and public experiments.",
+    "Verdict updates from the Tastemakers Lab, where AI Tastemakers tests changes to itself in public and records whether each one worked. AI Tastemakers is a free daily digest of fast-rising open source AI projects on GitHub, with a short brief for builders on each one.",
   itemTitle: {
     verdict_set: "Lab verdict recorded for {label}",
-    verdict_flip: "Lab verdict updated for {label}",
+    verdict_flip: "Lab verdict changed for {label}",
     stale_label_applied: "Lab verdict marked stale for {label}",
   },
   itemDescription: {
     verdict_set:
-      "AI Tastemakers Lab recorded a {verdictLabel} verdict for the experiment {label}. Open the experiment page for full notes.",
+      "The Tastemakers Lab recorded a {verdictLabel} verdict for the experiment {label}. Open the experiment page for the full results.",
     verdict_flip:
-      "AI Tastemakers Lab changed the verdict for {label} from {fromLabel} to {toLabel}. Open the experiment page for full notes.",
+      "The Tastemakers Lab changed its verdict for the experiment {label} from {fromLabel} to {toLabel}. Open the experiment page to see what changed.",
     stale_label_applied:
-      "AI Tastemakers Lab marked the {verdictLabel} verdict for {label} as stale after ninety days. Open the experiment page for context.",
+      "The {verdictLabel} verdict for the experiment {label} is now marked stale because it is 90 days old and may no longer hold. Open the experiment page for context.",
   },
 } as const;
 
@@ -240,4 +242,41 @@ export async function writeLabChangesRssFeed(
   await fs.mkdir(path.dirname(outPath), { recursive: true });
   await fs.writeFile(outPath, xml, "utf8");
   return { itemCount: items.length, relPath: LAB_CHANGES_RSS_REL };
+}
+
+/** All human-readable strings in a built Lab changes RSS document (em dash gate). */
+export function labChangesRssBuiltFeedTextFields(xml: string): Array<{ field: string; text: string }> {
+  const dom = new JSDOM(xml, { contentType: "text/xml" });
+  const doc = dom.window.document;
+  const out: Array<{ field: string; text: string }> = [];
+  const channel = doc.querySelector("channel");
+  if (channel) {
+    for (const tag of ["title", "link", "description", "language", "lastBuildDate", "docs", "generator"]) {
+      const text =
+        Array.from(channel.children).find((el) => el.tagName.toLowerCase() === tag)?.textContent?.trim() ??
+        "";
+      if (text) out.push({ field: `channel>${tag}`, text });
+    }
+  }
+  doc.querySelectorAll("item").forEach((item, index) => {
+    for (const tag of ["title", "link", "description", "guid", "pubDate"]) {
+      const text = item.querySelector(tag)?.textContent?.trim() ?? "";
+      if (text) out.push({ field: `item[${index}]>${tag}`, text });
+    }
+  });
+  return out;
+}
+
+export function validateLabChangesRssFeedEmDash(relPath: string, xml: string): string[] {
+  const messages: string[] = [];
+  if (!xml.trim()) {
+    messages.push(`missing ${relPath} for em dash gate`);
+    return messages;
+  }
+  for (const { field, text } of labChangesRssBuiltFeedTextFields(xml)) {
+    if (text.includes(EM_DASH)) {
+      messages.push(`${relPath}: ${field} contains U+2014 em dash`);
+    }
+  }
+  return messages;
 }

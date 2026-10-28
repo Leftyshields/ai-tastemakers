@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { JSDOM } from "jsdom";
+import { validateLabChangesRssFeedEmDash } from "./lab/lab-changes-rss.js";
 import { validateSeoCopyFile } from "./seo-copy.js";
 import { checkSeoText } from "./site-seo-text-gate.js";
 import { absoluteCanonicalUrl, normalizeCanonicalPath } from "./seo-helpers.js";
@@ -372,6 +373,19 @@ function main(): void {
   if (feedSeoIssues.length > 0) {
     failed = true;
     for (const m of feedSeoIssues) console.error(`  ${m}`);
+  }
+
+  const labRssPath = path.join(siteDir, "feeds/lab-changes.xml");
+  const labRssXml = fs.existsSync(labRssPath) ? fs.readFileSync(labRssPath, "utf8") : "";
+  const labRssEmDash = labRssXml
+    ? validateLabChangesRssFeedEmDash("feeds/lab-changes.xml", labRssXml)
+    : [];
+  if (labRssEmDash.length > 0) {
+    failed = true;
+    console.error("verify: feeds/lab-changes.xml em dash failed:");
+    for (const m of labRssEmDash) console.error(`  ${m}`);
+  } else if (fs.existsSync(path.join(siteDir, "feeds/lab-changes.xml"))) {
+    console.log("verify: feeds/lab-changes.xml em dash ok (channel and item fields)");
   }
 
   const html = validateHtmlPages();

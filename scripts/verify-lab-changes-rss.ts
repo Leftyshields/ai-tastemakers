@@ -7,11 +7,14 @@ import {
   buildLabChangesRssXml,
   LAB_CHANGES_RSS_COPY,
   LAB_CHANGES_RSS_REL,
+  validateLabChangesRssFeedEmDash,
 } from "./lab/lab-changes-rss.js";
 import {
   countQualifyingVerdictLogEvents,
   readVerdictLogEvents,
 } from "./lab/lab-verdict-log.js";
+import { pathToFileURL } from "node:url";
+import { EM_DASH } from "./seo-copy.js";
 import { checkSeoText } from "./site-seo-text-gate.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
@@ -71,17 +74,21 @@ function validateRssXml(relPath: string): { ok: boolean; itemCount: number; mess
   return { ok: messages.length === 0, itemCount: items.length, messages };
 }
 
+function emDashIssues(text: string, rel: string, field: string): string[] {
+  if (!text.includes(EM_DASH)) return [];
+  return [`${rel}: ${field} contains U+2014 em dash`];
+}
+
 function validateCopy(): string[] {
   const messages: string[] = [];
   messages.push(...checkSeoText(LAB_CHANGES_RSS_COPY.channelTitle, "lab-changes-rss", "title"));
-  messages.push(
-    ...checkSeoText(LAB_CHANGES_RSS_COPY.channelDescription, "lab-changes-rss", "description"),
-  );
+  messages.push(...emDashIssues(LAB_CHANGES_RSS_COPY.channelDescription, "lab-changes-rss", "channelDescription"));
   for (const template of Object.values(LAB_CHANGES_RSS_COPY.itemTitle)) {
     messages.push(...checkSeoText(template, "lab-changes-rss", "title"));
+    messages.push(...emDashIssues(template, "lab-changes-rss", "itemTitle"));
   }
   for (const template of Object.values(LAB_CHANGES_RSS_COPY.itemDescription)) {
-    messages.push(...checkSeoText(template, "lab-changes-rss", "description"));
+    messages.push(...emDashIssues(template, "lab-changes-rss", "itemDescription"));
   }
   return messages;
 }
@@ -103,6 +110,13 @@ function validateLabPagesHaveRssAlternate(): string[] {
     const href = link.getAttribute("href")?.trim() ?? "";
     if (href !== expectedHref) {
       messages.push(`${rel}: RSS alternate href ${href} (expected ${expectedHref})`);
+    }
+    if (!/^https?:\/\//i.test(href)) {
+      messages.push(`${rel}: RSS alternate href must be absolute URL`);
+    }
+    const title = link.getAttribute("title")?.trim() ?? "";
+    if (title !== LAB_CHANGES_RSS_COPY.channelTitle) {
+      messages.push(`${rel}: RSS alternate title "${title}" (expected "${LAB_CHANGES_RSS_COPY.channelTitle}")`);
     }
   }
   return messages;
@@ -162,8 +176,22 @@ function main(): void {
     console.log(`verify: Lab HTML RSS alternate links ok (${listLabHtmlFiles().length} page(s))`);
   }
 
+  const builtFeedPath = path.join(siteDir, LAB_CHANGES_RSS_REL);
+  const builtFeedXml = fs.existsSync(builtFeedPath) ? fs.readFileSync(builtFeedPath, "utf8") : "";
+  const emDashFeedIssues = validateLabChangesRssFeedEmDash(LAB_CHANGES_RSS_REL, builtFeedXml);
+  if (emDashFeedIssues.length > 0) {
+    failed = true;
+    console.error("verify: lab changes RSS feed em dash failed:");
+    for (const m of emDashFeedIssues) console.error(`  ${m}`);
+  } else {
+    console.log("verify: lab changes RSS feed em dash ok (all channel and item fields)");
+  }
+
   if (failed) process.exit(1);
   console.log("verify: lab changes RSS ok");
 }
 
-main();
+const isMain =
+  process.argv[1] &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+if (isMain) main();
