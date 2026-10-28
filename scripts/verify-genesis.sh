@@ -75,6 +75,8 @@ echo "verify: lab header mobile screenshots (390 scroll start/end)"
 "$TSX" scripts/capture-lab-header-390.ts
 echo "verify: site sitemap gate (Search Console verification HTML)"
 "$TSX" scripts/verify-site-sitemap-gate.ts
+echo "verify: lab changes RSS (verdict log, RSS 2.0, Lab alternates)"
+"$TSX" scripts/verify-lab-changes-rss.ts
 echo "verify: site SEO (sitemap, feeds, h1, json-ld)"
 "$TSX" scripts/verify-site-seo.ts
 echo "verify: outbound link tracking (/go) on site and email fixtures"

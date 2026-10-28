@@ -454,6 +454,9 @@ async function main(): Promise<void> {
   const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
   const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl, destRegistry);
 
+  const { writeLabChangesRssFeed } = await import("./lab/lab-changes-rss.js");
+  const labFeed = await writeLabChangesRssFeed(ROOT, SITE_DIR, siteBaseUrl, destRegistry);
+
   await registerEmailOutboundDestsForManifest(destRegistry, ROOT, siteBaseUrl, allowlist);
   await destRegistry.verifyHttpUpgrades();
 
@@ -512,7 +515,7 @@ async function main(): Promise<void> {
   const posthogNote =
     posthogPages > 0 ? `; PostHog on ${posthogPages} HTML page(s)` : "";
   console.log(
-    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/; sitemap ${sitemapUrls} URL(s)${posthogNote}`,
+    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/; lab RSS ${labFeed.itemCount} item(s); sitemap ${sitemapUrls} URL(s)${posthogNote}`,
   );
 }
 
