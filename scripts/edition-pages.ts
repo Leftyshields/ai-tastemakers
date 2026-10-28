@@ -52,6 +52,7 @@ import {
   buildSeoHeadHtml,
   defaultOgImageUrl,
   feedAlternateLinksHtml,
+  labFeedAlternateLinkHtml,
   googleSiteVerificationMetaHtml,
   digestRepoItemListJsonLd,
   itemListJsonLd,
@@ -931,12 +932,14 @@ export function pageShell(
   const safeTitle = escapeHtml(title);
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
   const siteBase = options?.siteBaseUrl ?? options?.seo?.siteBaseUrl;
-  const feedAlternates = siteBase ? feedAlternateLinksHtml(siteBase, escapeHtml) : "";
+  const labLayout = options?.labLayout === true;
+  const feedAlternates = siteBase
+    ? `${feedAlternateLinksHtml(siteBase, escapeHtml)}${labLayout ? `\n  ${labFeedAlternateLinkHtml(siteBase, escapeHtml)}` : ""}`
+    : "";
   const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const refreshMeta = options?.metaRefresh
     ? `<meta http-equiv="refresh" content="0;url=${escapeHtml(options.metaRefresh)}">`
     : "";
-  const labLayout = options?.labLayout === true;
   const homeIndexEdition = options?.homeIndexEdition;
   const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout, {
     desktopOnlyOnLab: labLayout,

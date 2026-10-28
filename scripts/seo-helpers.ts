@@ -38,15 +38,22 @@ export function googleSiteVerificationMetaHtml(escapeHtml: (t: string) => string
 export function feedAlternateLinksHtml(siteBaseUrl: string, escapeHtml: (t: string) => string): string {
   const base = normalizeBaseUrl(siteBaseUrl);
   const links = [
-    { href: `${base}/feeds/ai.xml`, title: "AI Tastemakers daily briefs" },
-    { href: `${base}/feeds/skills.xml`, title: "Skill Tastemakers daily briefs" },
+    { href: `${base}/feeds/ai.xml`, title: "AI Tastemakers daily briefs", type: "application/atom+xml" },
+    { href: `${base}/feeds/skills.xml`, title: "Skill Tastemakers daily briefs", type: "application/atom+xml" },
   ];
   return links
     .map(
       (link) =>
-        `<link rel="alternate" type="application/atom+xml" title="${escapeHtml(link.title)}" href="${escapeHtml(link.href)}">`,
+        `<link rel="alternate" type="${escapeHtml(link.type)}" title="${escapeHtml(link.title)}" href="${escapeHtml(link.href)}">`,
     )
     .join("\n  ");
+}
+
+export function labFeedAlternateLinkHtml(siteBaseUrl: string, escapeHtml: (t: string) => string): string {
+  const base = normalizeBaseUrl(siteBaseUrl);
+  const href = `${base}/feeds/lab-changes.xml`;
+  const title = "Tastemakers Lab changes";
+  return `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(title)}" href="${escapeHtml(href)}">`;
 }
 
 export function mergeJsonLdGraph(nodes: Record<string, unknown>[]): Record<string, unknown> {
