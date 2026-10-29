@@ -316,7 +316,7 @@
   }
 
   .lab-nav--combined {
-    @apply relative flex w-full min-w-0 max-w-full flex-nowrap items-center gap-2 overflow-x-auto pb-1;
+    @apply relative flex w-full min-w-0 max-w-full flex-nowrap items-center gap-1.5 overflow-x-auto pb-1;
     scroll-snap-type: x mandatory;
     scroll-padding-inline-end: var(--lab-nav-fade-width);
     margin-right: calc(-1 * var(--lab-nav-fade-width));
