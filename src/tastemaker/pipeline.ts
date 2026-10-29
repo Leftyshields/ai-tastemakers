@@ -19,6 +19,7 @@ import {
 import { appendRubricLog, scoreDigestRank1 } from "./quality/log.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
+import { refreshOutboundEmailDestManifest } from "./analytics/write-outbound-email-manifest.js";
 import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
 import { isSundayDateLabel } from "./weekly/week.js";
 import { resolveDigestRecipients } from "./subscribers/load.js";
@@ -396,18 +397,14 @@ export async function runPipeline(
         "Sunday: skipping daily top-10 email; weekly wrap-up sends the week-in-review instead.",
       );
     } else {
+      await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl, {
+        pendingDigest: { digest, dateLabel, editionId: config.editionId },
+      });
       const sendEmail = deps.sendEmail ?? sendDigestEmail;
       const recipients = await resolveDigestRecipients(config);
       console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
-      try {
-        const sent = await sendEmail(config, digest, dateLabel, recipients);
-        console.error(`Email sent (id: ${sent.id})`);
-      } catch (err) {
-        console.warn(
-          "Warning: digest email failed; briefing was still written:",
-          err instanceof Error ? err.message : err,
-        );
-      }
+      const sent = await sendEmail(config, digest, dateLabel, recipients);
+      console.error(`Email sent (id: ${sent.id})`);
     }
   }
 

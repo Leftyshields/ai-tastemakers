@@ -130,7 +130,7 @@ describe("runPipeline integration", () => {
     expect(snapshots).toContain("acme/one");
   });
 
-  it("still writes briefing when digest email fails", async () => {
+  it("fails after briefing is written when digest email fails", async () => {
     config.resendApiKey = "re_test";
     config.digestEmailFrom = "Digest <digest@epiphoric.com>";
     await fs.mkdir(path.join(tmpDir, "data"), { recursive: true });
@@ -139,25 +139,29 @@ describe("runPipeline integration", () => {
       JSON.stringify(["you@epiphoric.com"]),
     );
 
-    const result = await runPipeline(config, {
-      now: new Date("2026-06-06T14:00:00.000Z"),
-      search: vi.fn().mockResolvedValue({
-        candidates: mockCandidates,
-        succeededTopics: config.topics,
-        failedTopics: [],
-      }),
-      enrich: vi.fn(async (_c, candidates) => candidates),
-      narrate: vi.fn().mockResolvedValue(
-        narrationMap({
-          "acme/one": structuredBrief,
-          "acme/two": structuredBrief,
-        }),
-      ),
-      sendEmail: vi.fn().mockRejectedValue(new Error("Resend API error: invalid bcc")),
-    });
+    const briefingDir = path.join(config.briefingsDir, "2026-06-06");
 
-    await expect(fs.access(result.markdownPath)).resolves.toBeUndefined();
-    await expect(fs.access(result.jsonPath)).resolves.toBeUndefined();
+    await expect(
+      runPipeline(config, {
+        now: new Date("2026-06-06T14:00:00.000Z"),
+        search: vi.fn().mockResolvedValue({
+          candidates: mockCandidates,
+          succeededTopics: config.topics,
+          failedTopics: [],
+        }),
+        enrich: vi.fn(async (_c, candidates) => candidates),
+        narrate: vi.fn().mockResolvedValue(
+          narrationMap({
+            "acme/one": structuredBrief,
+            "acme/two": structuredBrief,
+          }),
+        ),
+        sendEmail: vi.fn().mockRejectedValue(new Error("Resend API error: invalid bcc")),
+      }),
+    ).rejects.toThrow("Resend API error: invalid bcc");
+
+    await expect(fs.access(path.join(briefingDir, "digest.json"))).resolves.toBeUndefined();
+    await expect(fs.access(path.join(briefingDir, "daily_brief.md"))).resolves.toBeUndefined();
   });
 
   it("keeps discovery star counts in digest when enrich returns different values", async () => {

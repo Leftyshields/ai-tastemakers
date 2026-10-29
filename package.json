@@ -12,6 +12,7 @@
     "monthly": "tsx src/tastemaker/monthly-cli.ts",
     "build:digest": "tsc -p tsconfig.json",
     "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify && tsx scripts/stamp-css-cache-bust.ts",
+    "build:outbound-email-manifest": "tsx scripts/build-outbound-email-manifest.ts",
     "inventory:tools": "tsx src/tastemaker/inventory-cli.ts",
     "experiment": "tsx src/tastemaker/experiments-cli.ts",
     "experiment:reminders": "tsx src/tastemaker/experiment-reminders-cli.ts",

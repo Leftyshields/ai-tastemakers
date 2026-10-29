@@ -86,7 +86,9 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-        run: npm run digest:resend-email
+        run: |
+          npm run build:outbound-email-manifest
+          npm run digest:resend-email
 
       - name: Run digest (OSS + Skills)
         if: steps.gate.outputs.skip_daily != 'true'
@@ -110,6 +112,7 @@ jobs:
           DIGEST_QUALITY_RUBRIC: "1"
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
+          npm run build:outbound-email-manifest
           # EXP-20260913-humanizer-polish-skills — complete (keep); humanizer polish on both editions
           export DIGEST_HUMANIZER_POLISH=1
           # Kept soft dedup (EXP-20260715) and Ponytail narration (EXP-20260802) apply to both editions.
