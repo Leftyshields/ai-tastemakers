@@ -2,15 +2,23 @@ name: Daily Digest
 
 on:
   schedule:
-    # Three morning slots (America/Los_Angeles). GitHub cron is best-effort; backups help when
-    # the primary is dropped. cancel-in-progress cancels redundant skip runs quickly (~30s).
-    # Avoid adding a fourth slot here — that reintroduces runner pile-ups (see e2ecb98).
-    - cron: "17 6 * * *"
-      timezone: "America/Los_Angeles"
-    - cron: "30 7 * * *"
-      timezone: "America/Los_Angeles"
-    - cron: "0 8 * * *"
-      timezone: "America/Los_Angeles"
+    # GitHub scheduled workflows run on UTC (no timezone field). Pick off-minute times so runs
+    # are less likely to queue behind top-of-hour traffic; spread backups across the morning.
+    # skip_daily idempotency ensures only the first successful run publishes; cancel-in-progress
+    # drops redundant skip-only runs quickly (~30s).
+    #
+    # DST: Pacific is UTC-7 (PDT) until Nov 1, then UTC-8 (PST). These UTC fires stay inside
+    # 7:00–10:00 AM local in *both* offsets (safe window = 15:00–16:59 UTC):
+    #   PDT → 8:07–9:53 AM   |   PST → 7:07–8:53 AM
+    # Target landing ~8–9 AM Pacific once GitHub actually starts the job.
+    - cron: "7 15 * * *"
+    - cron: "23 15 * * *"
+    - cron: "41 15 * * *"
+    - cron: "53 15 * * *"
+    - cron: "7 16 * * *"
+    - cron: "23 16 * * *"
+    - cron: "41 16 * * *"
+    - cron: "53 16 * * *"
   workflow_dispatch:
     inputs:
       resend_email:
