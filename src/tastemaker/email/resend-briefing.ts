@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import type { AppConfig, WeeklyReview } from "../types.js";
 import { readDigestJson } from "../writers/json.js";
 import { resolveDigestRecipients } from "../subscribers/load.js";
+import { refreshOutboundEmailDestManifest } from "../analytics/write-outbound-email-manifest.js";
 import { sendDigestEmail, sendWeeklyDigestEmail, shouldSendDigestEmail } from "./resend.js";
 import { coerceWeeklyEmail, coerceWeeklyNarrative } from "../narrate/weekly.js";
 import { isoWeekIdFromDateLabel, isSundayDateLabel } from "../weekly/week.js";
@@ -48,6 +49,9 @@ export async function resendDigestEmailForDate(
 
   const digestPath = path.join(config.briefingsDir, dateLabel, "digest.json");
   const digest = await readDigestJson(digestPath);
+  await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl, {
+    pendingDigest: { digest, dateLabel, editionId: "oss" },
+  });
   const sent = await sendDigestEmail(config, digest, dateLabel, recipients);
   return { id: sent.id, recipientCount: recipients.length };
 }
