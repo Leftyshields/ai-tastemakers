@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-10-29T19:06:55.899Z",
+  "generated_at": "2026-10-29T23:27:39.128Z",
   "project_id": "489599",
   "posthog_host": "https://us.posthog.com",
   "skipped": false,
@@ -121,9 +121,14 @@
     },
     "EXP-20260913-caveman-compress-skills": {
       "metric_posthog": "event:repo_click?section=skills",
-      "metric_current": null,
-      "metric_daily": [],
-      "metric_window_sum": null,
+      "metric_current": 1,
+      "metric_daily": [
+        {
+          "date": "2026-10-29",
+          "value": 1
+        }
+      ],
+      "metric_window_sum": 1,
       "metric_fetch_error": null
     }
   }
