@@ -442,9 +442,11 @@ function labNavPill(
   isActive: boolean,
   escapeHtml: (t: string) => string,
   trackAttr = "",
+  compact = false,
 ): string {
+  const px = compact ? "px-2.5" : "px-3.5";
   const base =
-    "lab-nav-pill inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline";
+    `lab-nav-pill inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border ${px} py-1 font-sans text-sm no-underline`;
   const active = "lab-nav-pill--active font-semibold";
   const idle =
     "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
@@ -455,6 +457,7 @@ function labNavPillsHtml(
   active: LabNavActive,
   escapeHtml: (t: string) => string,
   depth: 0 | 1 | 2,
+  compact = false,
 ): string {
   const prefix = depth === 0 ? "" : "../";
   const labHomeHref = depth === 0 ? "./" : "../";
@@ -462,7 +465,7 @@ function labNavPillsHtml(
   const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
   const pill = (href: string, label: string, isActive: boolean) =>
-    labNavPill(href, label, isActive, escapeHtml, ' data-lab-section="nav"');
+    labNavPill(href, label, isActive, escapeHtml, ' data-lab-section="nav"', compact);
 
   return [
     pill(labHomeHref, "Lab home", active === "home"),
@@ -491,18 +494,20 @@ export function labMobileCombinedNavHtml(
   depth: 0 | 1 | 2 = 0,
 ): string {
   const track = ' data-lab-section="nav"';
+  const compactPill = (href: string, label: string, isActive: boolean) =>
+    labNavPill(href, label, isActive, escapeHtml, track, true);
   return `<div class="lab-nav-scroll-wrap mt-4 min-[640px]:hidden">
     <nav aria-label="Lab and editions" class="lab-nav lab-nav--combined">
-      ${labNavPillsHtml(active, escapeHtml, depth)}
+      ${labNavPillsHtml(active, escapeHtml, depth, true)}
       <span class="lab-nav__divider shrink-0" aria-hidden="true"></span>
-      ${labNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, track)}
-      ${labNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, track)}
+      ${compactPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss")}
+      ${compactPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills")}
     </nav>
   </div>`;
 }
 
 export function labNavScrollScript(): string {
-  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;function sync(){var atEnd=n.scrollWidth-n.scrollLeft-n.clientWidth<4;n.setAttribute("data-scroll-end",atEnd?"true":"false");}sync();n.addEventListener("scroll",sync,{passive:true});window.addEventListener("resize",sync);var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});sync();}catch(e){}})();</script>`;
+  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;function sync(){var atEnd=n.scrollWidth-n.scrollLeft-n.clientWidth<4;n.setAttribute("data-scroll-end",atEnd?"true":"false");}sync();n.addEventListener("scroll",sync,{passive:true});window.addEventListener("resize",sync);var a=n.querySelector('[aria-current="page"]');if(a){var inline=n.scrollWidth>n.clientWidth+2?"start":"center";a.scrollIntoView({inline:inline,block:"nearest"});}sync();}catch(e){}})();</script>`;
 }
 
 export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
