@@ -65,6 +65,7 @@ describe("resendDigestEmailForDate", () => {
       sampleDigest,
       "2026-07-01",
       ["a@example.com", "b@example.com"],
+      { manualRunId: undefined },
     );
   });
 
