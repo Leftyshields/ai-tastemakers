@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import fs from "node:fs/promises";
 import path from "node:path";
 import os from "node:os";
@@ -28,8 +28,11 @@ const sampleDigest = {
 
 describe("resendDigestEmailForDate", () => {
   let tmpDir: string;
+  let savedGithubRunId: string | undefined;
 
   beforeEach(async () => {
+    savedGithubRunId = process.env.GITHUB_RUN_ID;
+    delete process.env.GITHUB_RUN_ID;
     vi.mocked(shouldSendDigestEmail).mockReset();
     vi.mocked(sendDigestEmail).mockReset();
     vi.mocked(sendWeeklyDigestEmail).mockReset();
@@ -41,6 +44,14 @@ describe("resendDigestEmailForDate", () => {
       `${JSON.stringify(sampleDigest, null, 2)}\n`,
       "utf8",
     );
+  });
+
+  afterEach(() => {
+    if (savedGithubRunId === undefined) {
+      delete process.env.GITHUB_RUN_ID;
+    } else {
+      process.env.GITHUB_RUN_ID = savedGithubRunId;
+    }
   });
 
   it("reads existing briefing and sends email", async () => {
@@ -66,6 +77,32 @@ describe("resendDigestEmailForDate", () => {
       "2026-07-01",
       ["a@example.com", "b@example.com"],
       { manualRunId: undefined },
+    );
+  });
+
+  it("passes GITHUB_RUN_ID as manualRunId for workflow resends", async () => {
+    process.env.GITHUB_RUN_ID = "run-abc";
+    vi.mocked(shouldSendDigestEmail).mockResolvedValue(true);
+    vi.mocked(resolveDigestRecipients).mockResolvedValue(["a@example.com"]);
+    vi.mocked(sendDigestEmail).mockResolvedValue({ id: "msg-123" });
+
+    const config: AppConfig = {
+      rootDir: tmpDir,
+      editionId: "oss",
+      editionName: "AI Tastemakers",
+      briefingsDir: path.join(tmpDir, "briefings"),
+      resendApiKey: "re_test",
+      digestEmailFrom: "Digest <digest@example.com>",
+      digestSiteUrl: "https://example.com",
+    } as AppConfig;
+
+    await resendDigestEmailForDate(config, "2026-07-01");
+    expect(sendDigestEmail).toHaveBeenCalledWith(
+      config,
+      sampleDigest,
+      "2026-07-01",
+      ["a@example.com"],
+      { manualRunId: "run-abc" },
     );
   });
 
