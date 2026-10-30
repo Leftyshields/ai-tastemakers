@@ -37,7 +37,18 @@ function requiredFile(relPath) {
   return { ok: true, path: relPath };
 }
 
-async function checkPages(date) {
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
+function pagesMaxWaitMs() {
+  const raw = process.env.VERIFY_PAGES_MAX_WAIT_MS;
+  if (raw === undefined || raw === '') return 0;
+  const n = Number.parseInt(raw, 10);
+  return Number.isFinite(n) && n > 0 ? n : 0;
+}
+
+async function checkPagesOnce(date) {
   const url = `${siteUrl}/briefings/${date}.html`;
   try {
     const res = await fetch(url, { method: 'HEAD', redirect: 'follow' });
@@ -45,6 +56,36 @@ async function checkPages(date) {
     return { ok: false, error: `Pages returned HTTP ${res.status} for ${url}` };
   } catch (e) {
     return { ok: false, error: `Pages check failed for ${url}: ${e.message}` };
+  }
+}
+
+/** Retry Pages HEAD with exponential backoff (VERIFY_PAGES_MAX_WAIT_MS, default 0 = single try). */
+async function checkPages(date) {
+  const maxWaitMs = pagesMaxWaitMs();
+  const started = Date.now();
+  let attempt = 0;
+  let delayMs = 15_000;
+  let last = { ok: false, error: 'Pages check did not run' };
+
+  while (true) {
+    attempt += 1;
+    last = await checkPagesOnce(date);
+    if (last.ok) {
+      return last;
+    }
+
+    const elapsed = Date.now() - started;
+    const remaining = maxWaitMs - elapsed;
+    if (maxWaitMs <= 0 || remaining <= 0) {
+      return last;
+    }
+
+    const waitMs = Math.min(delayMs, remaining);
+    console.log(
+      `  Pages not ready (attempt ${attempt}): ${last.error}. Retrying in ${Math.round(waitMs / 1000)}s...`,
+    );
+    await sleep(waitMs);
+    delayMs = Math.min(Math.round(delayMs * 1.45), 90_000);
   }
 }
 

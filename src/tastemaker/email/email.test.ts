@@ -190,8 +190,8 @@ describe("renderBriefForPlainText", () => {
 });
 
 describe("digestEmailSubject", () => {
-  it("includes date label", () => {
-    expect(digestEmailSubject("2026-06-06")).toContain("2026-06-06");
+  it("uses the copywriter daily brief template", () => {
+    expect(digestEmailSubject("2026-06-06")).toBe("Daily Brief: 2026-06-06 | AI Tastemakers");
   });
 });
 

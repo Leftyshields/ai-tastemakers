@@ -2,10 +2,9 @@ name: Daily Digest Verify
 
 on:
   schedule:
-    # After digest crons (6:17, 7:30, 8:00 PT). Extra slots catch GitHub schedule drift and
-    # total morning cron drops (incident 2026-08-27: zero scheduled runs before 11:00 PT).
-    - cron: "0 8 * * *"
-      timezone: America/Los_Angeles
+    # Primary window: 9:00 AM America/Los_Angeles (GitHub `timezone` keeps local 9 AM across DST:
+    # PDT UTC-7 and PST UTC-8). Runs after digest crons (~8-9 AM PT). Extra slots catch schedule
+    # drift and total morning cron drops (incident 2026-08-27: zero scheduled runs before 11:00 PT).
     - cron: "0 9 * * *"
       timezone: America/Los_Angeles
     - cron: "0 10 * * *"
@@ -35,6 +34,7 @@ jobs:
     env:
       TZ: America/Los_Angeles
       DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+      VERIFY_PAGES_MAX_WAIT_MS: "600000"
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
@@ -74,19 +74,44 @@ jobs:
         run: |
           echo "Briefings OK on main — triggering Pages redeploy (prior deploy may have hit a transient GitHub 500)."
           gh workflow run "Deploy GitHub Pages" --ref main
-          for attempt in 1 2 3 4 5 6 7 8 9 10 11 12; do
-            echo "Waiting for Pages deploy (attempt ${attempt}/12)..."
-            sleep 30
-            if node scripts/verify-daily-digest.mjs --pages-only; then
-              echo "recovered=true" >> "$GITHUB_OUTPUT"
-              exit 0
-            fi
-          done
+          sleep 15
+          run_id=$(gh run list --workflow=pages.yml --branch main --limit 3 --json databaseId,createdAt --jq 'sort_by(.createdAt) | reverse | .[0].databaseId')
+          if [ -n "$run_id" ] && [ "$run_id" != "null" ]; then
+            echo "Waiting for Pages workflow run ${run_id}..."
+            gh run watch "$run_id" --exit-status || true
+          fi
+          if node scripts/verify-daily-digest.mjs --pages-only; then
+            echo "recovered=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           echo "recovered=false" >> "$GITHUB_OUTPUT"
           exit 1
 
+      - name: Redeploy Pages after digest recovery
+        id: pages_after_digest
+        if: steps.digest_retrigger.outputs.recovered == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          echo "Digest recovered — waiting for GitHub Pages to publish today's brief."
+          gh workflow run "Deploy GitHub Pages" --ref main
+          sleep 15
+          run_id=$(gh run list --workflow=pages.yml --branch main --limit 3 --json databaseId,createdAt --jq 'sort_by(.createdAt) | reverse | .[0].databaseId')
+          if [ -n "$run_id" ] && [ "$run_id" != "null" ]; then
+            echo "Waiting for Pages workflow run ${run_id}..."
+            gh run watch "$run_id" --exit-status || true
+          fi
+          if node scripts/verify-daily-digest.mjs --pages-only; then
+            echo "pages_ok=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "pages_ok=false" >> "$GITHUB_OUTPUT"
+          exit 1
+
       - name: Re-verify after recovery
-        if: steps.digest_retrigger.outcome == 'success' || steps.pages_redeploy.outcome == 'success'
+        if: |
+          steps.pages_redeploy.outcome == 'success' ||
+          (steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok == 'true')
         run: node scripts/verify-daily-digest.mjs
 
       - name: Alert on failure
@@ -95,6 +120,7 @@ jobs:
           steps.check.outcome == 'failure' &&
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
             (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
           )
         env:
@@ -114,6 +140,7 @@ jobs:
           steps.check.outcome == 'failure' &&
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
+            (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
             (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
           )
         run: exit 1
