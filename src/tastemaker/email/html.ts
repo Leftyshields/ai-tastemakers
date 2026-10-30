@@ -338,5 +338,5 @@ export function renderDigestEmailText(
 }
 
 export function digestEmailSubject(dateLabel: string): string {
-  return `AI Tastemakers — Daily Brief — ${dateLabel}`;
+  return `Daily Brief: ${dateLabel} | AI Tastemakers`;
 }
