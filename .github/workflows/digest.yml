@@ -4,8 +4,10 @@ on:
   schedule:
     # GitHub scheduled workflows run on UTC (no timezone field). Pick off-minute times so runs
     # are less likely to queue behind top-of-hour traffic; spread backups across the morning.
-    # skip_daily idempotency ensures only the first successful run publishes; cancel-in-progress
-    # drops redundant skip-only runs quickly (~30s).
+    # skip_daily idempotency ensures only the first successful run publishes. Do not cancel an
+    # in-progress run: email can send before the briefing commit, and a replacement run would
+    # pass the gate and send again. Resend idempotency keys dedupe duplicate sends; queued runs
+    # exit quickly once digest.json exists on main.
     #
     # DST: Pacific is UTC-7 (PDT) until Nov 1, then UTC-8 (PST). These UTC fires stay inside
     # 7:00–10:00 AM local in *both* offsets (safe window = 15:00–16:59 UTC):
@@ -32,7 +34,7 @@ permissions:
 
 concurrency:
   group: daily-digest
-  cancel-in-progress: true
+  cancel-in-progress: false
 
 jobs:
   digest:

@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import { Resend } from "resend";
 import type { AppConfig, Digest, WeeklyReview } from "../types.js";
 import {
@@ -44,11 +45,34 @@ function resolveSendRecords(
   return recipients.map((email) => ({ email }));
 }
 
+export type DigestEmailSendOptions = {
+  /** When set, appends `-manual-<id>` so workflow resends are not deduped against scheduled sends. */
+  manualRunId?: string;
+};
+
+export function digestSendIdempotencyKey(
+  kind: "daily-digest" | "weekly-digest",
+  editionId: string,
+  periodLabel: string,
+  recipientEmail: string,
+  manualRunId?: string,
+): string {
+  const emailHash = createHash("sha256")
+    .update(recipientEmail.trim().toLowerCase())
+    .digest("hex");
+  let key = `${kind}/${editionId}/${periodLabel}/${emailHash}`;
+  if (manualRunId) {
+    key += `-manual-${manualRunId}`;
+  }
+  return key;
+}
+
 export async function sendDigestEmail(
   config: AppConfig,
   digest: Digest,
   dateLabel: string,
   recipients?: string[],
+  sendOptions?: DigestEmailSendOptions,
 ): Promise<{ id: string }> {
   const records = resolveSendRecords(
     recipients,
@@ -90,16 +114,26 @@ export async function sendDigestEmail(
       githubAllowlist,
     );
     await assertRenderedEmailAllowedByManifest(config.rootDir, html, text);
-    const { data, error } = await resend.emails.send({
-      from: config.digestEmailFrom,
-      to: [record.email],
-      subject,
-      html,
-      text,
-      headers: {
-        "List-Unsubscribe": `<${unsubscribeUrl}>`,
+    const idempotencyKey = digestSendIdempotencyKey(
+      "daily-digest",
+      config.editionId,
+      dateLabel,
+      record.email,
+      sendOptions?.manualRunId,
+    );
+    const { data, error } = await resend.emails.send(
+      {
+        from: config.digestEmailFrom,
+        to: [record.email],
+        subject,
+        html,
+        text,
+        headers: {
+          "List-Unsubscribe": `<${unsubscribeUrl}>`,
+        },
       },
-    });
+      { idempotencyKey },
+    );
 
     if (error) {
       throw new Error(`Resend API error: ${error.message}`);
@@ -117,6 +151,7 @@ export async function sendWeeklyDigestEmail(
   config: AppConfig,
   review: WeeklyReview,
   recipients?: string[],
+  sendOptions?: DigestEmailSendOptions,
 ): Promise<{ id: string }> {
   const records = resolveSendRecords(
     recipients,
@@ -152,16 +187,26 @@ export async function sendWeeklyDigestEmail(
       githubAllowlist,
     );
     await assertRenderedEmailAllowedByManifest(config.rootDir, weeklyHtml, weeklyText);
-    const { data, error } = await resend.emails.send({
-      from: config.digestEmailFrom,
-      to: [record.email],
-      subject,
-      html: weeklyHtml,
-      text: weeklyText,
-      headers: {
-        "List-Unsubscribe": `<${unsubscribeUrl}>`,
+    const idempotencyKey = digestSendIdempotencyKey(
+      "weekly-digest",
+      config.editionId,
+      review.week_id,
+      record.email,
+      sendOptions?.manualRunId,
+    );
+    const { data, error } = await resend.emails.send(
+      {
+        from: config.digestEmailFrom,
+        to: [record.email],
+        subject,
+        html: weeklyHtml,
+        text: weeklyText,
+        headers: {
+          "List-Unsubscribe": `<${unsubscribeUrl}>`,
+        },
       },
-    });
+      { idempotencyKey },
+    );
 
     if (error) {
       throw new Error(`Resend API error: ${error.message}`);

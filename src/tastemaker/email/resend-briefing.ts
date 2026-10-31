@@ -23,6 +23,7 @@ export async function resendDigestEmailForDate(
   }
 
   const recipients = await resolveDigestRecipients(config);
+  const manualRunId = process.env.GITHUB_RUN_ID?.trim() || undefined;
 
   if (isSundayDateLabel(dateLabel)) {
     const weekId = isoWeekIdFromDateLabel(dateLabel);
@@ -40,7 +41,7 @@ export async function resendDigestEmailForDate(
         narrative: coerceWeeklyNarrative(raw.narrative),
         email: coerceWeeklyEmail(raw.email),
       };
-      const sent = await sendWeeklyDigestEmail(config, review, recipients);
+      const sent = await sendWeeklyDigestEmail(config, review, recipients, { manualRunId });
       return { id: sent.id, recipientCount: recipients.length };
     } catch {
       // Weekly file missing — fall through to the daily top 10.
@@ -52,6 +53,6 @@ export async function resendDigestEmailForDate(
   await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl, {
     pendingDigest: { digest, dateLabel, editionId: "oss" },
   });
-  const sent = await sendDigestEmail(config, digest, dateLabel, recipients);
+  const sent = await sendDigestEmail(config, digest, dateLabel, recipients, { manualRunId });
   return { id: sent.id, recipientCount: recipients.length };
 }
