@@ -1,4 +1,8 @@
 import {
+  appendDailyDigestUtmClientSource,
+  appendDailyDigestUtmToUrl,
+} from "../src/tastemaker/analytics/digest-email-utm.js";
+import {
   digestDateFromCompact,
   labBadgeAttributionClientParserSource,
   labBadgeDestGoInlineRegexSources,
@@ -51,6 +55,7 @@ export function renderGoRedirectPage(
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
   const attributionParser = labBadgeAttributionClientParserSource();
+  const digestUtmAppend = appendDailyDigestUtmClientSource();
   const safeManifest = escapeScriptString(manifestHashMapJson(manifestDestHashes));
   const destHelpers = outboundDestClientHelpersScript();
 
@@ -155,6 +160,7 @@ export function renderGoRedirectPage(
   var LAB_DEST_INDEX_HASH_RE = new RegExp('${safeIndexHashRe}', 'i');
 
   ${attributionParser}
+  ${digestUtmAppend}
   function attributionQueryOk(search) {
     if (!search) return true;
     return parseLabBadgeAttribution(search) !== null;
@@ -183,7 +189,9 @@ export function renderGoRedirectPage(
   var destination = resolveUrl() || (window.location.origin + HOME);
   if (eventName === "lab_badge_click" && labDest) {
     var safeLabDest = isAllowlistedLabDest(labDest);
-    if (safeLabDest) destination = window.location.origin + decodeURIComponent(safeLabDest);
+    if (safeLabDest) {
+      destination = appendDailyDigestUtm(window.location.origin + decodeURIComponent(safeLabDest));
+    }
   }
 
   var continueLink = document.getElementById("continue-link");
@@ -280,7 +288,7 @@ export function resolveGoPageDestination(
     if (allowed) {
       try {
         const home = new URL(homeUrl);
-        return `${home.origin}${decodeURIComponent(allowed)}`;
+        return appendDailyDigestUtmToUrl(`${home.origin}${decodeURIComponent(allowed)}`);
       } catch {
         return homeUrl;
       }
