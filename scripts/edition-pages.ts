@@ -243,9 +243,8 @@ export function digestRepoClickTrackingScript(): string {
 (function () {
   function clickSource() {
     try {
-      return new URLSearchParams(window.location.search).get("utm_source") === "email"
-        ? "email"
-        : "direct";
+      var utmSource = new URLSearchParams(window.location.search).get("utm_source");
+      return utmSource === "email" || utmSource === "digest" ? "email" : "direct";
     } catch (e) {
       return "direct";
     }

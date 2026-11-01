@@ -42,7 +42,7 @@ describe("resolveGoPageDestination", () => {
         allowlist,
         "https://example.com/home/",
       ),
-    ).toBe(`https://example.com${dest}`);
+    ).toBe(`https://example.com${dest}?utm_source=digest&utm_medium=email&utm_campaign=daily`);
   });
 
   it("resolves lab badge dest with from_list attribution query", () => {
@@ -54,7 +54,22 @@ describe("resolveGoPageDestination", () => {
         allowlist,
         "https://example.com/home/",
       ),
-    ).toBe(`https://example.com${dest}`);
+    ).toBe(
+      `https://example.com${dest}&utm_source=digest&utm_medium=email&utm_campaign=daily`,
+    );
+  });
+
+  it("appends daily digest utm params on lab badge redirect without breaking hash", () => {
+    const dest = "/lab/index.html#lab-exp-EXP-20260913-humanizer-polish-skills";
+    const resolved = resolveGoPageDestination(
+      `?event=lab_badge_click&dest=${encodeURIComponent(dest)}`,
+      allowlist,
+      "https://example.com/home/",
+    );
+    const parsed = new URL(resolved);
+    expect(parsed.pathname).toBe("/lab/index.html");
+    expect(parsed.hash).toBe("#lab-exp-EXP-20260913-humanizer-polish-skills");
+    expect(parsed.searchParams.get("utm_campaign")).toBe("daily");
   });
 
   it("rejects open redirect lab dest paths", () => {

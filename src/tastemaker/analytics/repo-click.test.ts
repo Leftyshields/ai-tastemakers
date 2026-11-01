@@ -67,7 +67,7 @@ describe("email go URLs", () => {
     expect(url).toContain("pos=2");
     expect(url).toContain("target=button");
     expect(url).toContain("d=20260606");
-    expect(url).toContain("utm_campaign=digest_20260606");
+    expect(url).not.toContain("utm_source");
   });
 
   it("round trips compact digest dates", () => {

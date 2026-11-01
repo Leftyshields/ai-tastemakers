@@ -1,5 +1,6 @@
 import type { EditionId } from "../editions.js";
 import type { Digest, RankingMode } from "../types.js";
+import { appendDailyDigestUtmToUrl } from "../analytics/digest-email-utm.js";
 import {
   buildEmailGoUrl,
   buildFullDigestPagesUrl,
@@ -228,6 +229,7 @@ export function renderDigestEmailHtml(
     .join("\n");
 
   const fullDigestUrl = escapeHtml(buildFullDigestPagesUrl(siteUrl, dateLabel, section));
+  const archiveUrl = escapeHtml(appendDailyDigestUtmToUrl(siteUrl.replace(/\/+$/, "") + "/"));
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
 
   const htmlBody = `<!DOCTYPE html>
@@ -251,7 +253,7 @@ export function renderDigestEmailHtml(
     ${repoBlocks}
     <p style="margin:32px 0 0;font-family:system-ui,sans-serif;font-size:14px;text-align:center;">
       <a href="${fullDigestUrl}" style="color:${BRAND_LINK};font-weight:600;text-decoration:underline;">Open the full digest</a>
-      · <a href="${escapeHtml(siteUrl)}" style="color:#78716c;">Archive</a>
+      · <a href="${archiveUrl}" style="color:#78716c;">Archive</a>
     </p>
     <p style="margin:16px 0 0;font-family:system-ui,sans-serif;font-size:11px;color:#a8a29e;text-align:center;">
       One digest per day · <a href="${escapeHtml(unsubscribeUrl)}" style="color:#78716c;">Unsubscribe</a>
@@ -318,10 +320,11 @@ export function renderDigestEmailText(
   }
 
   const fullDigestUrl = buildFullDigestPagesUrl(siteUrl, dateLabel, section);
+  const archiveUrl = appendDailyDigestUtmToUrl(siteUrl.replace(/\/+$/, "") + "/");
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
   lines.push(
     `Open the full digest: ${fullDigestUrl}`,
-    `Archive: ${siteUrl}`,
+    `Archive: ${archiveUrl}`,
     `Unsubscribe: ${unsubscribeUrl}`,
     "",
     "One digest per day.",
