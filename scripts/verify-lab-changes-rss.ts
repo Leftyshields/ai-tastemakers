@@ -93,6 +93,32 @@ function validateCopy(): string[] {
   return messages;
 }
 
+function validateHomePagesHaveLabRssAlternate(): string[] {
+  const messages: string[] = [];
+  const expectedHref = `${siteBaseUrl.replace(/\/+$/, "")}/feeds/lab-changes.xml`;
+  for (const rel of ["site/index.html", "site/skills/index.html"]) {
+    const abs = path.join(repoRoot, rel);
+    if (!fs.existsSync(abs)) {
+      messages.push(`${rel}: missing home page for Lab RSS autodiscovery check`);
+      continue;
+    }
+    const html = fs.readFileSync(abs, "utf8");
+    const dom = new JSDOM(html);
+    const link = dom.window.document.querySelector(
+      'link[rel="alternate"][type="application/rss+xml"]',
+    );
+    if (!link) {
+      messages.push(`${rel}: missing Lab changes RSS alternate link`);
+      continue;
+    }
+    const href = link.getAttribute("href")?.trim() ?? "";
+    if (href !== expectedHref) {
+      messages.push(`${rel}: RSS alternate href ${href} (expected ${expectedHref})`);
+    }
+  }
+  return messages;
+}
+
 function validateLabPagesHaveRssAlternate(): string[] {
   const messages: string[] = [];
   const expectedHref = `${siteBaseUrl.replace(/\/+$/, "")}/feeds/lab-changes.xml`;
@@ -166,6 +192,14 @@ function main(): void {
     console.error("verify: site/feeds/lab-changes.xml does not match generator output from verdict log");
   } else if (builtXml) {
     console.log("verify: built lab changes RSS matches verdict log ok");
+  }
+
+  const homeAltIssues = validateHomePagesHaveLabRssAlternate();
+  if (homeAltIssues.length > 0) {
+    failed = true;
+    for (const m of homeAltIssues) console.error(`  ${m}`);
+  } else {
+    console.log("verify: home pages Lab changes RSS autodiscovery ok");
   }
 
   const labAltIssues = validateLabPagesHaveRssAlternate();

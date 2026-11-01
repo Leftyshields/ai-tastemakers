@@ -23,6 +23,7 @@ const ALLOWED_JSON_LD_TYPES = new Set([
   "BreadcrumbList",
   "Organization",
   "WebPage",
+  "CollectionPage",
 ]);
 
 function listHtmlFiles(dir: string): string[] {
@@ -184,6 +185,50 @@ function isHomeRel(rel: string): boolean {
   return rel === "index.html" || rel === "skills/index.html";
 }
 
+function isLabIndexRel(rel: string): boolean {
+  return rel === "lab/index.html";
+}
+
+function expectedFaviconHrefForRel(rel: string): string {
+  const depth = rel.split("/").length - 1;
+  return depth === 0 ? "favicon.ico" : `${"../".repeat(depth)}favicon.ico`;
+}
+
+function jsonLdCollectionPageUrl(doc: Document): string | null {
+  for (const script of doc.querySelectorAll('script[type="application/ld+json"]')) {
+    const raw = script.textContent?.trim();
+    if (!raw) continue;
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(raw);
+    } catch {
+      continue;
+    }
+    const visit = (node: unknown): string | null => {
+      if (node == null || typeof node !== "object") return null;
+      if (Array.isArray(node)) {
+        for (const item of node) {
+          const found = visit(item);
+          if (found) return found;
+        }
+        return null;
+      }
+      const obj = node as Record<string, unknown>;
+      if (obj["@type"] === "CollectionPage" && typeof obj.url === "string") {
+        return obj.url;
+      }
+      for (const value of Object.values(obj)) {
+        const found = visit(value);
+        if (found) return found;
+      }
+      return null;
+    };
+    const url = visit(parsed);
+    if (url) return url;
+  }
+  return null;
+}
+
 function validateHtmlPages(): { ok: boolean; messages: string[] } {
   const messages: string[] = [];
   const htmlFiles = listHtmlFiles(siteDir);
@@ -209,6 +254,19 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
     const alternates = doc.querySelectorAll('link[rel="alternate"][type="application/atom+xml"]');
     if (alternates.length < 2) {
       messages.push(`${rel}: expected 2 Atom feed alternate links, found ${alternates.length}`);
+    }
+
+    const iconLink = doc.querySelector('link[rel="icon"][href$="favicon.ico"]');
+    const expectedIcon = expectedFaviconHrefForRel(rel);
+    const iconHref = iconLink?.getAttribute("href")?.trim() ?? "";
+    if (!iconLink) {
+      messages.push(`${rel}: missing favicon.ico link`);
+    } else if (iconHref !== expectedIcon) {
+      messages.push(`${rel}: favicon href ${iconHref} (expected ${expectedIcon})`);
+    }
+    const appleIcon = doc.querySelector('link[rel="apple-touch-icon"]');
+    if (!appleIcon) {
+      messages.push(`${rel}: missing apple-touch-icon link`);
     }
 
     const titleEl = doc.querySelector("title");
@@ -293,6 +351,21 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
       }
       if (isDailyDigestRel(rel) && !types.has("ItemList")) {
         messages.push(`${rel}: missing JSON-LD ItemList`);
+      }
+      if (isLabIndexRel(rel)) {
+        if (!types.has("CollectionPage")) {
+          messages.push(`${rel}: missing JSON-LD CollectionPage`);
+        }
+        if (types.has("WebSite")) {
+          messages.push(`${rel}: lab index must not use WebSite JSON-LD`);
+        }
+        const collectionUrl = jsonLdCollectionPageUrl(doc);
+        const expectedLabUrl = absoluteCanonicalUrl(SITE_BASE_URL, "lab/");
+        if (collectionUrl && collectionUrl !== expectedLabUrl) {
+          messages.push(`${rel}: CollectionPage url ${collectionUrl} (expected ${expectedLabUrl})`);
+        } else if (!collectionUrl && types.has("CollectionPage")) {
+          messages.push(`${rel}: CollectionPage missing url`);
+        }
       }
     }
   }

@@ -56,6 +56,23 @@ export function labFeedAlternateLinkHtml(siteBaseUrl: string, escapeHtml: (t: st
   return `<link rel="alternate" type="application/rss+xml" title="${escapeHtml(title)}" href="${escapeHtml(href)}">`;
 }
 
+/** Site-relative prefix before `assets/style*.css`, e.g. `../` for `lab/index.html`. */
+export function siteRootRelPrefixFromCss(cssHref: string): string {
+  return cssHref.replace(/assets\/style(?:\.[a-f0-9]+)?\.css$/, "");
+}
+
+export function siteFaviconLinksHtml(rootRelPrefix: string, escapeHtml: (t: string) => string): string {
+  const prefix = rootRelPrefix;
+  const ico = `${prefix}favicon.ico`;
+  const png32 = `${prefix}favicon-32.png`;
+  const apple = `${prefix}apple-touch-icon.png`;
+  return [
+    `<link rel="icon" href="${escapeHtml(ico)}" sizes="any">`,
+    `<link rel="icon" type="image/png" href="${escapeHtml(png32)}" sizes="32x32">`,
+    `<link rel="apple-touch-icon" href="${escapeHtml(apple)}" sizes="180x180">`,
+  ].join("\n  ");
+}
+
 export function mergeJsonLdGraph(nodes: Record<string, unknown>[]): Record<string, unknown> {
   const graph = nodes.map((node) => {
     const copy = { ...node };
@@ -71,6 +88,20 @@ export function websiteJsonLd(siteBaseUrl: string, name: string, description: st
     name,
     description,
     url: absoluteCanonicalUrl(siteBaseUrl, ""),
+  };
+}
+
+export function collectionPageJsonLd(
+  siteBaseUrl: string,
+  canonicalPath: string,
+  name: string,
+  description: string,
+): Record<string, unknown> {
+  return {
+    "@type": "CollectionPage",
+    name,
+    description,
+    url: absoluteCanonicalUrl(siteBaseUrl, canonicalPath),
   };
 }
 

@@ -68,7 +68,7 @@ export function experimentTechnicalMoreHtml(
     lines.push(`<p class="text-xs">Flag: <span class="font-mono">${escapeHtml(exp.posthog_flag)}</span></p>`);
   }
   if (exp.note) {
-    lines.push(`<p class="text-xs">${escapeHtml(sanitizeVisibleCopy(exp.note))}</p>`);
+    lines.push(`<p class="text-sm text-stone-600 dark:text-stone-400">${escapeHtml(sanitizeVisibleCopy(exp.note))}</p>`);
   }
   return lines.join("\n");
 }

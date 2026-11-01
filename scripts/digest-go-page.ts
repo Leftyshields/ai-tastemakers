@@ -16,6 +16,7 @@ import {
   absoluteCanonicalUrl,
   feedAlternateLinksHtml,
   googleSiteVerificationMetaHtml,
+  siteFaviconLinksHtml,
 } from "./seo-helpers.js";
 
 function escapeHtml(text: string): string {
@@ -41,6 +42,7 @@ export function renderGoRedirectPage(
   const allowlistJson = JSON.stringify(allowlist);
   const posthog = posthogScriptHtml();
   const feedAlternates = feedAlternateLinksHtml(siteBaseUrl, escapeHtml);
+  const faviconLinks = siteFaviconLinksHtml("../", escapeHtml);
   const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const safeAllowlist = escapeScriptString(allowlistJson);
   const safeHome = escapeScriptString(homePath.startsWith("/") ? homePath : `/${homePath}`);
@@ -57,6 +59,7 @@ export function renderGoRedirectPage(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${faviconLinks}
   <title>Continue to GitHub</title>
   <meta name="description" content="Redirect to an allowlisted GitHub repository from AI Tastemakers outbound tracking.">
   <link rel="canonical" href="${escapeHtml(absoluteCanonicalUrl(siteBaseUrl, "go/index.html"))}">

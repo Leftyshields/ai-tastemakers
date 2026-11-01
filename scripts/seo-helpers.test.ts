@@ -11,7 +11,10 @@ import {
   briefSocialTitle,
   extractBriefSection,
   normalizeCanonicalPath,
+  collectionPageJsonLd,
   digestRepoItemListJsonLd,
+  siteFaviconLinksHtml,
+  siteRootRelPrefixFromCss,
   writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
 import {
@@ -125,6 +128,31 @@ describe("writeSitemapFromSiteDir", () => {
     expect(count).toBe(1);
     expect(xml).toContain(other);
     await fs.rm(tmp, { recursive: true, force: true });
+  });
+});
+
+describe("collectionPageJsonLd", () => {
+  it("uses directory canonical url for lab index", () => {
+    const node = collectionPageJsonLd(
+      "https://leftyshields.github.io/ai-tastemakers",
+      "lab/",
+      "Tastemakers Lab",
+      "Experiment registry",
+    );
+    expect(node["@type"]).toBe("CollectionPage");
+    expect(node.url).toBe("https://leftyshields.github.io/ai-tastemakers/lab/");
+  });
+});
+
+describe("site favicon head links", () => {
+  const esc = (t: string) => t;
+  it("prefixes icons from css href depth", () => {
+    expect(siteRootRelPrefixFromCss("../assets/style.css")).toBe("../");
+    expect(siteRootRelPrefixFromCss("../../assets/style.abc123.css")).toBe("../../");
+    const html = siteFaviconLinksHtml("../", esc);
+    expect(html).toContain('href="../favicon.ico"');
+    expect(html).toContain('href="../favicon-32.png"');
+    expect(html).toContain('href="../apple-touch-icon.png"');
   });
 });
 

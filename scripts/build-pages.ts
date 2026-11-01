@@ -21,7 +21,7 @@ import {
   writeRobotsTxt,
   writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
-import { writeDefaultOgPng } from "./generate-brief-og.js";
+import { writeDefaultOgPng, writeSiteFaviconsFromOgCard } from "./generate-brief-og.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import { renderGoRedirectPage } from "./digest-go-page.js";
 import { OutboundDestRegistry, writeOutboundDestManifest } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
@@ -419,7 +419,9 @@ async function main(): Promise<void> {
 
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(path.join(SITE_DIR, ".nojekyll"), "");
-  await writeDefaultOgPng(path.join(SITE_DIR, "assets", "og-card.png"));
+  const ogCardPath = path.join(SITE_DIR, "assets", "og-card.png");
+  await writeDefaultOgPng(ogCardPath);
+  await writeSiteFaviconsFromOgCard(SITE_DIR, ogCardPath);
 
   const siteBaseUrl =
     process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";

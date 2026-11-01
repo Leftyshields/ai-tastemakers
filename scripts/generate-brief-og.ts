@@ -109,6 +109,16 @@ export async function writeDefaultOgPng(outPath: string): Promise<void> {
   await rasterizeSvg(defaultOgCardSvg(), outPath);
 }
 
+/** Rasterize favicon assets at site publish root from the default OG card PNG. */
+export async function writeSiteFaviconsFromOgCard(siteDir: string, ogCardPath: string): Promise<void> {
+  const sharp = (await import("sharp")).default;
+  await fs.mkdir(siteDir, { recursive: true });
+  const card = sharp(ogCardPath);
+  await card.clone().resize(32, 32).png().toFile(path.join(siteDir, "favicon-32.png"));
+  await card.clone().resize(180, 180).png().toFile(path.join(siteDir, "apple-touch-icon.png"));
+  await sharp(ogCardPath).resize(32, 32).toFile(path.join(siteDir, "favicon.ico"));
+}
+
 export function defaultOgImagePath(_siteSegment = ""): string {
   return "assets/og-card.png";
 }
