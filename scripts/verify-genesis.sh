@@ -20,7 +20,7 @@ npm run lab:validate-experiments
 echo "verify: lab dashboard copy QA"
 sh scripts/verify-lab-dashboard-copy.sh
 echo "verify: lab color contrast light and dark (UX24)"
-npx --yes playwright@1.49.0 install chromium >/dev/null 2>&1 || true
+npx --yes playwright@1.64.1 install chromium >/dev/null 2>&1 || true
 "$TSX" scripts/verify-lab-color-contrast.ts
 echo "verify: lab prose inline spacing and write up fonts (UX26 UX46)"
 "$TSX" scripts/verify-lab-prose-inline-spacing.ts
