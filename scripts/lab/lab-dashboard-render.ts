@@ -360,7 +360,7 @@ export function renderRunningControlPanelBlock(
     </div>
     ${progress}
     <div class="mt-2">${renderLabMoreButton(moreId, escapeHtml)}</div>
-    <div class="lab-more-panel mt-2 text-xs text-stone-600 dark:text-stone-400" data-for="${moreId}" data-open="false">
+    <div class="lab-more-panel mt-2 text-sm text-stone-600 dark:text-stone-400" data-for="${moreId}" data-open="false">
       ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(run.id)}</p>`}
     </div>`);
 
@@ -714,7 +714,7 @@ function renderGanttRow(
       <p class="mt-1" title="${escapeHtml(isoTitleAttr(item.start))} to ${escapeHtml(isoTitleAttr(item.end))}">${escapeHtml(win)}</p>
       <p class="mt-1">${renderLabStatusChip("experiment", item.status, escapeHtml)}</p>
       <div class="mt-2">${renderLabMoreButton(popId, escapeHtml)}</div>
-      <div class="lab-more-panel mt-1 text-xs text-stone-600 dark:text-stone-400" data-for="${escapeHtml(popId)}" data-open="false">
+      <div class="lab-more-panel mt-1 text-sm text-stone-600 dark:text-stone-400" data-for="${escapeHtml(popId)}" data-open="false">
         <p class="font-mono">${escapeHtml(item.id)}</p>
       </div>
     </div>
@@ -888,7 +888,7 @@ function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         <td class="lab-num lab-backlog-starts" title="${escapeHtml(isoTitleAttr(freezePolicy.start))}">${escapeHtml(freezeStart)}</td>
         <td class="text-xs">${renderLabMoreButton(freezeId, escapeHtml)}</td>
       </tr>
-      <tr class="lab-expand-row" data-for="${freezeId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
+      <tr class="lab-expand-row" data-for="${freezeId}" data-open="false"><td colspan="4" class="text-sm text-stone-600 dark:text-stone-400">
         ${experimentTechnicalMoreHtml(freezePolicy, escapeHtml)}
       </td></tr>`);
     }
@@ -905,7 +905,7 @@ function renderBacklogSection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         <td class="lab-num lab-backlog-starts" title="${escapeHtml(isoTitleAttr(b.start))}">${escapeHtml(starts)}</td>
         <td class="text-xs lab-backlog-depends">${deps.htmlNames ? deps.htmlNames : ""} ${moreBtn}</td>
       </tr>
-      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
+      <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-sm text-stone-600 dark:text-stone-400">
         ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(b.id)}</p>`}
       </td></tr>`);
     }
@@ -947,7 +947,7 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         <td>${resultCell}</td>
         <td><div class="lab-history-details-links">${renderWriteUpLink(h.id, pub.writeup_post_ids, escapeHtml)} ${renderLabMoreButton(rowId, escapeHtml)}</div></td>
       </tr>
-      <tr class="lab-expand-row${hiddenClass}" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs">
+      <tr class="lab-expand-row${hiddenClass}" data-for="${rowId}" data-open="false"><td colspan="4" class="text-sm">
         ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(h.id)}</p>`}
       </td></tr>`);
     });

@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { briefOgCardSvg, defaultOgCardSvg } from "./generate-brief-og.js";
+import { briefOgCardSvg, defaultOgCardSvg, encodePngIco, siteFaviconMarkSvg } from "./generate-brief-og.js";
 import { OG } from "./og-theme.js";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -11,7 +11,10 @@ import {
   briefSocialTitle,
   extractBriefSection,
   normalizeCanonicalPath,
+  collectionPageJsonLd,
   digestRepoItemListJsonLd,
+  siteFaviconLinksHtml,
+  siteRootRelPrefixFromCss,
   writeSitemapFromSiteDir,
 } from "./seo-helpers.js";
 import {
@@ -125,6 +128,52 @@ describe("writeSitemapFromSiteDir", () => {
     expect(count).toBe(1);
     expect(xml).toContain(other);
     await fs.rm(tmp, { recursive: true, force: true });
+  });
+});
+
+describe("collectionPageJsonLd", () => {
+  it("uses directory canonical url for lab index", () => {
+    const node = collectionPageJsonLd(
+      "https://leftyshields.github.io/ai-tastemakers",
+      "lab/",
+      "Tastemakers Lab",
+      "Experiment registry",
+    );
+    expect(node["@type"]).toBe("CollectionPage");
+    expect(node.url).toBe("https://leftyshields.github.io/ai-tastemakers/lab/");
+  });
+});
+
+describe("site favicon mark", () => {
+  it("AT monogram SVG uses brand fill", () => {
+    const svg = siteFaviconMarkSvg();
+    expect(svg).toContain(">AT<");
+    expect(svg).toContain("#1e40af");
+  });
+
+  it("encodePngIco packs multiple PNG sizes", () => {
+    const png = Buffer.from(
+      "89504e470d0a1a0a0000000d49484452000000100000001008060000001ff3ff61000000049454e44ae426082",
+      "hex",
+    );
+    const ico = encodePngIco([
+      { width: 16, height: 16, png },
+      { width: 32, height: 32, png },
+    ]);
+    expect(ico.readUInt16LE(4)).toBe(2);
+    expect(ico.length).toBeGreaterThanOrEqual(6 + 16 * 2 + png.length * 2);
+  });
+});
+
+describe("site favicon head links", () => {
+  const esc = (t: string) => t;
+  it("prefixes icons from css href depth", () => {
+    expect(siteRootRelPrefixFromCss("../assets/style.css")).toBe("../");
+    expect(siteRootRelPrefixFromCss("../../assets/style.abc123.css")).toBe("../../");
+    const html = siteFaviconLinksHtml("../", esc);
+    expect(html).toContain('href="../favicon.ico"');
+    expect(html).toContain('href="../favicon-32.png"');
+    expect(html).toContain('href="../apple-touch-icon.png"');
   });
 });
 

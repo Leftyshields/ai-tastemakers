@@ -50,12 +50,15 @@ import {
   briefSocialTitle,
   breadcrumbJsonLd,
   buildSeoHeadHtml,
+  collectionPageJsonLd,
   defaultOgImageUrl,
   feedAlternateLinksHtml,
   labFeedAlternateLinkHtml,
   googleSiteVerificationMetaHtml,
   digestRepoItemListJsonLd,
   itemListJsonLd,
+  siteFaviconLinksHtml,
+  siteRootRelPrefixFromCss,
   websiteJsonLd,
   type BriefFeedEntry,
   type PageSeoOptions,
@@ -938,14 +941,16 @@ export function pageShell(
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
   const siteBase = options?.siteBaseUrl ?? options?.seo?.siteBaseUrl;
   const labLayout = options?.labLayout === true;
+  const homeIndexEdition = options?.homeIndexEdition;
+  const includeLabChangesFeed = labLayout || Boolean(homeIndexEdition);
   const feedAlternates = siteBase
-    ? `${feedAlternateLinksHtml(siteBase, escapeHtml)}${labLayout ? `\n  ${labFeedAlternateLinkHtml(siteBase, escapeHtml)}` : ""}`
+    ? `${feedAlternateLinksHtml(siteBase, escapeHtml)}${includeLabChangesFeed ? `\n  ${labFeedAlternateLinkHtml(siteBase, escapeHtml)}` : ""}`
     : "";
+  const faviconLinks = siteFaviconLinksHtml(siteRootRelPrefixFromCss(paths.css), escapeHtml);
   const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const refreshMeta = options?.metaRefresh
     ? `<meta http-equiv="refresh" content="0;url=${escapeHtml(options.metaRefresh)}">`
     : "";
-  const homeIndexEdition = options?.homeIndexEdition;
   const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout, {
     desktopOnlyOnLab: labLayout,
     homeIndexNav: Boolean(homeIndexEdition),
@@ -1003,6 +1008,7 @@ export function pageShell(
   <meta charset="utf-8">
   ${colorSchemeHeadScript}
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  ${faviconLinks}
   <title>${safeTitle}</title>
   ${refreshMeta}
   ${gscMeta}
@@ -2511,8 +2517,9 @@ export async function buildLabSite(
         canonicalPath: "lab/",
         ogType: "website",
         ogImageUrl: defaultOgImageUrl(siteBaseUrl),
-        jsonLd: websiteJsonLd(
+        jsonLd: collectionPageJsonLd(
           siteBaseUrl,
+          "lab/",
           labIndexCopy.h1 ?? "Tastemakers Lab",
           labIndexCopy.description ?? labIndexCopy.title ?? "Lab",
         ),

@@ -191,7 +191,7 @@ export function renderToolsPageHtml(
       <td>${statusChip(status, escapeHtml)}</td>
       ${linkedCell}
     </tr>
-    <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-xs text-stone-600 dark:text-stone-400">
+    <tr class="lab-expand-row" data-for="${rowId}" data-open="false"><td colspan="4" class="text-sm text-stone-600 dark:text-stone-400">
       ${expandBits.join("\n")}
     </td></tr>`);
   }
