@@ -109,14 +109,69 @@ export async function writeDefaultOgPng(outPath: string): Promise<void> {
   await rasterizeSvg(defaultOgCardSvg(), outPath);
 }
 
-/** Rasterize favicon assets at site publish root from the default OG card PNG. */
-export async function writeSiteFaviconsFromOgCard(siteDir: string, ogCardPath: string): Promise<void> {
+/** Site tab icon fill (Tailwind blue-800) — readable on light and dark browser chrome. */
+export const FAVICON_BRAND_FILL = "#1e40af";
+
+/** Square AT monogram mark for favicons (vector source for sharp rasterization). */
+export function siteFaviconMarkSvg(): string {
+  return `<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <rect width="512" height="512" rx="96" fill="${FAVICON_BRAND_FILL}"/>
+  <text x="256" y="268" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="700" font-size="232" letter-spacing="-10">AT</text>
+</svg>`;
+}
+
+/** Build a multi-size PNG-in-ICO file (16/32/48) without extra dependencies. */
+export function encodePngIco(entries: Array<{ width: number; height: number; png: Buffer }>): Buffer {
+  if (entries.length === 0) {
+    throw new Error("encodePngIco requires at least one image");
+  }
+  const count = entries.length;
+  const headerSize = 6 + count * 16;
+  let offset = headerSize;
+  const header = Buffer.alloc(6);
+  header.writeUInt16LE(0, 0);
+  header.writeUInt16LE(1, 2);
+  header.writeUInt16LE(count, 4);
+  const directory: Buffer[] = [];
+  const images: Buffer[] = [];
+  for (const entry of entries) {
+    const dir = Buffer.alloc(16);
+    dir.writeUInt8(entry.width >= 256 ? 0 : entry.width, 0);
+    dir.writeUInt8(entry.height >= 256 ? 0 : entry.height, 1);
+    dir.writeUInt8(0, 2);
+    dir.writeUInt8(0, 3);
+    dir.writeUInt16LE(1, 4);
+    dir.writeUInt16LE(32, 6);
+    dir.writeUInt32LE(entry.png.length, 8);
+    dir.writeUInt32LE(offset, 12);
+    directory.push(dir);
+    images.push(entry.png);
+    offset += entry.png.length;
+  }
+  return Buffer.concat([header, ...directory, ...images]);
+}
+
+/** Rasterize AT monogram favicons at site publish root. */
+export async function writeSiteFavicons(siteDir: string): Promise<void> {
   const sharp = (await import("sharp")).default;
   await fs.mkdir(siteDir, { recursive: true });
-  const card = sharp(ogCardPath);
-  await card.clone().resize(32, 32).png().toFile(path.join(siteDir, "favicon-32.png"));
-  await card.clone().resize(180, 180).png().toFile(path.join(siteDir, "apple-touch-icon.png"));
-  await sharp(ogCardPath).resize(32, 32).toFile(path.join(siteDir, "favicon.ico"));
+  const svg = siteFaviconMarkSvg();
+  const pngBySize = new Map<number, Buffer>();
+  for (const size of [16, 32, 48, 180]) {
+    const png = await sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
+    pngBySize.set(size, png);
+  }
+  await fs.writeFile(path.join(siteDir, "favicon-32.png"), pngBySize.get(32)!);
+  await fs.writeFile(path.join(siteDir, "apple-touch-icon.png"), pngBySize.get(180)!);
+  const ico = encodePngIco(
+    [16, 32, 48].map((size) => ({
+      width: size,
+      height: size,
+      png: pngBySize.get(size)!,
+    })),
+  );
+  await fs.writeFile(path.join(siteDir, "favicon.ico"), ico);
 }
 
 export function defaultOgImagePath(_siteSegment = ""): string {

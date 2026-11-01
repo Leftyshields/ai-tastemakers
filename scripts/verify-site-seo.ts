@@ -386,6 +386,44 @@ function validateHtmlPages(): { ok: boolean; messages: string[] } {
   return { ok: messages.length === 0, messages };
 }
 
+function icoEmbeddedImageSizes(icoPath: string): number[] {
+  const buf = fs.readFileSync(icoPath);
+  if (buf.length < 6) return [];
+  if (buf.readUInt16LE(0) !== 0 || buf.readUInt16LE(2) !== 1) return [];
+  const count = buf.readUInt16LE(4);
+  const sizes: number[] = [];
+  for (let i = 0; i < count; i++) {
+    const base = 6 + i * 16;
+    if (base + 16 > buf.length) break;
+    const w = buf.readUInt8(base) || 256;
+    const h = buf.readUInt8(base + 1) || 256;
+    if (w === h) sizes.push(w);
+  }
+  return sizes;
+}
+
+function validateBuiltFavicons(): string[] {
+  const messages: string[] = [];
+  const icoPath = path.join(siteDir, "favicon.ico");
+  if (!fs.existsSync(icoPath)) {
+    messages.push("missing site/favicon.ico (run npm run build:pages)");
+    return messages;
+  }
+  const sizes = icoEmbeddedImageSizes(icoPath);
+  const expected = [16, 32, 48];
+  for (const size of expected) {
+    if (!sizes.includes(size)) {
+      messages.push(`favicon.ico missing embedded ${size}px size (found ${sizes.join(", ")})`);
+    }
+  }
+  for (const rel of ["favicon-32.png", "apple-touch-icon.png"]) {
+    if (!fs.existsSync(path.join(siteDir, rel))) {
+      messages.push(`missing site/${rel}`);
+    }
+  }
+  return messages;
+}
+
 function validateFeedSeoCopy(): string[] {
   const messages: string[] = [];
   const feedTitles = new Map<string, string[]>();
@@ -459,6 +497,15 @@ function main(): void {
     for (const m of labRssEmDash) console.error(`  ${m}`);
   } else if (fs.existsSync(path.join(siteDir, "feeds/lab-changes.xml"))) {
     console.log("verify: feeds/lab-changes.xml em dash ok (channel and item fields)");
+  }
+
+  const faviconIssues = validateBuiltFavicons();
+  if (faviconIssues.length > 0) {
+    failed = true;
+    console.error("verify: built favicons failed:");
+    for (const m of faviconIssues) console.error(`  ${m}`);
+  } else if (fs.existsSync(path.join(siteDir, "favicon.ico"))) {
+    console.log("verify: built favicons ok (ICO 16/32/48 + PNG)");
   }
 
   const html = validateHtmlPages();

@@ -947,7 +947,7 @@ function renderHistorySection(pub: LabExperimentsPublicFile, escapeHtml: (t: str
         <td>${resultCell}</td>
         <td><div class="lab-history-details-links">${renderWriteUpLink(h.id, pub.writeup_post_ids, escapeHtml)} ${renderLabMoreButton(rowId, escapeHtml)}</div></td>
       </tr>
-      <tr class="lab-expand-row${hiddenClass}" data-for="${rowId}" data-open="false"><td colspan="4" class="text-sm text-stone-600 dark:text-stone-400">
+      <tr class="lab-expand-row${hiddenClass}" data-for="${rowId}" data-open="false"><td colspan="4" class="text-sm">
         ${source ? experimentTechnicalMoreHtml(source, escapeHtml) : `<p class="font-mono">${escapeHtml(h.id)}</p>`}
       </td></tr>`);
     });
