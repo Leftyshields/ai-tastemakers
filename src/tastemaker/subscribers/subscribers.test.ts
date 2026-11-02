@@ -142,4 +142,15 @@ describe("resolveDigestRecipients", () => {
 
     expect(recipients).toEqual([]);
   });
+
+  it("propagates Firestore read errors when Firebase Admin is configured", async () => {
+    vi.mocked(isFirebaseAdminConfigured).mockReturnValue(true);
+    vi.mocked(readFirestoreSubscribers).mockRejectedValue(
+      new Error("Firestore subscriber read failed: Cannot find module '@google-cloud/firestore'"),
+    );
+
+    await expect(resolveDigestRecipients(baseConfig)).rejects.toThrow(
+      /Firestore subscriber read failed/,
+    );
+  });
 });

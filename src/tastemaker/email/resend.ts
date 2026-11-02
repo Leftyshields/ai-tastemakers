@@ -19,9 +19,13 @@ import {
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
 import { collectDigestRepoAllowlist } from "../analytics/digest-allowlist.js";
 import { assertRenderedEmailAllowedByManifest } from "../analytics/outbound-email-manifest-guard.js";
+import { refreshOutboundEmailDestManifest } from "../analytics/write-outbound-email-manifest.js";
+import { isDigestEmailConfigured } from "./digest-send-gate.js";
+
+export { assertDigestSendReady, isDigestEmailConfigured } from "./digest-send-gate.js";
 
 export async function shouldSendDigestEmail(config: AppConfig): Promise<boolean> {
-  if (!config.resendApiKey || !config.digestEmailFrom) return false;
+  if (!isDigestEmailConfigured(config)) return false;
   const recipients = await resolveDigestRecipients(config);
   return recipients.length > 0;
 }
@@ -83,6 +87,10 @@ export async function sendDigestEmail(
       "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
     );
   }
+
+  await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl, {
+    pendingDigest: { digest, dateLabel, editionId: config.editionId },
+  });
 
   const resend = new Resend(config.resendApiKey);
   const subject = digestEmailSubject(dateLabel);
@@ -162,6 +170,8 @@ export async function sendWeeklyDigestEmail(
       "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
     );
   }
+
+  await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl);
 
   const resend = new Resend(config.resendApiKey);
   const subject = weeklyEmailSubject(review);

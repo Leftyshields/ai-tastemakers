@@ -123,6 +123,10 @@ export async function readFirestoreSubscriberRecords(
     }
     return records.filter((entry) => entry.email);
   } catch (err) {
+    if (isFirebaseAdminConfigured(config)) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`Firestore subscriber read failed: ${detail}`, { cause: err });
+    }
     console.warn("Firestore subscriber read failed; using file/env recipients only:", err);
     return [];
   }

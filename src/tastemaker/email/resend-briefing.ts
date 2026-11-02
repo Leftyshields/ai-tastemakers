@@ -2,9 +2,12 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import type { AppConfig, WeeklyReview } from "../types.js";
 import { readDigestJson } from "../writers/json.js";
-import { resolveDigestRecipients } from "../subscribers/load.js";
 import { refreshOutboundEmailDestManifest } from "../analytics/write-outbound-email-manifest.js";
-import { sendDigestEmail, sendWeeklyDigestEmail, shouldSendDigestEmail } from "./resend.js";
+import {
+  assertDigestSendReady,
+  sendDigestEmail,
+  sendWeeklyDigestEmail,
+} from "./resend.js";
 import { coerceWeeklyEmail, coerceWeeklyNarrative } from "../narrate/weekly.js";
 import { isoWeekIdFromDateLabel, isSundayDateLabel } from "../weekly/week.js";
 
@@ -16,13 +19,7 @@ export async function resendDigestEmailForDate(
     throw new Error("Digest email is OSS edition only");
   }
 
-  if (!(await shouldSendDigestEmail(config))) {
-    throw new Error(
-      "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
-    );
-  }
-
-  const recipients = await resolveDigestRecipients(config);
+  const recipients = await assertDigestSendReady(config);
   const manualRunId = process.env.GITHUB_RUN_ID?.trim() || undefined;
 
   if (isSundayDateLabel(dateLabel)) {

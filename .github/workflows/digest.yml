@@ -21,6 +21,9 @@ on:
     - cron: "23 16 * * *"
     - cron: "41 16 * * *"
     - cron: "53 16 * * *"
+    # Backstop when GitHub delays or skips the morning Pacific window (skip_daily exits if briefings exist).
+    - cron: "4 22 * * *"
+    - cron: "4 23 * * *"
   workflow_dispatch:
     inputs:
       resend_email:

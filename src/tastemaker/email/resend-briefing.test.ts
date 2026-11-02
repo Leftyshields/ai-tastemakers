@@ -6,17 +6,12 @@ import type { AppConfig } from "../types.js";
 import { resendDigestEmailForDate } from "./resend-briefing.js";
 
 vi.mock("./resend.js", () => ({
-  shouldSendDigestEmail: vi.fn(),
+  assertDigestSendReady: vi.fn(),
   sendDigestEmail: vi.fn(),
   sendWeeklyDigestEmail: vi.fn(),
 }));
 
-vi.mock("../subscribers/load.js", () => ({
-  resolveDigestRecipients: vi.fn(),
-}));
-
-import { shouldSendDigestEmail, sendDigestEmail, sendWeeklyDigestEmail } from "./resend.js";
-import { resolveDigestRecipients } from "../subscribers/load.js";
+import { assertDigestSendReady, sendDigestEmail, sendWeeklyDigestEmail } from "./resend.js";
 
 const sampleDigest = {
   run_id: "test",
@@ -33,10 +28,9 @@ describe("resendDigestEmailForDate", () => {
   beforeEach(async () => {
     savedGithubRunId = process.env.GITHUB_RUN_ID;
     delete process.env.GITHUB_RUN_ID;
-    vi.mocked(shouldSendDigestEmail).mockReset();
+    vi.mocked(assertDigestSendReady).mockReset();
     vi.mocked(sendDigestEmail).mockReset();
     vi.mocked(sendWeeklyDigestEmail).mockReset();
-    vi.mocked(resolveDigestRecipients).mockReset();
     tmpDir = await fs.mkdtemp(path.join(os.tmpdir(), "resend-email-"));
     await fs.mkdir(path.join(tmpDir, "briefings", "2026-07-01"), { recursive: true });
     await fs.writeFile(
@@ -55,8 +49,7 @@ describe("resendDigestEmailForDate", () => {
   });
 
   it("reads existing briefing and sends email", async () => {
-    vi.mocked(shouldSendDigestEmail).mockResolvedValue(true);
-    vi.mocked(resolveDigestRecipients).mockResolvedValue(["a@example.com", "b@example.com"]);
+    vi.mocked(assertDigestSendReady).mockResolvedValue(["a@example.com", "b@example.com"]);
     vi.mocked(sendDigestEmail).mockResolvedValue({ id: "msg-123" });
 
     const config: AppConfig = {
@@ -82,8 +75,7 @@ describe("resendDigestEmailForDate", () => {
 
   it("passes GITHUB_RUN_ID as manualRunId for workflow resends", async () => {
     process.env.GITHUB_RUN_ID = "run-abc";
-    vi.mocked(shouldSendDigestEmail).mockResolvedValue(true);
-    vi.mocked(resolveDigestRecipients).mockResolvedValue(["a@example.com"]);
+    vi.mocked(assertDigestSendReady).mockResolvedValue(["a@example.com"]);
     vi.mocked(sendDigestEmail).mockResolvedValue({ id: "msg-123" });
 
     const config: AppConfig = {
@@ -142,8 +134,7 @@ describe("resendDigestEmailForDate", () => {
       }),
       "utf8",
     );
-    vi.mocked(shouldSendDigestEmail).mockResolvedValue(true);
-    vi.mocked(resolveDigestRecipients).mockResolvedValue(["a@example.com"]);
+    vi.mocked(assertDigestSendReady).mockResolvedValue(["a@example.com"]);
     vi.mocked(sendWeeklyDigestEmail).mockResolvedValue({ id: "week-1" });
 
     const config: AppConfig = {
