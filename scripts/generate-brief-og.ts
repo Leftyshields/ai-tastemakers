@@ -125,20 +125,85 @@ function bf1SparkMark(sparkScale: number): string {
   return `<g transform="rotate(-40 256 256)">${inner}</g>`;
 }
 
+/** Vector scale for a readable (but oversized) 16px star; pixel spark targets ~this footprint. */
+export const FAVICON16_SPARK_SCALE = 1.3;
+
+const FAVICON16_AMBER = { r: 245, g: 158, b: 11 };
+
 export interface SiteFaviconMarkOptions {
-  /** Enlarge the bowl spark so it stays recognizable at 16px ICO rasterization. */
+  /** Omit vector spark (16px ICO adds a pixel plus after rasterizing the spoon). */
   favicon16?: boolean;
+  omitSpark?: boolean;
 }
 
 /** Square BF1 spoon mark for favicons (vector source for sharp rasterization). */
 export function siteFaviconMarkSvg(options: SiteFaviconMarkOptions = {}): string {
-  const sparkScale = options.favicon16 ? 1.72 : 1;
+  const includeSpark = !options.omitSpark && !options.favicon16;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
   <rect width="512" height="512" fill="${FAVICON_BRAND_FILL}"/>
   ${BF1_SPOON_MARK}
-  ${bf1SparkMark(sparkScale)}
+  ${includeSpark ? bf1SparkMark(1) : ""}
 </svg>`;
+}
+
+function isFaviconWhitePixel(r: number, g: number, b: number): boolean {
+  return r > 245 && g > 245 && b > 245;
+}
+
+function isFaviconAmberPixel(r: number, g: number, b: number): boolean {
+  return r > 200 && g > 100 && g < 210 && b < 80;
+}
+
+/** Hand-placed plus spark on the 16×16 bowl raster (white ring, recognizable star). */
+export function paintFavicon16PixelSpark(rgba: Buffer, width = 16, height = 16): void {
+  let sumX = 0;
+  let sumY = 0;
+  let count = 0;
+  for (let y = 3; y <= 7; y++) {
+    for (let x = 3; x <= 9; x++) {
+      const i = (y * width + x) * 4;
+      if (isFaviconWhitePixel(rgba[i]!, rgba[i + 1]!, rgba[i + 2]!)) {
+        sumX += x;
+        sumY += y;
+        count++;
+      }
+    }
+  }
+  if (count === 0) return;
+  const cx = Math.round(sumX / count);
+  const cy = Math.round(sumY / count);
+  const plus: Array<[number, number]> = [
+    [cx, cy],
+    [cx - 1, cy],
+    [cx + 1, cy],
+    [cx, cy - 1],
+    [cx, cy + 1],
+  ];
+  for (const [x, y] of plus) {
+    if (x < 0 || y < 0 || x >= width || y >= height) continue;
+    const i = (y * width + x) * 4;
+    if (!isFaviconWhitePixel(rgba[i]!, rgba[i + 1]!, rgba[i + 2]!)) continue;
+    rgba[i] = FAVICON16_AMBER.r;
+    rgba[i + 1] = FAVICON16_AMBER.g;
+    rgba[i + 2] = FAVICON16_AMBER.b;
+    rgba[i + 3] = 255;
+  }
+}
+
+/** Rasterize 16px favicon PNG with pixel-placed spark in the bowl. */
+export async function rasterSiteFavicon16Png(): Promise<Buffer> {
+  const sharp = (await import("sharp")).default;
+  const { data, info } = await sharp(Buffer.from(siteFaviconMarkSvg({ omitSpark: true })))
+    .resize(16, 16)
+    .ensureAlpha()
+    .raw()
+    .toBuffer({ resolveWithObject: true });
+  const rgba = Buffer.from(data);
+  paintFavicon16PixelSpark(rgba, info.width, info.height);
+  return sharp(rgba, { raw: { width: info.width, height: info.height, channels: 4 } })
+    .png()
+    .toBuffer();
 }
 
 /** Build a multi-size PNG-in-ICO file (16/32/48) without extra dependencies. */
@@ -184,11 +249,7 @@ export async function writeSiteFavicons(siteDir: string): Promise<void> {
       .toBuffer();
     pngBySize.set(size, png);
   }
-  const png16 = await sharp(Buffer.from(siteFaviconMarkSvg({ favicon16: true })))
-    .resize(16, 16)
-    .png()
-    .toBuffer();
-  pngBySize.set(16, png16);
+  pngBySize.set(16, await rasterSiteFavicon16Png());
   await fs.writeFile(path.join(siteDir, "favicon-32.png"), pngBySize.get(32)!);
   await fs.writeFile(path.join(siteDir, "apple-touch-icon.png"), pngBySize.get(180)!);
   const ico = encodePngIco(
