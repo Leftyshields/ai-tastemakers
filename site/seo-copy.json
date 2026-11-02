@@ -21,9 +21,9 @@
     },
     "lab_index": {
       "title": "Tastemakers Lab: Real AI Tool Tests, Including the Misses",
-      "description": "Public notes on digest pipeline experiments, engagement measurement, and what changed on AI Tastemakers.",
+      "description": "I test AI tools on real work briefs and publish every result, including the misses. See what actually earned its keep in the AI Tastemakers Lab.",
       "h1": "Tastemakers Lab",
-      "lead": "AI Tastemakers is my site for finding out which AI tools actually earn their keep, and in the Lab I test them on my real work briefs and publish every result, including the ones where nothing helped."
+      "lead": "AI Tastemakers is my site for finding out which AI tools actually earn their keep, and in the Lab I test them on my real work briefs and publish every result, including the ones where nothing helped. Every day the site reports on new tools, picks the ones that could improve how it runs, and puts them to work almost automatically, so each post shows what really happened."
     },
     "lab_methodology": {
       "title": "Methodology | Tastemakers Lab",
