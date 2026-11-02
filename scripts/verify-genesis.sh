@@ -81,4 +81,6 @@ echo "verify: site SEO (sitemap, feeds, h1, json-ld)"
 "$TSX" scripts/verify-site-seo.ts
 echo "verify: outbound link tracking (/go) on site and email fixtures"
 "$TSX" scripts/verify-outbound-links.ts
+echo "verify: digest send gate and Firestore dependency"
+"$VITEST" run src/tastemaker/email/digest-send-gate.test.ts src/tastemaker/email/digest-send-deps.test.ts
 echo "verify: ok"

@@ -5,9 +5,11 @@ import { loadWeekDigests } from "./load.js";
 import { parseWeekId, weekContaining, type WeekWindow } from "./week.js";
 import { formatActiveLabNotes, narrateWeekly, narrateWeeklyEmail } from "../narrate/weekly.js";
 import { writeWeeklyReview } from "../writers/weekly.js";
-import { sendWeeklyDigestEmail, shouldSendDigestEmail } from "../email/resend.js";
-import { resolveDigestRecipients } from "../subscribers/load.js";
-
+import {
+  assertDigestSendReady,
+  isDigestEmailConfigured,
+  sendWeeklyDigestEmail,
+} from "../email/resend.js";
 export interface WeeklyPipelineResult {
   skipped: boolean;
   reason?: string;
@@ -92,19 +94,12 @@ export async function runWeeklyPipeline(
   const { jsonPath, markdownPath } = await writeWeeklyReview(briefingDir, review);
 
   const emailConfig = deps.emailConfig;
-  if (emailConfig && (await shouldSendDigestEmail(emailConfig))) {
+  if (emailConfig && isDigestEmailConfigured(emailConfig)) {
     const sendEmail = deps.sendEmail ?? sendWeeklyDigestEmail;
-    const recipients = await resolveDigestRecipients(emailConfig);
+    const recipients = await assertDigestSendReady(emailConfig);
     console.error(`Sending weekly digest email to ${recipients.length} recipient(s)…`);
-    try {
-      const sent = await sendEmail(emailConfig, review, recipients);
-      console.error(`Weekly email sent (id: ${sent.id})`);
-    } catch (err) {
-      console.warn(
-        "Warning: weekly email failed; review was still written:",
-        err instanceof Error ? err.message : err,
-      );
-    }
+    const sent = await sendEmail(emailConfig, review, recipients);
+    console.error(`Weekly email sent (id: ${sent.id})`);
   }
 
   return {
