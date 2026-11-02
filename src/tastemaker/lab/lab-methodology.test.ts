@@ -81,8 +81,8 @@ describe("Lab methodology layout (round 7 revised)", () => {
     );
     expect(html).toContain("<h1");
     expect(html.indexOf("</h1>")).toBeLessThan(html.indexOf("earn their keep"));
-    expect(html).toContain("lab-home-lead");
-    expect(html).toContain("text-base");
+    expect(html).toContain('class="lab-home-lead"');
+    expect(html).not.toMatch(/lab-home-lead[^"]*text-sm/);
     expect(html).not.toContain("Public notes subtitle fixture");
     expect(html).not.toMatch(/site-brand[\s\S]*Tastemakers Lab/);
     expect(html).toContain('property="og:title" content="Tastemakers Lab: Real AI Tool Tests, Including the Misses"');

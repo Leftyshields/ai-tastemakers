@@ -22,6 +22,7 @@ import {
   sanitizeLabVisibleHtml,
 } from "./lab/lab-format.js";
 import { LAB_FOOTER_ABOUT_LABEL, labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
+import { LAB_HOME_HEADER_TAGLINE } from "./lab/lab-home-copy.js";
 import {
   applyLabIntroVonRestorff,
   renderLabLoopAboutBlockHtml,
@@ -989,7 +990,8 @@ export function pageShell(
     processedBody = rewriteOutboundLinksInHtml(processedBody, options.outboundRewrite);
   }
   const labBody = labLayout ? ensureLabLinkSections(processedBody, labFallback) : processedBody;
-  const h1Bottom = options?.documentH1Lead ? "mb-2.5" : "mb-6";
+  const labHomePage = options?.labHomePage === true;
+  const h1Bottom = options?.documentH1Lead ? "mb-2" : "mb-6";
   const h1Class = options?.documentH1Visible
     ? `font-sans text-2xl font-bold tracking-tight ${h1Bottom}`
     : "sr-only";
@@ -997,9 +999,12 @@ export function pageShell(
     ? `<h1 class="${h1Class}">${escapeHtml(options.documentH1)}</h1>`
     : "";
   const documentH1Lead = options?.documentH1Lead
-    ? `<p class="lab-home-lead mb-6 font-sans text-base font-normal text-stone-800 dark:text-stone-200">${escapeHtml(options.documentH1Lead)}</p>`
+    ? `<p class="lab-home-lead">${escapeHtml(options.documentH1Lead)}</p>`
     : "";
-  const hideLabHomeSiteBrand = options?.labHomePage === true;
+  const hideLabHomeSiteBrand = labHomePage;
+  const headerClass = labHomePage
+    ? "lab-home-header mb-4 border-b border-stone-200 pb-4 dark:border-stone-700"
+    : "mb-8 border-b border-stone-200 pb-6 dark:border-stone-700";
   const mainHtml = labLayout
     ? `<main class="lab-main">${documentH1}${documentH1Lead}${labBody}</main>`
     : `${documentH1}${documentH1Lead}${labBody}`;
@@ -1031,7 +1036,7 @@ export function pageShell(
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="${shellClass}">
-    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-700">
+    <header class="${headerClass}">
       ${
         hideLabHomeSiteBrand
           ? ""
@@ -2470,8 +2475,7 @@ export async function buildLabSite(
   const paths = labSitePaths();
   const brand = {
     name: "Tastemakers Lab",
-    tagline:
-      "Public notes on how repos get picked, how pipeline changes get tested, and what readers actually engage with.",
+    tagline: LAB_HOME_HEADER_TAGLINE,
   };
 
   const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };

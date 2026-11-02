@@ -19,6 +19,8 @@ echo "verify: lab experiments registry"
 npm run lab:validate-experiments
 echo "verify: lab dashboard copy QA"
 sh scripts/verify-lab-dashboard-copy.sh
+echo "verify: lab home hero (single title and intro)"
+"$TSX" scripts/verify-lab-home-hero.ts
 echo "verify: lab color contrast light and dark (UX24)"
 npx --yes playwright@1.64.1 install chromium >/dev/null 2>&1 || true
 "$TSX" scripts/verify-lab-color-contrast.ts
