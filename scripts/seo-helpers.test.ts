@@ -1,5 +1,13 @@
 import { describe, it, expect } from "vitest";
-import { briefOgCardSvg, defaultOgCardSvg, encodePngIco, siteFaviconMarkSvg } from "./generate-brief-og.js";
+import {
+  FAVICON16_SPARK_SCALE,
+  briefOgCardSvg,
+  defaultOgCardSvg,
+  encodePngIco,
+  rasterSiteFavicon16Png,
+  siteFaviconMarkSvg,
+} from "./generate-brief-og.js";
+import sharp from "sharp";
 import { OG } from "./og-theme.js";
 import fs from "node:fs/promises";
 import os from "node:os";
@@ -145,10 +153,62 @@ describe("collectionPageJsonLd", () => {
 });
 
 describe("site favicon mark", () => {
-  it("AT monogram SVG uses brand fill", () => {
+  it("BF1 spoon mark SVG uses brand fill and amber spark", () => {
     const svg = siteFaviconMarkSvg();
-    expect(svg).toContain(">AT<");
+    expect(svg).not.toContain(">AT<");
     expect(svg).toContain("#1e40af");
+    expect(svg).toContain("#f59e0b");
+    expect(svg).toContain('fill="#ffffff"');
+    expect(svg).not.toContain('rx="96"');
+  });
+
+  it("16px favicon omits vector spark for pixel placement", () => {
+    const svg16 = siteFaviconMarkSvg({ favicon16: true });
+    expect(svg16).not.toContain('fill="#f59e0b"');
+    expect(FAVICON16_SPARK_SCALE).toBe(1.3);
+  });
+
+  it("16px raster keeps a white bowl ring around the pixel spark", async () => {
+    const png = await rasterSiteFavicon16Png();
+    const { data, info } = await sharp(png).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    const w = info.width;
+    const amber: Array<[number, number]> = [];
+    for (let y = 0; y < info.height; y++) {
+      for (let x = 0; x < w; x++) {
+        const i = (y * w + x) * 4;
+        const r = data[i]!;
+        const g = data[i + 1]!;
+        const b = data[i + 2]!;
+        if (r > 200 && g > 100 && g < 210 && b < 80) amber.push([x, y]);
+      }
+    }
+    expect(amber.length).toBeGreaterThanOrEqual(3);
+    expect(amber.length).toBeLessThanOrEqual(7);
+    let minX = 99;
+    let maxX = -1;
+    let minY = 99;
+    let maxY = -1;
+    for (const [x, y] of amber) {
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
+      minY = Math.min(minY, y);
+      maxY = Math.max(maxY, y);
+    }
+    const isWhite = (r: number, g: number, b: number) => r > 245 && g > 245 && b > 245;
+    for (let x = minX; x <= maxX; x++) {
+      for (const y of [minY - 1, maxY + 1]) {
+        if (y < 0 || y >= info.height) continue;
+        const i = (y * w + x) * 4;
+        expect(isWhite(data[i]!, data[i + 1]!, data[i + 2]!)).toBe(true);
+      }
+    }
+    for (let y = minY; y <= maxY; y++) {
+      for (const x of [minX - 1, maxX + 1]) {
+        if (x < 0 || x >= w) continue;
+        const i = (y * w + x) * 4;
+        expect(isWhite(data[i]!, data[i + 1]!, data[i + 2]!)).toBe(true);
+      }
+    }
   });
 
   it("encodePngIco packs multiple PNG sizes", () => {
