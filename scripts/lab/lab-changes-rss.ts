@@ -1,6 +1,14 @@
 import path from "node:path";
-import { JSDOM } from "jsdom";
+import { createRequire } from "node:module";
 import { EM_DASH } from "../seo-copy.js";
+
+const require = createRequire(import.meta.url);
+
+function parseXmlWithJsdom(xml: string): Document {
+  const { JSDOM } = require("jsdom") as typeof import("jsdom");
+  const dom = new JSDOM(xml, { contentType: "text/xml" });
+  return dom.window.document;
+}
 import { digestDateCompact } from "../../src/tastemaker/analytics/repo-click.js";
 import type { OutboundDestRegistry } from "../../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { absoluteCanonicalUrl } from "../seo-helpers.js";
@@ -246,8 +254,7 @@ export async function writeLabChangesRssFeed(
 
 /** All human-readable strings in a built Lab changes RSS document (em dash gate). */
 export function labChangesRssBuiltFeedTextFields(xml: string): Array<{ field: string; text: string }> {
-  const dom = new JSDOM(xml, { contentType: "text/xml" });
-  const doc = dom.window.document;
+  const doc = parseXmlWithJsdom(xml);
   const out: Array<{ field: string; text: string }> = [];
   const channel = doc.querySelector("channel");
   if (channel) {
