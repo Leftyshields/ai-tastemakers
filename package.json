@@ -2,6 +2,9 @@
   "name": "ai-tastemakers",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test lib/loadGenome.test.js lib/decompose.test.js lib/signaling.test.js lib/guardrails.test.js lib/run.test.js lib/repair.test.js scripts/derive-expression-profiles.test.js scripts/molecules-read_file.test.js",
     "test:instantiate": "node --test scripts/instantiate.test.js",
