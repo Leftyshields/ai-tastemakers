@@ -266,6 +266,14 @@
     @apply ml-2 inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 font-sans text-[10px] font-bold uppercase tracking-wider text-emerald-800 align-middle dark:border-emerald-700/60 dark:bg-emerald-950/60 dark:text-emerald-300;
   }
 
+  .lab-main > h1:first-child {
+    @apply mt-0;
+  }
+
+  .lab-main > .lab-home-lead {
+    @apply mb-6 mt-0 max-w-[42rem] font-sans text-base font-normal leading-relaxed text-stone-900 dark:text-stone-100;
+  }
+
   .lab-main .prose :is(h1, h2, h3):first-child {
     @apply mt-0;
   }

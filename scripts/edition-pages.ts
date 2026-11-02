@@ -22,6 +22,7 @@ import {
   sanitizeLabVisibleHtml,
 } from "./lab/lab-format.js";
 import { LAB_FOOTER_ABOUT_LABEL, labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
+import { LAB_HOME_HEADER_TAGLINE } from "./lab/lab-home-copy.js";
 import {
   applyLabIntroVonRestorff,
   renderLabLoopAboutBlockHtml,
@@ -784,8 +785,11 @@ export function renderLabHomeIntroBlock(
   asOfIsoDate: string,
   escapeHtml: (t: string) => string,
 ): string {
+  const articleBlock = articleHtml.trim()
+    ? `<article class="${LAB_PROSE_ARTICLE_CLASS}">${articleHtml}</article>`
+    : "";
   return `<div class="lab-intro mb-8 font-sans">
-      <article class="${LAB_PROSE_ARTICLE_CLASS}">${articleHtml}</article>
+      ${articleBlock}
       ${loopStripHtml}
       ${renderLabExperimentsHowLink(escapeHtml)}
       <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
@@ -930,6 +934,9 @@ export function pageShell(
     siteBaseUrl?: string;
     documentH1?: string;
     documentH1Visible?: boolean;
+    documentH1Lead?: string;
+    /** Lab index: hide header site title/subtitle so main h1 + lead are the only hero. */
+    labHomePage?: boolean;
     labFallbackSection?: LabLinkSection;
     labPostShell?: boolean;
     metaRefresh?: string;
@@ -983,13 +990,24 @@ export function pageShell(
     processedBody = rewriteOutboundLinksInHtml(processedBody, options.outboundRewrite);
   }
   const labBody = labLayout ? ensureLabLinkSections(processedBody, labFallback) : processedBody;
-  const h1Class = options?.documentH1Visible ? "font-sans text-2xl font-bold tracking-tight mb-6" : "sr-only";
+  const labHomePage = options?.labHomePage === true;
+  const h1Bottom = options?.documentH1Lead ? "mb-2" : "mb-6";
+  const h1Class = options?.documentH1Visible
+    ? `font-sans text-2xl font-bold tracking-tight ${h1Bottom}`
+    : "sr-only";
   const documentH1 = options?.documentH1
     ? `<h1 class="${h1Class}">${escapeHtml(options.documentH1)}</h1>`
     : "";
+  const documentH1Lead = options?.documentH1Lead
+    ? `<p class="lab-home-lead">${escapeHtml(options.documentH1Lead)}</p>`
+    : "";
+  const hideLabHomeSiteBrand = labHomePage;
+  const headerClass = labHomePage
+    ? "lab-home-header mb-4 border-b border-stone-200 pb-4 dark:border-stone-700"
+    : "mb-8 border-b border-stone-200 pb-6 dark:border-stone-700";
   const mainHtml = labLayout
-    ? `<main class="lab-main">${documentH1}${labBody}</main>`
-    : `${documentH1}${labBody}`;
+    ? `<main class="lab-main">${documentH1}${documentH1Lead}${labBody}</main>`
+    : `${documentH1}${documentH1Lead}${labBody}`;
   const footerMt = labLayout ? "mt-10" : "mt-16";
   let footerLinks = footerLinkRowHtml(paths, escapeHtml, {
     homeIndex: Boolean(homeIndexEdition),
@@ -1018,11 +1036,15 @@ export function pageShell(
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="${shellClass}">
-    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-700">
-      <div class="site-brand m-0 font-sans text-2xl font-bold tracking-tight">
+    <header class="${headerClass}">
+      ${
+        hideLabHomeSiteBrand
+          ? ""
+          : `<div class="site-brand m-0 font-sans text-2xl font-bold tracking-tight">
         <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400"${homeTitleLink}${!homeIndexEdition && labLayout ? ' data-lab-section="nav"' : ""}>${escapeHtml(brand.name)}</a>
       </div>
-      <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brandTagline)}</p>
+      <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brandTagline)}</p>`
+      }
       ${nav}
       ${mobileLabNav}
     </header>
@@ -2453,8 +2475,7 @@ export async function buildLabSite(
   const paths = labSitePaths();
   const brand = {
     name: "Tastemakers Lab",
-    tagline:
-      "Public notes on how repos get picked, how pipeline changes get tested, and what readers actually engage with.",
+    tagline: LAB_HOME_HEADER_TAGLINE,
   };
 
   const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };
@@ -2478,10 +2499,9 @@ export async function buildLabSite(
   const labIndexMd = path.join(repoRoot, "briefings", "lab", "index.md");
   let introBlock = "";
   try {
-    const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = applyLabIntroVonRestorff(prepareLabProseHtmlFromMarkdown(markdown));
+    await fs.readFile(labIndexMd, "utf8");
     introBlock = renderLabHomeIntroBlock(
-      html,
+      "",
       renderLabLoopStripHtml("lab-home", escapeHtml, { linkCtx }),
       asOfIsoDate,
       escapeHtml,
@@ -2542,6 +2562,8 @@ export async function buildLabSite(
         siteBaseUrl,
         documentH1: labIndexCopy.h1,
         documentH1Visible: true,
+        documentH1Lead: labIndexCopy.lead,
+        labHomePage: true,
         outboundRewrite: labOutbound,
       },
     ),

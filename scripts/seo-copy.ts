@@ -11,6 +11,7 @@ export interface SeoCopyPage {
   descriptionTemplate?: string;
   descriptionFallback?: string;
   ogAlt?: string;
+  lead?: string;
   summary?: string;
   full_intro?: string;
 }
