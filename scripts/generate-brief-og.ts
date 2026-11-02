@@ -112,12 +112,32 @@ export async function writeDefaultOgPng(outPath: string): Promise<void> {
 /** Site tab icon fill (Tailwind blue-800) — readable on light and dark browser chrome. */
 export const FAVICON_BRAND_FILL = "#1e40af";
 
-/** Square AT monogram mark for favicons (vector source for sharp rasterization). */
-export function siteFaviconMarkSvg(): string {
+/** Brian BF1 mark: white spoon on full-bleed blue, amber four-point spark in the bowl. */
+const BF1_SPOON_MARK = `<g transform="rotate(-40 256 256)"><ellipse cx="256" cy="150" rx="110" ry="135" fill="#ffffff"/><rect x="224" y="260" width="64" height="230" rx="32" fill="#ffffff"/></g>`;
+const BF1_SPARK_PATH =
+  "M256 62 C265.768 127.208 278.792 140.232 344 150 C278.792 159.768 265.768 172.792 256 238 C246.232 172.792 233.208 159.768 168 150 C233.208 140.232 246.232 127.208 256 62Z";
+
+function bf1SparkMark(sparkScale: number): string {
+  const inner =
+    sparkScale === 1
+      ? `<path d="${BF1_SPARK_PATH}" fill="#f59e0b"/>`
+      : `<g transform="translate(256 150) scale(${sparkScale}) translate(-256 -150)"><path d="${BF1_SPARK_PATH}" fill="#f59e0b"/></g>`;
+  return `<g transform="rotate(-40 256 256)">${inner}</g>`;
+}
+
+export interface SiteFaviconMarkOptions {
+  /** Enlarge the bowl spark so it stays recognizable at 16px ICO rasterization. */
+  favicon16?: boolean;
+}
+
+/** Square BF1 spoon mark for favicons (vector source for sharp rasterization). */
+export function siteFaviconMarkSvg(options: SiteFaviconMarkOptions = {}): string {
+  const sparkScale = options.favicon16 ? 1.72 : 1;
   return `<?xml version="1.0" encoding="UTF-8"?>
 <svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
-  <rect width="512" height="512" rx="96" fill="${FAVICON_BRAND_FILL}"/>
-  <text x="256" y="268" text-anchor="middle" dominant-baseline="middle" fill="#ffffff" font-family="system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif" font-weight="700" font-size="232" letter-spacing="-10">AT</text>
+  <rect width="512" height="512" fill="${FAVICON_BRAND_FILL}"/>
+  ${BF1_SPOON_MARK}
+  ${bf1SparkMark(sparkScale)}
 </svg>`;
 }
 
@@ -152,16 +172,23 @@ export function encodePngIco(entries: Array<{ width: number; height: number; png
   return Buffer.concat([header, ...directory, ...images]);
 }
 
-/** Rasterize AT monogram favicons at site publish root. */
+/** Rasterize BF1 spoon favicons at site publish root. */
 export async function writeSiteFavicons(siteDir: string): Promise<void> {
   const sharp = (await import("sharp")).default;
   await fs.mkdir(siteDir, { recursive: true });
-  const svg = siteFaviconMarkSvg();
   const pngBySize = new Map<number, Buffer>();
-  for (const size of [16, 32, 48, 180]) {
-    const png = await sharp(Buffer.from(svg)).resize(size, size).png().toBuffer();
+  for (const size of [32, 48, 180]) {
+    const png = await sharp(Buffer.from(siteFaviconMarkSvg()))
+      .resize(size, size)
+      .png()
+      .toBuffer();
     pngBySize.set(size, png);
   }
+  const png16 = await sharp(Buffer.from(siteFaviconMarkSvg({ favicon16: true })))
+    .resize(16, 16)
+    .png()
+    .toBuffer();
+  pngBySize.set(16, png16);
   await fs.writeFile(path.join(siteDir, "favicon-32.png"), pngBySize.get(32)!);
   await fs.writeFile(path.join(siteDir, "apple-touch-icon.png"), pngBySize.get(180)!);
   const ico = encodePngIco(

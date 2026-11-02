@@ -145,10 +145,18 @@ describe("collectionPageJsonLd", () => {
 });
 
 describe("site favicon mark", () => {
-  it("AT monogram SVG uses brand fill", () => {
+  it("BF1 spoon mark SVG uses brand fill and amber spark", () => {
     const svg = siteFaviconMarkSvg();
-    expect(svg).toContain(">AT<");
+    expect(svg).not.toContain(">AT<");
     expect(svg).toContain("#1e40af");
+    expect(svg).toContain("#f59e0b");
+    expect(svg).toContain('fill="#ffffff"');
+    expect(svg).not.toContain('rx="96"');
+  });
+
+  it("16px favicon variant enlarges the spark", () => {
+    const svg16 = siteFaviconMarkSvg({ favicon16: true });
+    expect(svg16).toContain("scale(1.72)");
   });
 
   it("encodePngIco packs multiple PNG sizes", () => {
