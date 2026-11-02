@@ -11,6 +11,7 @@ import { labNavHtml, labSitePaths, pageShell, renderLabHomeIntroBlock } from "..
 import { prepareLabProseHtmlFromMarkdown } from "../../../scripts/lab/lab-format.js";
 import { applyLabIntroVonRestorff } from "../../../scripts/lab/lab-loop-strip.js";
 import { seoPage } from "../../../scripts/seo-copy.js";
+import { LAB_HOME_LEGACY_INTRO_TEXT } from "../../../scripts/lab/lab-home-copy.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../../..");
 
@@ -57,15 +58,17 @@ describe("Lab methodology layout (round 7 revised)", () => {
     const copy = seoPage("lab_index");
     expect(copy.title).toBe("Tastemakers Lab: Real AI Tool Tests, Including the Misses");
     expect(copy.lead).toContain("earn their keep");
+    expect(LAB_HOME_LEGACY_INTRO_TEXT).toContain("evaluates them");
     const html = pageShell(
       copy.title ?? "Lab",
       labNavHtml("home", escapeHtml),
       labSitePaths(),
-      { name: "Tastemakers", tagline: "Lab" },
+      { name: "Tastemakers Lab", tagline: "Public notes subtitle fixture" },
       copy.description,
       escapeHtml,
       {
         labLayout: true,
+        labHomePage: true,
         documentH1: copy.h1,
         documentH1Visible: true,
         documentH1Lead: copy.lead,
@@ -78,6 +81,10 @@ describe("Lab methodology layout (round 7 revised)", () => {
     );
     expect(html).toContain("<h1");
     expect(html.indexOf("</h1>")).toBeLessThan(html.indexOf("earn their keep"));
+    expect(html).toContain("lab-home-lead");
+    expect(html).toContain("text-base");
+    expect(html).not.toContain("Public notes subtitle fixture");
+    expect(html).not.toMatch(/site-brand[\s\S]*Tastemakers Lab/);
     expect(html).toContain('property="og:title" content="Tastemakers Lab: Real AI Tool Tests, Including the Misses"');
     expect(html).toContain('name="twitter:title" content="Tastemakers Lab: Real AI Tool Tests, Including the Misses"');
     expect(html).toContain(

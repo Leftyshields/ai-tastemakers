@@ -153,7 +153,9 @@ const CHECK_JS = `
         false,
       ),
     );
-    var lead = document.querySelector(".lab-intro article p, .lab-intro .brief-content p");
+    var lead =
+      document.querySelector("main .lab-home-lead") ??
+      document.querySelector(".lab-intro article p, .lab-intro .brief-content p");
     failures = failures.concat(checkContrast(lead, "lead", false));
     var td = document.querySelector(".lab-table td");
     failures = failures.concat(checkContrast(td, "table cell", true));
