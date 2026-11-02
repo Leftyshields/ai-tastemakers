@@ -930,6 +930,7 @@ export function pageShell(
     siteBaseUrl?: string;
     documentH1?: string;
     documentH1Visible?: boolean;
+    documentH1Lead?: string;
     labFallbackSection?: LabLinkSection;
     labPostShell?: boolean;
     metaRefresh?: string;
@@ -987,9 +988,12 @@ export function pageShell(
   const documentH1 = options?.documentH1
     ? `<h1 class="${h1Class}">${escapeHtml(options.documentH1)}</h1>`
     : "";
+  const documentH1Lead = options?.documentH1Lead
+    ? `<p class="mb-6 font-sans text-sm text-stone-600 dark:text-stone-400">${escapeHtml(options.documentH1Lead)}</p>`
+    : "";
   const mainHtml = labLayout
-    ? `<main class="lab-main">${documentH1}${labBody}</main>`
-    : `${documentH1}${labBody}`;
+    ? `<main class="lab-main">${documentH1}${documentH1Lead}${labBody}</main>`
+    : `${documentH1}${documentH1Lead}${labBody}`;
   const footerMt = labLayout ? "mt-10" : "mt-16";
   let footerLinks = footerLinkRowHtml(paths, escapeHtml, {
     homeIndex: Boolean(homeIndexEdition),
@@ -2542,6 +2546,7 @@ export async function buildLabSite(
         siteBaseUrl,
         documentH1: labIndexCopy.h1,
         documentH1Visible: true,
+        documentH1Lead: labIndexCopy.lead,
         outboundRewrite: labOutbound,
       },
     ),
