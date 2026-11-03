@@ -1,6 +1,6 @@
 {
   "schema_version": 1,
-  "generated_at": "2026-11-02T23:57:39.646Z",
+  "generated_at": "2026-11-03T05:30:26.797Z",
   "project_id": "489599",
   "posthog_host": "https://us.posthog.com",
   "skipped": false,
@@ -96,7 +96,7 @@
       "metric_current": null,
       "metric_daily": [],
       "metric_window_sum": null,
-      "metric_fetch_error": null
+      "metric_fetch_error": "PostHog query 504: {\"type\":\"server_error\",\"code\":\"error\",\"detail\":\"Query has hit the max execution time before completing. See our docs for how to improve your query performance. You may need to materialize.\",\"attr\":null}"
     },
     "EXP-20260715-soft-dedup-diversity-skills": {
       "metric_posthog": "event:repo_click?section=skills",
