@@ -21,6 +21,7 @@ on:
 
 permissions:
   contents: read
+  pages: read
   issues: write
   actions: write
 
