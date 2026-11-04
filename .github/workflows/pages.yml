@@ -167,6 +167,7 @@ jobs:
       - name: Verify Pages deploy (deploy_done gate + fresh_fetch advisory)
         env:
           EXPECTED_PAGES_SHA: ${{ github.sha }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -e
           extra=""
