@@ -24,10 +24,10 @@ describe("verify-pages-deploy-workflow-env", () => {
 `;
     const errors = auditWorkflowContent("bad.yml", yml);
     expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0]).toContain("GITHUB_TOKEN");
+    expect(errors[0]).toContain("step env");
   });
 
-  it("accepts job-level GITHUB_TOKEN for verify-daily-digest", () => {
+  it("rejects job-level GITHUB_TOKEN without step env", () => {
     const yml = `jobs:
   verify:
     runs-on: ubuntu-latest
@@ -35,6 +35,21 @@ describe("verify-pages-deploy-workflow-env", () => {
       GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Verify today's briefings and Pages
+        run: node scripts/verify-daily-digest.mjs
+`;
+    const errors = auditWorkflowContent("job-only.yml", yml);
+    expect(errors.length).toBe(1);
+    expect(errors[0]).toContain("step env");
+  });
+
+  it("accepts step-level GITHUB_TOKEN for verify-daily-digest", () => {
+    const yml = `jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Verify today's briefings and Pages
+        env:
+          GITHUB_TOKEN: \${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-daily-digest.mjs
 `;
     expect(auditWorkflowContent("ok.yml", yml)).toEqual([]);
