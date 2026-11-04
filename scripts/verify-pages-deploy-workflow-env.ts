@@ -36,15 +36,6 @@ export function splitStepBlocks(jobBody: string): string[] {
   return blocks;
 }
 
-export function jobHasGithubToken(jobBody: string): boolean {
-  const envIdx = jobBody.search(/^    env:\s*$/m);
-  if (envIdx === -1) return false;
-  const afterEnv = jobBody.slice(envIdx);
-  const stepsIdx = afterEnv.search(/^    steps:\s*$/m);
-  const envSection = stepsIdx === -1 ? afterEnv : afterEnv.slice(0, stepsIdx);
-  return TOKEN_IN_ENV.test(envSection);
-}
-
 export function parseJobs(content: string): { name: string; body: string }[] {
   const jobs: { name: string; body: string }[] = [];
   const re = /^  ([a-zA-Z0-9_-]+):\s*\n/gm;
@@ -88,14 +79,13 @@ export function auditWorkflowContent(
 ): string[] {
   const errors: string[] = [];
   for (const job of parseJobs(content)) {
-    const jobToken = jobHasGithubToken(job.body);
     for (const step of splitStepBlocks(job.body)) {
       if (!stepNeedsPagesToken(step)) continue;
-      if (!stepExposesGithubToken(step) && !jobToken) {
+      if (!stepExposesGithubToken(step)) {
         const nameMatch = step.match(/- name: (.+)/);
         const stepName = nameMatch?.[1] ?? "(unnamed step)";
         errors.push(
-          `${relPath} job ${job.name} step "${stepName}": missing GITHUB_TOKEN in step or job env`,
+          `${relPath} job ${job.name} step "${stepName}": missing GITHUB_TOKEN in step env`,
         );
       }
     }
