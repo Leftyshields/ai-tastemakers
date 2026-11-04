@@ -85,4 +85,9 @@ echo "verify: outbound link tracking (/go) on site and email fixtures"
 "$TSX" scripts/verify-outbound-links.ts
 echo "verify: digest send gate and Firestore dependency"
 "$VITEST" run src/tastemaker/email/digest-send-gate.test.ts src/tastemaker/email/digest-send-deps.test.ts
+echo "verify: pages deploy gate (deploy_done / fresh_fetch advisory)"
+"$VITEST" run scripts/pages-deploy-gate.test.ts
+echo "verify: pages deploy verify workflows expose GITHUB_TOKEN"
+"$VITEST" run scripts/verify-pages-deploy-workflow-env.test.ts
+"$TSX" scripts/verify-pages-deploy-workflow-env.ts
 echo "verify: ok"

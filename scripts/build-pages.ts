@@ -512,6 +512,22 @@ async function main(): Promise<void> {
   });
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
+  const pagesBuildSha =
+    process.env.GITHUB_SHA?.trim() ||
+    process.env.PAGES_BUILD_SHA?.trim() ||
+    "local";
+  await fs.writeFile(
+    path.join(SITE_DIR, "build.json"),
+    `${JSON.stringify(
+      {
+        commit: pagesBuildSha,
+        built_at: new Date().toISOString(),
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);
   const posthogNote =
     posthogPages > 0 ? `; PostHog on ${posthogPages} HTML page(s)` : "";

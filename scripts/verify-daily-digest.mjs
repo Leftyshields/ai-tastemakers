@@ -2,6 +2,11 @@
 /**
  * Verify today's OSS + Skills briefings exist and (optionally) Pages is live.
  * Exit 0 = OK, 1 = missing / broken. Used by digest-verify.yml.
+ *
+ * Pages check (VERIFY_PAGES_MAX_WAIT_MS, default 0 locally):
+ * - deploy_done (gate): Pages API latest build success for expected main SHA or descendant.
+ * - fresh_fetch (advisory): live /build.json vs deployed SHA; notice/warning only.
+ * - assertions: HEAD today's briefing HTML (may read cached CDN content up to max-age=600).
  */
 import fs from 'node:fs';
 import { appendFileSync } from 'node:fs';
@@ -37,56 +42,45 @@ function requiredFile(relPath) {
   return { ok: true, path: relPath };
 }
 
-function sleep(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
+import { execFileSync, spawnSync } from 'node:child_process';
 
-function pagesMaxWaitMs() {
-  const raw = process.env.VERIFY_PAGES_MAX_WAIT_MS;
-  if (raw === undefined || raw === '') return 0;
-  const n = Number.parseInt(raw, 10);
-  return Number.isFinite(n) && n > 0 ? n : 0;
-}
+const TSX = path.join(repoRoot, 'node_modules', '.bin', 'tsx');
 
-async function checkPagesOnce(date) {
-  const url = `${siteUrl}/briefings/${date}.html`;
+function expectedPagesSha() {
+  if (process.env.EXPECTED_PAGES_SHA?.trim()) {
+    return process.env.EXPECTED_PAGES_SHA.trim();
+  }
   try {
-    const res = await fetch(url, { method: 'HEAD', redirect: 'follow' });
-    if (res.status === 200) return { ok: true, url };
-    return { ok: false, error: `Pages returned HTTP ${res.status} for ${url}` };
-  } catch (e) {
-    return { ok: false, error: `Pages check failed for ${url}: ${e.message}` };
+    return execFileSync('git', ['rev-parse', 'HEAD'], { cwd: repoRoot, encoding: 'utf8' }).trim();
+  } catch {
+    return process.env.GITHUB_SHA?.trim() || '';
   }
 }
 
-/** Retry Pages HEAD with exponential backoff (VERIFY_PAGES_MAX_WAIT_MS, default 0 = single try). */
-async function checkPages(date) {
-  const maxWaitMs = pagesMaxWaitMs();
-  const started = Date.now();
-  let attempt = 0;
-  let delayMs = 15_000;
-  let last = { ok: false, error: 'Pages check did not run' };
-
-  while (true) {
-    attempt += 1;
-    last = await checkPagesOnce(date);
-    if (last.ok) {
-      return last;
-    }
-
-    const elapsed = Date.now() - started;
-    const remaining = maxWaitMs - elapsed;
-    if (maxWaitMs <= 0 || remaining <= 0) {
-      return last;
-    }
-
-    const waitMs = Math.min(delayMs, remaining);
-    console.log(
-      `  Pages not ready (attempt ${attempt}): ${last.error}. Retrying in ${Math.round(waitMs / 1000)}s...`,
-    );
-    await sleep(waitMs);
-    delayMs = Math.min(Math.round(delayMs * 1.45), 90_000);
+/** deploy_done gate + fresh_fetch advisory + assertions (HEAD briefing; may hit CDN cache). */
+function runPagesDeployVerify(date) {
+  const args = [
+    'scripts/pages-deploy-verify.ts',
+    '--stages',
+    'deploy_done,fresh_fetch,assertions',
+    '--date',
+    date,
+  ];
+  const r = spawnSync(TSX, args, {
+    cwd: repoRoot,
+    env: {
+      ...process.env,
+      EXPECTED_PAGES_SHA: expectedPagesSha(),
+    },
+    encoding: 'utf8',
+  });
+  if (r.stdout) process.stdout.write(r.stdout);
+  if (r.stderr) process.stderr.write(r.stderr);
+  if (r.status === 0) {
+    return { ok: true };
   }
+  const detail = (r.stderr || r.stdout || 'pages deploy verify failed').trim().split('\n').pop();
+  return { ok: false, error: detail || 'Pages deploy verification failed' };
 }
 
 function writeGithubOutputs(today, errors, briefingsOk, pagesOk) {
@@ -129,9 +123,8 @@ async function main() {
 
   let pagesOk = skipPages;
   if (!skipPages) {
-    const pages = await checkPages(today);
+    const pages = runPagesDeployVerify(today);
     if (pages.ok) {
-      console.log(`  OK Pages ${pages.url}`);
       pagesOk = true;
     } else {
       errors.push(pages.error);
