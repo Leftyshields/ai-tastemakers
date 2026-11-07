@@ -194,6 +194,8 @@ describe("runExperimentReminders", () => {
     narrateStructuredContext: false,
     narratePonytail: false,
     skillsExtraDiscovery: false,
+    humanizerPolish: false,
+    enrichCompress: false,
     experimentReminderTo: "ops@example.com",
     resendApiKey: "re_test",
     digestEmailFrom: "Ops <ops@example.com>",
