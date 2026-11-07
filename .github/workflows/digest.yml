@@ -126,6 +126,11 @@ jobs:
           FIRECRAWL_API_KEY: ${{ secrets.FIRECRAWL_API_KEY }}
         run: |
           npm run build:outbound-email-manifest
+          # EXP-20260913-caveman-compress-skills: compression only from 2026-11-08 PT (baseline through 2026-11-07).
+          # ISO dates: [[ d < start ]] is false when d >= start (lexicographic). Do not use [ ] with >= (invalid in test).
+          if [[ ! "${{ steps.gate.outputs.date }}" < "2026-11-08" ]]; then
+            export DIGEST_ENRICH_COMPRESS=1
+          fi
           # EXP-20260913-humanizer-polish-skills — complete (keep); humanizer polish on both editions
           export DIGEST_HUMANIZER_POLISH=1
           # Kept soft dedup (EXP-20260715) and Ponytail narration (EXP-20260802) apply to both editions.
