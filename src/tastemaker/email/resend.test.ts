@@ -172,9 +172,9 @@ describe("sendDigestEmail", () => {
     expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
   });
 
-  it("treats Resend idempotent 409 as already sent for that recipient", async () => {
+  it("treats structured invalid_idempotent_request as already sent for that recipient", async () => {
     sendMock
-      .mockResolvedValueOnce({ data: null, error: { message: "invalid_idempotent_request" } })
+      .mockResolvedValueOnce({ data: null, error: { name: "invalid_idempotent_request" } })
       .mockResolvedValueOnce({ data: { id: "ok-2" }, error: null });
 
     const result = await sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", [
@@ -183,6 +183,34 @@ describe("sendDigestEmail", () => {
     ]);
     expect(result.id).toBe("ok-2");
     expect(sendMock).toHaveBeenCalledTimes(2);
+  });
+
+  it("retries concurrent_idempotent_requests then fails without treating as sent", async () => {
+    const sleepSpy = vi.spyOn(await import("./resend-errors.js"), "sleepMs").mockResolvedValue();
+    sendMock.mockResolvedValue({
+      data: null,
+      error: { name: "concurrent_idempotent_requests", message: "in flight" },
+    });
+
+    await expect(
+      sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", ["alice@example.com"]),
+    ).rejects.toThrow(/1\/1 recipient/);
+
+    expect(sendMock.mock.calls.length).toBe(3);
+    sleepSpy.mockRestore();
+  });
+
+  it("does not treat generic 409 text as already sent", async () => {
+    sendMock.mockResolvedValueOnce({
+      data: null,
+      error: { message: "HTTP 409 conflict" },
+    });
+
+    await expect(
+      sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", ["alice@example.com"]),
+    ).rejects.toThrow(/1\/1 recipient/);
+
+    expect(sendMock).toHaveBeenCalledTimes(1);
   });
 
   it("attempts every recipient before failing so idempotent retries can finish partial sends", async () => {

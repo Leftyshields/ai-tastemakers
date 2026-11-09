@@ -200,9 +200,9 @@ jobs:
             exit 0
           fi
           git commit -m "chore: record digest email send marker for ${{ needs.catchup.outputs.date }}"
-          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
-          git pull --rebase origin main
-          git push origin HEAD:main
+          AUTH_HEADER="AUTHORIZATION: bearer ${GH_TOKEN}"
+          git -c "http.extraheader=${AUTH_HEADER}" pull --rebase origin main
+          git -c "http.extraheader=${AUTH_HEADER}" push origin HEAD:main
 
       - name: Re-verify after marker push
         if: steps.email_marker_push.outcome == 'success' && steps.email_marker_push.outputs.nothing_to_commit != 'true'
