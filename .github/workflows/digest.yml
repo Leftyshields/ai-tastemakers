@@ -34,6 +34,7 @@ on:
 permissions:
   contents: write
   actions: write
+  issues: write
 
 concurrency:
   group: daily-digest
@@ -80,18 +81,29 @@ jobs:
             echo "nothing_to_do=false" >> "$GITHUB_OUTPUT"
           fi
 
+          IS_SUNDAY="$(grep '^is_sunday=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)"
+          if [ "$IS_SUNDAY" != "true" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ ! -f "briefings/${TODAY}/email_sent.json" ]; then
+            echo "email_recovery_needed=true" >> "$GITHUB_OUTPUT"
+            echo "Briefings exist but email_sent.json missing — backstop will resend from stored briefing"
+          else
+            echo "email_recovery_needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true || steps.gate.outputs.email_recovery_needed == 'true'
         with:
           node-version: "22"
           cache: npm
 
       - name: Install dependencies
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true
+        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true || steps.gate.outputs.email_recovery_needed == 'true'
         run: npm ci
 
       - name: Resend digest email from existing briefing
-        if: inputs.resend_email == true && steps.gate.outputs.skip_daily == 'true'
+        id: email_resend
+        if: |
+          steps.gate.outputs.skip_daily == 'true' &&
+          (inputs.resend_email == true || steps.gate.outputs.email_recovery_needed == 'true')
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -219,8 +231,38 @@ jobs:
           git push
           echo "committed=true" >> "$GITHUB_OUTPUT"
 
+      - name: Commit email send marker after resend
+        id: email_marker_commit
+        if: steps.email_resend.outcome == 'success'
+        env:
+          TZ: America/Los_Angeles
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "briefings/${{ steps.gate.outputs.date }}/email_sent.json"
+          if git diff --staged --quiet; then
+            echo "committed=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "chore: record digest email send marker for ${{ steps.gate.outputs.date }}"
+          git pull --rebase origin main
+          git push
+          echo "committed=true" >> "$GITHUB_OUTPUT"
+
       - name: Deploy GitHub Pages
         if: steps.commit.outputs.committed == 'true'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run "Deploy GitHub Pages" --ref main
+
+      - name: Alert on digest job failure
+        if: failure()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          DIGEST_ALERT_KIND: digest_job_failed
+          VERIFY_DIGEST_DATE: ${{ steps.gate.outputs.date }}
+          VERIFY_DIGEST_ERRORS: Daily Digest workflow failed before a successful send (subscriber read, zero recipients, Resend error, or pipeline error). See job logs.
+        run: node scripts/send-digest-alert.mjs

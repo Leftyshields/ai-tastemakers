@@ -15,7 +15,7 @@ on:
   workflow_dispatch:
 
 permissions:
-  contents: read
+  contents: write
   pages: read
   actions: write
   issues: write
@@ -60,6 +60,37 @@ jobs:
           done
           echo "recovered=false" >> "$GITHUB_OUTPUT"
           exit 1
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        if: steps.check.outcome == 'failure' && steps.check.outputs.email_missing == 'true'
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies for email resend
+        if: steps.check.outcome == 'failure' && steps.check.outputs.email_missing == 'true'
+        run: npm ci
+
+      - name: Resend digest email when marker missing
+        id: email_resend
+        if: steps.check.outcome == 'failure' && steps.check.outputs.email_missing == 'true'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+          FIREBASE_PROJECT_ID: epiphoric-prod
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: |
+          npm run build:outbound-email-manifest
+          npm run digest:resend-email -- --date "${{ steps.check.outputs.date }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "briefings/${{ steps.check.outputs.date }}/email_sent.json"
+          git diff --staged --quiet && exit 0
+          git commit -m "chore: record digest email send marker for ${{ steps.check.outputs.date }}"
+          git pull --rebase origin main
+          git push
 
       - name: Redeploy Pages when briefings exist but site is stale
         id: pages_redeploy
@@ -109,6 +140,12 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-daily-digest.mjs
 
+      - name: Re-verify after email resend
+        if: steps.email_resend.outcome == 'success'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/verify-daily-digest.mjs
+
       - name: Alert on failure
         if: |
           always() &&
@@ -116,7 +153,8 @@ jobs:
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
-            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
+            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true') ||
+            (steps.check.outputs.email_missing == 'true' && steps.email_resend.outcome != 'success')
           )
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
@@ -127,6 +165,8 @@ jobs:
           VERIFY_DIGEST_ERRORS: ${{ steps.check.outputs.errors }}
           VERIFY_DIGEST_BRIEFINGS_OK: ${{ steps.check.outputs.briefings_ok }}
           VERIFY_DIGEST_PAGES_OK: ${{ steps.check.outputs.pages_ok }}
+          VERIFY_DIGEST_EMAIL_OK: ${{ steps.check.outputs.email_ok }}
+          VERIFY_DIGEST_EMAIL_REQUIRED: ${{ steps.check.outputs.email_required }}
         run: node scripts/send-digest-alert.mjs
 
       - name: Fail job if catch-up failed
@@ -135,6 +175,7 @@ jobs:
           steps.check.outcome == 'failure' &&
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
-            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
+            (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true') ||
+            (steps.check.outputs.email_missing == 'true' && steps.email_resend.outcome != 'success')
           )
         run: exit 1

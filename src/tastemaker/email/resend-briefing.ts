@@ -8,6 +8,7 @@ import {
   sendDigestEmail,
   sendWeeklyDigestEmail,
 } from "./resend.js";
+import { writeDailyDigestEmailSentMarker } from "./email-send-marker.js";
 import { coerceWeeklyEmail, coerceWeeklyNarrative } from "../narrate/weekly.js";
 import { isoWeekIdFromDateLabel, isSundayDateLabel } from "../weekly/week.js";
 
@@ -51,5 +52,6 @@ export async function resendDigestEmailForDate(
     pendingDigest: { digest, dateLabel, editionId: "oss" },
   });
   const sent = await sendDigestEmail(config, digest, dateLabel, recipients, { manualRunId });
+  await writeDailyDigestEmailSentMarker(config.briefingsDir, dateLabel, sent.id);
   return { id: sent.id, recipientCount: recipients.length };
 }

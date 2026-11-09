@@ -64,6 +64,11 @@ describe("resendDigestEmailForDate", () => {
 
     const result = await resendDigestEmailForDate(config, "2026-07-01");
     expect(result).toEqual({ id: "msg-123", recipientCount: 2 });
+    const marker = await fs.readFile(
+      path.join(tmpDir, "briefings", "2026-07-01", "email_sent.json"),
+      "utf8",
+    );
+    expect(JSON.parse(marker).resend_message_id).toBe("msg-123");
     expect(sendDigestEmail).toHaveBeenCalledWith(
       config,
       sampleDigest,

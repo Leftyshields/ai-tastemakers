@@ -22,6 +22,18 @@ jobs:
 
       - run: npm ci
 
+      - name: Digest runtime deps (production install)
+        run: |
+          rm -rf node_modules
+          npm ci --omit=dev
+          node --input-type=module -e "
+            import { createRequire } from 'node:module';
+            const require = createRequire(import.meta.url);
+            require('@google-cloud/firestore');
+            require('firebase-admin/firestore');
+          "
+          npm ci
+
       - name: Validate lab experiments registry
         run: npx tsx scripts/lab/validate-experiments.ts
 

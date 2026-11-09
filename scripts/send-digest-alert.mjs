@@ -22,7 +22,12 @@ const errors =
 
 const briefingsOk = process.env.VERIFY_DIGEST_BRIEFINGS_OK === 'true';
 const pagesOk = process.env.VERIFY_DIGEST_PAGES_OK === 'true';
+const emailOk = process.env.VERIFY_DIGEST_EMAIL_OK !== 'false';
+const emailRequired = process.env.VERIFY_DIGEST_EMAIL_REQUIRED === 'true';
 const pagesStale = briefingsOk && !pagesOk;
+const emailMissing = briefingsOk && emailRequired && !emailOk;
+const alertKind = process.env.DIGEST_ALERT_KIND?.trim() || 'verify';
+const digestJobFailed = alertKind === 'digest_job_failed';
 
 const resendKey = process.env.RESEND_API_KEY?.trim();
 const from = process.env.DIGEST_EMAIL_FROM?.trim();
@@ -33,16 +38,30 @@ const runUrl = process.env.GITHUB_RUN_ID
   ? `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : `https://github.com/${repo}/actions/workflows/digest-verify.yml`;
 
-const subject = pagesStale
-  ? `🚨 AI Tastemakers — Pages stale after digest (${today})`
-  : `🚨 AI Tastemakers — daily digest missing (${today})`;
+const subject = digestJobFailed
+  ? `🚨 AI Tastemakers — Daily Digest job failed (${today})`
+  : emailMissing
+    ? `🚨 AI Tastemakers — digest email not sent (${today})`
+    : pagesStale
+      ? `🚨 AI Tastemakers — Pages stale after digest (${today})`
+      : `🚨 AI Tastemakers — daily digest missing (${today})`;
 
-const actionLines = pagesStale
+const actionLines = digestJobFailed
   ? [
-      `Redeploy Pages: https://github.com/${repo}/actions/workflows/pages.yml`,
-      `Digest already committed for ${today} — re-running digest is not required unless briefing files are also missing.`,
+      `Inspect failed run: ${runUrl}`,
+      `Evening backstop may auto-resend if briefings exist but email_sent.json is missing.`,
     ]
-  : [`Re-run digest: https://github.com/${repo}/actions/workflows/digest.yml`];
+  : emailMissing
+    ? [
+        `Resend from stored briefing: https://github.com/${repo}/actions/workflows/digest.yml (workflow_dispatch, check resend_email)`,
+        `Briefings for ${today} already exist — do not regenerate content unless files are wrong.`,
+      ]
+    : pagesStale
+      ? [
+          `Redeploy Pages: https://github.com/${repo}/actions/workflows/pages.yml`,
+          `Digest already committed for ${today} — re-running digest is not required unless briefing files are also missing.`,
+        ]
+      : [`Re-run digest: https://github.com/${repo}/actions/workflows/digest.yml`];
 
 const text = [
   `Daily digest verification failed for ${today}.`,
@@ -52,9 +71,13 @@ const text = [
   ...actionLines,
   `Verify workflow: ${runUrl}`,
   '',
-  pagesStale
-    ? 'Checks: OSS + Skills briefing files on main (OK), GitHub Pages brief URL (missing/stale).'
-    : 'Checks: OSS + Skills briefing files on main, GitHub Pages brief URL.',
+  digestJobFailed
+    ? 'Checks: Daily Digest workflow exited with failure before confirming email send.'
+    : emailMissing
+      ? 'Checks: OSS + Skills briefing files on main (OK), email_sent.json marker (missing).'
+      : pagesStale
+        ? 'Checks: OSS + Skills briefing files on main (OK), GitHub Pages brief URL (missing/stale).'
+        : 'Checks: OSS + Skills briefing files on main, GitHub Pages brief URL.',
 ].join('\n');
 
 async function sendEmail() {
@@ -95,7 +118,11 @@ function openGitHubIssue() {
     return;
   }
 
-  const title = `Daily digest missing — ${today}`;
+  const title = digestJobFailed
+    ? `Daily Digest job failed — ${today}`
+    : emailMissing
+      ? `Daily digest email not sent — ${today}`
+      : `Daily digest missing — ${today}`;
   const bodyFile = path.join(os.tmpdir(), `digest-alert-${today}.md`);
   fs.writeFileSync(bodyFile, text, 'utf8');
 
