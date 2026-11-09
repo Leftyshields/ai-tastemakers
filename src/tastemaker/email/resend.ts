@@ -21,6 +21,7 @@ import { collectDigestRepoAllowlist } from "../analytics/digest-allowlist.js";
 import { assertRenderedEmailAllowedByManifest } from "../analytics/outbound-email-manifest-guard.js";
 import { refreshOutboundEmailDestManifest } from "../analytics/write-outbound-email-manifest.js";
 import { isDigestEmailConfigured } from "./digest-send-gate.js";
+import { isResendIdempotentAlreadySent, recipientFailureLabel } from "./resend-errors.js";
 
 export { assertDigestSendReady, isDigestEmailConfigured } from "./digest-send-gate.js";
 
@@ -98,8 +99,8 @@ export async function sendDigestEmail(
   let lastId = "";
   const failures: string[] = [];
 
-  for (const record of records) {
-  try {
+  for (const [index, record] of records.entries()) {
+    try {
     const unsubscribeUrl = digestUnsubscribeUrl(
       config.digestSiteUrl,
       record.email,
@@ -146,22 +147,34 @@ export async function sendDigestEmail(
     );
 
     if (error) {
+      if (isResendIdempotentAlreadySent(error)) {
+        lastId = lastId || "idempotent-replay";
+        continue;
+      }
       throw new Error(`Resend API error: ${error.message}`);
     }
     if (!data?.id) {
       throw new Error("Resend API returned no message id");
     }
     lastId = data.id;
-  } catch (err) {
-    const msg = err instanceof Error ? err.message : String(err);
-    failures.push(`${record.email}: ${msg}`);
-  }
+    } catch (err) {
+      if (isResendIdempotentAlreadySent(err)) {
+        lastId = lastId || "idempotent-replay";
+        continue;
+      }
+      const msg = err instanceof Error ? err.message : String(err);
+      failures.push(`${recipientFailureLabel(index, record.email)}: ${msg}`);
+    }
   }
 
   if (failures.length > 0) {
     throw new Error(
       `Resend daily digest failed for ${failures.length}/${records.length} recipient(s): ${failures.join("; ")}`,
     );
+  }
+
+  if (!lastId) {
+    throw new Error("Resend daily digest returned no message id");
   }
 
   return { id: lastId };
@@ -191,7 +204,7 @@ export async function sendWeeklyDigestEmail(
   let lastId = "";
   const failures: string[] = [];
 
-  for (const record of records) {
+  for (const [index, record] of records.entries()) {
     try {
       const unsubscribeUrl = digestUnsubscribeUrl(
         config.digestSiteUrl,
@@ -233,6 +246,10 @@ export async function sendWeeklyDigestEmail(
       );
 
       if (error) {
+        if (isResendIdempotentAlreadySent(error)) {
+          lastId = lastId || "idempotent-replay";
+          continue;
+        }
         throw new Error(`Resend API error: ${error.message}`);
       }
       if (!data?.id) {
@@ -240,8 +257,12 @@ export async function sendWeeklyDigestEmail(
       }
       lastId = data.id;
     } catch (err) {
+      if (isResendIdempotentAlreadySent(err)) {
+        lastId = lastId || "idempotent-replay";
+        continue;
+      }
       const msg = err instanceof Error ? err.message : String(err);
-      failures.push(`${record.email}: ${msg}`);
+      failures.push(`${recipientFailureLabel(index, record.email)}: ${msg}`);
     }
   }
 
@@ -249,6 +270,10 @@ export async function sendWeeklyDigestEmail(
     throw new Error(
       `Resend weekly digest failed for ${failures.length}/${records.length} recipient(s): ${failures.join("; ")}`,
     );
+  }
+
+  if (!lastId) {
+    throw new Error("Resend weekly digest returned no message id");
   }
 
   return { id: lastId };

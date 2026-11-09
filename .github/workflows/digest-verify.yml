@@ -25,10 +25,6 @@ permissions:
   issues: write
   actions: write
 
-concurrency:
-  group: digest-email-send
-  cancel-in-progress: false
-
 jobs:
   verify:
     runs-on: ubuntu-latest
@@ -169,14 +165,19 @@ jobs:
     needs: verify
     if: needs.verify.outputs.email_missing == 'true'
     runs-on: ubuntu-latest
+    concurrency:
+      group: digest-email-send
+      cancel-in-progress: false
     permissions:
       contents: write
+      issues: write
     env:
       TZ: America/Los_Angeles
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
         with:
           ref: main
+          persist-credentials: false
 
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
@@ -202,6 +203,8 @@ jobs:
       - name: Commit email send marker
         id: email_marker_push
         if: steps.email_send.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ github.token }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
@@ -211,8 +214,9 @@ jobs:
             exit 0
           fi
           git commit -m "chore: record digest email send marker for ${{ needs.verify.outputs.date }}"
+          git remote set-url origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
           git pull --rebase origin main
-          git push
+          git push origin HEAD:main
 
       - name: Re-verify after marker push
         if: steps.email_marker_push.outcome == 'success' && steps.email_marker_push.outputs.nothing_to_commit != 'true'

@@ -37,7 +37,7 @@ describe("digest.yml caveman compress date guard (bash)", () => {
   it("documents the date guard in the Run digest step (not always-on)", () => {
     const yml = fs.readFileSync(path.join(process.cwd(), ".github/workflows/digest.yml"), "utf8");
     const runDigest = yml.split("- name: Run digest (OSS + Skills)")[1]?.split("- name:")[0] ?? "";
-    expect(runDigest).toMatch(/\[\[\s*!\s*"\$\{\{\s*steps\.gate\.outputs\.date\s*\}\}"\s*<\s*"2026-11-08"\s*\]\]/);
+    expect(runDigest).toMatch(/\[\[\s*!\s*"\$\{\{\s*needs\.gate\.outputs\.date\s*\}\}"\s*<\s*"2026-11-08"\s*\]\]/);
     expect(runDigest).toContain("export DIGEST_ENRICH_COMPRESS=1");
     expect(runDigest).not.toMatch(/^          export DIGEST_ENRICH_COMPRESS=1\s*$/m);
   });

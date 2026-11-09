@@ -172,6 +172,19 @@ describe("sendDigestEmail", () => {
     expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
   });
 
+  it("treats Resend idempotent 409 as already sent for that recipient", async () => {
+    sendMock
+      .mockResolvedValueOnce({ data: null, error: { message: "invalid_idempotent_request" } })
+      .mockResolvedValueOnce({ data: { id: "ok-2" }, error: null });
+
+    const result = await sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", [
+      "alice@example.com",
+      "bob@example.com",
+    ]);
+    expect(result.id).toBe("ok-2");
+    expect(sendMock).toHaveBeenCalledTimes(2);
+  });
+
   it("attempts every recipient before failing so idempotent retries can finish partial sends", async () => {
     sendMock
       .mockResolvedValueOnce({ data: { id: "ok-1" }, error: null })
