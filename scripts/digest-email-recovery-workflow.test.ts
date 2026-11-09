@@ -96,6 +96,23 @@ describe("digest email recovery / backstop workflow guards", () => {
         expect(markerStep).toContain("::add-mask::");
         expect(markerStep).not.toContain("AUTHORIZATION: bearer");
       });
+
+      it("scopes unexpected-failure alerts to non-send non-marker failures", () => {
+        expect(job).toMatch(
+          /Alert on unexpected[\s\S]*if: \|[\s\S]*always\(\)[\s\S]*failure\(\)[\s\S]*steps\.[^\n]+outcome != 'failure'[\s\S]*!\(steps\.[^\n]+outcome == 'success' && steps\.[^\n]+outcome == 'failure'\)/,
+        );
+        expect(job).toMatch(
+          /Fail on unexpected[\s\S]*if: \|[\s\S]*always\(\)[\s\S]*failure\(\)[\s\S]*steps\.[^\n]+outcome != 'failure'[\s\S]*!\(steps\.[^\n]+outcome == 'success' && steps\.[^\n]+outcome == 'failure'\)/,
+        );
+      });
+
+      if (wf.file === ".github/workflows/digest-verify.yml") {
+        it("re-verify after marker push skips Pages (GITHUB_TOKEN push does not redeploy)", () => {
+          const reverify = stepBlock(job, "Re-verify after marker push");
+          expect(reverify).toContain("verify-daily-digest.mjs --skip-pages");
+          expect(reverify).not.toMatch(/verify-daily-digest\.mjs\s*$/m);
+        });
+      }
     });
   }
 });

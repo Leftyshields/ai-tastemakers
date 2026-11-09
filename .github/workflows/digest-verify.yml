@@ -226,7 +226,7 @@ jobs:
         if: steps.email_marker_push.outcome == 'success' && steps.email_marker_push.outputs.nothing_to_commit != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: node scripts/verify-daily-digest.mjs
+        run: node scripts/verify-daily-digest.mjs --skip-pages
 
       - name: Alert when email send failed
         if: always() && steps.email_send.outcome == 'failure'
