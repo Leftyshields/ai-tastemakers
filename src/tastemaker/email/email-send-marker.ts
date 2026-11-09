@@ -1,13 +1,21 @@
 import path from "node:path";
 import { promises as fs } from "node:fs";
 
+const ISO_DATE_LABEL = /^\d{4}-\d{2}-\d{2}$/;
+
+export function assertIsoDateLabel(dateLabel: string): void {
+  if (!ISO_DATE_LABEL.test(dateLabel)) {
+    throw new Error(`Invalid date label (expected YYYY-MM-DD): ${dateLabel}`);
+  }
+}
+
 export type DailyDigestEmailSentMarker = {
   schema_version: 1;
   date_label: string;
   edition_id: "oss";
-  resend_message_id: string;
+  /** UTC timestamp when Resend accepted the last recipient send (no Resend message id in git). */
   sent_at: string;
-  github_run_id?: string;
+  recipient_count: number;
 };
 
 export const EMAIL_SENT_MARKER_FILE = "email_sent.json";
@@ -16,6 +24,7 @@ export function dailyDigestEmailSentMarkerPath(
   briefingsDir: string,
   dateLabel: string,
 ): string {
+  assertIsoDateLabel(dateLabel);
   return path.join(briefingsDir, dateLabel, EMAIL_SENT_MARKER_FILE);
 }
 
@@ -31,9 +40,9 @@ export async function readDailyDigestEmailSentMarker(
       parsed?.schema_version === 1 &&
       parsed.date_label === dateLabel &&
       parsed.edition_id === "oss" &&
-      typeof parsed.resend_message_id === "string" &&
-      parsed.resend_message_id.length > 0 &&
-      typeof parsed.sent_at === "string"
+      typeof parsed.sent_at === "string" &&
+      typeof parsed.recipient_count === "number" &&
+      parsed.recipient_count > 0
     ) {
       return parsed;
     }
@@ -47,16 +56,19 @@ export async function readDailyDigestEmailSentMarker(
 export async function writeDailyDigestEmailSentMarker(
   briefingsDir: string,
   dateLabel: string,
-  resendMessageId: string,
+  recipientCount: number,
   sentAt: Date = new Date(),
 ): Promise<string> {
+  assertIsoDateLabel(dateLabel);
+  if (recipientCount < 1) {
+    throw new Error("Cannot write email send marker with zero recipients");
+  }
   const marker: DailyDigestEmailSentMarker = {
     schema_version: 1,
     date_label: dateLabel,
     edition_id: "oss",
-    resend_message_id: resendMessageId,
     sent_at: sentAt.toISOString(),
-    github_run_id: process.env.GITHUB_RUN_ID?.trim() || undefined,
+    recipient_count: recipientCount,
   };
   const filePath = dailyDigestEmailSentMarkerPath(briefingsDir, dateLabel);
   await fs.mkdir(path.dirname(filePath), { recursive: true });

@@ -28,6 +28,7 @@ const pagesStale = briefingsOk && !pagesOk;
 const emailMissing = briefingsOk && emailRequired && !emailOk;
 const alertKind = process.env.DIGEST_ALERT_KIND?.trim() || 'verify';
 const digestJobFailed = alertKind === 'digest_job_failed';
+const markerPushFailed = alertKind === 'marker_push_failed';
 
 const resendKey = process.env.RESEND_API_KEY?.trim();
 const from = process.env.DIGEST_EMAIL_FROM?.trim();
@@ -38,7 +39,9 @@ const runUrl = process.env.GITHUB_RUN_ID
   ? `${process.env.GITHUB_SERVER_URL || 'https://github.com'}/${repo}/actions/runs/${process.env.GITHUB_RUN_ID}`
   : `https://github.com/${repo}/actions/workflows/digest-verify.yml`;
 
-const subject = digestJobFailed
+const subject = markerPushFailed
+  ? `🚨 AI Tastemakers — digest email marker push failed (${today})`
+  : digestJobFailed
   ? `🚨 AI Tastemakers — Daily Digest job failed (${today})`
   : emailMissing
     ? `🚨 AI Tastemakers — digest email not sent (${today})`
@@ -46,7 +49,12 @@ const subject = digestJobFailed
       ? `🚨 AI Tastemakers — Pages stale after digest (${today})`
       : `🚨 AI Tastemakers — daily digest missing (${today})`;
 
-const actionLines = digestJobFailed
+const actionLines = markerPushFailed
+  ? [
+      'Resend likely succeeded; fix git push / rebase for email_sent.json on main.',
+      `Workflow: ${runUrl}`,
+    ]
+  : digestJobFailed
   ? [
       `Inspect failed run: ${runUrl}`,
       `Evening backstop may auto-resend if briefings exist but email_sent.json is missing.`,
@@ -71,7 +79,9 @@ const text = [
   ...actionLines,
   `Verify workflow: ${runUrl}`,
   '',
-  digestJobFailed
+  markerPushFailed
+    ? 'Checks: Resend send succeeded; committing public email_sent.json (sent_at + recipient_count only) failed.'
+    : digestJobFailed
     ? 'Checks: Daily Digest workflow exited with failure before confirming email send.'
     : emailMissing
       ? 'Checks: OSS + Skills briefing files on main (OK), email_sent.json marker (missing).'
@@ -118,7 +128,9 @@ function openGitHubIssue() {
     return;
   }
 
-  const title = digestJobFailed
+  const title = markerPushFailed
+    ? `Digest email marker push failed — ${today}`
+    : digestJobFailed
     ? `Daily Digest job failed — ${today}`
     : emailMissing
       ? `Daily digest email not sent — ${today}`

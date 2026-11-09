@@ -96,8 +96,10 @@ export async function sendDigestEmail(
   const subject = digestEmailSubject(dateLabel);
   const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
+  const failures: string[] = [];
 
   for (const record of records) {
+  try {
     const unsubscribeUrl = digestUnsubscribeUrl(
       config.digestSiteUrl,
       record.email,
@@ -150,6 +152,16 @@ export async function sendDigestEmail(
       throw new Error("Resend API returned no message id");
     }
     lastId = data.id;
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    failures.push(`${record.email}: ${msg}`);
+  }
+  }
+
+  if (failures.length > 0) {
+    throw new Error(
+      `Resend daily digest failed for ${failures.length}/${records.length} recipient(s): ${failures.join("; ")}`,
+    );
   }
 
   return { id: lastId };
@@ -177,54 +189,66 @@ export async function sendWeeklyDigestEmail(
   const subject = weeklyEmailSubject(review);
   const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
+  const failures: string[] = [];
 
   for (const record of records) {
-    const unsubscribeUrl = digestUnsubscribeUrl(
-      config.digestSiteUrl,
-      record.email,
-      record.unsubscribeToken,
-    );
-    const weeklyHtml = renderWeeklyEmailHtml(
-      review,
-      config.digestSiteUrl,
-      unsubscribeUrl,
-      githubAllowlist,
-    );
-    const weeklyText = renderWeeklyEmailText(
-      review,
-      config.digestSiteUrl,
-      unsubscribeUrl,
-      githubAllowlist,
-    );
-    await assertRenderedEmailAllowedByManifest(config.rootDir, weeklyHtml, weeklyText);
-    const idempotencyKey = digestSendIdempotencyKey(
-      "weekly-digest",
-      config.editionId,
-      review.week_id,
-      record.email,
-      sendOptions?.manualRunId,
-    );
-    const { data, error } = await resend.emails.send(
-      {
-        from: config.digestEmailFrom,
-        to: [record.email],
-        subject,
-        html: weeklyHtml,
-        text: weeklyText,
-        headers: {
-          "List-Unsubscribe": `<${unsubscribeUrl}>`,
+    try {
+      const unsubscribeUrl = digestUnsubscribeUrl(
+        config.digestSiteUrl,
+        record.email,
+        record.unsubscribeToken,
+      );
+      const weeklyHtml = renderWeeklyEmailHtml(
+        review,
+        config.digestSiteUrl,
+        unsubscribeUrl,
+        githubAllowlist,
+      );
+      const weeklyText = renderWeeklyEmailText(
+        review,
+        config.digestSiteUrl,
+        unsubscribeUrl,
+        githubAllowlist,
+      );
+      await assertRenderedEmailAllowedByManifest(config.rootDir, weeklyHtml, weeklyText);
+      const idempotencyKey = digestSendIdempotencyKey(
+        "weekly-digest",
+        config.editionId,
+        review.week_id,
+        record.email,
+        sendOptions?.manualRunId,
+      );
+      const { data, error } = await resend.emails.send(
+        {
+          from: config.digestEmailFrom,
+          to: [record.email],
+          subject,
+          html: weeklyHtml,
+          text: weeklyText,
+          headers: {
+            "List-Unsubscribe": `<${unsubscribeUrl}>`,
+          },
         },
-      },
-      { idempotencyKey },
-    );
+        { idempotencyKey },
+      );
 
-    if (error) {
-      throw new Error(`Resend API error: ${error.message}`);
+      if (error) {
+        throw new Error(`Resend API error: ${error.message}`);
+      }
+      if (!data?.id) {
+        throw new Error("Resend API returned no message id");
+      }
+      lastId = data.id;
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      failures.push(`${record.email}: ${msg}`);
     }
-    if (!data?.id) {
-      throw new Error("Resend API returned no message id");
-    }
-    lastId = data.id;
+  }
+
+  if (failures.length > 0) {
+    throw new Error(
+      `Resend weekly digest failed for ${failures.length}/${records.length} recipient(s): ${failures.join("; ")}`,
+    );
   }
 
   return { id: lastId };

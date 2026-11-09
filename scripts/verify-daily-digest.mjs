@@ -11,6 +11,10 @@
 import fs from 'node:fs';
 import { appendFileSync } from 'node:fs';
 import path from 'node:path';
+import {
+  emailSentMarkerEnforced,
+  isSundayDateLabel,
+} from './digest-email-marker-policy.mjs';
 
 const TZ = process.env.TZ || 'America/Los_Angeles';
 const siteUrl = (process.env.DIGEST_SITE_URL || 'https://leftyshields.github.io/ai-tastemakers').replace(
@@ -30,26 +34,16 @@ function todayInTz() {
   }).format(new Date());
 }
 
-function isSundayDateLabel(dateLabel) {
-  const [y, m, d] = dateLabel.split('-').map(Number);
-  const utcNoon = new Date(Date.UTC(y, m - 1, d, 12));
-  const weekday = new Intl.DateTimeFormat('en-US', { timeZone: TZ, weekday: 'short' }).format(
-    utcNoon,
-  );
-  return weekday === 'Sun';
-}
-
-function dailyDigestEmailExpected(dateLabel) {
-  return !isSundayDateLabel(dateLabel);
-}
-
 function emailSentMarkerPath(dateLabel) {
   return path.join(repoRoot, 'briefings', dateLabel, 'email_sent.json');
 }
 
 function verifyEmailSentMarker(dateLabel) {
-  if (!dailyDigestEmailExpected(dateLabel)) {
-    return { ok: true, required: false };
+  if (!emailSentMarkerEnforced(dateLabel)) {
+    if (isSundayDateLabel(dateLabel)) {
+      return { ok: true, required: false, reason: 'sunday' };
+    }
+    return { ok: true, required: false, reason: 'grandfathered' };
   }
   const markerPath = emailSentMarkerPath(dateLabel);
   if (!fs.existsSync(markerPath)) {
@@ -65,8 +59,9 @@ function verifyEmailSentMarker(dateLabel) {
       raw?.schema_version === 1 &&
       raw?.date_label === dateLabel &&
       raw?.edition_id === 'oss' &&
-      typeof raw?.resend_message_id === 'string' &&
-      raw.resend_message_id.length > 0
+      typeof raw?.sent_at === 'string' &&
+      typeof raw?.recipient_count === 'number' &&
+      raw.recipient_count > 0
     ) {
       return { ok: true, required: true, path: `briefings/${dateLabel}/email_sent.json` };
     }
@@ -194,9 +189,12 @@ async function main() {
         emailOk = false;
         errors.push(emailCheck.error);
       }
-    } else {
+    } else if (emailCheck.reason === 'sunday') {
       emailOk = true;
       console.log('  OK (Sunday — daily top-10 email not expected)');
+    } else {
+      emailOk = true;
+      console.log('  OK (email marker not required before enforcement date)');
     }
   }
 
@@ -217,7 +215,7 @@ async function main() {
 
     if (briefingsOk && emailRequired && !emailOk) {
       console.error(
-        '\nBriefings exist on main but the daily digest email was never confirmed sent — run digest:resend-email (stored briefing, Resend idempotency prevents duplicate sends).',
+        '\nBriefings exist on main but email_sent.json is missing (send may not have completed or marker was not committed). Automatic recovery uses date-based Resend idempotency per recipient (no run-id suffix); duplicates are unlikely but not impossible if Resend rejects a key.',
       );
       console.error(
         `Actions: https://github.com/Leftyshields/ai-tastemakers/actions/workflows/digest.yml`,

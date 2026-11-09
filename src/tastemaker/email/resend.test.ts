@@ -172,6 +172,21 @@ describe("sendDigestEmail", () => {
     expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
   });
 
+  it("attempts every recipient before failing so idempotent retries can finish partial sends", async () => {
+    sendMock
+      .mockResolvedValueOnce({ data: { id: "ok-1" }, error: null })
+      .mockResolvedValueOnce({ data: null, error: { message: "rate limit" } });
+
+    await expect(
+      sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", [
+        "alice@example.com",
+        "bob@example.com",
+      ]),
+    ).rejects.toThrow(/1\/2 recipient/);
+
+    expect(sendMock).toHaveBeenCalledTimes(2);
+  });
+
   it("passes manual idempotency keys when manualRunId is set", async () => {
     await sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", ["alice@example.com"], {
       manualRunId: "12345",

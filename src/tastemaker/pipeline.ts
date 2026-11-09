@@ -427,7 +427,7 @@ export async function runPipeline(
       const sendEmail = deps.sendEmail ?? sendDigestEmail;
       console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
       const sent = await sendEmail(config, digest, dateLabel, recipients);
-      await writeDailyDigestEmailSentMarker(config.briefingsDir, dateLabel, sent.id);
+      await writeDailyDigestEmailSentMarker(config.briefingsDir, dateLabel, recipients.length);
       console.error(`Email sent (id: ${sent.id})`);
     }
   }

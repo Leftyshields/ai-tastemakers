@@ -24,7 +24,7 @@ describe("verify-daily-digest email marker gate", () => {
 
   beforeEach(() => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "verify-digest-"));
-    writeBriefingTree(tmpDir, "2026-11-03");
+    writeBriefingTree(tmpDir, "2026-11-11");
   });
 
   afterEach(() => {
@@ -40,7 +40,7 @@ describe("verify-daily-digest email marker gate", () => {
         env: {
           ...process.env,
           TZ: "America/Los_Angeles",
-          VERIFY_DIGEST_DATE: "2026-11-03",
+          VERIFY_DIGEST_DATE: "2026-11-11",
         },
         encoding: "utf8",
       },
@@ -50,16 +50,16 @@ describe("verify-daily-digest email marker gate", () => {
   });
 
   it("passes when email marker exists for a weekday", () => {
-    const markerDir = path.join(tmpDir, "briefings", "2026-11-03");
+    const markerDir = path.join(tmpDir, "briefings", "2026-11-11");
     fs.writeFileSync(
       path.join(markerDir, "email_sent.json"),
       `${JSON.stringify(
         {
           schema_version: 1,
-          date_label: "2026-11-03",
+          date_label: "2026-11-11",
           edition_id: "oss",
-          resend_message_id: "msg-1",
-          sent_at: "2026-11-03T16:00:00.000Z",
+          sent_at: "2026-11-11T16:00:00.000Z",
+          recipient_count: 2,
         },
         null,
         2,
@@ -74,7 +74,7 @@ describe("verify-daily-digest email marker gate", () => {
         env: {
           ...process.env,
           TZ: "America/Los_Angeles",
-          VERIFY_DIGEST_DATE: "2026-11-03",
+          VERIFY_DIGEST_DATE: "2026-11-11",
         },
         encoding: "utf8",
       },

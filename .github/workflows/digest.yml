@@ -37,7 +37,7 @@ permissions:
   issues: write
 
 concurrency:
-  group: daily-digest
+  group: digest-email-send
   cancel-in-progress: false
 
 jobs:
@@ -82,7 +82,8 @@ jobs:
           fi
 
           IS_SUNDAY="$(grep '^is_sunday=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)"
-          if [ "$IS_SUNDAY" != "true" ] && [ -f "briefings/${TODAY}/digest.json" ] && [ ! -f "briefings/${TODAY}/email_sent.json" ]; then
+          ENFORCE_FROM="2026-11-10"
+          if [ "$IS_SUNDAY" != "true" ] && [[ ! "$TODAY" < "$ENFORCE_FROM" ]] && [ -f "briefings/${TODAY}/digest.json" ] && [ ! -f "briefings/${TODAY}/email_sent.json" ]; then
             echo "email_recovery_needed=true" >> "$GITHUB_OUTPUT"
             echo "Briefings exist but email_sent.json missing — backstop will resend from stored briefing"
           else
@@ -111,9 +112,10 @@ jobs:
           FIREBASE_PROJECT_ID: epiphoric-prod
           FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
           FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          DIGEST_RESEND_MANUAL: ${{ inputs.resend_email == true && '1' || '' }}
         run: |
           npm run build:outbound-email-manifest
-          npm run digest:resend-email
+          npm run digest:resend-email -- --date "${{ steps.gate.outputs.date }}"
 
       - name: Run digest (OSS + Skills)
         if: steps.gate.outputs.skip_daily != 'true'

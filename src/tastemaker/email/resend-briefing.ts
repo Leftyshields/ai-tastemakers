@@ -8,7 +8,8 @@ import {
   sendDigestEmail,
   sendWeeklyDigestEmail,
 } from "./resend.js";
-import { writeDailyDigestEmailSentMarker } from "./email-send-marker.js";
+import { assertIsoDateLabel, writeDailyDigestEmailSentMarker } from "./email-send-marker.js";
+import { resolveDigestResendManualRunId } from "./resend-manual.js";
 import { coerceWeeklyEmail, coerceWeeklyNarrative } from "../narrate/weekly.js";
 import { isoWeekIdFromDateLabel, isSundayDateLabel } from "../weekly/week.js";
 
@@ -20,8 +21,9 @@ export async function resendDigestEmailForDate(
     throw new Error("Digest email is OSS edition only");
   }
 
+  assertIsoDateLabel(dateLabel);
   const recipients = await assertDigestSendReady(config);
-  const manualRunId = process.env.GITHUB_RUN_ID?.trim() || undefined;
+  const manualRunId = resolveDigestResendManualRunId();
 
   if (isSundayDateLabel(dateLabel)) {
     const weekId = isoWeekIdFromDateLabel(dateLabel);
@@ -52,6 +54,6 @@ export async function resendDigestEmailForDate(
     pendingDigest: { digest, dateLabel, editionId: "oss" },
   });
   const sent = await sendDigestEmail(config, digest, dateLabel, recipients, { manualRunId });
-  await writeDailyDigestEmailSentMarker(config.briefingsDir, dateLabel, sent.id);
+  await writeDailyDigestEmailSentMarker(config.briefingsDir, dateLabel, recipients.length);
   return { id: sent.id, recipientCount: recipients.length };
 }
