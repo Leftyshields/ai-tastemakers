@@ -281,6 +281,7 @@ jobs:
 
       - name: Resend digest email from existing briefing
         id: email_resend
+        continue-on-error: true
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -296,6 +297,7 @@ jobs:
       - name: Commit email send marker after resend
         id: email_marker_commit
         if: steps.email_resend.outcome == 'success'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -306,12 +308,14 @@ jobs:
             exit 0
           fi
           git commit -m "chore: record digest email send marker for ${{ needs.gate.outputs.date }}"
-          AUTH_HEADER="AUTHORIZATION: bearer ${GH_TOKEN}"
+          BASIC_AUTH="$(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+          echo "::add-mask::${BASIC_AUTH}"
+          AUTH_HEADER="AUTHORIZATION: basic ${BASIC_AUTH}"
           git -c "http.extraheader=${AUTH_HEADER}" pull --rebase origin main
           git -c "http.extraheader=${AUTH_HEADER}" push origin HEAD:main
 
       - name: Alert when email resend failed
-        if: steps.email_resend.outcome == 'failure'
+        if: always() && steps.email_resend.outcome == 'failure'
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -325,7 +329,7 @@ jobs:
         run: node scripts/send-digest-alert.mjs
 
       - name: Alert when marker push failed after successful resend
-        if: steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure'
+        if: always() && steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure'
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -339,24 +343,36 @@ jobs:
           VERIFY_DIGEST_EMAIL_REQUIRED: "true"
         run: node scripts/send-digest-alert.mjs
 
-      - name: Alert on email backstop job failure
-        if: failure()
+      - name: Alert on unexpected email backstop failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_resend.outcome != 'failure' &&
+          !(steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure')
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
           DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
           GH_TOKEN: ${{ github.token }}
           VERIFY_DIGEST_DATE: ${{ needs.gate.outputs.date }}
-          VERIFY_DIGEST_ERRORS: Daily Digest email_backstop job failed (resend, marker commit, or alert). See job logs.
+          VERIFY_DIGEST_ERRORS: Daily Digest email_backstop job failed before resend completed (install, checkout, or setup). See job logs.
           VERIFY_DIGEST_BRIEFINGS_OK: "true"
           VERIFY_DIGEST_EMAIL_OK: "false"
           VERIFY_DIGEST_EMAIL_REQUIRED: "true"
         run: node scripts/send-digest-alert.mjs
 
       - name: Fail when email resend failed
-        if: steps.email_resend.outcome == 'failure'
+        if: always() && steps.email_resend.outcome == 'failure'
         run: exit 1
 
       - name: Fail when marker push failed
-        if: steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure'
+        if: always() && steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure'
+        run: exit 1
+
+      - name: Fail on unexpected email backstop failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_resend.outcome != 'failure' &&
+          !(steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure')
         run: exit 1

@@ -189,6 +189,7 @@ jobs:
 
       - name: Send digest email from stored briefing
         id: email_send
+        continue-on-error: true
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -203,6 +204,7 @@ jobs:
       - name: Commit email send marker
         id: email_marker_push
         if: steps.email_send.outcome == 'success'
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
@@ -214,7 +216,9 @@ jobs:
             exit 0
           fi
           git commit -m "chore: record digest email send marker for ${{ needs.verify.outputs.date }}"
-          AUTH_HEADER="AUTHORIZATION: bearer ${GH_TOKEN}"
+          BASIC_AUTH="$(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+          echo "::add-mask::${BASIC_AUTH}"
+          AUTH_HEADER="AUTHORIZATION: basic ${BASIC_AUTH}"
           git -c "http.extraheader=${AUTH_HEADER}" pull --rebase origin main
           git -c "http.extraheader=${AUTH_HEADER}" push origin HEAD:main
 
@@ -225,7 +229,7 @@ jobs:
         run: node scripts/verify-daily-digest.mjs
 
       - name: Alert when email send failed
-        if: steps.email_send.outcome == 'failure'
+        if: always() && steps.email_send.outcome == 'failure'
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -240,7 +244,7 @@ jobs:
         run: node scripts/send-digest-alert.mjs
 
       - name: Alert when marker push failed after successful send
-        if: steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure'
+        if: always() && steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure'
         env:
           RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
           DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
@@ -254,10 +258,37 @@ jobs:
           VERIFY_DIGEST_EMAIL_REQUIRED: ${{ needs.verify.outputs.email_required }}
         run: node scripts/send-digest-alert.mjs
 
+      - name: Alert on unexpected email recovery failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_send.outcome != 'failure' &&
+          !(steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure')
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ needs.verify.outputs.date }}
+          VERIFY_DIGEST_ERRORS: Daily Digest verify email_recovery job failed before send completed (install, checkout, or setup). See job logs.
+          VERIFY_DIGEST_BRIEFINGS_OK: ${{ needs.verify.outputs.briefings_ok }}
+          VERIFY_DIGEST_PAGES_OK: ${{ needs.verify.outputs.pages_ok }}
+          VERIFY_DIGEST_EMAIL_OK: "false"
+          VERIFY_DIGEST_EMAIL_REQUIRED: ${{ needs.verify.outputs.email_required }}
+        run: node scripts/send-digest-alert.mjs
+
       - name: Fail when email send failed
-        if: steps.email_send.outcome == 'failure'
+        if: always() && steps.email_send.outcome == 'failure'
         run: exit 1
 
       - name: Fail when marker push failed
-        if: steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure'
+        if: always() && steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure'
+        run: exit 1
+
+      - name: Fail on unexpected email recovery failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_send.outcome != 'failure' &&
+          !(steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure')
         run: exit 1
