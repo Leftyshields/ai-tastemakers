@@ -1,62 +1,29 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   STAGE_DEPLOY_DONE,
-  deployedCommitSatisfiesGate,
   formatGithubActionsLog,
   freshFetchMismatchMessage,
   gateFailureMessage,
   gateTimeoutDetail,
   githubActionsLogLevel,
-  isPagesBuildSuccessStatus,
+  liveBuildJsonMismatchDetail,
   parseBuildJsonCommit,
   pollDeployDoneGate,
   runFreshFetchAdvisory,
 } from "./pages-deploy-gate.js";
 
-describe("isPagesBuildSuccessStatus", () => {
-  it("accepts built and success statuses", () => {
-    expect(isPagesBuildSuccessStatus("built")).toBe(true);
-    expect(isPagesBuildSuccessStatus("success")).toBe(true);
-    expect(isPagesBuildSuccessStatus("building")).toBe(false);
-  });
-});
-
-describe("deployedCommitSatisfiesGate", () => {
-  it("passes identical sha", () => {
-    expect(deployedCommitSatisfiesGate("abc", "abc", null)).toBe(true);
-  });
-
-  it("passes descendant sha when compare behind_by is 0", () => {
-    expect(
-      deployedCommitSatisfiesGate("def", "abc", {
-        ahead_by: 2,
-        behind_by: 0,
-        status: "ahead",
-      }),
-    ).toBe(true);
-  });
-
-  it("rejects ancestor sha when compare behind_by is positive", () => {
-    expect(
-      deployedCommitSatisfiesGate("abc", "def", {
-        ahead_by: 0,
-        behind_by: 1,
-        status: "behind",
-      }),
-    ).toBe(false);
-  });
-});
-
 describe("pollDeployDoneGate", () => {
-  it("succeeds when latest build is built for expected commit", async () => {
-    const api = {
-      getPagesBuildLatest: vi.fn().mockResolvedValue({ status: "built", commit: "sha1" }),
-      compareCommits: vi.fn(),
-    };
+  it("passes when live /build.json commit matches expected head SHA", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "sha1" }),
+    });
     const result = await pollDeployDoneGate({
       expectedSha: "sha1",
       maxWaitMs: 0,
-      api,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
       sleep: vi.fn(),
       now: () => 0,
     });
@@ -64,53 +31,90 @@ describe("pollDeployDoneGate", () => {
     if (result.ok) {
       expect(result.deployedSha).toBe("sha1");
     }
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://example.com/site/build.json",
+      expect.objectContaining({ method: "GET" }),
+    );
   });
 
-  it("times out naming deploy_done stage via gateFailureMessage", async () => {
-    const api = {
-      getPagesBuildLatest: vi
-        .fn()
-        .mockResolvedValue({ status: "building", commit: "sha1" }),
-      compareCommits: vi.fn(),
-    };
+  it("fails when live /build.json commit is stale", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "older-sha" }),
+    });
     const result = await pollDeployDoneGate({
-      expectedSha: "sha1",
+      expectedSha: "head-sha",
       maxWaitMs: 0,
-      api,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
       sleep: vi.fn(),
       now: () => 0,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.timedOut).toBe(false);
-      const msg = gateFailureMessage(
-        STAGE_DEPLOY_DONE,
-        gateTimeoutDetail("sha1"),
+      expect(result.reason).toBe(
+        liveBuildJsonMismatchDetail("head-sha", "older-sha"),
       );
-      expect(msg).toContain("deploy_done");
-      expect(msg).toContain("sha1");
+      expect(result.timedOut).toBe(false);
     }
   });
 
-  it("passes when deployed commit is a descendant of expected", async () => {
-    const api = {
-      getPagesBuildLatest: vi
-        .fn()
-        .mockResolvedValue({ status: "built", commit: "child" }),
-      compareCommits: vi.fn().mockResolvedValue({ ahead_by: 1, behind_by: 0 }),
-    };
+  it("times out naming deploy_done stage via gateFailureMessage", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "other" }),
+    });
     const result = await pollDeployDoneGate({
-      expectedSha: "parent",
+      expectedSha: "sha1",
       maxWaitMs: 0,
-      api,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
       sleep: vi.fn(),
       now: () => 0,
     });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      const msg = gateFailureMessage(STAGE_DEPLOY_DONE, gateTimeoutDetail("sha1"));
+      expect(msg).toContain("deploy_done");
+      expect(msg).toContain("sha1");
+      expect(msg).toContain("build.json");
+    }
+  });
+
+  it("retries until live commit matches within maxWaitMs", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: new Headers(),
+        text: async () => JSON.stringify({ commit: "stale" }),
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: new Headers(),
+        text: async () => JSON.stringify({ commit: "target" }),
+      });
+    let nowMs = 0;
+    const sleep = vi.fn(async (ms: number) => {
+      nowMs += ms;
+    });
+    const result = await pollDeployDoneGate({
+      expectedSha: "target",
+      maxWaitMs: 60_000,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => nowMs,
+      pollIntervalMs: 1000,
+    });
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.deployedSha).toBe("child");
+      expect(result.deployedSha).toBe("target");
     }
-    expect(api.compareCommits).toHaveBeenCalledWith("parent", "child");
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledTimes(1);
   });
 });
 
