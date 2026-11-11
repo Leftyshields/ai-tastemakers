@@ -33,10 +33,7 @@ describe("pollDeployDoneGate", () => {
     }
     expect(fetchImpl).toHaveBeenCalledWith(
       "https://example.com/site/build.json?t=0",
-      expect.objectContaining({
-        method: "GET",
-        headers: expect.objectContaining({ "Cache-Control": "no-cache" }),
-      }),
+      expect.objectContaining({ method: "GET", cache: "no-store" }),
     );
   });
 
@@ -96,12 +93,13 @@ describe("pollDeployDoneGate", () => {
 
   it("fails closed on fetch network error without waiting", async () => {
     const fetchImpl = vi.fn().mockRejectedValue(new Error("ECONNRESET"));
+    const sleep = vi.fn();
     const result = await pollDeployDoneGate({
       expectedSha: "sha1",
       maxWaitMs: 0,
       siteUrl: "https://example.com/site",
       fetchImpl,
-      sleep: vi.fn(),
+      sleep,
       now: () => 0,
     });
     expect(result.ok).toBe(false);
@@ -109,6 +107,8 @@ describe("pollDeployDoneGate", () => {
       expect(result.reason).toBe("ECONNRESET");
       expect(result.timedOut).toBe(false);
     }
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
   });
 
   it("fails closed on non-200 response without waiting", async () => {
@@ -117,12 +117,13 @@ describe("pollDeployDoneGate", () => {
       headers: new Headers(),
       text: async () => "unavailable",
     });
+    const sleep = vi.fn();
     const result = await pollDeployDoneGate({
       expectedSha: "sha1",
       maxWaitMs: 0,
       siteUrl: "https://example.com/site",
       fetchImpl,
-      sleep: vi.fn(),
+      sleep,
       now: () => 0,
     });
     expect(result.ok).toBe(false);
@@ -132,6 +133,8 @@ describe("pollDeployDoneGate", () => {
       );
       expect(result.timedOut).toBe(false);
     }
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
   });
 
   it("fails closed on invalid JSON in build.json without waiting", async () => {
@@ -139,6 +142,30 @@ describe("pollDeployDoneGate", () => {
       status: 200,
       headers: new Headers(),
       text: async () => "not-json",
+    });
+    const sleep = vi.fn();
+    const result = await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => 0,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe(liveBuildJsonMismatchDetail("sha1", null));
+      expect(result.timedOut).toBe(false);
+    }
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it("does not set timedOut when maxWaitMs is zero (immediate fail, not a poll timeout)", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "other" }),
     });
     const result = await pollDeployDoneGate({
       expectedSha: "sha1",
@@ -150,7 +177,6 @@ describe("pollDeployDoneGate", () => {
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
-      expect(result.reason).toBe(liveBuildJsonMismatchDetail("sha1", null));
       expect(result.timedOut).toBe(false);
     }
   });

@@ -95,10 +95,8 @@ export async function pollDeployDoneGate(options: {
       const res = await fetchImpl(fetchUrl, {
         method: "GET",
         redirect: "follow",
-        headers: {
-          Accept: "application/json",
-          "Cache-Control": "no-cache",
-        },
+        cache: "no-store",
+        headers: { Accept: "application/json" },
       });
       if (res.status === 200) {
         const liveSha = parseBuildJsonCommit(await res.text());
