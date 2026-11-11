@@ -9,13 +9,14 @@ jobs:
     # PR author and triggering actor must both be Dependabot (not a human/agent push to the branch).
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
+    permissions: {}
     env:
       PR_URL: ${{ github.event.pull_request.html_url }}
-      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # Fine-grained PAT (Contents, Pull requests, Workflows RW) in Dependabot secrets; merge push can trigger deploys.
+      GH_TOKEN: ${{ secrets.DEPENDABOT_AUTOMERGE_TOKEN }}
     steps:
       # --auto merges after required status checks pass on main, once those checks are configured.
       - name: Enable auto-merge for Dependabot PR
-        run: gh pr merge --auto --squash "$PR_URL"
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::error::DEPENDABOT_AUTOMERGE_TOKEN Dependabot secret is not set"; exit 1; fi
+          gh pr merge --auto --squash "$PR_URL"
