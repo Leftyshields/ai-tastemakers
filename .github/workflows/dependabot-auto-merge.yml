@@ -6,7 +6,8 @@ on:
 
 jobs:
   enable-auto-merge:
-    if: github.event.pull_request.user.login == 'dependabot[bot]'
+    # PR author and triggering actor must both be Dependabot (not a human/agent push to the branch).
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.actor == 'dependabot[bot]'
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -15,5 +16,6 @@ jobs:
       PR_URL: ${{ github.event.pull_request.html_url }}
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
+      # --auto merges after required status checks pass on main, once those checks are configured.
       - name: Enable auto-merge for Dependabot PR
         run: gh pr merge --auto --squash "$PR_URL"
