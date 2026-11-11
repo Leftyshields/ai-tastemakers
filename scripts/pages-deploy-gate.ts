@@ -11,26 +11,37 @@ export type VerifyStage =
   | typeof STAGE_FRESH_FETCH
   | typeof STAGE_ASSERTIONS;
 
-export type PagesBuildLatest = {
-  status?: string;
-  commit?: string;
-};
-
-export type GitHubCompare = {
-  status?: string;
-  ahead_by?: number;
-  behind_by?: number;
-};
-
-export type GitHubApiClient = {
-  getPagesBuildLatest(): Promise<PagesBuildLatest>;
-  compareCommits(base: string, head: string): Promise<GitHubCompare>;
-};
-
 export type FetchClient = (
   url: string,
   init?: RequestInit,
 ) => Promise<{ status: number; headers: Headers; text: () => Promise<string> }>;
+
+/** Live /build.json URL with existing site query params preserved and cache-bust `t`. */
+export function liveBuildJsonCacheBustedUrl(
+  siteUrl: string,
+  cacheBustMs: number,
+): string {
+  const withoutTrailing = siteUrl.replace(/\/+$/, "");
+  const base = new URL(withoutTrailing);
+  const buildPath = base.pathname.endsWith("/")
+    ? `${base.pathname}build.json`
+    : `${base.pathname}/build.json`;
+  const url = new URL(buildPath, base.origin);
+  for (const [key, value] of base.searchParams) {
+    url.searchParams.set(key, value);
+  }
+  url.searchParams.set("t", String(cacheBustMs));
+  return url.href;
+}
+
+export function liveBuildJsonFetchInit(): RequestInit {
+  return {
+    method: "GET",
+    redirect: "follow",
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  };
+}
 
 export function pagesMaxWaitMs(envValue: string | undefined): number {
   if (envValue === undefined || envValue === "") return 0;
@@ -38,31 +49,12 @@ export function pagesMaxWaitMs(envValue: string | undefined): number {
   return Number.isFinite(n) && n > 0 ? n : 0;
 }
 
-export function isPagesBuildSuccessStatus(status: string | undefined): boolean {
-  if (!status) return false;
-  const s = status.toLowerCase();
-  return s === "built" || s === "success" || s === "deployed";
-}
-
-/** Deployed commit is identical to expected or a descendant on the default branch history. */
-export function deployedCommitSatisfiesGate(
-  deployedSha: string | undefined,
-  expectedSha: string,
-  compare: GitHubCompare | null,
-): boolean {
-  if (!deployedSha || !expectedSha) return false;
-  if (deployedSha === expectedSha) return true;
-  if (!compare) return false;
-  const behind = compare.behind_by ?? 0;
-  return behind === 0;
-}
-
 export function gateFailureMessage(stage: VerifyStage, detail: string): string {
   return `GitHub Pages verification failed at stage ${stage}: ${detail}`;
 }
 
 export function gateTimeoutDetail(expectedSha: string): string {
-  return `timed out waiting for Pages API to report a successful build whose commit matches ${expectedSha} or is a descendant (compare API behind_by=0)`;
+  return `timed out waiting for live /build.json commit to match ${expectedSha} (CDN cache may lag up to max-age=600)`;
 }
 
 export function parseBuildJsonCommit(body: string): string | null {
@@ -73,6 +65,16 @@ export function parseBuildJsonCommit(body: string): string | null {
   } catch {
     return null;
   }
+}
+
+export function liveBuildJsonMismatchDetail(
+  expectedSha: string,
+  liveSha: string | null,
+): string {
+  if (!liveSha) {
+    return `live /build.json missing or unreadable commit (expected ${expectedSha})`;
+  }
+  return `live /build.json commit ${liveSha} does not match expected ${expectedSha}`;
 }
 
 export function freshFetchMismatchMessage(
@@ -89,10 +91,12 @@ export type DeployDonePollResult =
   | { ok: true; deployedSha: string; buildStatus: string }
   | { ok: false; reason: string; timedOut: boolean };
 
+/** Gate: live /build.json commit must equal the workflow head SHA (retry for CDN). */
 export async function pollDeployDoneGate(options: {
   expectedSha: string;
   maxWaitMs: number;
-  api: GitHubApiClient;
+  siteUrl: string;
+  fetchImpl: FetchClient;
   sleep: (ms: number) => Promise<void>;
   now?: () => number;
   pollIntervalMs?: number;
@@ -100,34 +104,28 @@ export async function pollDeployDoneGate(options: {
   const {
     expectedSha,
     maxWaitMs,
-    api,
+    siteUrl,
+    fetchImpl,
     sleep,
     now = () => Date.now(),
     pollIntervalMs = 15_000,
   } = options;
   const started = now();
-  let attempt = 0;
   let delayMs = pollIntervalMs;
-  let lastReason = "Pages build status not ready";
+  let lastReason = "live /build.json not yet available";
 
   while (true) {
-    attempt += 1;
+    const fetchUrl = liveBuildJsonCacheBustedUrl(siteUrl, now());
     try {
-      const build = await api.getPagesBuildLatest();
-      const buildStatus = build.status ?? "unknown";
-      const deployedSha = build.commit?.trim();
-
-      if (isPagesBuildSuccessStatus(buildStatus) && deployedSha) {
-        let compare: GitHubCompare | null = null;
-        if (deployedSha !== expectedSha) {
-          compare = await api.compareCommits(expectedSha, deployedSha);
+      const res = await fetchImpl(fetchUrl, liveBuildJsonFetchInit());
+      if (res.status === 200) {
+        const liveSha = parseBuildJsonCommit(await res.text());
+        if (liveSha === expectedSha) {
+          return { ok: true, deployedSha: liveSha, buildStatus: "live" };
         }
-        if (deployedCommitSatisfiesGate(deployedSha, expectedSha, compare)) {
-          return { ok: true, deployedSha, buildStatus };
-        }
-        lastReason = `Pages build status=${buildStatus} commit=${deployedSha} is not ${expectedSha} or a descendant (compare behind_by=${compare?.behind_by ?? "n/a"})`;
+        lastReason = liveBuildJsonMismatchDetail(expectedSha, liveSha);
       } else {
-        lastReason = `Pages build status=${buildStatus}${deployedSha ? ` commit=${deployedSha}` : " (no commit on latest build)"}`;
+        lastReason = `HTTP ${res.status} for ${fetchUrl}`;
       }
     } catch (e) {
       lastReason = e instanceof Error ? e.message : String(e);
@@ -162,20 +160,17 @@ export async function runFreshFetchAdvisory(options: {
   siteUrl: string;
   expectedSha: string;
   fetchImpl: FetchClient;
+  now?: () => number;
 }): Promise<FreshFetchAdvisoryResult> {
-  const base = options.siteUrl.replace(/\/+$/, "");
-  const url = `${base}/build.json`;
+  const now = options.now ?? (() => Date.now());
+  const fetchUrl = liveBuildJsonCacheBustedUrl(options.siteUrl, now());
   let etag: string | null = null;
   let age: string | null = null;
   let xCache: string | null = null;
   let liveSha: string | null = null;
 
   try {
-    const res = await options.fetchImpl(url, {
-      method: "GET",
-      redirect: "follow",
-      headers: { Accept: "application/json" },
-    });
+    const res = await options.fetchImpl(fetchUrl, liveBuildJsonFetchInit());
     etag = res.headers.get("etag");
     age = res.headers.get("age");
     xCache = res.headers.get("x-cache");
@@ -190,7 +185,7 @@ export async function runFreshFetchAdvisory(options: {
       etag,
       age,
       xCache,
-      message: `fresh_fetch: fetch failed for ${url}: ${msg}`,
+      message: `fresh_fetch: fetch failed for ${fetchUrl}: ${msg}`,
     };
   }
 
@@ -220,31 +215,4 @@ export function formatGithubActionsLog(
   message: string,
 ): string {
   return `::${level}::${message}`;
-}
-
-export function createGitHubApiClient(repo: string, token: string): GitHubApiClient {
-  const apiBase = `https://api.github.com/repos/${repo}`;
-  const headers = {
-    Accept: "application/vnd.github+json",
-    Authorization: `Bearer ${token}`,
-    "X-GitHub-Api-Version": "2022-11-28",
-  };
-
-  async function ghGet<T>(path: string): Promise<T> {
-    const res = await fetch(`${apiBase}${path}`, { headers });
-    if (!res.ok) {
-      const body = await res.text();
-      throw new Error(`GitHub API ${path} HTTP ${res.status}: ${body.slice(0, 200)}`);
-    }
-    return (await res.json()) as T;
-  }
-
-  return {
-    async getPagesBuildLatest() {
-      return ghGet<PagesBuildLatest>("/pages/builds/latest");
-    },
-    async compareCommits(base, head) {
-      return ghGet<GitHubCompare>(`/compare/${base}...${head}`);
-    },
-  };
 }

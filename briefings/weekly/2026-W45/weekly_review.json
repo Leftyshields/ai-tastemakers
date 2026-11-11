@@ -1,0 +1,194 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W45",
+  "week_start": "2026-11-02",
+  "week_end": "2026-11-08",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 44,
+      "skills": 45
+    },
+    "total_stars_gained": {
+      "oss": 179905,
+      "skills": 193713
+    },
+    "top_topics": {
+      "oss": [
+        "ai-agents",
+        "claude-code",
+        "llm",
+        "mcp",
+        "ai"
+      ],
+      "skills": [
+        "claude-code",
+        "ai",
+        "agent-skills",
+        "ai-agents",
+        "codex"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "vercel-labs/agent-desktop",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "ccch1mneyyy/dsh-Go",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "D4Vinci/Scrapling",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "thedotmack/claude-mem",
+          "days_appeared": 4
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "pbakaus/impeccable",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "D4Vinci/Scrapling",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "thedotmack/claude-mem",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Gathin23/cleanyourtv",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "milind-soni/OpenMausBot",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "ConardLi/garden-skills",
+      "D4Vinci/Scrapling",
+      "FailproofAI/failproofai",
+      "addyosmani/agent-skills",
+      "affaan-m/ECC",
+      "blader/humanizer",
+      "calesthio/OpenMontage",
+      "firecrawl/firecrawl",
+      "gamedev-skills/awesome-gamedev-agent-skills",
+      "milind-soni/OpenMausBot",
+      "morluto/rea",
+      "thedotmack/claude-mem",
+      "tt-a1i/archify",
+      "yetone/magpie",
+      "yihui-dev/awesome-opus5-5-videos"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 197572,
+          "days_appeared": 7,
+          "excerpt": "REA is a Model Context Protocol (MCP) server, meaning it exposes tools to AI agents using a standard interface, and it specializes in reverse engineering: inspecting native binaries, JavaScript and Electron apps, .NET assemblies, and websites without access to source code."
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "total_stars_gained": 82293,
+          "days_appeared": 7,
+          "excerpt": "A zero-dependency dsh plugin that routes requests to frontier models including DeepSeek V4.1 Flash and Kimi K3 through public gateways (OpenCode Zen and Kilo AI) with no login, API key, or usage cap required."
+        },
+        {
+          "full_name": "vercel-labs/agent-desktop",
+          "total_stars_gained": 58222,
+          "days_appeared": 6,
+          "excerpt": "`agent-desktop` is a CLI and C library for macOS, Windows, and Linux that exposes the OS accessibility tree as JSON snapshots, letting AI agents read and operate desktop apps through stable element refs rather than pixel matching."
+        },
+        {
+          "full_name": "ccch1mneyyy/dsh-Go",
+          "total_stars_gained": 42664,
+          "days_appeared": 4,
+          "excerpt": "DSH Go is an Android client (Flutter/Dart, Android 8+) that runs DeepSeek Harness locally on your phone or remotely controls a desktop DSH instance, with animated on-screen pets that reflect agent state: typing, done, waiting for confirmation, or idle."
+        },
+        {
+          "full_name": "D4Vinci/Scrapling",
+          "total_stars_gained": 33238,
+          "days_appeared": 4,
+          "excerpt": "Scrapling is a Python web scraping framework that handles everything from single HTTP requests to full browser-based crawls, with built-in stealth features, auto-adapting CSS/XPath selectors, and an MCP server interface (MCP is the protocol AI agents use to call external tools)."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 197547,
+          "days_appeared": 7,
+          "excerpt": "REA is a Model Context Protocol (MCP) server, a standard interface for connecting AI agents to external tools, that gives agents the ability to inspect native binaries, JavaScript and Electron apps, .NET assemblies, and websites without access to source code."
+        },
+        {
+          "full_name": "pbakaus/impeccable",
+          "total_stars_gained": 49655,
+          "days_appeared": 5,
+          "excerpt": "Impeccable installs slash-commands into coding agents like Claude Code, Cursor, and Codex to steer UI design with moves like `bolder` and `quieter`, review with `critique` and `audit`, and flag AI-default patterns such as Inter-for-everything and purple-to-blue gradients using 62 deterministic, no-API rules."
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "total_stars_gained": 37319,
+          "days_appeared": 4,
+          "excerpt": "A collection of small, composable agent skills for Claude Code, Codex, Copilot, and similar coding agents, giving engineers fine-grained control over AI-assisted workflows without handing off the entire process."
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "total_stars_gained": 35020,
+          "days_appeared": 4,
+          "excerpt": "VoiceStudio is a fully local, open-source alternative to ElevenLabs covering voice cloning, video dubbing, transcription, and audiobook creation across 646 languages, running on laptops, phones, and servers without any external API calls."
+        },
+        {
+          "full_name": "D4Vinci/Scrapling",
+          "total_stars_gained": 33237,
+          "days_appeared": 4,
+          "excerpt": "Scrapling is a Python web scraping framework covering single requests through full-scale crawls, with built-in stealth, Playwright support, adaptive CSS/XPath selectors, and an MCP server interface for wiring scraping into tool-calling agent workflows."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The clearest signal from W45 is that developer teams are building a layer of specialized, connectable tools on top of frontier AI models rather than waiting for a single platform to do everything. The week's most-starred project, REA, gives AI agents the ability to inspect compiled software without source code, a capability with obvious value for security, compliance, and legacy-system teams. Vercel's agent-desktop project attracted sustained attention by letting AI agents read and control desktop applications directly, which moves automation beyond the browser. A free-model router that requires no API key and no usage cap drew strong interest, signaling continued pressure on proprietary API businesses. Watch whether the \"agent skills\" category, small composable instructions that tune AI coding assistants without full automation, becomes a standard part of engineering onboarding in Q1 2027.",
+    "generalist": "The builder story this week was about connective tissue. REA, an MCP server for reverse engineering binaries, Electron apps, and websites, held the top spot in both the open-source and skills rankings for all seven days, which almost never happens. Its staying power suggests the community sees a genuine gap in giving agents structured access to closed or compiled systems. On the agent-desktop side, Vercel Labs shipped a CLI and C library that serializes the OS accessibility tree as JSON, giving agents a stable handle on native apps rather than relying on fragile screenshot-based approaches.\n\nThe skills category had its own standouts. Impeccable adds slash-commands to Claude Code, Cursor, and Codex specifically to push back against AI design defaults, things like overused gradients and automatic Inter font choices, using 62 rule-based checks with no external API required. mattpocock/skills took a broader approach, offering a library of small composable agent instructions for multiple coding assistants. Both reflect a maturing pattern: engineers want to stay in the loop rather than hand off entire workflows, and they want reusable primitives to do it.",
+    "statistician": "Both editions tracked 44-45 unique repos, and the star totals are skewed heavily by REA, which alone accounts for more stars than many full weeks across both lists combined. The seven-day repeat streaks for REA and dsh-our-free-model are genuine sustained-interest signals, not launch-day spikes, while four-day appearances like Scrapling and dsh-Go are more typical new-entry momentum. Cross-edition overlap at 15 repos is high, meaning the open-source and skills audiences are converging on the same projects this week."
+  },
+  "email": {
+    "verdict": "Engineers want agents that can reach into real systems, and this week's attention went almost entirely to tools that do exactly that.",
+    "body": "The story of the week is [REA](https://github.com/morluto/rea). It is an MCP server, meaning it plugs into an AI agent and gives it a set of callable tools, and those tools let the agent reverse-engineer software with no source code: native binaries, Electron apps, .NET assemblies, websites. It held the top spot on AI Tastemakers (the daily list of open-source AI tools) on Monday, Tuesday, Thursday, and Saturday, and it stayed on both lists every single day. That is not a spike; that is sustained pressure.\n\nWhat made the week interesting is what surrounded REA. [Scrapling](https://github.com/D4Vinci/Scrapling), a Python scraping framework with stealth crawling and an MCP interface for agent workflows, ran four days on both lists. [Vercel Labs' agent-desktop](https://github.com/vercel-labs/agent-desktop), a library that reads the OS accessibility tree and hands an agent stable references to desktop UI elements, held six days on AI Tastemakers. The pattern is the same in each case: take something hard to reach (closed binaries, live websites, native apps), and wire it to an agent via a standard tool interface.\n\nSkill Tastemakers (the daily list of agent skills and add-ons) told a parallel story. [Impeccable](https://github.com/pbakaus/impeccable) adds design-review commands to coding agents. [mattpocock/skills](https://github.com/mattpocock/skills) is a library of composable agent behaviors for Claude Code and similar tools. Both stayed on the list most of the week.\n\nAttention this week concentrated on the layer between agents and the real world. The agent itself is almost beside the point; what engineers are building, and watching others build, is the connective tissue that gets an agent into systems it was never designed to touch."
+  },
+  "generated_at": "2026-11-08T19:33:07.736Z"
+}

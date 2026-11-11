@@ -6,7 +6,6 @@ import {
   STAGE_ASSERTIONS,
   STAGE_DEPLOY_DONE,
   STAGE_FRESH_FETCH,
-  createGitHubApiClient,
   formatGithubActionsLog,
   gateFailureMessage,
   gateTimeoutDetail,
@@ -69,8 +68,6 @@ async function main(): Promise<void> {
     process.env.EXPECTED_PAGES_SHA?.trim() ||
     process.env.GITHUB_SHA?.trim() ||
     "";
-  const repo = process.env.GITHUB_REPOSITORY?.trim() || "";
-  const token = process.env.GITHUB_TOKEN?.trim() || process.env.GH_TOKEN?.trim() || "";
   const siteUrl =
     process.env.DIGEST_SITE_URL?.trim() ||
     process.env.PAGES_SITE_URL?.trim() ||
@@ -85,6 +82,15 @@ async function main(): Promise<void> {
 
   let gateDeployedSha = expectedSha;
 
+  const fetchImpl = async (url: string, init?: RequestInit) => {
+    const res = await fetch(url, init);
+    return {
+      status: res.status,
+      headers: res.headers,
+      text: () => res.text(),
+    };
+  };
+
   if (stages.has(STAGE_DEPLOY_DONE)) {
     if (!deployPagesSucceeded) {
       const msg = gateFailureMessage(
@@ -94,20 +100,20 @@ async function main(): Promise<void> {
       console.error(msg);
       process.exit(1);
     }
-    if (!expectedSha || !repo || !token) {
+    if (!expectedSha) {
       const msg = gateFailureMessage(
         STAGE_DEPLOY_DONE,
-        "missing GITHUB_SHA, GITHUB_REPOSITORY, or GITHUB_TOKEN",
+        "missing EXPECTED_PAGES_SHA or GITHUB_SHA",
       );
       console.error(msg);
       process.exit(1);
     }
 
-    const api = createGitHubApiClient(repo, token);
     const poll = await pollDeployDoneGate({
       expectedSha,
       maxWaitMs,
-      api,
+      siteUrl,
+      fetchImpl,
       sleep,
     });
 
@@ -121,7 +127,7 @@ async function main(): Promise<void> {
 
     gateDeployedSha = poll.deployedSha;
     console.log(
-      `${STAGE_DEPLOY_DONE}: OK Pages build status=${poll.buildStatus} commit=${poll.deployedSha}`,
+      `${STAGE_DEPLOY_DONE}: OK live /build.json commit=${poll.deployedSha}`,
     );
   }
 
@@ -129,14 +135,7 @@ async function main(): Promise<void> {
     const advisory = await runFreshFetchAdvisory({
       siteUrl,
       expectedSha: gateDeployedSha,
-      fetchImpl: async (url, init) => {
-        const res = await fetch(url, init);
-        return {
-          status: res.status,
-          headers: res.headers,
-          text: () => res.text(),
-        };
-      },
+      fetchImpl,
     });
     const headerBits = [
       advisory.etag != null ? `ETag=${advisory.etag}` : null,

@@ -1,62 +1,49 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   STAGE_DEPLOY_DONE,
-  deployedCommitSatisfiesGate,
   formatGithubActionsLog,
   freshFetchMismatchMessage,
   gateFailureMessage,
   gateTimeoutDetail,
   githubActionsLogLevel,
-  isPagesBuildSuccessStatus,
+  liveBuildJsonMismatchDetail,
   parseBuildJsonCommit,
   pollDeployDoneGate,
   runFreshFetchAdvisory,
 } from "./pages-deploy-gate.js";
 
-describe("isPagesBuildSuccessStatus", () => {
-  it("accepts built and success statuses", () => {
-    expect(isPagesBuildSuccessStatus("built")).toBe(true);
-    expect(isPagesBuildSuccessStatus("success")).toBe(true);
-    expect(isPagesBuildSuccessStatus("building")).toBe(false);
-  });
-});
-
-describe("deployedCommitSatisfiesGate", () => {
-  it("passes identical sha", () => {
-    expect(deployedCommitSatisfiesGate("abc", "abc", null)).toBe(true);
-  });
-
-  it("passes descendant sha when compare behind_by is 0", () => {
-    expect(
-      deployedCommitSatisfiesGate("def", "abc", {
-        ahead_by: 2,
-        behind_by: 0,
-        status: "ahead",
-      }),
-    ).toBe(true);
-  });
-
-  it("rejects ancestor sha when compare behind_by is positive", () => {
-    expect(
-      deployedCommitSatisfiesGate("abc", "def", {
-        ahead_by: 0,
-        behind_by: 1,
-        status: "behind",
-      }),
-    ).toBe(false);
-  });
-});
-
 describe("pollDeployDoneGate", () => {
-  it("succeeds when latest build is built for expected commit", async () => {
-    const api = {
-      getPagesBuildLatest: vi.fn().mockResolvedValue({ status: "built", commit: "sha1" }),
-      compareCommits: vi.fn(),
-    };
+  it("appends cache buster when siteUrl already has query params", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "sha1" }),
+    });
+    await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site?foo=bar",
+      fetchImpl,
+      sleep: vi.fn(),
+      now: () => 42,
+    });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://example.com/site/build.json?foo=bar&t=42",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+  });
+
+  it("passes when live /build.json commit matches expected head SHA", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "sha1" }),
+    });
     const result = await pollDeployDoneGate({
       expectedSha: "sha1",
       maxWaitMs: 0,
-      api,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
       sleep: vi.fn(),
       now: () => 0,
     });
@@ -64,53 +51,188 @@ describe("pollDeployDoneGate", () => {
     if (result.ok) {
       expect(result.deployedSha).toBe("sha1");
     }
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://example.com/site/build.json?t=0",
+      expect.objectContaining({ method: "GET", cache: "no-store" }),
+    );
   });
 
-  it("times out naming deploy_done stage via gateFailureMessage", async () => {
-    const api = {
-      getPagesBuildLatest: vi
-        .fn()
-        .mockResolvedValue({ status: "building", commit: "sha1" }),
-      compareCommits: vi.fn(),
-    };
+  it("fails when live /build.json commit is stale", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "older-sha" }),
+    });
+    const result = await pollDeployDoneGate({
+      expectedSha: "head-sha",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep: vi.fn(),
+      now: () => 0,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe(
+        liveBuildJsonMismatchDetail("head-sha", "older-sha"),
+      );
+      expect(result.timedOut).toBe(false);
+    }
+  });
+
+  it("times out when live commit stays stale until maxWaitMs elapses", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "other" }),
+    });
+    let nowMs = 0;
+    const sleep = vi.fn(async (ms: number) => {
+      nowMs += ms;
+    });
+    const result = await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 1000,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => nowMs,
+      pollIntervalMs: 500,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.timedOut).toBe(true);
+      expect(result.reason).toBe(liveBuildJsonMismatchDetail("sha1", "other"));
+      const msg = gateFailureMessage(STAGE_DEPLOY_DONE, gateTimeoutDetail("sha1"));
+      expect(msg).toContain("deploy_done");
+      expect(msg).toContain("sha1");
+      expect(msg).toContain("build.json");
+    }
+    expect(sleep).toHaveBeenCalled();
+  });
+
+  it("fails closed on fetch network error without waiting", async () => {
+    const fetchImpl = vi.fn().mockRejectedValue(new Error("ECONNRESET"));
+    const sleep = vi.fn();
     const result = await pollDeployDoneGate({
       expectedSha: "sha1",
       maxWaitMs: 0,
-      api,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => 0,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe("ECONNRESET");
+      expect(result.timedOut).toBe(false);
+    }
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it("fails closed on non-200 response without waiting", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 503,
+      headers: new Headers(),
+      text: async () => "unavailable",
+    });
+    const sleep = vi.fn();
+    const result = await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => 0,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe(
+        "HTTP 503 for https://example.com/site/build.json?t=0",
+      );
+      expect(result.timedOut).toBe(false);
+    }
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it("fails closed on invalid JSON in build.json without waiting", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => "not-json",
+    });
+    const sleep = vi.fn();
+    const result = await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => 0,
+    });
+    expect(result.ok).toBe(false);
+    if (!result.ok) {
+      expect(result.reason).toBe(liveBuildJsonMismatchDetail("sha1", null));
+      expect(result.timedOut).toBe(false);
+    }
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+    expect(sleep).not.toHaveBeenCalled();
+  });
+
+  it("does not set timedOut when maxWaitMs is zero (immediate fail, not a poll timeout)", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "other" }),
+    });
+    const result = await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
       sleep: vi.fn(),
       now: () => 0,
     });
     expect(result.ok).toBe(false);
     if (!result.ok) {
       expect(result.timedOut).toBe(false);
-      const msg = gateFailureMessage(
-        STAGE_DEPLOY_DONE,
-        gateTimeoutDetail("sha1"),
-      );
-      expect(msg).toContain("deploy_done");
-      expect(msg).toContain("sha1");
     }
   });
 
-  it("passes when deployed commit is a descendant of expected", async () => {
-    const api = {
-      getPagesBuildLatest: vi
-        .fn()
-        .mockResolvedValue({ status: "built", commit: "child" }),
-      compareCommits: vi.fn().mockResolvedValue({ ahead_by: 1, behind_by: 0 }),
-    };
+  it("retries until live commit matches within maxWaitMs", async () => {
+    const fetchImpl = vi
+      .fn()
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: new Headers(),
+        text: async () => JSON.stringify({ commit: "stale" }),
+      })
+      .mockResolvedValueOnce({
+        status: 200,
+        headers: new Headers(),
+        text: async () => JSON.stringify({ commit: "target" }),
+      });
+    let nowMs = 0;
+    const sleep = vi.fn(async (ms: number) => {
+      nowMs += ms;
+    });
     const result = await pollDeployDoneGate({
-      expectedSha: "parent",
-      maxWaitMs: 0,
-      api,
-      sleep: vi.fn(),
-      now: () => 0,
+      expectedSha: "target",
+      maxWaitMs: 60_000,
+      siteUrl: "https://example.com/site",
+      fetchImpl,
+      sleep,
+      now: () => nowMs,
+      pollIntervalMs: 1000,
     });
     expect(result.ok).toBe(true);
     if (result.ok) {
-      expect(result.deployedSha).toBe("child");
+      expect(result.deployedSha).toBe("target");
     }
-    expect(api.compareCommits).toHaveBeenCalledWith("parent", "child");
+    expect(fetchImpl).toHaveBeenCalledTimes(2);
+    expect(sleep).toHaveBeenCalledTimes(1);
   });
 });
 
@@ -129,7 +251,12 @@ describe("runFreshFetchAdvisory", () => {
       siteUrl: "https://example.com/site",
       expectedSha: "fresh",
       fetchImpl,
+      now: () => 99,
     });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://example.com/site/build.json?t=99",
+      expect.objectContaining({ cache: "no-store" }),
+    );
     expect(result.ok).toBe(false);
     expect(result.message).toContain(freshFetchMismatchMessage("fresh", "stale"));
     expect(githubActionsLogLevel(result.ok)).toBe("warning");
