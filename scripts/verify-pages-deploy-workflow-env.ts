@@ -60,7 +60,7 @@ export function parseJobs(content: string): { name: string; body: string }[] {
   return jobs;
 }
 
-export function stepNeedsPagesToken(stepBlock: string): boolean {
+export function stepNeedsDigestVerifyToken(stepBlock: string): boolean {
   if (!stepBlock.includes("verify-daily-digest.mjs")) return false;
   if (/--skip-pages/.test(stepBlock) && !/--pages-only/.test(stepBlock)) {
     return false;
@@ -79,7 +79,7 @@ export function auditWorkflowContent(
   const errors: string[] = [];
   for (const job of parseJobs(content)) {
     for (const step of splitStepBlocks(job.body)) {
-      if (!stepNeedsPagesToken(step)) continue;
+      if (!stepNeedsDigestVerifyToken(step)) continue;
       if (!stepExposesGithubToken(step)) {
         const nameMatch = step.match(/- name: (.+)/);
         const stepName = nameMatch?.[1] ?? "(unnamed step)";

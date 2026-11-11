@@ -13,6 +13,26 @@ import {
 } from "./pages-deploy-gate.js";
 
 describe("pollDeployDoneGate", () => {
+  it("appends cache buster when siteUrl already has query params", async () => {
+    const fetchImpl = vi.fn().mockResolvedValue({
+      status: 200,
+      headers: new Headers(),
+      text: async () => JSON.stringify({ commit: "sha1" }),
+    });
+    await pollDeployDoneGate({
+      expectedSha: "sha1",
+      maxWaitMs: 0,
+      siteUrl: "https://example.com/site?foo=bar",
+      fetchImpl,
+      sleep: vi.fn(),
+      now: () => 42,
+    });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://example.com/site/build.json?foo=bar&t=42",
+      expect.objectContaining({ cache: "no-store" }),
+    );
+  });
+
   it("passes when live /build.json commit matches expected head SHA", async () => {
     const fetchImpl = vi.fn().mockResolvedValue({
       status: 200,
@@ -231,7 +251,12 @@ describe("runFreshFetchAdvisory", () => {
       siteUrl: "https://example.com/site",
       expectedSha: "fresh",
       fetchImpl,
+      now: () => 99,
     });
+    expect(fetchImpl).toHaveBeenCalledWith(
+      "https://example.com/site/build.json?t=99",
+      expect.objectContaining({ cache: "no-store" }),
+    );
     expect(result.ok).toBe(false);
     expect(result.message).toContain(freshFetchMismatchMessage("fresh", "stale"));
     expect(githubActionsLogLevel(result.ok)).toBe("warning");
