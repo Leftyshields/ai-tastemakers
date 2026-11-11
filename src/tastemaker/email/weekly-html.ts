@@ -1,6 +1,12 @@
 import type { WeeklyEmailCopy, WeeklyReview } from "../types.js";
 import { rankingModeLabel, renderBriefForEmail, renderBriefForPlainText } from "./html.js";
 import { digestUnsubscribeUrl } from "./unsubscribe.js";
+import type { OutboundDestRegistry } from "../analytics/outbound-dest-manifest.js";
+import {
+  rewriteOutboundLinksInHtml,
+  rewriteOutboundLinksInPlainText,
+  type OutboundRewriteContext,
+} from "../analytics/rewrite-outbound-links.js";
 
 /** Standing inbox subject. The week's hook opens the body, not the subject. */
 export const SUNDAY_EMAIL_SUBJECT =
@@ -109,10 +115,29 @@ function rankedListLinksHtml(ossUrl: string, skillsUrl: string): string {
     </p>`;
 }
 
+export function weeklyEmailOutboundContext(
+  siteUrl: string,
+  review: WeeklyReview,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): OutboundRewriteContext {
+  return {
+    siteBaseUrl: siteUrl,
+    destRegistry,
+    githubAllowlist,
+    channel: "email",
+    surface: "weekly_email",
+    section: "oss",
+    digestDate: review.week_end,
+  };
+}
+
 export function renderWeeklyEmailHtml(
   review: WeeklyReview,
   siteUrl: string,
   unsubscribeUrlOverride?: string,
+  githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const copy = resolveWeeklyEmail(review);
   const preheader = escapeHtml(weeklyEmailPreheader(review));
@@ -122,7 +147,7 @@ export function renderWeeklyEmailHtml(
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
   const both = review.stats.cross_edition_overlap.length;
 
-  return `<!DOCTYPE html>
+  const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#fafaf9;">
@@ -157,12 +182,19 @@ export function renderWeeklyEmailHtml(
   </div>
 </body>
 </html>`;
+  if (Object.keys(githubAllowlist).length === 0) return htmlBody;
+  return rewriteOutboundLinksInHtml(
+    htmlBody,
+    weeklyEmailOutboundContext(siteUrl, review, githubAllowlist, destRegistry),
+  );
 }
 
 export function renderWeeklyEmailText(
   review: WeeklyReview,
   siteUrl: string,
   unsubscribeUrlOverride?: string,
+  githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const copy = resolveWeeklyEmail(review);
   const ossUrl = ossTop10Url(siteUrl, review.week_end);
@@ -187,5 +219,12 @@ export function renderWeeklyEmailText(
     `Full week on the site: ${weeklyOnlineUrl(siteUrl, review.week_id)}`,
     `Unsubscribe: ${unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl)}`,
   );
-  return lines.join("\n");
+  let text = lines.join("\n");
+  if (Object.keys(githubAllowlist).length > 0) {
+    text = rewriteOutboundLinksInPlainText(
+      text,
+      weeklyEmailOutboundContext(siteUrl, review, githubAllowlist, destRegistry),
+    );
+  }
+  return text;
 }

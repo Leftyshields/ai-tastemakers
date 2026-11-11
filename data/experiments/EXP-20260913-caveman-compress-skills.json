@@ -3,7 +3,7 @@
   "id": "EXP-20260913-caveman-compress-skills",
   "title": "Shorter enrichment context",
   "reader_summary": "Compress web/HN enrichment text before Claude writes Skills blurbs, so we spend fewer tokens on fluff and keep the facts.",
-  "outcome_line": "Baseline running 2026-10-25 to 2026-11-07; treatment 2026-11-08.",
+  "outcome_line": "Baseline closed 2026-11-07. Treatment 2026-11-08 to 2026-11-21 with DIGEST_ENRICH_COMPRESS on both digests.",
   "how_we_measure": "Primary: enrichment/input token cost and output tokens vs baseline. Must not drop rank-1 rubric pass rate or Why-now quality. PostHog secondary.",
   "reader_glossary": [
     {
@@ -13,7 +13,7 @@
   ],
   "hypothesis": "Compressing enrichment context before narration cuts input/output tokens without lowering rubric pass rate or Why-now quality.",
   "change_summary": "Add DIGEST_ENRICH_COMPRESS=1 on both the OSS and Skills digest commands (compress enrich bundles before narrate).",
-  "status": "baseline",
+  "status": "active",
   "edition": "both",
   "baseline_window": {
     "start": "2026-10-25",
@@ -28,9 +28,36 @@
       "DIGEST_ENRICH_COMPRESS": "1"
     }
   },
-  "snapshots": [],
+  "snapshots": [
+    {
+      "imported_at": "2026-11-07T16:25:17.418Z",
+      "period": {
+        "start": "2026-10-25",
+        "end": "2026-11-07"
+      },
+      "metrics": {
+        "pageviews_by_path": {},
+        "outbound_clicks": {
+          "_runs": 26,
+          "_avg_output_tokens": 3338,
+          "_avg_output_words": 992,
+          "_avg_input_tokens": 25410,
+          "_avg_enrich_chars": 1642,
+          "_rubric_pass": 13,
+          "_rubric_runs": 13,
+          "_why_now_avg": 4.6,
+          "_specificity_avg": 5,
+          "_estimated_usd_total": 3.283656
+        },
+        "missing_digest_dates": [
+          "2026-11-07"
+        ]
+      },
+      "source": "data/experiments/exports/EXP-20260913-caveman-compress-skills-baseline.csv"
+    }
+  ],
   "shadow_runs": [],
   "verdict": "",
   "keep_change": null,
-  "notes": "Queued #3 after humanizer polish. Distinct from Ponytail (output writing rules). Distinct from Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md. 2026-09-26: extended to run on both OSS and Skills digests per Brian (id keeps its -skills suffix for continuity). 2026-10-25: baseline started (status baseline); DIGEST_ENRICH_COMPRESS confirmed off in digest.yml."
+  "notes": "Distinct from Ponytail (output writing rules) and Humanizer (post-polish). Requires Firecrawl enrich still on. Lab post: briefings/lab/posts/EXP-20260913-caveman-compress-skills.md. Baseline snapshot imported 2026-11-07 PT: 26 token-log runs (13 OSS + 13 Skills, 2026-10-25 through 2026-11-06); 2026-11-07 digest not published at close (missing_digest_dates). Token metrics from data/quality/token-usage.jsonl (rank-1 rubric joined on Skills runs only). Frozen export: data/experiments/exports/EXP-20260913-caveman-compress-skills-baseline.csv. Treatment 2026-11-08: digest.yml enables DIGEST_ENRICH_COMPRESS from 2026-11-08 PT via date guard on both OSS and Skills commands."
 }

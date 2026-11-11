@@ -1,5 +1,9 @@
 import type { EditionId } from "../editions.js";
 import {
+  appendDailyDigestUtmToUrl,
+  isDigestEmailUtmSource,
+} from "./digest-email-utm.js";
+import {
   isValidLabBadgeAttributionSearch,
   parseLabBadgeFromListParam,
   parseLabBadgeFromRankParam,
@@ -43,7 +47,7 @@ export function digestDateFromCompact(compact: string): string | null {
 export function pagesRepoClickSource(pageSearch: string): RepoClickSource {
   try {
     const params = new URLSearchParams(pageSearch.startsWith("?") ? pageSearch : `?${pageSearch}`);
-    return params.get("utm_source") === "email" ? "email" : "direct";
+    return isDigestEmailUtmSource(params.get("utm_source")) ? "email" : "direct";
   } catch {
     return "direct";
   }
@@ -225,9 +229,6 @@ export function buildEmailGoUrl(
     pos: String(query.position),
     target: query.target,
     d,
-    utm_source: "email",
-    utm_medium: "email",
-    utm_campaign: `digest_${d}`,
   });
   return `${base}/go/?${params.toString()}`;
 }
@@ -238,14 +239,9 @@ export function buildFullDigestPagesUrl(
   section: EditionId,
 ): string {
   const base = siteBaseUrl.replace(/\/+$/, "");
-  const d = digestDateCompact(digestDate);
   const prefix = section === "skills" ? "/skills" : "";
-  const params = new URLSearchParams({
-    utm_source: "email",
-    utm_medium: "email",
-    utm_campaign: `digest_${d}`,
-  });
-  return `${base}${prefix}/briefings/${digestDate}.html?${params.toString()}`;
+  const path = `${base}${prefix}/briefings/${digestDate}.html`;
+  return appendDailyDigestUtmToUrl(path);
 }
 
 /** Ensures PostHog repo_click fires at most once per page load. */

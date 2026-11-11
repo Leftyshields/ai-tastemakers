@@ -1,0 +1,174 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W44",
+  "week_start": "2026-10-26",
+  "week_end": "2026-11-01",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 54,
+      "skills": 46
+    },
+    "total_stars_gained": {
+      "oss": 190268,
+      "skills": 235489
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "ai-agents",
+        "llm",
+        "mcp",
+        "agent-skills"
+      ],
+      "skills": [
+        "claude-code",
+        "agent-skills",
+        "codex",
+        "ai",
+        "ai-agents"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 2
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "Gathin23/cleanyourtv",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "Nutlope/hallmark",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "pbakaus/impeccable",
+          "days_appeared": 4
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "Donchitos/Claude-Code-Game-Studios",
+      "Jakeschincariol/day-trader-skill",
+      "JetBrains/thinkrail",
+      "JuliusBrussee/caveman",
+      "K-Dense-AI/scientific-agent-skills",
+      "alchaincyf/huashu-design",
+      "career-ops-hq/career-ops",
+      "chatanywhere/GPT_API_free",
+      "harry0703/MoneyPrinterTurbo",
+      "kajisho5/ffmpeg-skill",
+      "milind-soni/OpenMausBot",
+      "morluto/rea",
+      "op7418/guizang-ppt-skill",
+      "op7418/guizang-social-card-skill",
+      "ruvnet/ruflo"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 323933,
+          "days_appeared": 7,
+          "excerpt": "REA is a Model Context Protocol (MCP) server that connects AI agents to reverse-engineering tools for native binaries, JavaScript and Electron apps, .NET assemblies, and websites without source code, using decompilers like Ghidra and Hopper."
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "total_stars_gained": 105596,
+          "days_appeared": 7,
+          "excerpt": "A zero-dependency dsh plugin that exposes frontier models including DeepSeek V4.1 Flash and Kimi K3 with no login, API key, or usage cap, via the OpenCode Zen and Kilo AI public gateways."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 33681,
+          "days_appeared": 4,
+          "excerpt": "Ponytail is a JavaScript agent skill that steers AI coding agents toward minimal, YAGNI-compliant output, replacing verbose generated code with the least code that actually works."
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "total_stars_gained": 14709,
+          "days_appeared": 2,
+          "excerpt": "Graphify parses any codebase, including docs, SQL schemas, configs, and PDFs, into a queryable knowledge graph using local deterministic AST parsing via tree-sitter, with every edge explained and no vector store required."
+        },
+        {
+          "full_name": "heygen-com/hyperframes",
+          "total_stars_gained": 5059,
+          "days_appeared": 1,
+          "excerpt": "HyperFrames is an open-source TypeScript framework that converts HTML, CSS, and seekable animations into deterministic MP4 videos, accessible via a CLI, AI agent skills, or a hosted rendering pipeline."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 323871,
+          "days_appeared": 7,
+          "excerpt": "REA is a Model Context Protocol (MCP) server, meaning it gives AI agents a standardized way to call tools, and this one targets reverse engineering: inspecting native binaries, JavaScript and Electron apps, .NET assemblies, and websites without source code, running all analysis locally and surfacing evidence and limitations alongside each conclusion."
+        },
+        {
+          "full_name": "Gathin23/cleanyourtv",
+          "total_stars_gained": 163708,
+          "days_appeared": 7,
+          "excerpt": "CleanYourTV uses ADB over Wi-Fi to disable bloatware and sponsored launchers on Android TV and Google TV devices, swapping the stock home screen for a lightweight, Apple TV-style launcher across 332 supported TV models."
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "total_stars_gained": 75852,
+          "days_appeared": 6,
+          "excerpt": "VoiceStudio is a local-first, open-source desktop app covering voice cloning, voice design, video dubbing, dictation, transcription, and audiobook creation across 646 languages, with OmniVoice as the default engine."
+        },
+        {
+          "full_name": "Nutlope/hallmark",
+          "total_stars_gained": 56194,
+          "days_appeared": 5,
+          "excerpt": "Hallmark is a design ruleset for Claude Code, Cursor, and Codex that selects from fifty material-based themes, structures pages around their primary action, and lints output in a real browser against the specific patterns that make AI-generated UIs look machine-made."
+        },
+        {
+          "full_name": "pbakaus/impeccable",
+          "total_stars_gained": 45457,
+          "days_appeared": 4,
+          "excerpt": "Impeccable is a set of slash-command skills for coding agents including Claude Code, Cursor, and Codex, adding named design moves like `bolder`, `quieter`, and `polish`, plus a 62-rule static detector that flags defaults like Inter-for-everything and purple-to-blue gradients without requiring an API key."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant signal this week is that developers are building infrastructure to let AI agents work on code they cannot read, a capability that matters for security audits, legacy modernization, and competitive analysis. The project REA, an MCP server that connects AI agents to reverse-engineering tools for compiled binaries and obfuscated apps, appeared every day of the week across both our open-source and agent-skills tracking lists. Alongside that, two separate design-quality projects (Hallmark and Impeccable) gained sustained traction, suggesting that teams are starting to treat AI-generated UI as a quality problem worth systematizing, not just a speed advantage. Free-model access tools also returned to the top of the charts, pointing to continued pressure on paid API costs. The watch-item for Q4: governance and licensing questions around AI-assisted reverse engineering are coming faster than most legal teams expect.",
+    "generalist": "The builder story this week was dominated by tooling that extends what agents can perceive and how they express results. REA is the clearest example: it wraps Ghidra, Hopper, and other decompilers behind an MCP interface so that any agent with tool-calling support can analyze a closed binary, a minified JavaScript bundle, or a .NET assembly without source code. It ran at the top of trending lists all seven days, which is unusual staying power. Graphify took a different angle on the \"read anything\" problem, parsing codebases, SQL schemas, configs, and PDFs into a queryable knowledge graph using tree-sitter for deterministic AST analysis, with no vector store and every inferred edge explained.\n\nOn the output side, Hallmark and Impeccable both address the same frustration from different directions. Hallmark is a design ruleset you drop into Claude Code, Cursor, or Codex to steer the agent toward material-based themes and page structures organized around a primary action. Impeccable adds named slash commands such as `bolder` and `quieter`, plus a 62-rule static linter that catches the specific defaults (think Inter everywhere, purple-to-blue gradients) that make AI-generated UIs feel generic. Both are opinionated constraints rather than generative prompts, which is an interesting design philosophy gaining ground in the agent-skills ecosystem this week.",
+    "statistician": "The star counts here are cumulative across each repo's days in the trending window, so a project that appeared all seven days will show a much larger total than a one-day appearance with equal daily momentum. Treat the skills-side aggregate (235,489 stars gained across 46 repos) as notably higher than the OSS side (190,268 across 54 repos), partly because CleanYourTV and VoiceStudio pulled large general-audience interest that inflated the skills totals. The 15 repos appearing in both the OSS and skills editions are the most reliable signal of genuine, broad builder interest rather than audience-specific spikes."
+  },
+  "email": {
+    "verdict": "One repo held the top spot on both lists every single day this week, and it lets an AI agent take apart software it has no source code for.",
+    "body": "[REA](https://github.com/morluto/rea) is a server that connects AI agents to reverse-engineering tools, running decompilers like Ghidra and Hopper locally against native binaries, JavaScript apps, .NET assemblies, and websites. It follows the Model Context Protocol, a standard that lets agents call external tools in a consistent way. It topped both AI Tastemakers (the daily list of open-source AI tools) and Skill Tastemakers (the daily list of skills you can install on an agent) every day from Monday through Sunday. That does not happen often.\n\nTwo other things pulled attention this week and they rhyme. [Hallmark](https://github.com/Nutlope/hallmark) is a design ruleset you drop into Claude Code, Cursor, or Codex that enforces fifty material-based themes and lints output in a real browser for the patterns that make AI-generated UIs look machine-made. [Impeccable](https://github.com/pbakaus/impeccable) takes a different angle: slash commands for coding agents that name specific design moves like `bolder` and `quieter`, plus a 62-rule detector that flags defaults like Inter-for-everything and purple-to-blue gradients. Both landed in Skill Tastemakers for most of the week.\n\nThe pattern is agents getting taste. Not new models, not new infrastructure. Constraints that push agents toward outputs that look like a person made them. Attention concentrated there this week, which suggests the current frustration is not capability; it is that the output is too obviously automatic."
+  },
+  "generated_at": "2026-11-01T19:34:22.112Z"
+}

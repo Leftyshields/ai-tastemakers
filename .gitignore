@@ -26,3 +26,5 @@ site/weekly/
 site/monthly/
 site/.nojekyll
 site/assets/style.css
+site/assets/style.*.css
+site/assets/style.css.json

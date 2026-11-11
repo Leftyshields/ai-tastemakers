@@ -1,5 +1,8 @@
+import fs from "node:fs";
+import path from "node:path";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import type { Digest } from "../types.js";
+import { OUTBOUND_DEST_MANIFEST_SITE_REL } from "../analytics/outbound-email-manifest-guard.js";
 
 const sendMock = vi.fn();
 
@@ -9,7 +12,13 @@ vi.mock("resend", () => ({
   })),
 }));
 
-import { parseFromAddress, sendDigestEmail, sendOpsEmail, sendWeeklyDigestEmail } from "./resend.js";
+import {
+  digestSendIdempotencyKey,
+  parseFromAddress,
+  sendDigestEmail,
+  sendOpsEmail,
+  sendWeeklyDigestEmail,
+} from "./resend.js";
 
 const sampleDigest: Digest = {
   schema_version: 1,
@@ -48,6 +57,12 @@ const baseConfig = {
 beforeEach(() => {
   sendMock.mockReset();
   sendMock.mockResolvedValue({ data: { id: "msg_123" }, error: null });
+  const manifestPath = path.join("/tmp", OUTBOUND_DEST_MANIFEST_SITE_REL);
+  fs.mkdirSync(path.dirname(manifestPath), { recursive: true });
+  fs.writeFileSync(
+    manifestPath,
+    `${JSON.stringify({ schema_version: 1, generated_at: "2026-01-01T00:00:00.000Z", dest_hashes: [] }, null, 2)}\n`,
+  );
 });
 
 describe("parseFromAddress", () => {
@@ -59,6 +74,56 @@ describe("parseFromAddress", () => {
 
   it("returns plain address unchanged", () => {
     expect(parseFromAddress("digest@epiphoric.com")).toBe("digest@epiphoric.com");
+  });
+});
+
+describe("digestSendIdempotencyKey", () => {
+  it("hashes recipient email and never embeds the raw address", () => {
+    const key = digestSendIdempotencyKey(
+      "daily-digest",
+      "oss",
+      "2026-06-10",
+      "alice@example.com",
+    );
+    expect(key).toBe(
+      "daily-digest/oss/2026-06-10/ff8d9819fc0e12bf0d24892e45987e249a28dce836a85cad60e28eaaa8c6d976",
+    );
+    expect(key).not.toContain("alice");
+    expect(key).not.toContain("@");
+  });
+
+  it("is stable for the same date and recipient", () => {
+    const a = digestSendIdempotencyKey("daily-digest", "oss", "2026-06-10", "alice@example.com");
+    const b = digestSendIdempotencyKey("daily-digest", "oss", "2026-06-10", "alice@example.com");
+    expect(a).toBe(b);
+  });
+
+  it("differs across dates and recipients", () => {
+    const base = digestSendIdempotencyKey("daily-digest", "oss", "2026-06-10", "alice@example.com");
+    expect(digestSendIdempotencyKey("daily-digest", "oss", "2026-06-11", "alice@example.com")).not.toBe(
+      base,
+    );
+    expect(digestSendIdempotencyKey("daily-digest", "oss", "2026-06-10", "bob@example.com")).not.toBe(
+      base,
+    );
+  });
+
+  it("manual suffix differs from scheduled key", () => {
+    const scheduled = digestSendIdempotencyKey(
+      "daily-digest",
+      "oss",
+      "2026-06-10",
+      "alice@example.com",
+    );
+    const manual = digestSendIdempotencyKey(
+      "daily-digest",
+      "oss",
+      "2026-06-10",
+      "alice@example.com",
+      "999888777",
+    );
+    expect(manual).toBe(`${scheduled}-manual-999888777`);
+    expect(manual).not.toBe(scheduled);
   });
 });
 
@@ -78,17 +143,48 @@ describe("sendDigestEmail", () => {
         from: "AI Tastemakers <digest@epiphoric.com>",
         to: ["alice@example.com"],
       }),
+      expect.objectContaining({
+        idempotencyKey: digestSendIdempotencyKey(
+          "daily-digest",
+          "oss",
+          "2026-06-10",
+          "alice@example.com",
+        ),
+      }),
     );
     expect(sendMock).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
         to: ["bob@example.com"],
       }),
+      expect.objectContaining({
+        idempotencyKey: digestSendIdempotencyKey(
+          "daily-digest",
+          "oss",
+          "2026-06-10",
+          "bob@example.com",
+        ),
+      }),
     );
     expect(sendMock.mock.calls[0][0].html).toContain(
       "unsubscribe.html?email=alice%40example.com",
     );
     expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");
+  });
+
+  it("passes manual idempotency keys when manualRunId is set", async () => {
+    await sendDigestEmail(baseConfig, sampleDigest, "2026-06-10", ["alice@example.com"], {
+      manualRunId: "12345",
+    });
+    expect(sendMock.mock.calls[0][1]).toEqual({
+      idempotencyKey: digestSendIdempotencyKey(
+        "daily-digest",
+        "oss",
+        "2026-06-10",
+        "alice@example.com",
+        "12345",
+      ),
+    });
   });
 });
 
@@ -145,6 +241,14 @@ describe("sendWeeklyDigestEmail", () => {
       expect.objectContaining({
         subject: "The Sunday wrap-up: one opinionated read on what actually moved this week",
         to: ["alice@example.com"],
+      }),
+      expect.objectContaining({
+        idempotencyKey: digestSendIdempotencyKey(
+          "weekly-digest",
+          "oss",
+          "2026-W33",
+          "alice@example.com",
+        ),
       }),
     );
     expect(sendMock.mock.calls[0][0]).not.toHaveProperty("bcc");

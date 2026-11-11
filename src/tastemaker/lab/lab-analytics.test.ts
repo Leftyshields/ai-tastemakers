@@ -4,7 +4,6 @@ import {
   findLabAnalyticsViolations,
   labLinkClickScript,
   prepareLabPostArticleHtml,
-  renderLabPostBackLink,
   resolveLabToolHref,
 } from "../../../scripts/lab/lab-analytics.js";
 
@@ -19,10 +18,8 @@ describe("Lab UX42 analytics", () => {
     expect(labLinkClickScript()).toContain("lab_link_click");
   });
 
-  it("Back to Lab link meets ~44px tap target", () => {
-    const esc = (t: string) => t;
-    expect(renderLabPostBackLink(esc)).toContain("min-h-11");
-    expect(renderLabPostBackLink(esc)).toContain("lab-post-back-link");
+  it("lab link script tracks Back button clicks", () => {
+    expect(labLinkClickScript()).toContain("button[data-lab-section]");
   });
 
   it("tags lab post body links and routes GitHub through go", () => {

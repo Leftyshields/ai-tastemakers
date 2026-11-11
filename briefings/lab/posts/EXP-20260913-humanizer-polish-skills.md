@@ -1,74 +1,45 @@
-# Less AI-sounding Skills briefs
-
-_We added a final polish step to both daily lists that rewrites phrasing that sounds machine-written, and tested it from Oct 11 to Oct 24, 2026. Briefs passed all 13 quality checks and scored 5.0 on why now and 5.0 on specificity, up from 3.7 and 4.5 before, so we kept it._
-
-## The question, in English
-
-Skills and OSS blurbs already go through Ponytail (short sections, one try-this step) and Firecrawl enrichment. They can still read like generic AI copy: stock phrases, filler transitions, and "in today's fast-paced landscape" energy.
-
-After Claude writes each blurb, we want a **light polish pass** that strips those tells without changing facts or the Why now hook, and adds a plain-language line when a repo name assumes specialist knowledge.
-
-That is the whole test. Humanizer is *where the idea came from*, not a tool we installed.
-
-## What Humanizer means here
-
-[Humanizer](https://github.com/blader/humanizer) is a Claude Code skill that detects named AI-writing patterns and rewrites prose without inventing facts.
-
-We are **not** installing Humanizer on the digest pipeline.
-
-We copied the habit: **one post-narration batch edit** per digest run on **both** editions. README-grounded specifics stay. Why now hooks stay. Filler and stock AI phrasing go.
-
-## How we'll know
-
-| We want | What "good" looks like |
-|---------|------------------------|
-| Less AI-sounding | Editorial spot-check: fewer stock phrases and filler transitions |
-| Still accurate | Rank-1 rubric pass rate holds (specificity, accuracy) |
-| Still timely | Why now rubric score does not regress |
-| Cost | Token log includes one extra batch call per edition per run |
-
-PostHog CTR is **out of scope** for this experiment. We gate on editorial rubric and human-sounding spot-checks.
-
-## Windows
-
-| Phase | Dates (PT) |
-|-------|------------|
-| Before (change off) | 2026-09-27 → 2026-10-10 |
-| After (change on) | 2026-10-11 → 2026-10-24 |
-
-## Recommendation
-
-**In treatment.** Production enables polish from **2026-10-11** Pacific via `digest.yml` date guard. Compare token log and rubric to baseline through **2026-10-24**.
-
+---
+lead: "Kept Oct 24, 2026. A final polish step now strips machine-sounding phrasing from both daily lists, and briefs passed all 13 quality checks while why now rose from 3.7 to 5.0 and specificity from 4.5 to 5.0."
 ---
 
-## Operator notes
+# Less AI-sounding briefs
 
-| Flag | What it does |
-|------|----------------|
-| `DIGEST_HUMANIZER_POLISH=1` | One batch post narrate polish pass per digest run (strip AI-writing tells; no new facts; plain-language gloss for jargon) |
+_**Kept Oct 24, 2026.** This experiment added a final polish step to both daily lists that rewrites phrasing that sounds machine-written. From Oct 11 to Oct 24, 2026, briefs passed all 13 quality checks and scored 5.0 on why now and 5.0 on specificity, up from 3.7 and 4.5 before._
 
-Flags go on **both** OSS and Skills digest commands. GitHub Actions turns the flag on only when `steps.gate.outputs.date` is **2026-10-11** or later (Pacific).
+## The idea
 
-### Optional side-by-side preview
+Briefs already ran through the Ponytail rules (short sections, one thing to try) and Firecrawl page reading. They could still sound like generic AI copy: stock phrases, filler transitions, and "in today's fast-paced landscape" energy.
 
-```bash
-EXPERIMENT_ID=`EXP-20260913-humanizer-polish-skills` \
-DIGEST_ENRICH_WEB=1 \
-DIGEST_ENRICH_WEB_PROVIDER=firecrawl \
-DIGEST_NARRATE_STRUCTURED_CONTEXT=1 \
-DIGEST_NARRATE_PONYTAIL=1 \
-DIGEST_HUMANIZER_POLISH=1 \
-DIGEST_ENRICH_SHADOW=1 \
-npm run digest -- --edition skills
-```
+The bet: one light polish pass after the writing strips those tells, keeps every fact and the why now line, and adds a plain explanation when a project name assumes specialist knowledge.
 
-Output: `data/experiments/runs/{run_id}/`. Score with the [shadow rubric](../shadow-rubric.md).
+[Humanizer](https://github.com/blader/humanizer), a project that first appeared on the Skills list on Aug 5, 2026, spots common AI writing patterns and rewrites them without inventing facts. Humanizer itself does not run on the list. The polish step borrows its habit.
 
-## References
+## The change
 
-- Experiment ID: ``EXP-20260913-humanizer-polish-skills``
-- Prior in queue: soft-dedup diversity (``EXP-20260715-soft-dedup-diversity-skills``)
-- Prior narration experiment: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.html)
-- Tool inventory: [blader/humanizer](https://github.com/blader/humanizer) (featured on Skills list; habit borrowed, not installed)
-- Lab dashboard: [/lab/experiments.html](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)
+One extra editing pass now runs after each daily list is written, on both the AI Tastemakers and Skill Tastemakers lists. Specific details from each project's own description stay. Why now hooks stay. Filler and stock AI phrasing go.
+
+The before period ran Sep 27 to Oct 10, 2026. The polish step ran Oct 11 to Oct 24, 2026.
+
+## How to tell if it worked
+
+| Goal | Sign of success |
+|---------|------------------------|
+| Less AI-sounding | Editor spot checks find fewer stock phrases and filler transitions |
+| Still accurate and timely | Average scores of at least 4.0 out of 5 on specificity, why now, and accuracy |
+| Cost | One extra AI call per list per day shows up in the token log |
+
+Clicks were not part of the call. Click tracking did not run from Oct 11 to Oct 18, so no click data exists for those days. From Oct 19 to Oct 24, Skills projects drew 0 clicks, so clicks cannot show whether a brief sounds more human.
+
+## What happened
+
+- The day's top brief passed the quality checklist 13 times out of 13, so the polish step did not introduce errors.
+- The why now score rose to 5.0 from 3.7 on a 1 to 5 scale. Briefs got clearer about why each project matters right now.
+- The specificity score rose to 5.0 from 4.5. Polishing the wording did not water down the details.
+- Both scores cleared the 4.0 bar with room to spare.
+
+The polish step stays on for both daily lists.
+
+### More
+
+- Earlier writing experiment: [Shorter Skills briefs](./EXP-20260802-ponytail-narration-skills.html)
+- All experiments: [Lab dashboard](https://leftyshields.github.io/ai-tastemakers/lab/experiments.html)

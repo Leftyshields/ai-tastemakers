@@ -2,6 +2,9 @@
   "name": "ai-tastemakers",
   "version": "0.1.0",
   "private": true,
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "test": "node --test lib/loadGenome.test.js lib/decompose.test.js lib/signaling.test.js lib/guardrails.test.js lib/run.test.js lib/repair.test.js scripts/derive-expression-profiles.test.js scripts/molecules-read_file.test.js",
     "test:instantiate": "node --test scripts/instantiate.test.js",
@@ -11,7 +14,8 @@
     "weekly": "tsx src/tastemaker/weekly-cli.ts",
     "monthly": "tsx src/tastemaker/monthly-cli.ts",
     "build:digest": "tsc -p tsconfig.json",
-    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify",
+    "build:pages": "tsx scripts/build-pages.ts && tailwindcss -i site/assets/input.css -o site/assets/style.css --minify && tsx scripts/stamp-css-cache-bust.ts",
+    "build:outbound-email-manifest": "tsx scripts/build-outbound-email-manifest.ts",
     "inventory:tools": "tsx src/tastemaker/inventory-cli.ts",
     "experiment": "tsx src/tastemaker/experiments-cli.ts",
     "experiment:reminders": "tsx src/tastemaker/experiment-reminders-cli.ts",
@@ -21,6 +25,7 @@
     "genesis:verify-experiments-page": "bash genesis/verify-experiments-page.sh",
     "render:digest-email": "tsx scripts/render-digest-email-preview.ts",
     "verify:genesis": "sh scripts/verify-genesis.sh",
+    "capture:seo-header": "tsx scripts/capture-seo-header-ux-artifacts.ts",
     "verify:digest": "node scripts/verify-daily-digest.mjs",
     "subscribers:add": "tsx scripts/add-subscriber.ts",
     "subscribers:remove": "tsx scripts/remove-subscriber.ts",
@@ -29,19 +34,22 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
+    "@google-cloud/firestore": "^9.4.0",
     "dotenv": "^16.4.7",
-    "firebase-admin": "^13.4.0",
-    "resend": "^6.12.4"
+    "firebase-admin": "14.5.0",
+    "resend": "^6.37.0"
   },
   "devDependencies": {
-    "@tailwindcss/cli": "^4.3.0",
-    "@tailwindcss/typography": "^0.5.19",
-    "jsdom": "24.1.3",
-    "marked": "^18.0.5",
-    "playwright": "1.49.0",
-    "sharp": "^0.34.5",
-    "tailwindcss": "^4.3.0",
-    "tsx": "^4.19.3",
+    "@tailwindcss/cli": "^4.3.4",
+    "@tailwindcss/typography": "^0.5.20",
+    "jsdom": "30.1.3",
+    "marked": "^18.1.3",
+    "pixelmatch": "7.2.0",
+    "playwright": "1.64.1",
+    "pngjs": "7.0.0",
+    "sharp": "^0.35.5",
+    "tailwindcss": "^4.3.3",
+    "tsx": "4.23.15",
     "typescript": "^5.8.2",
     "vitest": "^3.0.9"
   }

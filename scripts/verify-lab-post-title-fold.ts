@@ -23,6 +23,7 @@ async function main(): Promise<void> {
   const layout = await page.evaluate(() => {
     const article = document.querySelector("article");
     const h1 =
+      document.querySelector(".lab-post-panel__title") ??
       document.querySelector(".lab-post-header h1") ??
       article?.querySelector("h1") ??
       document.querySelector("article h1");

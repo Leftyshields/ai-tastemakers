@@ -1,0 +1,195 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W43",
+  "week_start": "2026-10-19",
+  "week_end": "2026-10-25",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 45,
+      "skills": 41
+    },
+    "total_stars_gained": {
+      "oss": 355805,
+      "skills": 450587
+    },
+    "top_topics": {
+      "oss": [
+        "llm",
+        "claude-code",
+        "ai-agents",
+        "developer-tools",
+        "codex"
+      ],
+      "skills": [
+        "claude-code",
+        "ai-agents",
+        "codex",
+        "mcp",
+        "llm"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "affaan-m/ECC",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "yetone/magpie",
+          "days_appeared": 3
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Gathin23/cleanyourtv",
+          "days_appeared": 6
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "ChromeDevTools/chrome-devtools-mcp",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "wheresryan22/anatomy",
+          "days_appeared": 3
+        },
+        {
+          "full_name": "MadsLorentzen/ai-job-search",
+          "days_appeared": 2
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "DietrichGebert/ponytail",
+      "Graphify-Labs/graphify",
+      "NousResearch/hermes-agent",
+      "addyosmani/agent-skills",
+      "blader/humanizer",
+      "citrolabs/ego-lite",
+      "firecrawl/firecrawl",
+      "gamedev-skills/awesome-gamedev-agent-skills",
+      "headroomlabs-ai/headroom",
+      "morluto/rea",
+      "nextlevelbuilder/ui-ux-pro-max-skill",
+      "rohitg00/ai-engineering-from-scratch",
+      "tt-a1i/archify",
+      "xerj-org/xerj",
+      "yetone/magpie",
+      "yihui-dev/awesome-opus5-5-videos"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 875931,
+          "days_appeared": 7,
+          "excerpt": "REA is an MCP server (a standardized tool-connection layer for AI agents) that lets agents inspect closed binaries, JavaScript/Electron apps, .NET assemblies, and websites without source code, routing the analysis through Hopper or Ghidra running locally."
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "total_stars_gained": 128798,
+          "days_appeared": 7,
+          "excerpt": "A zero-configuration plugin for dsh (a shell-based AI coding environment) that routes requests to frontier models — DeepSeek V4.1 Flash, Kimi K3, and others — through the OpenCode Zen and Kilo AI public gateways, requiring no login, API key, or build step."
+        },
+        {
+          "full_name": "DietrichGebert/ponytail",
+          "total_stars_gained": 59243,
+          "days_appeared": 7,
+          "excerpt": "Ponytail is a JavaScript agent skill that installs a \"laziest senior dev\" heuristic into AI coding agents, cutting generated code by 53%, token usage by 45%, and raising test coverage of risky logic from 68% to 98% — benchmarked on Claude Code against a real FastAPI + React repo."
+        },
+        {
+          "full_name": "Graphify-Labs/graphify",
+          "total_stars_gained": 25870,
+          "days_appeared": 4,
+          "excerpt": "Graphify turns a codebase—plus its docs, SQL schemas, configs, and PDFs—into a queryable knowledge graph using deterministic AST parsing via tree-sitter, exposing every relationship with an explanation and no vector store or embedding infrastructure required."
+        },
+        {
+          "full_name": "yetone/magpie",
+          "total_stars_gained": 21470,
+          "days_appeared": 3,
+          "excerpt": "Magpie is a local gateway — available as a menu bar app, CLI, Docker container, or TUI — that lets any AI coding agent (Claude Code, Codex, Gemini CLI, OpenCode) target any provider or model by editing one config, with automatic failover when a quota runs out."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 875752,
+          "days_appeared": 7,
+          "excerpt": "REA is a single MCP server (a standardized way to give AI agents access to external tools) that lets agents inspect closed-source binaries, JavaScript/Electron apps, .NET assemblies, and websites using Hopper or Ghidra as the analysis backend—no source code required."
+        },
+        {
+          "full_name": "Gathin23/cleanyourtv",
+          "total_stars_gained": 116707,
+          "days_appeared": 6,
+          "excerpt": "CleanYourTV sends ADB commands over Wi-Fi to disable bloatware and ad-serving packages on Android TV and Google TV, then sideloads a 390 KB Java launcher that swaps the default home screen for an Apple TV-style interface — no root or USB cable required."
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "total_stars_gained": 100253,
+          "days_appeared": 7,
+          "excerpt": "VoiceStudio is a local-first, open-source desktop app (Electron + Python) covering voice cloning, voice design, video dubbing, dictation, transcription, and audiobook generation across 646 languages, using k2-fsa/OmniVoice as its default model."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 44721,
+          "days_appeared": 5,
+          "excerpt": "Orca is a desktop and mobile orchestrator that runs multiple coding agents—Codex, Claude Code, OpenCode, Grok Bot—in parallel git worktrees, so you can fan out a single prompt to several agents and merge whichever result wins."
+        },
+        {
+          "full_name": "ChromeDevTools/chrome-devtools-mcp",
+          "total_stars_gained": 43902,
+          "days_appeared": 4,
+          "excerpt": "`chrome-devtools-mcp` is an MCP server that gives AI coding agents—Claude, Cursor, Copilot—direct access to Chrome DevTools: network inspection, source-mapped console traces, screenshots, Puppeteer automation, and performance profiling."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "The dominant story of W43 is that AI agents are gaining eyes into places they previously couldn't see: REA, an open-source tool that lets agents reverse-engineer closed software without source code, was the week's most-watched project across both general and developer audiences. Alongside it, builders shipped infrastructure to make agent workflows cheaper and more resilient — a local model-routing gateway called Magpie that automatically fails over between providers, and a free-model plugin for AI coding shells that eliminates the need for API keys entirely. The practical implication: the cost and lock-in of running coding agents are falling fast, which lowers the barrier for teams experimenting with autonomous development. **Watch this quarter** whether reverse-engineering capabilities in agents create compliance or IP-risk conversations inside your legal and security teams — the technology is ahead of the policy.",
+    "generalist": "The builder stack shifted in two directions this week: **tool connectivity** and **cost reduction**. On connectivity, `morluto/rea` was the week's breakout — an MCP server that routes agent queries through Hopper or Ghidra to analyze compiled binaries, Electron apps, .NET assemblies, and live websites with no source code in hand. It's the kind of primitive that unlocks a whole class of security, interop, and legacy-modernization workflows that agents previously couldn't touch. `ChromeDevTools/chrome-devtools-mcp` pushed in a similar direction, giving agents like Claude and Cursor direct access to browser internals — network traces, console logs, screenshots, and Puppeteer automation — via the same MCP standard.\n\nOn cost and ergonomics, `yetone/magpie` landed as a local gateway that lets any coding agent swap providers or models by editing one config file, with automatic quota failover. `Ebony-Vinyl/dsh-our-free-model` went further, routing shell-based AI coding requests to frontier models through public gateways with zero login or API key required. And `DietrichGebert/ponytail` introduced a \"laziest senior dev\" heuristic as an installable agent skill, reporting meaningful reductions in generated code volume and token spend alongside higher test coverage of risky paths — a reminder that prompt-layer skills can still move the needle considerably even as infrastructure matures.",
+    "statistician": "The skills edition ran notably hotter than OSS this week — 450,587 total stars gained across 41 repos versus 355,805 across 45 — but both totals are pulled sharply upward by `morluto/rea`, which appeared in both charts and posted star figures that dwarf every other entry; treat the aggregate as reflecting one outlier, not a broad surge. The seven-day repeat streaks (REA, VoiceStudio, dsh-our-free-model) indicate genuine sustained interest rather than a single viral moment, while shorter appearances of two to four days are more likely reflecting normal trending-tab cycling."
+  },
+  "email": {
+    "verdict": "One repo ate the week whole, and what it does explains exactly why.",
+    "body": "[REA](https://github.com/morluto/rea) topped both AI Tastemakers (the daily list of open-source AI tools) and Skill Tastemakers (the daily list of skills you install on an agent) every single day from Monday through Sunday. It pulled more attention on its quietest day than most repos see in a week. What it does: REA is an MCP server, which is a standardized connection layer for giving AI agents access to external tools, and this one lets agents inspect closed binaries, JavaScript and Electron apps, .NET assemblies, and websites with no source code available, routing analysis through Hopper or Ghidra running locally.\n\nThat function lands differently in 2026 than it would have two years ago. Agents are now being handed real engineering tasks, and real codebases are not all open. REA hands an agent the ability to reason about software it cannot read directly. That is a genuinely new surface.\n\nThe rest of the week filled in a coherent picture around it. [Ponytail](https://github.com/DietrichGebert/ponytail), a JavaScript agent skill that steers coding agents toward minimal solutions, held AI Tastemakers all seven days. [chrome-devtools-mcp](https://github.com/ChromeDevTools/chrome-devtools-mcp), which gives agents direct access to Chrome DevTools including network inspection and performance profiling, held Skill Tastemakers for four days. [Orca](https://github.com/stablyai/orca), a desktop orchestrator that fans a single prompt across multiple coding agents running in parallel git worktrees, ran five days on Skill Tastemakers.\n\nAttention this week concentrated almost entirely on making agents more capable at tasks engineers already do: reading opaque code, writing less bloated code, debugging in the browser, parallelizing work. The scaffolding layer is not experimental anymore; it is being equipped."
+  },
+  "generated_at": "2026-10-25T17:07:53.016Z"
+}

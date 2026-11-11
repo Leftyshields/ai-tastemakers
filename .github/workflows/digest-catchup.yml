@@ -16,6 +16,7 @@ on:
 
 permissions:
   contents: read
+  pages: read
   actions: write
   issues: write
 
@@ -65,6 +66,7 @@ jobs:
         if: steps.check.outcome == 'failure' && steps.check.outputs.pages_stale == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Briefings OK on main — triggering Pages redeploy."
           gh workflow run "Deploy GitHub Pages" --ref main
@@ -84,6 +86,7 @@ jobs:
         if: steps.digest_retrigger.outputs.recovered == 'true'
         env:
           GH_TOKEN: ${{ github.token }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Digest recovered — ensuring Pages is live for today."
           gh workflow run "Deploy GitHub Pages" --ref main
@@ -102,6 +105,8 @@ jobs:
         if: |
           steps.pages_redeploy.outcome == 'success' ||
           (steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok == 'true')
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-daily-digest.mjs
 
       - name: Alert on failure

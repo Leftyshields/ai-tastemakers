@@ -1,4 +1,8 @@
 import {
+  appendDailyDigestUtmClientSource,
+  appendDailyDigestUtmToUrl,
+} from "../src/tastemaker/analytics/digest-email-utm.js";
+import {
   digestDateFromCompact,
   labBadgeAttributionClientParserSource,
   labBadgeDestGoInlineRegexSources,
@@ -7,7 +11,17 @@ import {
   resolveAllowlistedLabBadgeDestPath,
   type RepoClickProperties,
 } from "../src/tastemaker/analytics/repo-click.js";
+import {
+  outboundDestClientHelpersScript,
+  resolveOutboundDestFromManifest,
+} from "../src/tastemaker/analytics/outbound-dest-manifest.js";
 import { escapeScriptString, posthogScriptHtml } from "./edition-pages.js";
+import {
+  absoluteCanonicalUrl,
+  feedAlternateLinksHtml,
+  googleSiteVerificationMetaHtml,
+  siteFaviconLinksHtml,
+} from "./seo-helpers.js";
 
 function escapeHtml(text: string): string {
   return text
@@ -17,12 +31,23 @@ function escapeHtml(text: string): string {
     .replace(/"/g, "&quot;");
 }
 
+function manifestHashMapJson(sortedHashes: string[]): string {
+  const map: Record<string, true> = {};
+  for (const h of sortedHashes) map[h] = true;
+  return JSON.stringify(map);
+}
+
 export function renderGoRedirectPage(
   allowlist: Record<string, string>,
   homePath = "/",
+  siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
+  manifestDestHashes: string[] = [],
 ): string {
   const allowlistJson = JSON.stringify(allowlist);
   const posthog = posthogScriptHtml();
+  const feedAlternates = feedAlternateLinksHtml(siteBaseUrl, escapeHtml);
+  const faviconLinks = siteFaviconLinksHtml("../", escapeHtml);
+  const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const safeAllowlist = escapeScriptString(allowlistJson);
   const safeHome = escapeScriptString(homePath.startsWith("/") ? homePath : `/${homePath}`);
   const labDestRe = labBadgeDestGoInlineRegexSources();
@@ -30,13 +55,22 @@ export function renderGoRedirectPage(
   const safeIndexPathRe = escapeScriptString(labDestRe.indexPath);
   const safeIndexHashRe = escapeScriptString(labDestRe.indexHash);
   const attributionParser = labBadgeAttributionClientParserSource();
+  const digestUtmAppend = appendDailyDigestUtmClientSource();
+  const safeManifest = escapeScriptString(manifestHashMapJson(manifestDestHashes));
+  const destHelpers = outboundDestClientHelpersScript();
 
   return `<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
+  ${faviconLinks}
   <title>Continue to GitHub</title>
+  <meta name="description" content="Redirect to an allowlisted GitHub repository from AI Tastemakers outbound tracking.">
+  <link rel="canonical" href="${escapeHtml(absoluteCanonicalUrl(siteBaseUrl, "go/index.html"))}">
+  <meta name="robots" content="noindex, nofollow">
+  ${gscMeta}
+  ${feedAlternates}
   ${posthog}
   <style>
     body { font-family: system-ui, sans-serif; margin: 0; padding: 2rem; background: #fafaf9; color: #1c1917; }
@@ -47,6 +81,7 @@ export function renderGoRedirectPage(
 </head>
 <body>
   <main>
+    <h1 style="font-size:1.125rem;margin:0 0 0.75rem;font-weight:600">Continue to GitHub</h1>
     <p>Opening GitHub</p>
     <p><a id="continue-link" href="${escapeHtml(homePath)}">Continue to GitHub</a></p>
   </main>
@@ -56,6 +91,7 @@ export function renderGoRedirectPage(
   <script>
 (function () {
   var ALLOWLIST = JSON.parse('${safeAllowlist}');
+  var MANIFEST_HASHES = JSON.parse('${safeManifest}');
   var HOME = '${safeHome}';
   var captured = false;
 
@@ -73,6 +109,8 @@ export function renderGoRedirectPage(
     window.location.replace(url);
   }
 
+  ${destHelpers}
+
   var params = new URLSearchParams(window.location.search);
   var eventName = params.get("event") || "";
   var parsed = {
@@ -85,7 +123,8 @@ export function renderGoRedirectPage(
     exp: params.get("exp"),
     status: params.get("status"),
     dest: params.get("dest"),
-    channel: params.get("channel")
+    channel: params.get("channel"),
+    surface: params.get("surface")
   };
 
   var repo = parsed.repo;
@@ -121,6 +160,7 @@ export function renderGoRedirectPage(
   var LAB_DEST_INDEX_HASH_RE = new RegExp('${safeIndexHashRe}', 'i');
 
   ${attributionParser}
+  ${digestUtmAppend}
   function attributionQueryOk(search) {
     if (!search) return true;
     return parseLabBadgeAttribution(search) !== null;
@@ -143,41 +183,52 @@ export function renderGoRedirectPage(
     return (postOk || indexOk) ? encodeURIComponent(raw) : null;
   }
 
+  var clickChannel = parsed.channel === "pages" ? "pages" : "email";
+  var clickSource = parsed.channel === "pages" ? "direct" : "email";
+
   var destination = resolveUrl() || (window.location.origin + HOME);
   if (eventName === "lab_badge_click" && labDest) {
     var safeLabDest = isAllowlistedLabDest(labDest);
-    if (safeLabDest) destination = window.location.origin + decodeURIComponent(safeLabDest);
+    if (safeLabDest) {
+      destination = appendDailyDigestUtm(window.location.origin + decodeURIComponent(safeLabDest));
+    }
   }
+
   var continueLink = document.getElementById("continue-link");
   if (continueLink) continueLink.href = destination;
 
-  if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
-    var normalizedRepo = normalizeRepo(repo) || "";
-    captureOnce("lab_badge_click", {
-      experiment_id: parsed.exp,
-      exp_id: parsed.exp,
-      repo: normalizedRepo || repo || "",
-      source_repo: normalizedRepo,
-      status: parsed.status || "",
-      list: section,
-      rank: rank,
-      surface: "email",
-      channel: parsed.channel || "email"
-    });
-  } else {
+  function captureForQuery() {
+    if (eventName === "lab_badge_click" && section && Number.isFinite(rank) && parsed.exp) {
+      var normalizedRepo = normalizeRepo(repo) || "";
+      captureOnce("lab_badge_click", {
+        experiment_id: parsed.exp,
+        exp_id: parsed.exp,
+        repo: normalizedRepo || repo || "",
+        source_repo: normalizedRepo,
+        status: parsed.status || "",
+        list: section,
+        rank: rank,
+        surface: "email",
+        channel: parsed.channel || "email"
+      });
+      return;
+    }
+    if (eventName === "outbound_link_click") return;
     var githubTarget = resolveUrl();
     if (githubTarget && section && Number.isFinite(pos)) {
       captureOnce("repo_click", {
         repo: normalizeRepo(repo),
         section: section,
-        channel: "email",
+        channel: clickChannel,
         position: pos,
         target: target,
         digest_date: digestDate,
-        source: "email"
+        source: clickSource
       });
     }
   }
+
+  captureForQuery();
 
   var done = false;
   function go() {
@@ -186,7 +237,32 @@ export function renderGoRedirectPage(
     forward(destination);
   }
 
-  setTimeout(go, 300);
+  function finishOutbound(destUrl, surface) {
+    if (!isSafeExternalUrl(destUrl)) {
+      setTimeout(go, 300);
+      return;
+    }
+    destination = destUrl;
+    if (continueLink) continueLink.href = destination;
+    var host = "";
+    try { host = new URL(destUrl).hostname; } catch (e) {}
+    captureOnce("outbound_link_click", {
+      destination: destUrl,
+      host: host,
+      surface: surface || "",
+      channel: clickChannel
+    });
+    setTimeout(go, 300);
+  }
+
+  if (eventName === "outbound_link_click" && parsed.dest) {
+    resolveManifestOutbound(parsed.dest, MANIFEST_HASHES).then(function (allowed) {
+      if (allowed) finishOutbound(allowed, parsed.surface || "");
+      else setTimeout(go, 300);
+    });
+  } else {
+    setTimeout(go, 300);
+  }
 })();
   </script>
 </body>
@@ -198,16 +274,21 @@ export function resolveGoPageDestination(
   search: string,
   allowlist: Record<string, string>,
   homeUrl: string,
+  manifestHashes: ReadonlySet<string> = new Set(),
 ): string {
   const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
   const event = params.get("event") || "";
   const dest = params.get("dest");
+  if (event === "outbound_link_click" && dest) {
+    const resolved = resolveOutboundDestFromManifest(dest, manifestHashes);
+    return resolved ?? homeUrl;
+  }
   if (event === "lab_badge_click" && dest) {
     const allowed = resolveAllowlistedLabBadgeDestPath(dest);
     if (allowed) {
       try {
         const home = new URL(homeUrl);
-        return `${home.origin}${decodeURIComponent(allowed)}`;
+        return appendDailyDigestUtmToUrl(`${home.origin}${decodeURIComponent(allowed)}`);
       } catch {
         return homeUrl;
       }

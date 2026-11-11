@@ -86,8 +86,8 @@ export function outcomeLine(record: ExperimentRecord, archived: boolean): string
   if (archived && record.keep_change === true) {
     return "Shipped to the live site without a full before/after measurement.";
   }
-  if (record.keep_change === true) return "We kept this change.";
-  if (record.keep_change === false) return "We reverted this change.";
+  if (record.keep_change === true) return "This change stayed on.";
+  if (record.keep_change === false) return "This change was reverted.";
   return "";
 }
 
@@ -107,14 +107,14 @@ export function buildQueueSummary(experiments: ExperimentRecord[]): string {
   const active = experiments.find((e) => e.status === "active" || e.status === "baseline");
   if (active?.status === "baseline") {
     const w = windowLabel(active.baseline_window?.start, active.baseline_window?.end);
-    return `We're collecting the before picture for ${displayTitle(active)} (${w}). The change is still off. Cost and quality live on the Token dashboard.`;
+    return `Collecting the before picture for ${displayTitle(active)} (${w}). The change is still off. Cost and quality live on the Token dashboard.`;
   }
   if (active?.status === "active") {
     const start = active.treatment_window?.start || "—";
     const end = active.treatment_window?.end || "—";
     const measure = active.how_we_measure?.trim();
     const tail = measure || "Watch cost and writing quality on the Token dashboard.";
-    return `We're testing ${displayTitle(active)}. The change is on for Skills digests from ${start} through ${end}. ${tail}`;
+    return `Now testing ${displayTitle(active)}. The change is on for Skills digests from ${start} through ${end}. ${tail}`;
   }
   const draft = experiments.find((e) => e.status === "draft");
   if (draft) {

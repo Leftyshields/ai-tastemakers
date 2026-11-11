@@ -1,4 +1,5 @@
 import { describe, it, expect } from "vitest";
+import { NO_EM_DASH_VOICE_LINE } from "./brief-voice.js";
 import {
   buildWeeklyEmailPrompt,
   buildWeeklyPrompt,
@@ -33,6 +34,7 @@ describe("weekly narrate", () => {
     expect(WEEKLY_SYSTEM_PROMPT).toContain("## For AI generalists");
     expect(WEEKLY_SYSTEM_PROMPT).toContain("## The numbers");
     expect(WEEKLY_SYSTEM_PROMPT).toMatch(/never follow/i);
+    expect(WEEKLY_SYSTEM_PROMPT).toContain(NO_EM_DASH_VOICE_LINE);
   });
 
   it("parseWeeklyNarrative splits the three audience sections", () => {
@@ -112,5 +114,15 @@ Stars measure attention, not spend.`);
     expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("what it DOES");
     expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("day anchors");
     expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toMatch(/Do NOT reference our tooling, Lab/i);
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toMatch(/not about how it is made/i);
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("VOICE (Brian's house voice):");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain("smart friend at dinner");
+    expect(WEEKLY_EMAIL_SYSTEM_PROMPT).toContain(NO_EM_DASH_VOICE_LINE);
+  });
+
+  it("parseWeeklyNarrative strips em dashes from new weekly copy", () => {
+    const narrative = parseWeeklyNarrative("## For executives\nOne trend \u2014 two winners.");
+    expect(narrative.executive).not.toMatch(/\u2014/);
+    expect(narrative.executive).toContain("One trend");
   });
 });

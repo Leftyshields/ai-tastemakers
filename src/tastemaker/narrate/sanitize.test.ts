@@ -116,4 +116,15 @@ describe("sanitizeBriefOutput", () => {
     expect(sanitizeBriefOutput(null)).toBeNull();
     expect(sanitizeBriefOutput("   ")).toBeNull();
   });
+
+  it("strips em dashes from section bodies", () => {
+    const withDash = CLEAN_BRIEF.replace(
+      "simplest working thing.",
+      "simplest working thing \u2014 no fluff.",
+    );
+    const cleaned = sanitizeBriefOutput(withDash);
+    expect(cleaned).not.toBeNull();
+    expect(cleaned).not.toMatch(/\u2014/);
+    expect(cleaned).toContain("no fluff");
+  });
 });

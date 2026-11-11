@@ -21,6 +21,7 @@ describe("Lab UX43 tools page", () => {
     expect(html).not.toContain("`");
     expect(html).toContain('data-lab-section="tools"');
     expect(html).toContain("What the digest has learned");
+    expect(html).toContain("data-third-party");
   });
 
   it("keeps More rows collapsed by default and sets Evaluated aria-current", () => {

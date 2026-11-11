@@ -6,11 +6,15 @@ import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
   buildIsoDatePt,
   findLabPostBacktickViolations,
+  findLabPostUnrenderedMarkdownLinkViolations,
+  findLabPostUnrenderedTableViolations,
   findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
   normalizeLabWriteupMarkdown,
+  prepareLabWriteupHtmlFromMarkdown,
   prepareLabProseHtmlFromMarkdown,
+  repairGfmTableDelimiterRows,
   sanitizeLabVisibleHtml,
 } from "../../../scripts/lab/lab-format.js";
 import { buildLabPublicFile, renderLabDashboardHtml } from "../../../scripts/lab/build-lab-public.js";
@@ -127,6 +131,28 @@ describe("Lab UX26 UX28 UX29", () => {
     }
   });
 
+  it("UX43 repairs GFM delimiter rows with space-only cells so marked emits tables", () => {
+    const broken = `| Phase | Window | Outcome |
+|-------|-------------|         |
+| Baseline | a | b |`;
+    const repaired = repairGfmTableDelimiterRows(broken);
+    expect(repaired).toContain("| --- |");
+    const html = prepareLabProseHtmlFromMarkdown(broken);
+    expect(html).toContain("lab-post-table-wrap");
+    expect(html).toContain("<table");
+    expect(findLabPostUnrenderedTableViolations(`<article class="lab-prose-capped">${html}</article>`, "test")).toEqual([]);
+  });
+
+  it("UX43 web enrich write up What happened table renders (not a pipe paragraph)", () => {
+    const mdPath = path.join(repoRoot, "briefings/lab/posts/EXP-20260628-web-enrich-skills.md");
+    const md = fs.readFileSync(mdPath, "utf8");
+    const section = md.split("## What happened")[1]?.split("### Metrics")[0] ?? "";
+    const html = prepareLabProseHtmlFromMarkdown(section);
+    expect(html).toContain("lab-post-table-wrap");
+    expect(html).not.toMatch(/<p>\|\s*Period/);
+    expect(findLabPostUnrenderedTableViolations(`<article class="lab-prose-capped">${html}</article>`, "test")).toEqual([]);
+  });
+
   it("UX46 normalizes write up dates and about approximations", () => {
     const md = "_**Kept (2026-08-29).** Cut ~18% with hook on 2026-08-17._";
     const out = normalizeLabWriteupMarkdown(md);
@@ -135,6 +161,24 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(out).toContain("Aug 17, 2026");
     expect(out).not.toMatch(/~\s*\d/);
     expect(out).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+  });
+
+  it("UX46 leaves ISO paths in markdown link destinations intact", () => {
+    const md =
+      "- **After:** [Aug 17, 2026](../../skills/briefings/2026-08-17.html), the first brief under the new rules.";
+    const out = normalizeLabWriteupMarkdown(md);
+    expect(out).toContain("../../skills/briefings/2026-08-17.html");
+    expect(out).not.toContain("Aug 17, 2026.html");
+    const html = prepareLabWriteupHtmlFromMarkdown(md);
+    expect(html).toContain('href="../../skills/briefings/2026-08-17.html"');
+    expect(findLabPostUnrenderedMarkdownLinkViolations(`<article class="${"lab-prose-capped"}">${html}</article>`, "test")).toEqual([]);
+  });
+
+  it("UX43 flags raw markdown links in rendered lab post HTML", () => {
+    const bad = `<article class="lab-prose-capped"><p>[Aug 17, 2026](../../skills/briefings/Aug 17, 2026.html)</p></article>`;
+    expect(findLabPostUnrenderedMarkdownLinkViolations(bad, "site/lab/posts/x.html").length).toBeGreaterThan(0);
+    const ok = `<article class="lab-prose-capped"><p><a href="../../skills/briefings/2026-08-17.html">Aug 17, 2026</a></p></article>`;
+    expect(findLabPostUnrenderedMarkdownLinkViolations(ok, "site/lab/posts/x.html")).toEqual([]);
   });
 
   it("UX37 buildIsoDatePt uses America/Los_Angeles calendar date", () => {

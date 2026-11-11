@@ -1,5 +1,6 @@
 import type { EditionId } from "../editions.js";
 import type { Digest, RankingMode } from "../types.js";
+import { appendDailyDigestUtmToUrl } from "../analytics/digest-email-utm.js";
 import {
   buildEmailGoUrl,
   buildFullDigestPagesUrl,
@@ -18,6 +19,12 @@ import {
   type LabBadgeInfo,
 } from "../../../scripts/lab/lab-tested-badge.js";
 import { appendLabBadgeAttributionToHref } from "../../../scripts/lab/lab-post-header.js";
+import type { OutboundDestRegistry } from "../analytics/outbound-dest-manifest.js";
+import {
+  rewriteOutboundLinksInHtml,
+  rewriteOutboundLinksInPlainText,
+  type OutboundRewriteContext,
+} from "../analytics/rewrite-outbound-links.js";
 
 const EMAIL_TOPIC_LIMIT = 5;
 const BRAND_LINK = "#1e40af";
@@ -123,6 +130,24 @@ function labBadgeEmailContext(badgeLookup?: ReadonlyMap<string, LabBadgeInfo>): 
   return { lookup, writeupPostIds };
 }
 
+export function digestEmailOutboundContext(
+  siteUrl: string,
+  dateLabel: string,
+  section: EditionId,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): OutboundRewriteContext {
+  return {
+    siteBaseUrl: siteUrl,
+    destRegistry,
+    githubAllowlist,
+    channel: "email",
+    surface: "daily_email",
+    section,
+    digestDate: dateLabel,
+  };
+}
+
 export function renderDigestEmailHtml(
   digest: Digest,
   dateLabel: string,
@@ -130,6 +155,8 @@ export function renderDigestEmailHtml(
   unsubscribeUrlOverride?: string,
   section: EditionId = "oss",
   badgeLookup?: ReadonlyMap<string, LabBadgeInfo>,
+  githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const bootstrapNote = digest.ranking_mode === "delta_7d" ? "" : bootstrapNoteHtml();
   const preheader = escapeHtml(digestEmailPreheader(digest));
@@ -202,9 +229,10 @@ export function renderDigestEmailHtml(
     .join("\n");
 
   const fullDigestUrl = escapeHtml(buildFullDigestPagesUrl(siteUrl, dateLabel, section));
+  const archiveUrl = escapeHtml(appendDailyDigestUtmToUrl(siteUrl.replace(/\/+$/, "") + "/"));
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
 
-  return `<!DOCTYPE html>
+  const htmlBody = `<!DOCTYPE html>
 <html lang="en">
 <head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"></head>
 <body style="margin:0;padding:0;background:#fafaf9;">
@@ -225,7 +253,7 @@ export function renderDigestEmailHtml(
     ${repoBlocks}
     <p style="margin:32px 0 0;font-family:system-ui,sans-serif;font-size:14px;text-align:center;">
       <a href="${fullDigestUrl}" style="color:${BRAND_LINK};font-weight:600;text-decoration:underline;">Open the full digest</a>
-      · <a href="${escapeHtml(siteUrl)}" style="color:#78716c;">Archive</a>
+      · <a href="${archiveUrl}" style="color:#78716c;">Archive</a>
     </p>
     <p style="margin:16px 0 0;font-family:system-ui,sans-serif;font-size:11px;color:#a8a29e;text-align:center;">
       One digest per day · <a href="${escapeHtml(unsubscribeUrl)}" style="color:#78716c;">Unsubscribe</a>
@@ -236,6 +264,11 @@ export function renderDigestEmailHtml(
   </div>
 </body>
 </html>`;
+  if (Object.keys(githubAllowlist).length === 0) return htmlBody;
+  return rewriteOutboundLinksInHtml(
+    htmlBody,
+    digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist, destRegistry),
+  );
 }
 
 export function renderDigestEmailText(
@@ -245,6 +278,8 @@ export function renderDigestEmailText(
   unsubscribeUrlOverride?: string,
   section: EditionId = "oss",
   badgeLookup?: ReadonlyMap<string, LabBadgeInfo>,
+  githubAllowlist: Record<string, string> = {},
+  destRegistry?: OutboundDestRegistry,
 ): string {
   const lines: string[] = [
     `AI TASTEMAKERS — Daily Brief — ${dateLabel}`,
@@ -268,9 +303,16 @@ export function renderDigestEmailText(
       const match = labBadgeForRepo(badgeCtx.lookup, repo.full_name);
       if (match) labSuffix = renderLabTestedBadgePlainSuffix(match);
     }
+    const repoLineUrl =
+      Object.keys(githubAllowlist).length > 0
+        ? rewriteOutboundLinksInPlainText(
+            repo.html_url,
+            digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist, destRegistry),
+          )
+        : repo.html_url;
     lines.push(
       `${repo.rank}. ${repo.full_name}${labSuffix}${newRepoPlainLabel(repo.is_new)}`,
-      `${repo.full_name}  ${repo.html_url}`,
+      `${repo.full_name}  ${repoLineUrl}`,
       `${formatStars(repo, digest.ranking_mode)} · ${topics}`,
       brief,
       "",
@@ -278,18 +320,26 @@ export function renderDigestEmailText(
   }
 
   const fullDigestUrl = buildFullDigestPagesUrl(siteUrl, dateLabel, section);
+  const archiveUrl = appendDailyDigestUtmToUrl(siteUrl.replace(/\/+$/, "") + "/");
   const unsubscribeUrl = unsubscribeUrlOverride ?? digestUnsubscribeUrl(siteUrl);
   lines.push(
     `Open the full digest: ${fullDigestUrl}`,
-    `Archive: ${siteUrl}`,
+    `Archive: ${archiveUrl}`,
     `Unsubscribe: ${unsubscribeUrl}`,
     "",
     "One digest per day.",
   );
 
-  return lines.join("\n");
+  let text = lines.join("\n");
+  if (Object.keys(githubAllowlist).length > 0) {
+    text = rewriteOutboundLinksInPlainText(
+      text,
+      digestEmailOutboundContext(siteUrl, dateLabel, section, githubAllowlist, destRegistry),
+    );
+  }
+  return text;
 }
 
 export function digestEmailSubject(dateLabel: string): string {
-  return `AI Tastemakers — Daily Brief — ${dateLabel}`;
+  return `Daily Brief: ${dateLabel} | AI Tastemakers`;
 }

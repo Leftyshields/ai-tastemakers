@@ -10,6 +10,7 @@ import {
   renderRunningBadgeFixtureCard,
 } from "./lab/lab-tested-badge.js";
 import { renderDigestRepoCard } from "../src/tastemaker/pages/brief-cards.js";
+import { findBuiltStylesheet } from "./site-css-path.js";
 
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const siteRoot = path.join(repoRoot, "site");
@@ -49,9 +50,11 @@ function buildActionRowFixturePage(stylesheetHref: string): string {
 }
 
 async function main(): Promise<void> {
-  const cssPath = path.join(siteRoot, "assets", "style.css");
-  if (!fs.existsSync(cssPath)) {
-    console.error("missing site/assets/style.css (run npm run build:pages first)");
+  let cssPath: string;
+  try {
+    cssPath = findBuiltStylesheet(path.join(siteRoot, "assets"));
+  } catch {
+    console.error("missing built stylesheet under site/assets (run npm run build:pages first)");
     process.exit(1);
   }
 

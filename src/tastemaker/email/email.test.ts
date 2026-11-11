@@ -18,6 +18,7 @@ vi.mock("../subscribers/load.js", async (importOriginal) => {
     resolveDigestRecipients: vi.fn(),
   };
 });
+import { DEFAULT_DIGEST_SITE_URL } from "../config.js";
 import type { AppConfig, Digest } from "../types.js";
 
 const sampleDigest: Digest = {
@@ -97,12 +98,23 @@ describe("renderDigestEmailHtml", () => {
     expect(html).not.toContain("**What it does:**");
   });
 
-  it("includes Open the full digest link with email utm params", () => {
+  it("includes Open the full digest link with daily digest utm params", () => {
     const html = renderDigestEmailHtml(sampleDigest, "2026-06-06", "https://example.com/app");
     expect(html).toContain("Open the full digest");
-    expect(html).toContain("utm_source=email");
-    expect(html).toContain("utm_campaign=digest_20260606");
+    expect(html).toContain("utm_source=digest");
+    expect(html).toContain("utm_medium=email");
+    expect(html).toContain("utm_campaign=daily");
     expect(html).toContain("/briefings/2026-06-06.html");
+  });
+
+  it("tags Archive and full digest Pages links on production site base", () => {
+    const html = renderDigestEmailHtml(sampleDigest, "2026-06-06", DEFAULT_DIGEST_SITE_URL);
+    const utm =
+      "utm_source=digest&amp;utm_medium=email&amp;utm_campaign=daily";
+    expect(html).toContain(`href="${DEFAULT_DIGEST_SITE_URL}/briefings/2026-06-06.html?${utm}"`);
+    expect(html).toContain(`href="${DEFAULT_DIGEST_SITE_URL}/?${utm}"`);
+    expect(html).toContain("/go/?");
+    expect(html).not.toMatch(/\/go\/\?[^"']*utm_source=/);
   });
 
   it("includes bulletproof View on GitHub button with /go/ tracking links", () => {
@@ -190,8 +202,8 @@ describe("renderBriefForPlainText", () => {
 });
 
 describe("digestEmailSubject", () => {
-  it("includes date label", () => {
-    expect(digestEmailSubject("2026-06-06")).toContain("2026-06-06");
+  it("uses the copywriter daily brief template", () => {
+    expect(digestEmailSubject("2026-06-06")).toBe("Daily Brief: 2026-06-06 | AI Tastemakers");
   });
 });
 
@@ -232,6 +244,8 @@ describe("shouldSendDigestEmail", () => {
   narrateStructuredContext: false,
   narratePonytail: false,
   skillsExtraDiscovery: false,
+  humanizerPolish: false,
+  enrichCompress: false,
   };
 
   it("returns false when email env incomplete", async () => {
