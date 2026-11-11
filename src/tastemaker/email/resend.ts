@@ -21,6 +21,14 @@ import { collectDigestRepoAllowlist } from "../analytics/digest-allowlist.js";
 import { assertRenderedEmailAllowedByManifest } from "../analytics/outbound-email-manifest-guard.js";
 import { refreshOutboundEmailDestManifest } from "../analytics/write-outbound-email-manifest.js";
 import { isDigestEmailConfigured } from "./digest-send-gate.js";
+import {
+  isResendConcurrentIdempotentRequest,
+  isResendIdempotentAlreadySent,
+  recipientFailureLabel,
+  RESEND_CONCURRENT_IDEMPOTENT_BACKOFF_MS,
+  sleepMs,
+  truncateResendFailureMessage,
+} from "./resend-errors.js";
 
 export { assertDigestSendReady, isDigestEmailConfigured } from "./digest-send-gate.js";
 
@@ -71,6 +79,36 @@ export function digestSendIdempotencyKey(
   return key;
 }
 
+type ResendSendResult = { data: { id: string } | null; error: unknown };
+
+async function sendResendWithIdempotencyHandling(
+  sendOnce: () => Promise<ResendSendResult>,
+): Promise<string> {
+  for (let attempt = 0; ; attempt++) {
+    const { data, error } = await sendOnce();
+    if (!error) {
+      if (!data?.id) {
+        throw new Error("Resend API returned no message id");
+      }
+      return data.id;
+    }
+    if (isResendIdempotentAlreadySent(error)) {
+      return "idempotent-replay";
+    }
+    if (
+      isResendConcurrentIdempotentRequest(error) &&
+      attempt < RESEND_CONCURRENT_IDEMPOTENT_BACKOFF_MS.length
+    ) {
+      await sleepMs(RESEND_CONCURRENT_IDEMPOTENT_BACKOFF_MS[attempt]);
+      continue;
+    }
+    const errObj = error as { message?: string };
+    const raw =
+      typeof errObj?.message === "string" ? errObj.message : String(error);
+    throw new Error(`Resend API error: ${truncateResendFailureMessage(raw)}`);
+  }
+}
+
 export async function sendDigestEmail(
   config: AppConfig,
   digest: Digest,
@@ -96,8 +134,10 @@ export async function sendDigestEmail(
   const subject = digestEmailSubject(dateLabel);
   const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
+  const failures: string[] = [];
 
-  for (const record of records) {
+  for (const [index, record] of records.entries()) {
+    try {
     const unsubscribeUrl = digestUnsubscribeUrl(
       config.digestSiteUrl,
       record.email,
@@ -129,27 +169,46 @@ export async function sendDigestEmail(
       record.email,
       sendOptions?.manualRunId,
     );
-    const { data, error } = await resend.emails.send(
-      {
-        from: config.digestEmailFrom,
-        to: [record.email],
-        subject,
-        html,
-        text,
-        headers: {
-          "List-Unsubscribe": `<${unsubscribeUrl}>`,
+    const messageId = await sendResendWithIdempotencyHandling(() =>
+      resend.emails.send(
+        {
+          from: config.digestEmailFrom,
+          to: [record.email],
+          subject,
+          html,
+          text,
+          headers: {
+            "List-Unsubscribe": `<${unsubscribeUrl}>`,
+          },
         },
-      },
-      { idempotencyKey },
+        { idempotencyKey },
+      ),
     );
+    if (messageId !== "idempotent-replay") {
+      lastId = messageId;
+    } else {
+      lastId = lastId || "idempotent-replay";
+    }
+    } catch (err) {
+      if (isResendIdempotentAlreadySent(err)) {
+        lastId = lastId || "idempotent-replay";
+        continue;
+      }
+      const msg = err instanceof Error ? err.message : String(err);
+      failures.push(
+        `${recipientFailureLabel(index, record.email)}: ${truncateResendFailureMessage(msg)}`,
+      );
+    }
+  }
 
-    if (error) {
-      throw new Error(`Resend API error: ${error.message}`);
-    }
-    if (!data?.id) {
-      throw new Error("Resend API returned no message id");
-    }
-    lastId = data.id;
+  if (failures.length > 0) {
+    throw new Error(
+      `Resend daily digest failed for ${failures.length}/${records.length} recipient(s): ${failures.join("; ")}`,
+    );
+  }
+
+  if (!lastId) {
+    throw new Error("Resend daily digest returned no message id");
   }
 
   return { id: lastId };
@@ -177,54 +236,75 @@ export async function sendWeeklyDigestEmail(
   const subject = weeklyEmailSubject(review);
   const githubAllowlist = await collectDigestRepoAllowlist(config.rootDir);
   let lastId = "";
+  const failures: string[] = [];
 
-  for (const record of records) {
-    const unsubscribeUrl = digestUnsubscribeUrl(
-      config.digestSiteUrl,
-      record.email,
-      record.unsubscribeToken,
-    );
-    const weeklyHtml = renderWeeklyEmailHtml(
-      review,
-      config.digestSiteUrl,
-      unsubscribeUrl,
-      githubAllowlist,
-    );
-    const weeklyText = renderWeeklyEmailText(
-      review,
-      config.digestSiteUrl,
-      unsubscribeUrl,
-      githubAllowlist,
-    );
-    await assertRenderedEmailAllowedByManifest(config.rootDir, weeklyHtml, weeklyText);
-    const idempotencyKey = digestSendIdempotencyKey(
-      "weekly-digest",
-      config.editionId,
-      review.week_id,
-      record.email,
-      sendOptions?.manualRunId,
-    );
-    const { data, error } = await resend.emails.send(
-      {
-        from: config.digestEmailFrom,
-        to: [record.email],
-        subject,
-        html: weeklyHtml,
-        text: weeklyText,
-        headers: {
-          "List-Unsubscribe": `<${unsubscribeUrl}>`,
-        },
-      },
-      { idempotencyKey },
-    );
+  for (const [index, record] of records.entries()) {
+    try {
+      const unsubscribeUrl = digestUnsubscribeUrl(
+        config.digestSiteUrl,
+        record.email,
+        record.unsubscribeToken,
+      );
+      const weeklyHtml = renderWeeklyEmailHtml(
+        review,
+        config.digestSiteUrl,
+        unsubscribeUrl,
+        githubAllowlist,
+      );
+      const weeklyText = renderWeeklyEmailText(
+        review,
+        config.digestSiteUrl,
+        unsubscribeUrl,
+        githubAllowlist,
+      );
+      await assertRenderedEmailAllowedByManifest(config.rootDir, weeklyHtml, weeklyText);
+      const idempotencyKey = digestSendIdempotencyKey(
+        "weekly-digest",
+        config.editionId,
+        review.week_id,
+        record.email,
+        sendOptions?.manualRunId,
+      );
+      const messageId = await sendResendWithIdempotencyHandling(() =>
+        resend.emails.send(
+          {
+            from: config.digestEmailFrom,
+            to: [record.email],
+            subject,
+            html: weeklyHtml,
+            text: weeklyText,
+            headers: {
+              "List-Unsubscribe": `<${unsubscribeUrl}>`,
+            },
+          },
+          { idempotencyKey },
+        ),
+      );
+      if (messageId !== "idempotent-replay") {
+        lastId = messageId;
+      } else {
+        lastId = lastId || "idempotent-replay";
+      }
+    } catch (err) {
+      if (isResendIdempotentAlreadySent(err)) {
+        lastId = lastId || "idempotent-replay";
+        continue;
+      }
+      const msg = err instanceof Error ? err.message : String(err);
+      failures.push(
+        `${recipientFailureLabel(index, record.email)}: ${truncateResendFailureMessage(msg)}`,
+      );
+    }
+  }
 
-    if (error) {
-      throw new Error(`Resend API error: ${error.message}`);
-    }
-    if (!data?.id) {
-      throw new Error("Resend API returned no message id");
-    }
-    lastId = data.id;
+  if (failures.length > 0) {
+    throw new Error(
+      `Resend weekly digest failed for ${failures.length}/${records.length} recipient(s): ${failures.join("; ")}`,
+    );
+  }
+
+  if (!lastId) {
+    throw new Error("Resend weekly digest returned no message id");
   }
 
   return { id: lastId };

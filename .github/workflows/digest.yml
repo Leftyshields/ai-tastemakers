@@ -34,15 +34,25 @@ on:
 permissions:
   contents: write
   actions: write
+  issues: write
 
 concurrency:
   group: daily-digest
   cancel-in-progress: false
 
 jobs:
-  digest:
+  gate:
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    outputs:
+      date: ${{ steps.gate.outputs.date }}
+      skip_daily: ${{ steps.gate.outputs.skip_daily }}
+      run_weekly: ${{ steps.gate.outputs.run_weekly }}
+      run_monthly: ${{ steps.gate.outputs.run_monthly }}
+      is_sunday: ${{ steps.gate.outputs.is_sunday }}
+      nothing_to_do: ${{ steps.gate.outputs.nothing_to_do }}
+      email_recovery_needed: ${{ steps.gate.outputs.email_recovery_needed }}
+      week_id: ${{ steps.gate.outputs.week_id }}
+      month_id: ${{ steps.gate.outputs.month_id }}
     env:
       TZ: America/Los_Angeles
     steps:
@@ -80,31 +90,36 @@ jobs:
             echo "nothing_to_do=false" >> "$GITHUB_OUTPUT"
           fi
 
+          IS_SUNDAY="$(grep '^is_sunday=' "$GITHUB_OUTPUT" | tail -1 | cut -d= -f2-)"
+          ENFORCE_FROM="$(node --input-type=module -e "import { EMAIL_SENT_MARKER_ENFORCE_FROM } from './scripts/digest-email-marker-policy.mjs'; console.log(EMAIL_SENT_MARKER_ENFORCE_FROM)")"
+          if [ "$IS_SUNDAY" != "true" ] && [[ ! "$TODAY" < "$ENFORCE_FROM" ]] && [ -f "briefings/${TODAY}/digest.json" ] && [ ! -f "briefings/${TODAY}/email_sent.json" ]; then
+            echo "email_recovery_needed=true" >> "$GITHUB_OUTPUT"
+            echo "Briefings exist but email_sent.json missing — backstop will resend from stored briefing"
+          else
+            echo "email_recovery_needed=false" >> "$GITHUB_OUTPUT"
+          fi
+
+  digest:
+    needs: gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      TZ: America/Los_Angeles
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true
+        if: needs.gate.outputs.skip_daily != 'true' || needs.gate.outputs.run_weekly == 'true' || needs.gate.outputs.run_monthly == 'true' || needs.gate.outputs.is_sunday == 'true'
         with:
           node-version: "22"
           cache: npm
 
       - name: Install dependencies
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true' || inputs.resend_email == true
+        if: needs.gate.outputs.skip_daily != 'true' || needs.gate.outputs.run_weekly == 'true' || needs.gate.outputs.run_monthly == 'true' || needs.gate.outputs.is_sunday == 'true'
         run: npm ci
 
-      - name: Resend digest email from existing briefing
-        if: inputs.resend_email == true && steps.gate.outputs.skip_daily == 'true'
-        env:
-          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
-          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
-          DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
-          FIREBASE_PROJECT_ID: epiphoric-prod
-          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
-          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
-        run: |
-          npm run build:outbound-email-manifest
-          npm run digest:resend-email
-
       - name: Run digest (OSS + Skills)
-        if: steps.gate.outputs.skip_daily != 'true'
+        if: needs.gate.outputs.skip_daily != 'true'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -128,7 +143,7 @@ jobs:
           npm run build:outbound-email-manifest
           # EXP-20260913-caveman-compress-skills: compression only from 2026-11-08 PT (baseline through 2026-11-07).
           # ISO dates: [[ d < start ]] is false when d >= start (lexicographic). Do not use [ ] with >= (invalid in test).
-          if [[ ! "${{ steps.gate.outputs.date }}" < "2026-11-08" ]]; then
+          if [[ ! "${{ needs.gate.outputs.date }}" < "2026-11-08" ]]; then
             export DIGEST_ENRICH_COMPRESS=1
           fi
           # EXP-20260913-humanizer-polish-skills — complete (keep); humanizer polish on both editions
@@ -150,8 +165,8 @@ jobs:
           npm run digest -- --edition skills
 
       - name: Run monthly rollup (fourth Sunday)
-        if: steps.gate.outputs.run_monthly == 'true'
-        continue-on-error: ${{ steps.gate.outputs.skip_daily != 'true' }}
+        if: needs.gate.outputs.run_monthly == 'true'
+        continue-on-error: ${{ needs.gate.outputs.skip_daily != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -164,8 +179,8 @@ jobs:
         run: npm run monthly
 
       - name: Run weekly wrap-up (Sundays)
-        if: steps.gate.outputs.run_weekly == 'true'
-        continue-on-error: ${{ steps.gate.outputs.skip_daily != 'true' }}
+        if: needs.gate.outputs.run_weekly == 'true'
+        continue-on-error: ${{ needs.gate.outputs.skip_daily != 'true' }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
@@ -178,13 +193,13 @@ jobs:
         run: npm run weekly
 
       - name: Refresh tool inventory (Sundays)
-        if: steps.gate.outputs.is_sunday == 'true'
+        if: needs.gate.outputs.is_sunday == 'true'
         continue-on-error: true
         run: npm run inventory:tools
 
       - name: Commit briefing and tool inventory
         id: commit
-        if: steps.gate.outputs.skip_daily != 'true' || steps.gate.outputs.run_weekly == 'true' || steps.gate.outputs.run_monthly == 'true' || steps.gate.outputs.is_sunday == 'true'
+        if: needs.gate.outputs.skip_daily != 'true' || needs.gate.outputs.run_weekly == 'true' || needs.gate.outputs.run_monthly == 'true' || needs.gate.outputs.is_sunday == 'true'
         env:
           TZ: America/Los_Angeles
         run: |
@@ -197,21 +212,21 @@ jobs:
             exit 0
           fi
           INV_SUFFIX=""
-          if [ "${{ steps.gate.outputs.is_sunday }}" = "true" ]; then
+          if [ "${{ needs.gate.outputs.is_sunday }}" = "true" ]; then
             INV_SUFFIX=" + tool inventory"
           fi
-          if [ "${{ steps.gate.outputs.skip_daily }}" = "true" ] && [ "${{ steps.gate.outputs.run_weekly }}" != "true" ] && [ "${{ steps.gate.outputs.run_monthly }}" != "true" ] && [ "${{ steps.gate.outputs.is_sunday }}" = "true" ]; then
+          if [ "${{ needs.gate.outputs.skip_daily }}" = "true" ] && [ "${{ needs.gate.outputs.run_weekly }}" != "true" ] && [ "${{ needs.gate.outputs.run_monthly }}" != "true" ] && [ "${{ needs.gate.outputs.is_sunday }}" = "true" ]; then
             git commit -m "chore: refresh tool inventory"
-          elif [ "${{ steps.gate.outputs.skip_daily }}" = "true" ]; then
-            if [ "${{ steps.gate.outputs.run_monthly }}" = "true" ]; then
-              git commit -m "chore: monthly rollup ${{ steps.gate.outputs.month_id }}${INV_SUFFIX}"
+          elif [ "${{ needs.gate.outputs.skip_daily }}" = "true" ]; then
+            if [ "${{ needs.gate.outputs.run_monthly }}" = "true" ]; then
+              git commit -m "chore: monthly rollup ${{ needs.gate.outputs.month_id }}${INV_SUFFIX}"
             else
-              git commit -m "chore: weekly wrap-up ${{ steps.gate.outputs.week_id }}${INV_SUFFIX}"
+              git commit -m "chore: weekly wrap-up ${{ needs.gate.outputs.week_id }}${INV_SUFFIX}"
             fi
-          elif [ "${{ steps.gate.outputs.run_monthly }}" = "true" ]; then
-            git commit -m "chore: daily digest $(date +%Y-%m-%d) + monthly rollup ${{ steps.gate.outputs.month_id }}${INV_SUFFIX}"
-          elif [ "${{ steps.gate.outputs.run_weekly }}" = "true" ]; then
-            git commit -m "chore: daily digest $(date +%Y-%m-%d) + weekly wrap-up ${{ steps.gate.outputs.week_id }}${INV_SUFFIX}"
+          elif [ "${{ needs.gate.outputs.run_monthly }}" = "true" ]; then
+            git commit -m "chore: daily digest $(date +%Y-%m-%d) + monthly rollup ${{ needs.gate.outputs.month_id }}${INV_SUFFIX}"
+          elif [ "${{ needs.gate.outputs.run_weekly }}" = "true" ]; then
+            git commit -m "chore: daily digest $(date +%Y-%m-%d) + weekly wrap-up ${{ needs.gate.outputs.week_id }}${INV_SUFFIX}"
           else
             git commit -m "chore: daily digest $(date +%Y-%m-%d)${INV_SUFFIX}"
           fi
@@ -224,3 +239,140 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh workflow run "Deploy GitHub Pages" --ref main
+
+      - name: Alert on digest job failure
+        if: failure()
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          DIGEST_ALERT_KIND: digest_job_failed
+          VERIFY_DIGEST_DATE: ${{ needs.gate.outputs.date }}
+          VERIFY_DIGEST_ERRORS: Daily Digest pipeline job failed (subscriber read, zero recipients, Resend error, or pipeline error). See job logs.
+        run: node scripts/send-digest-alert.mjs
+
+  email_backstop:
+    needs: gate
+    if: |
+      needs.gate.outputs.skip_daily == 'true' &&
+      (inputs.resend_email == true || needs.gate.outputs.email_recovery_needed == 'true')
+    runs-on: ubuntu-latest
+    concurrency:
+      group: digest-email-send
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      issues: write
+    env:
+      TZ: America/Los_Angeles
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Resend digest email from existing briefing
+        id: email_resend
+        continue-on-error: true
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+          FIREBASE_PROJECT_ID: epiphoric-prod
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+          DIGEST_RESEND_MANUAL: ${{ inputs.resend_email == true && '1' || '' }}
+        run: |
+          npm run build:outbound-email-manifest
+          npm run digest:resend-email -- --date "${{ needs.gate.outputs.date }}"
+
+      - name: Commit email send marker after resend
+        id: email_marker_commit
+        if: steps.email_resend.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "briefings/${{ needs.gate.outputs.date }}/email_sent.json"
+          if git diff --staged --quiet; then
+            exit 0
+          fi
+          git commit -m "chore: record digest email send marker for ${{ needs.gate.outputs.date }}"
+          BASIC_AUTH="$(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+          echo "::add-mask::${BASIC_AUTH}"
+          AUTH_HEADER="AUTHORIZATION: basic ${BASIC_AUTH}"
+          git -c "http.extraheader=${AUTH_HEADER}" pull --rebase origin main
+          git -c "http.extraheader=${AUTH_HEADER}" push origin HEAD:main
+
+      - name: Alert when email resend failed
+        if: always() && steps.email_resend.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ needs.gate.outputs.date }}
+          VERIFY_DIGEST_ERRORS: Daily Digest email backstop resend failed. See email_backstop job logs.
+          VERIFY_DIGEST_BRIEFINGS_OK: "true"
+          VERIFY_DIGEST_EMAIL_OK: "false"
+          VERIFY_DIGEST_EMAIL_REQUIRED: "true"
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Alert when marker push failed after successful resend
+        if: always() && steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          DIGEST_ALERT_KIND: marker_push_failed
+          VERIFY_DIGEST_DATE: ${{ needs.gate.outputs.date }}
+          VERIFY_DIGEST_ERRORS: "Resend send succeeded but committing email_sent.json to main failed (rebase/push). Subscribers may have the email; do not assume unsent."
+          VERIFY_DIGEST_BRIEFINGS_OK: "true"
+          VERIFY_DIGEST_EMAIL_OK: "true"
+          VERIFY_DIGEST_EMAIL_REQUIRED: "true"
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Alert on unexpected email backstop failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_resend.outcome != 'failure' &&
+          !(steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure')
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ needs.gate.outputs.date }}
+          VERIFY_DIGEST_ERRORS: Daily Digest email_backstop job failed before resend completed (install, checkout, or setup). See job logs.
+          VERIFY_DIGEST_BRIEFINGS_OK: "true"
+          VERIFY_DIGEST_EMAIL_OK: "false"
+          VERIFY_DIGEST_EMAIL_REQUIRED: "true"
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Fail when email resend failed
+        if: always() && steps.email_resend.outcome == 'failure'
+        run: exit 1
+
+      - name: Fail when marker push failed
+        if: always() && steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure'
+        run: exit 1
+
+      - name: Fail on unexpected email backstop failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_resend.outcome != 'failure' &&
+          !(steps.email_resend.outcome == 'success' && steps.email_marker_commit.outcome == 'failure')
+        run: exit 1

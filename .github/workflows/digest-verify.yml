@@ -25,13 +25,20 @@ permissions:
   issues: write
   actions: write
 
-concurrency:
-  group: digest-verify
-  cancel-in-progress: false
-
 jobs:
   verify:
     runs-on: ubuntu-latest
+    outputs:
+      date: ${{ steps.check.outputs.date }}
+      briefings_ok: ${{ steps.check.outputs.briefings_ok }}
+      pages_ok: ${{ steps.check.outputs.pages_ok }}
+      email_ok: ${{ steps.check.outputs.email_ok }}
+      email_required: ${{ steps.check.outputs.email_required }}
+      email_missing: ${{ steps.check.outputs.email_missing }}
+      briefings_missing: ${{ steps.check.outputs.briefings_missing }}
+      pages_stale: ${{ steps.check.outputs.pages_stale }}
+      errors: ${{ steps.check.outputs.errors }}
+      check_failed: ${{ steps.check.outcome == 'failure' }}
     env:
       TZ: America/Los_Angeles
       DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
@@ -121,10 +128,11 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: node scripts/verify-daily-digest.mjs
 
-      - name: Alert on failure
+      - name: Alert on non-email verification failure
         if: |
           always() &&
           steps.check.outcome == 'failure' &&
+          steps.check.outputs.email_missing != 'true' &&
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
@@ -141,13 +149,146 @@ jobs:
           VERIFY_DIGEST_PAGES_OK: ${{ steps.check.outputs.pages_ok }}
         run: node scripts/send-digest-alert.mjs
 
-      - name: Fail job if verification failed
+      - name: Fail job if non-email verification failed
         if: |
           always() &&
           steps.check.outcome == 'failure' &&
+          steps.check.outputs.email_missing != 'true' &&
           (
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered != 'true') ||
             (steps.check.outputs.briefings_missing == 'true' && steps.digest_retrigger.outputs.recovered == 'true' && steps.pages_after_digest.outputs.pages_ok != 'true') ||
             (steps.check.outputs.pages_stale == 'true' && steps.pages_redeploy.outputs.recovered != 'true')
           )
+        run: exit 1
+
+  email_recovery:
+    needs: verify
+    if: needs.verify.outputs.email_missing == 'true'
+    runs-on: ubuntu-latest
+    concurrency:
+      group: digest-email-send
+      cancel-in-progress: false
+    permissions:
+      contents: write
+      issues: write
+    env:
+      TZ: America/Los_Angeles
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+        with:
+          ref: main
+          persist-credentials: false
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Send digest email from stored briefing
+        id: email_send
+        continue-on-error: true
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+          FIREBASE_PROJECT_ID: epiphoric-prod
+          FIREBASE_CLIENT_EMAIL: ${{ secrets.FIREBASE_CLIENT_EMAIL }}
+          FIREBASE_PRIVATE_KEY: ${{ secrets.FIREBASE_PRIVATE_KEY }}
+        run: |
+          npm run build:outbound-email-manifest
+          npm run digest:resend-email -- --date "${{ needs.verify.outputs.date }}"
+
+      - name: Commit email send marker
+        id: email_marker_push
+        if: steps.email_send.outcome == 'success'
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "briefings/${{ needs.verify.outputs.date }}/email_sent.json"
+          if git diff --staged --quiet; then
+            echo "nothing_to_commit=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          git commit -m "chore: record digest email send marker for ${{ needs.verify.outputs.date }}"
+          BASIC_AUTH="$(printf 'x-access-token:%s' "${GH_TOKEN}" | base64 -w0)"
+          echo "::add-mask::${BASIC_AUTH}"
+          AUTH_HEADER="AUTHORIZATION: basic ${BASIC_AUTH}"
+          git -c "http.extraheader=${AUTH_HEADER}" pull --rebase origin main
+          git -c "http.extraheader=${AUTH_HEADER}" push origin HEAD:main
+
+      - name: Re-verify after marker push
+        if: steps.email_marker_push.outcome == 'success' && steps.email_marker_push.outputs.nothing_to_commit != 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/verify-daily-digest.mjs --skip-pages
+
+      - name: Alert when email send failed
+        if: always() && steps.email_send.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ needs.verify.outputs.date }}
+          VERIFY_DIGEST_ERRORS: ${{ needs.verify.outputs.errors }}
+          VERIFY_DIGEST_BRIEFINGS_OK: ${{ needs.verify.outputs.briefings_ok }}
+          VERIFY_DIGEST_PAGES_OK: ${{ needs.verify.outputs.pages_ok }}
+          VERIFY_DIGEST_EMAIL_OK: "false"
+          VERIFY_DIGEST_EMAIL_REQUIRED: ${{ needs.verify.outputs.email_required }}
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Alert when marker push failed after successful send
+        if: always() && steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure'
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          DIGEST_ALERT_KIND: marker_push_failed
+          VERIFY_DIGEST_DATE: ${{ needs.verify.outputs.date }}
+          VERIFY_DIGEST_ERRORS: "Resend send succeeded but committing email_sent.json to main failed (rebase/push). Subscribers may have the email; do not assume unsent."
+          VERIFY_DIGEST_BRIEFINGS_OK: ${{ needs.verify.outputs.briefings_ok }}
+          VERIFY_DIGEST_EMAIL_OK: "true"
+          VERIFY_DIGEST_EMAIL_REQUIRED: ${{ needs.verify.outputs.email_required }}
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Alert on unexpected email recovery failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_send.outcome != 'failure' &&
+          !(steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure')
+        env:
+          RESEND_API_KEY: ${{ secrets.RESEND_API_KEY }}
+          DIGEST_EMAIL_FROM: ${{ secrets.DIGEST_EMAIL_FROM }}
+          DIGEST_ALERT_TO: ${{ secrets.DIGEST_ALERT_TO }}
+          GH_TOKEN: ${{ github.token }}
+          VERIFY_DIGEST_DATE: ${{ needs.verify.outputs.date }}
+          VERIFY_DIGEST_ERRORS: Daily Digest verify email_recovery job failed before send completed (install, checkout, or setup). See job logs.
+          VERIFY_DIGEST_BRIEFINGS_OK: ${{ needs.verify.outputs.briefings_ok }}
+          VERIFY_DIGEST_PAGES_OK: ${{ needs.verify.outputs.pages_ok }}
+          VERIFY_DIGEST_EMAIL_OK: "false"
+          VERIFY_DIGEST_EMAIL_REQUIRED: ${{ needs.verify.outputs.email_required }}
+        run: node scripts/send-digest-alert.mjs
+
+      - name: Fail when email send failed
+        if: always() && steps.email_send.outcome == 'failure'
+        run: exit 1
+
+      - name: Fail when marker push failed
+        if: always() && steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure'
+        run: exit 1
+
+      - name: Fail on unexpected email recovery failure
+        if: |
+          always() &&
+          failure() &&
+          steps.email_send.outcome != 'failure' &&
+          !(steps.email_send.outcome == 'success' && steps.email_marker_push.outcome == 'failure')
         run: exit 1

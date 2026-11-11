@@ -1,10 +1,15 @@
 #!/usr/bin/env node
 import { loadConfig } from "./config.js";
 import { resendDigestEmailForDate } from "./email/resend-briefing.js";
+import { assertIsoDateLabel } from "./email/email-send-marker.js";
 
 function parseDateArg(): string | undefined {
   const idx = process.argv.indexOf("--date");
-  if (idx >= 0 && process.argv[idx + 1]) return process.argv[idx + 1];
+  if (idx >= 0 && process.argv[idx + 1]) {
+    const dateLabel = process.argv[idx + 1];
+    assertIsoDateLabel(dateLabel);
+    return dateLabel;
+  }
   return undefined;
 }
 

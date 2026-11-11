@@ -24,10 +24,13 @@ const sampleDigest = {
 describe("resendDigestEmailForDate", () => {
   let tmpDir: string;
   let savedGithubRunId: string | undefined;
+  let savedResendManual: string | undefined;
 
   beforeEach(async () => {
     savedGithubRunId = process.env.GITHUB_RUN_ID;
+    savedResendManual = process.env.DIGEST_RESEND_MANUAL;
     delete process.env.GITHUB_RUN_ID;
+    delete process.env.DIGEST_RESEND_MANUAL;
     vi.mocked(assertDigestSendReady).mockReset();
     vi.mocked(sendDigestEmail).mockReset();
     vi.mocked(sendWeeklyDigestEmail).mockReset();
@@ -45,6 +48,11 @@ describe("resendDigestEmailForDate", () => {
       delete process.env.GITHUB_RUN_ID;
     } else {
       process.env.GITHUB_RUN_ID = savedGithubRunId;
+    }
+    if (savedResendManual === undefined) {
+      delete process.env.DIGEST_RESEND_MANUAL;
+    } else {
+      process.env.DIGEST_RESEND_MANUAL = savedResendManual;
     }
   });
 
@@ -64,6 +72,11 @@ describe("resendDigestEmailForDate", () => {
 
     const result = await resendDigestEmailForDate(config, "2026-07-01");
     expect(result).toEqual({ id: "msg-123", recipientCount: 2 });
+    const marker = await fs.readFile(
+      path.join(tmpDir, "briefings", "2026-07-01", "email_sent.json"),
+      "utf8",
+    );
+    expect(JSON.parse(marker).recipient_count).toBe(2);
     expect(sendDigestEmail).toHaveBeenCalledWith(
       config,
       sampleDigest,
@@ -73,7 +86,8 @@ describe("resendDigestEmailForDate", () => {
     );
   });
 
-  it("passes GITHUB_RUN_ID as manualRunId for workflow resends", async () => {
+  it("passes manualRunId only when DIGEST_RESEND_MANUAL=1", async () => {
+    process.env.DIGEST_RESEND_MANUAL = "1";
     process.env.GITHUB_RUN_ID = "run-abc";
     vi.mocked(assertDigestSendReady).mockResolvedValue(["a@example.com"]);
     vi.mocked(sendDigestEmail).mockResolvedValue({ id: "msg-123" });

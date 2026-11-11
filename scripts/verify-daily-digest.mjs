@@ -11,6 +11,10 @@
 import fs from 'node:fs';
 import { appendFileSync } from 'node:fs';
 import path from 'node:path';
+import {
+  emailSentMarkerEnforced,
+  isSundayDateLabel,
+} from './digest-email-marker-policy.mjs';
 
 const TZ = process.env.TZ || 'America/Los_Angeles';
 const siteUrl = (process.env.DIGEST_SITE_URL || 'https://leftyshields.github.io/ai-tastemakers').replace(
@@ -28,6 +32,51 @@ function todayInTz() {
     month: '2-digit',
     day: '2-digit',
   }).format(new Date());
+}
+
+function emailSentMarkerPath(dateLabel) {
+  return path.join(repoRoot, 'briefings', dateLabel, 'email_sent.json');
+}
+
+function verifyEmailSentMarker(dateLabel) {
+  if (!emailSentMarkerEnforced(dateLabel)) {
+    if (isSundayDateLabel(dateLabel)) {
+      return { ok: true, required: false, reason: 'sunday' };
+    }
+    return { ok: true, required: false, reason: 'grandfathered' };
+  }
+  const markerPath = emailSentMarkerPath(dateLabel);
+  if (!fs.existsSync(markerPath)) {
+    return {
+      ok: false,
+      required: true,
+      error: `Missing daily digest email marker: briefings/${dateLabel}/email_sent.json (briefing may exist without a successful Resend send)`,
+    };
+  }
+  try {
+    const raw = JSON.parse(fs.readFileSync(markerPath, 'utf8'));
+    if (
+      raw?.schema_version === 1 &&
+      raw?.date_label === dateLabel &&
+      raw?.edition_id === 'oss' &&
+      typeof raw?.sent_at === 'string' &&
+      typeof raw?.recipient_count === 'number' &&
+      raw.recipient_count > 0
+    ) {
+      return { ok: true, required: true, path: `briefings/${dateLabel}/email_sent.json` };
+    }
+    return {
+      ok: false,
+      required: true,
+      error: `Invalid email send marker: briefings/${dateLabel}/email_sent.json`,
+    };
+  } catch {
+    return {
+      ok: false,
+      required: true,
+      error: `Unreadable email send marker: briefings/${dateLabel}/email_sent.json`,
+    };
+  }
 }
 
 function requiredFile(relPath) {
@@ -83,14 +132,20 @@ function runPagesDeployVerify(date) {
   return { ok: false, error: detail || 'Pages deploy verification failed' };
 }
 
-function writeGithubOutputs(today, errors, briefingsOk, pagesOk) {
+function writeGithubOutputs(today, errors, briefingsOk, pagesOk, emailOk, emailRequired) {
   const outFile = process.env.GITHUB_OUTPUT;
   if (!outFile) return;
 
   appendFileSync(outFile, `date=${today}\n`);
   appendFileSync(outFile, `briefings_ok=${briefingsOk ? 'true' : 'false'}\n`);
   appendFileSync(outFile, `pages_ok=${pagesOk ? 'true' : 'false'}\n`);
+  appendFileSync(outFile, `email_ok=${emailOk ? 'true' : 'false'}\n`);
+  appendFileSync(outFile, `email_required=${emailRequired ? 'true' : 'false'}\n`);
   appendFileSync(outFile, `pages_stale=${briefingsOk && !pagesOk ? 'true' : 'false'}\n`);
+  appendFileSync(
+    outFile,
+    `email_missing=${briefingsOk && emailRequired && !emailOk ? 'true' : 'false'}\n`,
+  );
   appendFileSync(outFile, `briefings_missing=${!briefingsOk ? 'true' : 'false'}\n`);
   if (errors.length) {
     appendFileSync(outFile, `errors<<EOF\n${errors.join('\n')}\nEOF\n`);
@@ -98,7 +153,7 @@ function writeGithubOutputs(today, errors, briefingsOk, pagesOk) {
 }
 
 async function main() {
-  const today = todayInTz();
+  const today = process.env.VERIFY_DIGEST_DATE?.trim() || todayInTz();
   const errors = [];
   let briefingsOk = pagesOnly;
 
@@ -121,6 +176,28 @@ async function main() {
     console.log(`Checking Pages only for ${today} (${TZ})`);
   }
 
+  let emailOk = pagesOnly;
+  let emailRequired = false;
+  if (!pagesOnly && briefingsOk) {
+    const emailCheck = verifyEmailSentMarker(today);
+    emailRequired = emailCheck.required;
+    if (emailCheck.required) {
+      if (emailCheck.ok) {
+        emailOk = true;
+        console.log(`  OK ${emailCheck.path}`);
+      } else {
+        emailOk = false;
+        errors.push(emailCheck.error);
+      }
+    } else if (emailCheck.reason === 'sunday') {
+      emailOk = true;
+      console.log('  OK (Sunday — daily top-10 email not expected)');
+    } else {
+      emailOk = true;
+      console.log('  OK (email marker not required before enforcement date)');
+    }
+  }
+
   let pagesOk = skipPages;
   if (!skipPages) {
     const pages = runPagesDeployVerify(today);
@@ -136,7 +213,14 @@ async function main() {
     console.error('\nDaily digest verification FAILED:');
     for (const e of errors) console.error(`  - ${e}`);
 
-    if (briefingsOk && !pagesOk) {
+    if (briefingsOk && emailRequired && !emailOk) {
+      console.error(
+        '\nBriefings exist on main but email_sent.json is missing (send may not have completed or marker was not committed). Automatic recovery uses date-based Resend idempotency per recipient (no run-id suffix); duplicates are unlikely but not impossible if Resend rejects a key.',
+      );
+      console.error(
+        `Actions: https://github.com/Leftyshields/ai-tastemakers/actions/workflows/digest.yml`,
+      );
+    } else if (briefingsOk && !pagesOk) {
       console.error(
         '\nBriefings exist on main but GitHub Pages is stale — redeploy Pages (often a transient GitHub 500 after digest commit).',
       );
@@ -150,12 +234,12 @@ async function main() {
       console.error(`\nActions: https://github.com/Leftyshields/ai-tastemakers/actions/workflows/digest.yml`);
     }
 
-    writeGithubOutputs(today, errors, briefingsOk, pagesOk);
+    writeGithubOutputs(today, errors, briefingsOk, pagesOk, emailOk, emailRequired);
     process.exit(1);
   }
 
   console.log('\nDaily digest verification passed.');
-  writeGithubOutputs(today, [], briefingsOk, pagesOk);
+  writeGithubOutputs(today, [], briefingsOk, pagesOk, emailOk, emailRequired);
 }
 
 main();
