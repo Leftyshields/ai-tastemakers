@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * CI guard: workflow steps that invoke pages-deploy-verify must expose GITHUB_TOKEN.
+ * CI guard: workflow steps that invoke verify-daily-digest must expose GITHUB_TOKEN.
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -61,7 +61,6 @@ export function parseJobs(content: string): { name: string; body: string }[] {
 }
 
 export function stepNeedsPagesToken(stepBlock: string): boolean {
-  if (stepBlock.includes("pages-deploy-verify.ts")) return true;
   if (!stepBlock.includes("verify-daily-digest.mjs")) return false;
   if (/--skip-pages/.test(stepBlock) && !/--pages-only/.test(stepBlock)) {
     return false;

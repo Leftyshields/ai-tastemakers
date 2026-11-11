@@ -90,11 +90,15 @@ export async function pollDeployDoneGate(options: {
   let lastReason = "live /build.json not yet available";
 
   while (true) {
+    const fetchUrl = `${url}?t=${now()}`;
     try {
-      const res = await fetchImpl(url, {
+      const res = await fetchImpl(fetchUrl, {
         method: "GET",
         redirect: "follow",
-        headers: { Accept: "application/json" },
+        headers: {
+          Accept: "application/json",
+          "Cache-Control": "no-cache",
+        },
       });
       if (res.status === 200) {
         const liveSha = parseBuildJsonCommit(await res.text());
@@ -103,7 +107,7 @@ export async function pollDeployDoneGate(options: {
         }
         lastReason = liveBuildJsonMismatchDetail(expectedSha, liveSha);
       } else {
-        lastReason = `HTTP ${res.status} for ${url}`;
+        lastReason = `HTTP ${res.status} for ${fetchUrl}`;
       }
     } catch (e) {
       lastReason = e instanceof Error ? e.message : String(e);

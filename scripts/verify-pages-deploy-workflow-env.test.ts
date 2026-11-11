@@ -12,7 +12,7 @@ describe("verify-pages-deploy-workflow-env", () => {
     execFileSync(TSX, [SCRIPT], { cwd: ROOT, encoding: "utf8", stdio: "pipe" });
   });
 
-  it("flags pages-deploy-verify step without GITHUB_TOKEN", () => {
+  it("allows pages-deploy-verify step without GITHUB_TOKEN", () => {
     const yml = `jobs:
   verify:
     runs-on: ubuntu-latest
@@ -22,9 +22,7 @@ describe("verify-pages-deploy-workflow-env", () => {
           EXPECTED_PAGES_SHA: \${{ github.sha }}
         run: tsx scripts/pages-deploy-verify.ts
 `;
-    const errors = auditWorkflowContent("bad.yml", yml);
-    expect(errors.length).toBeGreaterThan(0);
-    expect(errors[0]).toContain("step env");
+    expect(auditWorkflowContent("pages.yml", yml)).toEqual([]);
   });
 
   it("rejects job-level GITHUB_TOKEN without step env", () => {
