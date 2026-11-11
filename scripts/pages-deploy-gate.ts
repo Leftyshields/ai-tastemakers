@@ -16,6 +16,33 @@ export type FetchClient = (
   init?: RequestInit,
 ) => Promise<{ status: number; headers: Headers; text: () => Promise<string> }>;
 
+/** Live /build.json URL with existing site query params preserved and cache-bust `t`. */
+export function liveBuildJsonCacheBustedUrl(
+  siteUrl: string,
+  cacheBustMs: number,
+): string {
+  const withoutTrailing = siteUrl.replace(/\/+$/, "");
+  const base = new URL(withoutTrailing);
+  const buildPath = base.pathname.endsWith("/")
+    ? `${base.pathname}build.json`
+    : `${base.pathname}/build.json`;
+  const url = new URL(buildPath, base.origin);
+  for (const [key, value] of base.searchParams) {
+    url.searchParams.set(key, value);
+  }
+  url.searchParams.set("t", String(cacheBustMs));
+  return url.href;
+}
+
+export function liveBuildJsonFetchInit(): RequestInit {
+  return {
+    method: "GET",
+    redirect: "follow",
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+  };
+}
+
 export function pagesMaxWaitMs(envValue: string | undefined): number {
   if (envValue === undefined || envValue === "") return 0;
   const n = Number.parseInt(envValue, 10);
@@ -83,19 +110,14 @@ export async function pollDeployDoneGate(options: {
     now = () => Date.now(),
     pollIntervalMs = 15_000,
   } = options;
-  const base = siteUrl.replace(/\/+$/, "");
-  const url = `${base}/build.json`;
   const started = now();
   let delayMs = pollIntervalMs;
   let lastReason = "live /build.json not yet available";
 
   while (true) {
+    const fetchUrl = liveBuildJsonCacheBustedUrl(siteUrl, now());
     try {
-      const res = await fetchImpl(url, {
-        method: "GET",
-        redirect: "follow",
-        headers: { Accept: "application/json" },
-      });
+      const res = await fetchImpl(fetchUrl, liveBuildJsonFetchInit());
       if (res.status === 200) {
         const liveSha = parseBuildJsonCommit(await res.text());
         if (liveSha === expectedSha) {
@@ -103,7 +125,7 @@ export async function pollDeployDoneGate(options: {
         }
         lastReason = liveBuildJsonMismatchDetail(expectedSha, liveSha);
       } else {
-        lastReason = `HTTP ${res.status} for ${url}`;
+        lastReason = `HTTP ${res.status} for ${fetchUrl}`;
       }
     } catch (e) {
       lastReason = e instanceof Error ? e.message : String(e);
@@ -138,20 +160,17 @@ export async function runFreshFetchAdvisory(options: {
   siteUrl: string;
   expectedSha: string;
   fetchImpl: FetchClient;
+  now?: () => number;
 }): Promise<FreshFetchAdvisoryResult> {
-  const base = options.siteUrl.replace(/\/+$/, "");
-  const url = `${base}/build.json`;
+  const now = options.now ?? (() => Date.now());
+  const fetchUrl = liveBuildJsonCacheBustedUrl(options.siteUrl, now());
   let etag: string | null = null;
   let age: string | null = null;
   let xCache: string | null = null;
   let liveSha: string | null = null;
 
   try {
-    const res = await options.fetchImpl(url, {
-      method: "GET",
-      redirect: "follow",
-      headers: { Accept: "application/json" },
-    });
+    const res = await options.fetchImpl(fetchUrl, liveBuildJsonFetchInit());
     etag = res.headers.get("etag");
     age = res.headers.get("age");
     xCache = res.headers.get("x-cache");
@@ -166,7 +185,7 @@ export async function runFreshFetchAdvisory(options: {
       etag,
       age,
       xCache,
-      message: `fresh_fetch: fetch failed for ${url}: ${msg}`,
+      message: `fresh_fetch: fetch failed for ${fetchUrl}: ${msg}`,
     };
   }
 
