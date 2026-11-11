@@ -4,8 +4,8 @@
  * Exit 0 = OK, 1 = missing / broken. Used by digest-verify.yml.
  *
  * Pages check (VERIFY_PAGES_MAX_WAIT_MS, default 0 locally):
- * - deploy_done (gate): Pages API latest build success for expected main SHA or descendant.
- * - fresh_fetch (advisory): live /build.json vs deployed SHA; notice/warning only.
+ * - deploy_done (gate): live /build.json commit equals expected main HEAD (retry for CDN).
+ * - fresh_fetch (advisory): live /build.json vs gate commit; notice/warning only.
  * - assertions: HEAD today's briefing HTML (may read cached CDN content up to max-age=600).
  */
 import fs from 'node:fs';

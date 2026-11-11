@@ -151,8 +151,8 @@ jobs:
       VERIFY_PAGES_MAX_WAIT_MS: "600000"
       DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
     # Three-stage contract:
-    # - deploy_done (gate): deploy-pages succeeded AND Pages API latest build is built/success for GITHUB_SHA or a descendant (compare API).
-    # - fresh_fetch (advisory): fetch live /build.json vs deployed commit; log ETag/Age/X-Cache as notice/warning only (CDN may lag max-age=600).
+    # - deploy_done (gate): deploy-pages succeeded AND live /build.json commit equals GITHUB_SHA (retry for CDN up to VERIFY_PAGES_MAX_WAIT_MS).
+    # - fresh_fetch (advisory): fetch live /build.json vs gate commit; log ETag/Age/X-Cache as notice/warning only (CDN may lag max-age=600).
     # - assertions: optional content checks; may observe cached live HTML (none in this workflow).
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
