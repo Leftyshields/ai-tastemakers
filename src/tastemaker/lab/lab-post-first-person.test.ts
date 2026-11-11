@@ -18,7 +18,7 @@ describe("lab post first-person gate", () => {
   });
 
   it("Lab shell tagline after Copywriter sweep has no first-person hits", () => {
-    const html = `<header class="mb-8 border-b"><h1>Lab</h1><p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">Public notes on how repos get picked, how pipeline changes get tested, and what readers actually engage with.</p></header><main><p>The post body is neutral.</p></main>`;
+    const html = `<header class="mb-8 border-b"><div class="site-brand">Lab</div><p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">Public notes on how repos get picked, how pipeline changes get tested, and what readers actually engage with.</p></header><main><p>The post body is neutral.</p></main>`;
     expect(findLabPostFirstPersonSentences(html)).toEqual([]);
   });
 

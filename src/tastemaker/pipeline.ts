@@ -19,9 +19,13 @@ import {
 import { appendRubricLog, scoreDigestRank1 } from "./quality/log.js";
 import { writeDigestJson } from "./writers/json.js";
 import { writeDailyBrief } from "./writers/markdown.js";
-import { sendDigestEmail, shouldSendDigestEmail } from "./email/resend.js";
+import { refreshOutboundEmailDestManifest } from "./analytics/write-outbound-email-manifest.js";
+import {
+  assertDigestSendReady,
+  isDigestEmailConfigured,
+  sendDigestEmail,
+} from "./email/resend.js";
 import { isSundayDateLabel } from "./weekly/week.js";
-import { resolveDigestRecipients } from "./subscribers/load.js";
 import { appendShadowRun } from "./experiments/load.js";
 import {
   writeShadowDigest,
@@ -32,9 +36,11 @@ import type { EnrichmentBundle } from "./enrich/types.js";
 import {
   enrichExternalContext,
   applyExternalContext,
+  applyEnrichCompressIfEnabled,
   writeEnrichmentBundles,
   enrichmentBundleRef,
 } from "./enrich/index.js";
+import type { EnrichCompressBatchResult } from "./enrich/index.js";
 import { narrateRepos, briefsFromNarration, type NarrationOptions } from "./narrate/claude.js";
 import type { NarrationResult } from "./narrate/claude.js";
 import { appendTokenLog, buildTokenLogEntry } from "./quality/tokens.js";
@@ -195,6 +201,17 @@ export async function runPipeline(
     });
   }
 
+  const enrichCharsRawMap = enrichCharMaps(top, externalBundles);
+  let enrichCompressResult: EnrichCompressBatchResult | undefined;
+  if (useExternalEnrich && config.enrichCompress) {
+    const compressed = applyEnrichCompressIfEnabled(
+      { enrichCompress: true, enrichMaxChars: config.enrichMaxChars },
+      externalBundles,
+    );
+    externalBundles = compressed.bundles;
+    enrichCompressResult = compressed.compress;
+  }
+
   let controlResults = new Map<string, NarrationResult>();
   let treatmentResults = new Map<string, NarrationResult>();
 
@@ -203,6 +220,7 @@ export async function runPipeline(
     structured_context: config.narrateStructuredContext,
     ponytail: config.narratePonytail,
     humanizer_polish: config.humanizerPolish,
+    enrich_compress: config.enrichCompress && useExternalEnrich,
   };
 
   const enrichCharsMap = enrichCharMaps(top, externalBundles);
@@ -213,6 +231,7 @@ export async function runPipeline(
     variant: "control" | "treatment" | "single",
     rubric?: RubricLogEntry | null,
     humanizer_polish?: HumanizerPolishBatchResult | null,
+    enrich_compress?: EnrichCompressBatchResult | null,
   ): Promise<void> {
     const entry = buildTokenLogEntry({
       run_id: runId,
@@ -225,9 +244,11 @@ export async function runPipeline(
       flags: tokenFlags,
       results,
       enrich_chars: enrichCharsMap,
+      enrich_chars_raw: enrich_compress ? enrichCharsRawMap : undefined,
       readme_chars: readmeCharsMap,
       rubric,
       humanizer_polish,
+      enrich_compress,
     });
     await appendTokenLog(config.rootDir, entry);
     console.error(
@@ -366,14 +387,16 @@ export async function runPipeline(
 
     const polishForLog =
       humanizerPolishResult && config.humanizerPolish ? humanizerPolishResult : null;
+    const compressForLog =
+      enrichCompressResult && config.enrichCompress ? enrichCompressResult : null;
     if (narrateShadow) {
       await logNarrationVariant(controlResults, "control");
-      await logNarrationVariant(treatmentResults, "treatment", null, polishForLog);
+      await logNarrationVariant(treatmentResults, "treatment", null, polishForLog, compressForLog);
     } else if (sideBySideNarrate) {
       await logNarrationVariant(controlResults, "control");
-      await logNarrationVariant(treatmentResults, "treatment", null, polishForLog);
+      await logNarrationVariant(treatmentResults, "treatment", null, polishForLog, compressForLog);
     } else {
-      await logNarrationVariant(treatmentResults, "single", null, polishForLog);
+      await logNarrationVariant(treatmentResults, "single", null, polishForLog, compressForLog);
     }
 
     return {
@@ -390,24 +413,20 @@ export async function runPipeline(
   const jsonPath = await writeDigestJson(briefingDir, digest);
   const markdownPath = await writeDailyBrief(briefingDir, digest, dateLabel, config.editionName);
 
-  if (config.editionId === "oss" && (await shouldSendDigestEmail(config))) {
+  if (config.editionId === "oss" && isDigestEmailConfigured(config)) {
     if (isSundayDateLabel(dateLabel)) {
       console.error(
         "Sunday: skipping daily top-10 email; weekly wrap-up sends the week-in-review instead.",
       );
     } else {
+      const recipients = await assertDigestSendReady(config);
+      await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl, {
+        pendingDigest: { digest, dateLabel, editionId: config.editionId },
+      });
       const sendEmail = deps.sendEmail ?? sendDigestEmail;
-      const recipients = await resolveDigestRecipients(config);
       console.error(`Sending digest email to ${recipients.length} recipient(s)…`);
-      try {
-        const sent = await sendEmail(config, digest, dateLabel, recipients);
-        console.error(`Email sent (id: ${sent.id})`);
-      } catch (err) {
-        console.warn(
-          "Warning: digest email failed; briefing was still written:",
-          err instanceof Error ? err.message : err,
-        );
-      }
+      const sent = await sendEmail(config, digest, dateLabel, recipients);
+      console.error(`Email sent (id: ${sent.id})`);
     }
   }
 
@@ -424,6 +443,7 @@ export async function runPipeline(
       "single",
       rubricEntry,
       humanizerPolishResult ?? null,
+      enrichCompressResult ?? null,
     );
   } else {
     await logNarrationVariant(
@@ -431,6 +451,7 @@ export async function runPipeline(
       "single",
       null,
       humanizerPolishResult ?? null,
+      enrichCompressResult ?? null,
     );
   }
 

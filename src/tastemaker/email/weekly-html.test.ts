@@ -50,7 +50,15 @@ describe("weekly email", () => {
   });
 
   it("html leads with hook, lists dek, list links, then flowing body and receipts", () => {
-    const html = renderWeeklyEmailHtml(sampleReview, "https://example.com/app");
+    const allowlist = {
+      "diegosouzapw/OmniRoute": "https://github.com/diegosouzapw/OmniRoute",
+    };
+    const html = renderWeeklyEmailHtml(
+      sampleReview,
+      "https://example.com/app",
+      undefined,
+      allowlist,
+    );
     expect(html).toContain(sampleReview.email!.verdict);
     expect(html).toContain(SUNDAY_EMAIL_LISTS_DEK);
     expect(html).not.toContain(SUNDAY_EMAIL_SUBJECT);
@@ -58,7 +66,8 @@ describe("weekly email", () => {
     expect(html.indexOf(SUNDAY_EMAIL_LISTS_DEK)).toBeLessThan(
       html.indexOf(ossTop10Url("https://example.com/app", "2026-08-16")),
     );
-    expect(html).toContain("https://github.com/diegosouzapw/OmniRoute");
+    expect(html).toContain("/go/?");
+    expect(html).not.toContain("https://github.com/diegosouzapw/OmniRoute");
     expect(html).toContain("Monday a hub jumped");
     expect(html).not.toContain("The tell");
     expect(html).not.toContain("Evidence");

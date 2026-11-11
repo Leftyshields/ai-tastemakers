@@ -4,6 +4,7 @@ import {
   EDITIONS,
   OSS_DISCOVER_TOPIC_CHIPS,
   type EditionDefinition,
+  type EditionId,
 } from "../src/tastemaker/editions.js";
 import { renderSafeMarkdown } from "./safe-markdown.js";
 import { briefingsDirForEdition } from "../src/tastemaker/editions.js";
@@ -21,6 +22,7 @@ import {
   sanitizeLabVisibleHtml,
 } from "./lab/lab-format.js";
 import { LAB_FOOTER_ABOUT_LABEL, labPublishFooterHtml } from "./lab/lab-dashboard-copy.js";
+import { LAB_HOME_HEADER_TAGLINE } from "./lab/lab-home-copy.js";
 import {
   applyLabIntroVonRestorff,
   renderLabLoopAboutBlockHtml,
@@ -37,15 +39,42 @@ import {
 import { renderToolsPageHtml } from "./lab/render-tools-page.js";
 import { labAboutRedirectScript } from "./lab/lab-about-redirect.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
+import type { OutboundDestRegistry } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
+import {
+  rewriteOutboundLinksInHtml,
+  type OutboundRewriteContext,
+} from "../src/tastemaker/analytics/rewrite-outbound-links.js";
 import {
   articleJsonLd,
   briefMetaDescription,
   briefSocialDescription,
   briefSocialTitle,
+  breadcrumbJsonLd,
   buildSeoHeadHtml,
+  collectionPageJsonLd,
   defaultOgImageUrl,
+  feedAlternateLinksHtml,
+  labFeedAlternateLinkHtml,
+  googleSiteVerificationMetaHtml,
+  digestRepoItemListJsonLd,
+  itemListJsonLd,
+  siteFaviconLinksHtml,
+  siteRootRelPrefixFromCss,
+  websiteJsonLd,
+  type BriefFeedEntry,
   type PageSeoOptions,
 } from "./seo-helpers.js";
+import {
+  applyTemplate,
+  buildSeoDescriptionFromTemplate,
+  buildSeoTitleFromTemplate,
+  formatSeoDateLabel,
+  formatSeoDateShort,
+  metaDescriptionFromLead,
+  seoPage,
+  topPickShortName,
+  parseWeeklyReviewDateRange,
+} from "./seo-copy.js";
 import { briefOgImagePath, EDITION_TAGLINES, writeBriefOgPng } from "./generate-brief-og.js";
 import {
   groupDatesByMonth,
@@ -70,6 +99,31 @@ import {
   splitDailyBriefMarkdown,
 } from "../src/tastemaker/pages/brief-cards.js";
 import type { Digest } from "../src/tastemaker/types.js";
+import {
+  archiveBackLinkLabel,
+  daysArchiveIntroForEdition,
+  daysArchiveMetaForEdition,
+  DAYS_ARCHIVE_EMPTY,
+  DAYS_ARCHIVE_PAGE_TITLE,
+  DAYS_ARCHIVE_SECTION_HEADING,
+  MONTHLY_INDEX_INTRO,
+  MONTHLY_INDEX_META_DESCRIPTION,
+  MONTHLY_INDEX_PAGE_TITLE,
+  MONTHLY_INDEX_SECTION_HEADING,
+  WEEKLY_INDEX_INTRO,
+  WEEKLY_INDEX_META_DESCRIPTION,
+  WEEKLY_INDEX_PAGE_TITLE,
+  WEEKLY_INDEX_SECTION_HEADING,
+} from "./index-archive-page-copy.js";
+import {
+  buildHomeIndexMainHtml,
+  HOME_EDITION_TAGLINES,
+  type HomeWrapUpArchive,
+} from "./home-index-layout.js";
+import { formatWeekReviewDateRange, loadWeekRangeLabels } from "./week-review-date-range.js";
+import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
+
+const ARCHIVE_SECTION_HEADING_CLASS = "archive-sh";
 
 export { landingLayoutV2Enabled } from "./index-layout-helpers.js";
 
@@ -94,6 +148,7 @@ async function listHtmlFiles(dir: string): Promise<string[]> {
     if (entry.isDirectory()) {
       results.push(...(await listHtmlFiles(full)));
     } else if (entry.name.endsWith(".html")) {
+      if (isSiteGateExemptHtmlFile(full)) continue;
       results.push(full);
     }
   }
@@ -105,10 +160,10 @@ export async function verifyPosthogInBuiltSite(siteDir: string): Promise<number>
   if (!posthogAnalyticsEnabled()) {
     if (process.env.GITHUB_ACTIONS === "true") {
       throw new Error(
-        "POSTHOG_KEY is required for GitHub Pages deploy — all HTML pages must ship with analytics.",
+        "POSTHOG_KEY is required for GitHub Pages deploy: all HTML pages must ship with analytics.",
       );
     }
-    console.warn("Warning: POSTHOG_KEY not set — built HTML has no PostHog snippet.");
+    console.warn("Warning: POSTHOG_KEY not set: built HTML has no PostHog snippet.");
     return 0;
   }
 
@@ -192,9 +247,8 @@ export function digestRepoClickTrackingScript(): string {
 (function () {
   function clickSource() {
     try {
-      return new URLSearchParams(window.location.search).get("utm_source") === "email"
-        ? "email"
-        : "direct";
+      var utmSource = new URLSearchParams(window.location.search).get("utm_source");
+      return utmSource === "email" || utmSource === "digest" ? "email" : "direct";
     } catch (e) {
       return "direct";
     }
@@ -228,6 +282,8 @@ export function digestRepoClickTrackingScript(): string {
     var link = targetEl.closest("a[href]");
     if (!link || !card.contains(link)) return;
     if (link.closest(".digest-repo-card__body")) return;
+    var href = link.getAttribute("href") || "";
+    if (href.indexOf("/go/") >= 0 || href.indexOf("go/index.html") >= 0) return;
     var clickTarget = link.classList.contains("digest-repo-card__cta")
       ? "button"
       : link.classList.contains("digest-repo-card__title-link")
@@ -236,59 +292,6 @@ export function digestRepoClickTrackingScript(): string {
     if (!clickTarget) return;
     captureRepoClick(card, clickTarget);
   }, true);
-})();
-</script>`;
-}
-
-/** @deprecated Legacy brief markdown link tracking; kept for shadow/lab pages if needed. */
-export function briefOutboundTrackingScript(editionId: string, pageDate: string): string {
-  if (!posthogAnalyticsEnabled()) return "";
-  const edition = escapeScriptString(editionId);
-  const pageDateSafe = escapeScriptString(pageDate);
-  return `<script>
-(function () {
-  function repoFromHref(href) {
-    try {
-      var u = new URL(href);
-      if (u.hostname !== "github.com") return "";
-      var parts = u.pathname.replace(/^\\/+/, "").split("/");
-      if (parts.length < 2) return "";
-      return parts[0] + "/" + parts[1];
-    } catch (e) {
-      return "";
-    }
-  }
-
-  function rankForAnchor(anchor) {
-    var block = anchor.closest("p") || anchor;
-    var el = block;
-    while (el && el.closest && el.closest(".brief-content")) {
-      var prev = el.previousElementSibling;
-      while (prev) {
-        if (prev.tagName === "H2" || prev.tagName === "H3") {
-          var m = prev.textContent.match(/^\\s*(\\d+)\\./);
-          if (m) return m[1];
-        }
-        prev = prev.previousElementSibling;
-      }
-      el = el.parentElement;
-    }
-    return "";
-  }
-
-  document.querySelectorAll(".brief-content a[href]").forEach(function (anchor) {
-    anchor.addEventListener("click", function () {
-      if (typeof posthog === "undefined" || !posthog.capture) return;
-      var repo = repoFromHref(anchor.href);
-      if (!repo) return;
-      posthog.capture("outbound_repo_click", {
-        edition: "${edition}",
-        repo: repo,
-        rank: rankForAnchor(anchor),
-        page_date: "${pageDateSafe}"
-      });
-    });
-  });
 })();
 </script>`;
 }
@@ -354,6 +357,14 @@ function editionNavFor(siteSegment: string, depth: 0 | 1): EditionNav {
 
 export type LabNavActive = "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts";
 
+function escapeHtml(text: string): string {
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function editionNavPill(
   href: string,
   label: string,
@@ -361,13 +372,17 @@ function editionNavPill(
   escapeHtml: (t: string) => string,
   extraClass = "",
   trackAttr = "",
+  homeIndexNav = false,
 ): string {
-  const base =
-    "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
-  const active =
-    "border-blue-800 bg-blue-50 font-semibold text-blue-900 dark:border-blue-500 dark:bg-blue-950/50 dark:text-blue-200";
-  const idle =
-    "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+  const base = homeIndexNav
+    ? "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline"
+    : "inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border px-3.5 py-1 font-sans text-sm no-underline transition";
+  const active = homeIndexNav
+    ? "home-index-tab--active"
+    : "border-blue-800 bg-blue-50 font-semibold text-blue-900 edition-nav-tab--active";
+  const idle = homeIndexNav
+    ? "home-index-tab--idle"
+    : "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
   return `<a href="${href}" class="${base} ${isActive ? active : idle}${extraClass ? ` ${extraClass}` : ""}"${trackAttr}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
 }
 
@@ -375,16 +390,20 @@ export function editionNavHtml(
   nav: EditionNav,
   escapeHtml: (t: string) => string,
   labAnalytics = false,
-  options?: { desktopOnlyOnLab?: boolean },
+  options?: { desktopOnlyOnLab?: boolean; homeIndexNav?: boolean },
 ): string {
   const track = labAnalytics ? ' data-lab-section="nav"' : "";
+  const indexCta = options?.homeIndexNav ? ' data-index-cta="cross_edition"' : "";
   const layout = options?.desktopOnlyOnLab
     ? "mt-4 hidden min-[640px]:flex flex-wrap gap-2"
-    : "mt-4 flex flex-wrap gap-2";
+    : options?.homeIndexNav
+      ? "home-index-edition-nav tabs mt-4 flex flex-wrap gap-2"
+      : "mt-4 flex flex-wrap gap-2";
 
+  const homeIndexNav = options?.homeIndexNav === true;
   return `<nav aria-label="Tastemakers editions" class="${layout}">
-      ${editionNavPill(nav.ossHref, "AI Tastemakers", nav.active === "oss", escapeHtml, "", track)}
-      ${editionNavPill(nav.skillsHref, "Skill Tastemakers", nav.active === "skills", escapeHtml, "", track)}
+      ${editionNavPill(nav.ossHref, "AI Tastemakers", nav.active === "oss", escapeHtml, "", `${track}${indexCta}`, homeIndexNav)}
+      ${editionNavPill(nav.skillsHref, "Skill Tastemakers", nav.active === "skills", escapeHtml, "", `${track}${indexCta}`, homeIndexNav)}
     </nav>`;
 }
 
@@ -420,10 +439,28 @@ export function editionSitePaths(siteSegment: string, depth: 0 | 1): SitePaths {
   };
 }
 
+function labNavPill(
+  href: string,
+  label: string,
+  isActive: boolean,
+  escapeHtml: (t: string) => string,
+  trackAttr = "",
+  compact = false,
+): string {
+  const px = compact ? "px-2.5" : "px-3.5";
+  const base =
+    `lab-nav-pill inline-flex min-h-8 shrink-0 snap-start items-center rounded-full border ${px} py-1 font-sans text-sm no-underline`;
+  const active = "lab-nav-pill--active font-semibold";
+  const idle =
+    "border-stone-200 text-stone-600 hover:border-stone-300 hover:text-stone-900 dark:border-stone-700 dark:text-stone-400 dark:hover:border-stone-500 dark:hover:text-stone-100";
+  return `<a href="${href}" class="${base} ${isActive ? active : idle}"${trackAttr}${isActive ? ' aria-current="page"' : ""}>${escapeHtml(label)}</a>`;
+}
+
 function labNavPillsHtml(
   active: LabNavActive,
   escapeHtml: (t: string) => string,
   depth: 0 | 1 | 2,
+  compact = false,
 ): string {
   const prefix = depth === 0 ? "" : "../";
   const labHomeHref = depth === 0 ? "./" : "../";
@@ -431,7 +468,7 @@ function labNavPillsHtml(
   const postsHref = depth === 0 ? "posts/" : depth === 1 ? "./" : "../posts/";
 
   const pill = (href: string, label: string, isActive: boolean) =>
-    editionNavPill(href, label, isActive, escapeHtml, "", ' data-lab-section="nav"');
+    labNavPill(href, label, isActive, escapeHtml, ' data-lab-section="nav"', compact);
 
   return [
     pill(labHomeHref, "Lab home", active === "home"),
@@ -460,16 +497,20 @@ export function labMobileCombinedNavHtml(
   depth: 0 | 1 | 2 = 0,
 ): string {
   const track = ' data-lab-section="nav"';
-  return `<nav aria-label="Lab and editions" class="lab-nav lab-nav--combined mt-4 min-[640px]:hidden">
-      ${labNavPillsHtml(active, escapeHtml, depth)}
+  const compactPill = (href: string, label: string, isActive: boolean) =>
+    labNavPill(href, label, isActive, escapeHtml, track, true);
+  return `<div class="lab-nav-scroll-wrap mt-4 min-[640px]:hidden">
+    <nav aria-label="Lab and editions" class="lab-nav lab-nav--combined">
+      ${labNavPillsHtml(active, escapeHtml, depth, true)}
       <span class="lab-nav__divider shrink-0" aria-hidden="true"></span>
-      ${editionNavPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss", escapeHtml, "", track)}
-      ${editionNavPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills", escapeHtml, "", track)}
-    </nav>`;
+      ${compactPill(editionNav.ossHref, "AI Tastemakers", editionNav.active === "oss")}
+      ${compactPill(editionNav.skillsHref, "Skill Tastemakers", editionNav.active === "skills")}
+    </nav>
+  </div>`;
 }
 
 export function labNavScrollScript(): string {
-  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;var a=n.querySelector('[aria-current="page"]');if(a)a.scrollIntoView({inline:"center",block:"nearest"});}catch(e){}})();</script>`;
+  return `<script>(function(){try{var n=document.querySelector(".lab-nav--combined");if(!n)return;function sync(){var atEnd=n.scrollWidth-n.scrollLeft-n.clientWidth<4;n.setAttribute("data-scroll-end",atEnd?"true":"false");}sync();n.addEventListener("scroll",sync,{passive:true});window.addEventListener("resize",sync);var a=n.querySelector('[aria-current="page"]');if(a){var inline=n.scrollWidth>n.clientWidth+2?"start":"center";a.scrollIntoView({inline:inline,block:"nearest"});}sync();}catch(e){}})();</script>`;
 }
 
 export function labSitePaths(depth: 0 | 1 = 0): SitePaths {
@@ -521,7 +562,7 @@ function formatTokenUsage(usage?: { input_tokens: number; output_tokens: number 
 
 function renderBriefMarkdown(brief: string | null | undefined): string {
   if (!brief?.trim()) {
-    return '<p class="text-stone-500">—</p>';
+    return '<p class="text-stone-500">-</p>';
   }
   return renderSafeMarkdown(brief);
 }
@@ -583,7 +624,7 @@ export function renderShadowCompareBody(
 
   const notice =
     shadow.enrich_web_requested && !hasSideBySide
-      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output — repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
+      ? `<p class="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm leading-relaxed text-amber-900 dark:border-amber-800 dark:bg-amber-950/40 dark:text-amber-200">This run predates side-by-side shadow output: repos only have a single <code>brief</code> field. Re-run with <code>DIGEST_ENRICH_WEB=1</code> and <code>DIGEST_ENRICH_SHADOW=1</code>, then rebuild pages for control vs treatment columns.</p>`
       : "";
 
   const usageBanner =
@@ -628,10 +669,12 @@ async function buildLabMarkdownPage(
   labShell: { labLayout: true },
   navActive: "home" | "methodology" | "tools" | "experiments" | "tokens" | "posts" = "home",
   siteBaseUrl?: string,
+  outboundRewrite?: OutboundRewriteContext,
 ): Promise<boolean> {
   const markdownPath = path.join(repoRoot, markdownRelPath);
   try {
     const markdown = await fs.readFile(markdownPath, "utf8");
+    const markdownHasH1 = /^#\s+/m.test(markdown);
     let html = prepareLabProseHtmlFromMarkdown(markdown);
     if (htmlName === "methodology.html") {
       html = html.replace(
@@ -641,18 +684,62 @@ async function buildLabMarkdownPage(
       html = `<h2 class="mb-6 font-sans text-lg font-bold tracking-tight">Methodology</h2>${html}`;
     }
     const body = `${labNavHtml(navActive, escapeHtml)}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>${labPublishFooterHtml(escapeHtml)}`;
+    const methodologyCopy = seoPage("lab_methodology");
     const seo =
       siteBaseUrl && htmlName === "methodology.html"
-        ? { siteBaseUrl, canonicalPath: "lab/methodology.html" }
+        ? {
+            siteBaseUrl,
+            canonicalPath: "lab/methodology.html",
+            ogType: "website",
+            ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            jsonLd: websiteJsonLd(
+              siteBaseUrl,
+              methodologyCopy.h1 ?? "Methodology",
+              methodologyCopy.description ?? pageTitle,
+            ),
+          }
         : undefined;
+    const pageCopy =
+      htmlName === "methodology.html" ? methodologyCopy : { title: pageTitle, description: pageTitle, h1: pageTitle };
+    const genericDescription =
+      htmlName === "methodology.html"
+        ? methodologyCopy.description
+        : metaDescriptionFromLead(pageTitle);
+    const genericSeo =
+      siteBaseUrl && htmlName !== "methodology.html"
+        ? {
+            siteBaseUrl,
+            canonicalPath: `lab/${htmlName}`,
+            ogType: "website",
+            ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+          }
+        : seo;
     await fs.writeFile(
       path.join(labSiteDir, htmlName),
-      pageShell(pageTitle, body, labSitePaths(), brand, undefined, escapeHtml, {
-        ...labShell,
-        labNavActive: navActive,
-        labFallbackSection: "about",
-        seo,
-      }),
+      pageShell(
+        (htmlName === "methodology.html" ? methodologyCopy.title : pageCopy.title) ?? pageTitle,
+        body,
+        labSitePaths(),
+        brand,
+        htmlName === "methodology.html" ? methodologyCopy.description : genericDescription,
+        escapeHtml,
+        {
+          ...labShell,
+          labNavActive: navActive,
+          labFallbackSection: "about",
+          seo: genericSeo,
+          siteBaseUrl,
+          documentH1:
+            htmlName === "methodology.html"
+              ? methodologyCopy.h1
+              : markdownHasH1
+                ? undefined
+                : pageCopy.h1,
+          documentH1Visible:
+            htmlName === "methodology.html" || (!markdownHasH1 && htmlName !== "methodology.html"),
+          outboundRewrite,
+        },
+      ),
     );
     return true;
   } catch {
@@ -666,6 +753,8 @@ async function writeLabAboutRedirectPage(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
+  siteBaseUrl?: string,
+  outboundRewrite?: OutboundRewriteContext,
 ): Promise<void> {
   const body = `${labNavHtml("methodology", escapeHtml)}<p class="font-sans text-sm text-stone-700 dark:text-stone-300">This page moved to <a href="methodology.html" class="text-blue-800 underline dark:text-blue-400" data-lab-section="about">Methodology</a>.</p>${labAboutRedirectScript()}${labPublishFooterHtml(escapeHtml)}`;
   await fs.writeFile(
@@ -675,6 +764,17 @@ async function writeLabAboutRedirectPage(
       labNavActive: "methodology",
       labFallbackSection: "about",
       metaRefresh: "methodology.html",
+      siteBaseUrl: undefined,
+      documentH1: "About",
+      documentH1Visible: true,
+      seo: siteBaseUrl
+        ? {
+            siteBaseUrl,
+            canonicalPath: "lab/about.html",
+            noindex: true,
+          }
+        : undefined,
+      outboundRewrite,
     }),
   );
 }
@@ -685,8 +785,11 @@ export function renderLabHomeIntroBlock(
   asOfIsoDate: string,
   escapeHtml: (t: string) => string,
 ): string {
+  const articleBlock = articleHtml.trim()
+    ? `<article class="${LAB_PROSE_ARTICLE_CLASS}">${articleHtml}</article>`
+    : "";
   return `<div class="lab-intro mb-8 font-sans">
-      <article class="${LAB_PROSE_ARTICLE_CLASS}">${articleHtml}</article>
+      ${articleBlock}
       ${loopStripHtml}
       ${renderLabExperimentsHowLink(escapeHtml)}
       <p class="lab-last-updated">Last updated ${escapeHtml(formatLabLastUpdatedPt(asOfIsoDate))}</p>
@@ -699,6 +802,8 @@ async function buildShadowPages(
   brand: { name: string; tagline: string },
   escapeHtml: (t: string) => string,
   labShell: { labLayout: true },
+  siteBaseUrl?: string,
+  outboundRewrite: OutboundRewriteContext,
 ): Promise<number> {
   const runsDir = path.join(repoRoot, "data", "experiments", "runs");
   const shadowSiteDir = path.join(labSiteDir, "shadow");
@@ -718,7 +823,10 @@ async function buildShadowPages(
     try {
       const raw = await fs.readFile(shadowPath, "utf8");
       const shadow = JSON.parse(raw) as ShadowDigestPayload;
-      const body = renderShadowCompareBody(shadow, escapeHtml);
+      const body = rewriteOutboundLinksInHtml(renderShadowCompareBody(shadow, escapeHtml), {
+        ...outboundRewrite,
+        surface: "shadow",
+      });
       await fs.writeFile(
         path.join(shadowSiteDir, `${runId}.html`),
         pageShell(
@@ -728,7 +836,24 @@ async function buildShadowPages(
           brand,
           "Side-by-side control vs treatment blurbs from a digest pipeline shadow run.",
           escapeHtml,
-          { ...labShell, labNavActive: "experiments", labNavDepth: 2 },
+          {
+            ...labShell,
+            labNavActive: "experiments",
+            labNavDepth: 2,
+            siteBaseUrl,
+            documentH1: `Shadow run ${runId.slice(0, 8)}`,
+            documentH1Visible: true,
+            outboundRewrite: { ...outboundRewrite, surface: "shadow" },
+            seo: siteBaseUrl
+              ? {
+                  siteBaseUrl,
+                  canonicalPath: `lab/shadow/${runId}.html`,
+                  noindex: true,
+                  ogType: "website",
+                  ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                }
+              : undefined,
+          },
         ),
       );
       count++;
@@ -759,19 +884,32 @@ export function labAboutFooterHref(paths: SitePaths): string {
   return labHomeFooterHref(paths);
 }
 
-export function footerLinkRowHtml(paths: SitePaths, escapeHtml: (t: string) => string): string {
+export function footerLinkRowHtml(
+  paths: SitePaths,
+  escapeHtml: (t: string) => string,
+  options?: { homeIndex?: boolean },
+): string {
   const link = (href: string, label: string) =>
-    `<a href="${href}" class="site-footer__link" data-lab-section="footer">${label}</a>`;
+    `<a href="${href}" class="site-footer__link" data-lab-section="footer">${escapeHtml(label)}</a>`;
 
-  const items = [
-    link(paths.subscribe, "Subscribe"),
-    paths.crossEdition
-      ? link(paths.crossEdition.href, escapeHtml(paths.crossEdition.label))
-      : "",
-    link(labHomeFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
-    link(labMethodologyFooterHref(paths), "Methodology"),
-    link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
-  ].filter(Boolean);
+  const items = options?.homeIndex
+    ? [
+        link(paths.subscribe, "Subscribe"),
+        link(paths.editionNav.ossHref, "AI Tastemakers"),
+        link(paths.editionNav.skillsHref, "Skill Tastemakers"),
+        link(labHomeFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
+        link(labMethodologyFooterHref(paths), "Methodology"),
+        link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
+      ]
+    : [
+        link(paths.subscribe, "Subscribe"),
+        paths.crossEdition
+          ? link(paths.crossEdition.href, paths.crossEdition.label)
+          : "",
+        link(labHomeFooterHref(paths), LAB_FOOTER_ABOUT_LABEL),
+        link(labMethodologyFooterHref(paths), "Methodology"),
+        link("https://github.com/Leftyshields/ai-tastemakers", "Source on GitHub"),
+      ].filter(Boolean);
 
   return items.join('<span class="site-footer__sep" aria-hidden="true">&middot;</span>');
 }
@@ -785,26 +923,43 @@ export function pageShell(
   paths: SitePaths,
   brand: { name: string; tagline: string },
   description?: string,
-  escapeHtml: (t: string) => string = (t) => t,
+  escapeHtml: (t: string) => string = escapeHtml,
   options?: {
     labLayout?: boolean;
     labNavActive?: LabNavActive;
     labNavDepth?: 0 | 1 | 2;
     wideIndex?: boolean;
+    homeIndexEdition?: EditionId;
     seo?: PageSeoOptions;
+    siteBaseUrl?: string;
+    documentH1?: string;
+    documentH1Visible?: boolean;
+    documentH1Lead?: string;
+    /** Lab index: hide header site title/subtitle so main h1 + lead are the only hero. */
+    labHomePage?: boolean;
     labFallbackSection?: LabLinkSection;
     labPostShell?: boolean;
     metaRefresh?: string;
+    outboundRewrite?: OutboundRewriteContext;
   },
 ): string {
   const safeTitle = escapeHtml(title);
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
+  const siteBase = options?.siteBaseUrl ?? options?.seo?.siteBaseUrl;
+  const labLayout = options?.labLayout === true;
+  const homeIndexEdition = options?.homeIndexEdition;
+  const includeLabChangesFeed = labLayout || Boolean(homeIndexEdition);
+  const feedAlternates = siteBase
+    ? `${feedAlternateLinksHtml(siteBase, escapeHtml)}${includeLabChangesFeed ? `\n  ${labFeedAlternateLinkHtml(siteBase, escapeHtml)}` : ""}`
+    : "";
+  const faviconLinks = siteFaviconLinksHtml(siteRootRelPrefixFromCss(paths.css), escapeHtml);
+  const gscMeta = googleSiteVerificationMetaHtml(escapeHtml);
   const refreshMeta = options?.metaRefresh
     ? `<meta http-equiv="refresh" content="0;url=${escapeHtml(options.metaRefresh)}">`
     : "";
-  const labLayout = options?.labLayout === true;
   const nav = editionNavHtml(paths.editionNav, escapeHtml, labLayout, {
     desktopOnlyOnLab: labLayout,
+    homeIndexNav: Boolean(homeIndexEdition),
   });
   const mobileLabNav =
     labLayout && options?.labNavActive
@@ -817,13 +972,52 @@ export function pageShell(
       : "";
   const maxWidth = options?.wideIndex === true ? "max-w-6xl" : "max-w-2xl";
   const labPostShell = options?.labPostShell === true;
+  const homeShell = homeIndexEdition ? " home-index-shell" : "";
   const shellClass = labLayout
     ? `mx-auto max-w-2xl border-stone-200 px-5 py-8 text-stone-900 dark:border-stone-700 dark:text-stone-200 md:max-w-[64rem] md:border-x md:px-8 md:py-12${labPostShell ? " lab-post-shell bg-stone-100 dark:bg-[#0c0a09]" : " bg-[#fffcf8] dark:bg-stone-900"}`
-    : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12`;
+    : `mx-auto min-h-screen ${maxWidth} border-stone-200 bg-[#fffcf8] px-5 py-8 text-stone-900 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 md:border-x md:px-8 md:py-12${homeShell}`;
+  const brandTagline = homeIndexEdition
+    ? HOME_EDITION_TAGLINES[homeIndexEdition]
+    : brand.tagline;
+  const homeTitleLink = homeIndexEdition
+    ? ` data-index-cta="home"`
+    : labLayout
+      ? ' data-lab-section="nav"'
+      : "";
   const labFallback = options?.labFallbackSection ?? "about";
-  const labBody = labLayout ? ensureLabLinkSections(body, labFallback) : body;
-  const mainHtml = labLayout ? `<main class="lab-main">${labBody}</main>` : body;
+  let processedBody = body;
+  if (options?.outboundRewrite) {
+    processedBody = rewriteOutboundLinksInHtml(processedBody, options.outboundRewrite);
+  }
+  const labBody = labLayout ? ensureLabLinkSections(processedBody, labFallback) : processedBody;
+  const labHomePage = options?.labHomePage === true;
+  const h1Bottom = options?.documentH1Lead ? "mb-2" : "mb-6";
+  const h1Class = options?.documentH1Visible
+    ? `font-sans text-2xl font-bold tracking-tight ${h1Bottom}`
+    : "sr-only";
+  const documentH1 = options?.documentH1
+    ? `<h1 class="${h1Class}">${escapeHtml(options.documentH1)}</h1>`
+    : "";
+  const documentH1Lead = options?.documentH1Lead
+    ? `<p class="lab-home-lead">${escapeHtml(options.documentH1Lead)}</p>`
+    : "";
+  const hideLabHomeSiteBrand = labHomePage;
+  const headerClass = labHomePage
+    ? "lab-home-header mb-4 border-b border-stone-200 pb-4 dark:border-stone-700"
+    : "mb-8 border-b border-stone-200 pb-6 dark:border-stone-700";
+  const mainHtml = labLayout
+    ? `<main class="lab-main">${documentH1}${documentH1Lead}${labBody}</main>`
+    : `${documentH1}${documentH1Lead}${labBody}`;
   const footerMt = labLayout ? "mt-10" : "mt-16";
+  let footerLinks = footerLinkRowHtml(paths, escapeHtml, {
+    homeIndex: Boolean(homeIndexEdition),
+  });
+  if (options?.outboundRewrite) {
+    footerLinks = rewriteOutboundLinksInHtml(footerLinks, {
+      ...options.outboundRewrite,
+      surface: "site_footer",
+    });
+  }
 
   return `<!DOCTYPE html>
 <html lang="en">
@@ -831,26 +1025,33 @@ export function pageShell(
   <meta charset="utf-8">
   ${colorSchemeHeadScript}
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  ${faviconLinks}
   <title>${safeTitle}</title>
   ${refreshMeta}
+  ${gscMeta}
+  ${feedAlternates}
   ${headMeta}
   <link rel="stylesheet" href="${paths.css}">
   ${posthogScriptHtml()}
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
   <div class="${shellClass}">
-    <header class="mb-8 border-b border-stone-200 pb-6 dark:border-stone-700">
-      <h1 class="font-sans text-2xl font-bold tracking-tight">
-        <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400"${labLayout ? ' data-lab-section="nav"' : ""}>${escapeHtml(brand.name)}</a>
-      </h1>
-      <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brand.tagline)}</p>
+    <header class="${headerClass}">
+      ${
+        hideLabHomeSiteBrand
+          ? ""
+          : `<div class="site-brand m-0 font-sans text-2xl font-bold tracking-tight">
+        <a href="${paths.home}" class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400"${homeTitleLink}${!homeIndexEdition && labLayout ? ' data-lab-section="nav"' : ""}>${escapeHtml(brand.name)}</a>
+      </div>
+      <p class="mt-1 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(brandTagline)}</p>`
+      }
       ${nav}
       ${mobileLabNav}
     </header>
     ${mainHtml}
     <footer class="site-footer ${footerMt}">
-      <nav aria-label="Site footer" class="site-footer__links">${footerLinkRowHtml(paths, escapeHtml)}</nav>
-      <p class="site-footer__meta">Updated daily &middot; Automated pipeline</p>
+      <nav aria-label="Site footer" class="site-footer__links">${footerLinks}</nav>
+      <p class="site-footer__meta">${homeIndexEdition ? "Updated every morning" : "Updated daily &middot; Automated pipeline"}</p>
     </footer>
   </div>
   ${labLayout ? `${labLinkClickScript()}${labNavScrollScript()}` : ""}
@@ -901,6 +1102,7 @@ export interface WrapUpArchive {
   monthlyLatest?: string;
   weeklyGeneratedAt?: string;
   monthlyGeneratedAt?: string;
+  weekLabels: Map<string, string>;
   weekHref: (weekId: string) => string;
   monthHref: (monthId: string) => string;
 }
@@ -930,6 +1132,7 @@ export async function buildWrapUpArchive(
     siteSegment ? `../weekly/${weekId}.html` : `weekly/${weekId}.html`;
   const monthHref = (monthId: string) =>
     siteSegment ? `../monthly/${monthId}.html` : `monthly/${monthId}.html`;
+  const weekLabels = weeks.length > 0 ? await loadWeekRangeLabels(repoRoot, weeks) : new Map();
 
   return {
     weeks,
@@ -938,8 +1141,22 @@ export async function buildWrapUpArchive(
     monthlyLatest,
     weeklyGeneratedAt,
     monthlyGeneratedAt,
+    weekLabels,
     weekHref,
     monthHref,
+  };
+}
+
+function archiveIndexMainWrap(inner: string): string {
+  return `<div class="home-index-main">${inner}</div>`;
+}
+
+function homeWrapUpFromArchive(wrap?: WrapUpArchive): HomeWrapUpArchive | undefined {
+  if (!wrap) return undefined;
+  return {
+    weeklyLatest: wrap.weeklyLatest,
+    weekHref: wrap.weekHref,
+    weekRangeLabel: wrap.weeklyLatest ? wrap.weekLabels.get(wrap.weeklyLatest) : undefined,
   };
 }
 
@@ -975,6 +1192,7 @@ function wrapUpCtaHtml(wrap?: WrapUpArchive): string {
 function monthlyArchiveSection(
   months: string[],
   monthHref: (monthId: string) => string,
+  options?: { archiveIndex?: boolean },
 ): string {
   if (months.length === 0) return "";
   const items = months
@@ -987,10 +1205,16 @@ function monthlyArchiveSection(
         </li>`,
     )
     .join("\n");
+  const h2Class = options?.archiveIndex
+    ? ARCHIVE_SECTION_HEADING_CLASS
+    : "mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
+  const sectionClass = options?.archiveIndex
+    ? "sec scroll-mt-8"
+    : "mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800";
   return `
-    <section id="monthly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Monthly rollups</h2>
-      <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Fourth-Sunday synthesis across weekly reviews &mdash; month-level themes and builder takeaways.</p>
+    <section id="monthly-archive" class="${sectionClass}">
+      <h2 class="${h2Class} mb-4">${MONTHLY_INDEX_SECTION_HEADING}</h2>
+      <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${items}</ul>
     </section>`;
 }
@@ -1017,29 +1241,36 @@ function formatDisplayDate(isoDate: string): string {
   });
 }
 
-function formatWeekLabel(weekId: string): string {
-  return weekId.replace("-W", " · Week ");
-}
-
 function weeklyArchiveSection(
   weeks: string[],
   weekHref: (weekId: string) => string,
+  weekLabels: Map<string, string>,
+  options?: { archiveIndex?: boolean },
 ): string {
   if (weeks.length === 0) return "";
   const items = weeks
-    .map(
-      (w) =>
-        `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
+    .map((w) => {
+      const label = weekLabels.get(w);
+      if (!label) {
+        throw new Error(`missing week range label for ${w}`);
+      }
+      return `<li class="border-b border-stone-200 py-3.5 dark:border-stone-800">
           <a class="font-sans font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}">
-            ${formatWeekLabel(w)}
+            ${label}
           </a>
-        </li>`,
-    )
+        </li>`;
+    })
     .join("\n");
+  const h2Class = options?.archiveIndex
+    ? ARCHIVE_SECTION_HEADING_CLASS
+    : "mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
+  const sectionClass = options?.archiveIndex
+    ? "sec scroll-mt-8"
+    : "mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800";
   return `
-    <section id="weekly-archive" class="mb-12 scroll-mt-8 border-t border-stone-200 pt-10 dark:border-stone-800">
-      <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Weekly reviews</h2>
-      <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">Sunday synthesis across AI Tastemakers and Skill Tastemakers &mdash; themes, stats, and builder takeaways.</p>
+    <section id="weekly-archive" class="${sectionClass}">
+      <h2 class="${h2Class} mb-4">${WEEKLY_INDEX_SECTION_HEADING}</h2>
+      <p class="mb-4 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${items}</ul>
     </section>`;
 }
@@ -1110,7 +1341,7 @@ function ossIndexBody(
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 font-sans text-sm text-stone-500\">No briefings yet.</li>"}</ul>
     </section>
-    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref, wrapUp.weekLabels) : ""}
     ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "skills")}`;
 }
@@ -1121,7 +1352,7 @@ function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): strin
     <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
       <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a></h2>
-      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills: Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}">Browse skills digest &rarr;</a>
     </section>`;
   }
@@ -1130,7 +1361,7 @@ function siblingEditionPromo(paths: SitePaths, sibling: "oss" | "skills"): strin
     <section class="mt-12 rounded-xl border border-stone-200 bg-stone-50 p-6 dark:border-stone-700 dark:bg-stone-950/40">
       <p class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Also from Tastemakers</p>
       <h2 class="mb-2 font-sans text-lg font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}">AI Tastemakers</a></h2>
-      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <p class="mb-4 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos: agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}">Browse OSS digest &rarr;</a>
     </section>`;
 }
@@ -1143,7 +1374,7 @@ function skillsIndexBody(
   wrapUp?: WrapUpArchive,
 ): string {
   const inspiration = edition.inspiration
-    ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a> — installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
+    ? `<p class="mb-0 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${edition.inspiration.url}">${edition.inspiration.label}</a>, installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
     : "";
 
   const weeklyCta = wrapUpCtaHtml(wrapUp);
@@ -1178,13 +1409,13 @@ function skillsIndexBody(
       <div class="mt-6">${heroActions}</div>
     </section>
     <section class="mb-12 text-base leading-relaxed text-stone-600 dark:text-stone-400">
-      <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics — then rank by 7-day star momentum with Claude briefs.</p>
+      <p class="mb-3">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics, then rank by 7-day star momentum with Claude briefs.</p>
     </section>
     <section id="archive" class="mb-4 scroll-mt-8">
       <h2 class="mb-1 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Daily archive</h2>
       <ul class="m-0 list-none p-0">${items || "<li class=\"py-3 text-sm text-stone-500\">No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.</li>"}</ul>
     </section>
-    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref) : ""}
+    ${wrapUp ? weeklyArchiveSection(wrapUp.weeks, wrapUp.weekHref, wrapUp.weekLabels) : ""}
     ${wrapUp ? monthlyArchiveSection(wrapUp.months, wrapUp.monthHref) : ""}
     ${siblingEditionPromo(paths, "oss")}`;
 }
@@ -1218,21 +1449,37 @@ function contentCard(
   title: string,
   bodyHtml: string,
   paddingClass: string,
+  escapeHtml: (t: string) => string,
+  options?: { archiveHeading?: boolean },
 ): string {
   const idAttr = sectionId ? ` id="${sectionId}"` : "";
+  const h2Class = options?.archiveHeading
+    ? `${ARCHIVE_SECTION_HEADING_CLASS} mb-4`
+    : "mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400";
   return `
     <section${idAttr} class="content-card ${CONTENT_CARD_CLASS} ${paddingClass}">
-      <h2 class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">${title}</h2>
+      <h2 class="${h2Class}">${escapeHtml(title)}</h2>
       ${bodyHtml}
     </section>`;
 }
 
-function sidebarCard(sectionId: string | undefined, title: string, bodyHtml: string): string {
-  return contentCard(sectionId, title, bodyHtml, "p-5");
+function sidebarCard(
+  sectionId: string | undefined,
+  title: string,
+  bodyHtml: string,
+  escapeHtml: (t: string) => string,
+): string {
+  return contentCard(sectionId, title, bodyHtml, "p-5", escapeHtml);
 }
 
-function mainBlockCard(sectionId: string | undefined, title: string, bodyHtml: string): string {
-  return contentCard(sectionId, title, bodyHtml, "p-6");
+function mainBlockCard(
+  sectionId: string | undefined,
+  title: string,
+  bodyHtml: string,
+  escapeHtml: (t: string) => string,
+  options?: { archiveHeading?: boolean },
+): string {
+  return contentCard(sectionId, title, bodyHtml, "p-6", escapeHtml, options);
 }
 
 function wrapUpSecondaryCtaHtml(wrap?: WrapUpArchive): string {
@@ -1281,25 +1528,32 @@ function howItWorksMainBlockHtml(): string {
         <li><strong class="text-stone-900 dark:text-stone-100">Narrate</strong> &mdash; Enrich the top 10 and generate concise briefs with Claude.</li>
         <li><strong class="text-stone-900 dark:text-stone-100">Publish</strong> &mdash; A daily GitHub Action commits the briefing and updates this site.</li>
       </ol>`;
-  return mainBlockCard(undefined, "How it works", body);
+  return mainBlockCard(undefined, "How it works", body, escapeHtml);
 }
 
 function skillsAboutMainBlockHtml(): string {
   const body = `
       <p class="m-0 text-sm leading-relaxed text-stone-600 dark:text-stone-400">We scan GitHub for <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-skill</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">claude-code</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">ai-prompts</code>, <code class="rounded bg-stone-200 px-1.5 py-0.5 text-xs dark:bg-stone-800">cursor</code>, and related topics &mdash; then rank by 7-day star momentum with Claude briefs.</p>`;
-  return mainBlockCard(undefined, "About this digest", body);
+  return mainBlockCard(undefined, "About this digest", body, escapeHtml);
 }
 
-function weeklyListItems(weeks: string[], weekHref: (weekId: string) => string): string {
+function weeklyListItems(
+  weeks: string[],
+  weekHref: (weekId: string) => string,
+  weekLabels: Map<string, string>,
+): string {
   return weeks
-    .map(
-      (w) =>
-        `<li class="border-b border-stone-200 py-2.5 last:border-0 dark:border-stone-800">
+    .map((w) => {
+      const label = weekLabels.get(w);
+      if (!label) {
+        throw new Error(`missing week range label for ${w}`);
+      }
+      return `<li class="border-b border-stone-200 py-2.5 last:border-0 dark:border-stone-800">
           <a class="font-sans text-sm font-medium text-stone-900 no-underline hover:text-blue-800 dark:text-stone-100 dark:hover:text-blue-400" href="${weekHref(w)}" data-index-cta="weekly">
-            ${formatWeekLabel(w)}
+            ${label}
           </a>
-        </li>`,
-    )
+        </li>`;
+    })
     .join("\n");
 }
 
@@ -1319,33 +1573,37 @@ function monthlyListItems(months: string[], monthHref: (monthId: string) => stri
 function weeklyMainBlock(wrap: WrapUpArchive): string {
   if (wrap.weeks.length === 0) return "";
   const body = `
-      <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">Sunday synthesis across AI Tastemakers and Skill Tastemakers &mdash; themes, stats, and builder takeaways.</p>
-      <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref)}</ul>`;
-  return mainBlockCard("weekly-archive", "Weekly reviews", body);
+      <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${WEEKLY_INDEX_INTRO}</p>
+      <ul class="m-0 list-none p-0">${weeklyListItems(wrap.weeks, wrap.weekHref, wrap.weekLabels)}</ul>`;
+  return mainBlockCard("weekly-archive", WEEKLY_INDEX_SECTION_HEADING, body, escapeHtml);
 }
 
 function monthlyMainBlock(wrap: WrapUpArchive): string {
   if (wrap.months.length === 0) return "";
   const body = `
-      <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">Fourth-Sunday synthesis across weekly reviews &mdash; month-level themes and builder takeaways.</p>
+      <p class="mb-3 text-sm text-stone-600 dark:text-stone-400">${MONTHLY_INDEX_INTRO}</p>
       <ul class="m-0 list-none p-0">${monthlyListItems(wrap.months, wrap.monthHref)}</ul>`;
-  return mainBlockCard("monthly-archive", "Monthly rollups", body);
+  return mainBlockCard("monthly-archive", "Monthly rollups", body, escapeHtml);
 }
 
-function siblingEditionPromoSidebar(paths: SitePaths, sibling: "oss" | "skills"): string {
+function siblingEditionPromoSidebar(
+  paths: SitePaths,
+  sibling: "oss" | "skills",
+  escapeHtml: (t: string) => string,
+): string {
   if (sibling === "skills") {
     const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Skill Tastemakers</a></h3>
-      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills — Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI agent skills: Claude Code plugins, research skills, and installable capabilities ranked by GitHub momentum.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.skillsHref}" data-index-cta="cross_edition">Browse skills digest &rarr;</a>`;
-    return sidebarCard(undefined, "Also from Tastemakers", body);
+    return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
   }
 
   const body = `
       <h3 class="mb-2 font-sans text-base font-semibold"><a class="text-inherit no-underline hover:text-blue-800 dark:hover:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">AI Tastemakers</a></h3>
-      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos — agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
+      <p class="mb-3 text-sm leading-relaxed text-stone-600 dark:text-stone-400">Daily top ten AI-derivative open source repos: agents, MCP servers, LLM tooling, ranked by 7-day star growth.</p>
       <a class="font-sans text-sm font-medium text-blue-800 no-underline hover:underline dark:text-blue-400" href="${paths.editionNav.ossHref}" data-index-cta="cross_edition">Browse OSS digest &rarr;</a>`;
-  return sidebarCard(undefined, "Also from Tastemakers", body);
+  return sidebarCard(undefined, "Also from Tastemakers", body, escapeHtml);
 }
 
 function indexLayoutGrid(mainHtml: string, sidebarHtml: string): string {
@@ -1402,12 +1660,15 @@ async function archiveMonthGridHtml(
   briefingsDir: string,
   emptyMessage: string,
   escapeHtml: (t: string) => string,
+  sectionTitle = "Daily archive",
 ): Promise<string> {
   if (dates.length === 0) {
     return mainBlockCard(
       "archive",
-      "Daily archive",
-      `<p class="m-0 font-sans text-sm text-stone-500 dark:text-stone-400">${emptyMessage}</p>`,
+      sectionTitle,
+      `<p class="m-0 font-sans text-sm text-stone-500 dark:text-stone-400">${escapeHtml(emptyMessage)}</p>`,
+      escapeHtml,
+      { archiveHeading: true },
     );
   }
 
@@ -1418,7 +1679,7 @@ async function archiveMonthGridHtml(
   );
 
   const body = `<div class="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-3">${tiles.join("\n")}</div>`;
-  return mainBlockCard("archive", "Daily archive", body);
+  return mainBlockCard("archive", sectionTitle, body, escapeHtml, { archiveHeading: true });
 }
 
 function ossHeroActionsV2(paths: SitePaths, latest: string | undefined, wrapUp?: WrapUpArchive): string {
@@ -1458,64 +1719,130 @@ async function ossIndexBodyV2(
   dates: string[],
   briefingsDir: string,
   escapeHtml: (t: string) => string,
-  latest?: string,
-  wrapUp?: WrapUpArchive,
+  latest: string | undefined,
+  wrapUp: WrapUpArchive | undefined,
+  repoRoot: string,
+  badgeLookup: ReadonlyMap<string, import("./lab/lab-tested-badge.js").LabBadgeInfo>,
 ): Promise<string> {
-  const mainParts = [
-    `<section class="border-b border-stone-200 pb-8 dark:border-stone-800">
-      <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily digest &middot; GitHub momentum</p>
-      <p class="mb-3 text-xl leading-snug md:text-[1.65rem] md:leading-snug">Every morning, AI Tastemakers surfaces the 10 open-source AI repos gaining the most momentum&mdash;moving past static star leaderboards to track real velocity.</p>
-      <p class="mb-4 text-base leading-relaxed text-stone-600 dark:text-stone-400">Tools, agents, and frameworks built on top of foundation models &ndash; not foundation model news. We rank by <strong class="font-semibold text-stone-800 dark:text-stone-200">stars gained in the last seven days</strong> and narrate each pick with Claude.</p>
-      ${ossHeroActionsV2(paths, latest, wrapUp)}
-    </section>`,
-    howItWorksMainBlockHtml(),
-    await archiveMonthGridHtml(dates, paths, briefingsDir, "No briefings yet.", escapeHtml),
-    wrapUp ? weeklyMainBlock(wrapUp) : "",
-    wrapUp ? monthlyMainBlock(wrapUp) : "",
-  ].filter(Boolean);
-
-  const main = `<div class="space-y-8">${mainParts.join("\n")}</div>`;
-  const sidebar = siblingEditionPromoSidebar(paths, "skills");
-
-  return `${indexLayoutGrid(main, sidebar)}${homepageIndexTrackingScript("oss")}`;
+  void dates;
+  const main = await buildHomeIndexMainHtml({
+    edition: "oss",
+    paths,
+    latestDate: latest,
+    briefingsDir,
+    badgeLookup,
+    wrapUp: homeWrapUpFromArchive(wrapUp),
+    escapeHtml,
+    repoRoot,
+  });
+  return `${main}${homepageIndexTrackingScript("oss")}`;
 }
 
 async function skillsIndexBodyV2(
   paths: SitePaths,
   dates: string[],
   briefingsDir: string,
-  edition: EditionDefinition,
   escapeHtml: (t: string) => string,
-  latest?: string,
-  wrapUp?: WrapUpArchive,
+  latest: string | undefined,
+  wrapUp: WrapUpArchive | undefined,
+  repoRoot: string,
+  badgeLookup: ReadonlyMap<string, import("./lab/lab-tested-badge.js").LabBadgeInfo>,
 ): Promise<string> {
-  const inspiration = edition.inspiration
-    ? `<p class="mb-4 text-sm text-stone-500 dark:text-stone-400">Inspired by the agent-skill wave led by repos like <a class="text-blue-800 hover:underline dark:text-blue-400" href="${escapeHtml(edition.inspiration.url)}">${escapeHtml(edition.inspiration.label)}</a> — installable skills for Claude Code, Cursor, Codex, and 50+ Agent Skills hosts.</p>`
-    : "";
+  void dates;
+  const main = await buildHomeIndexMainHtml({
+    edition: "skills",
+    paths,
+    latestDate: latest,
+    briefingsDir,
+    badgeLookup,
+    wrapUp: homeWrapUpFromArchive(wrapUp),
+    escapeHtml,
+    repoRoot,
+  });
+  return `${main}${homepageIndexTrackingScript("skills")}`;
+}
 
-  const mainParts = [
-    `<section class="border-b border-stone-200 pb-8 dark:border-stone-800">
-      <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500">Agent skills · GitHub momentum</p>
-      <p class="mb-4 text-xl leading-snug md:text-[1.65rem]">Reusable agent instruction artifacts &mdash; prompt skills, Claude Code extensions, and capabilities you drop into your AI agents to unlock new powers. Overlaps with AI Tastemakers are intentional; the lens is different.</p>
-      ${inspiration}
-      ${skillsHeroActionsV2(paths, latest, wrapUp)}
-    </section>`,
-    skillsAboutMainBlockHtml(),
-    await archiveMonthGridHtml(
-      dates,
+function briefingsArchivePaths(siteSegment: string): SitePaths {
+  if (siteSegment === "skills") {
+    return {
+      css: "../../assets/style.css",
+      home: "../",
+      subscribe: "../../subscribe.html",
+      lab: "../../lab/",
+      brief: (date) => `${date}.html`,
+      editionNav: editionNavFor("skills", 1),
+    };
+  }
+  return {
+    css: "../assets/style.css",
+    home: "../",
+    subscribe: "../subscribe.html",
+    lab: "../lab/",
+    brief: (date) => `${date}.html`,
+    editionNav: editionNavFor("", 1),
+  };
+}
+
+function archiveIndexBackNav(homeHref: string, editionId: EditionId, escapeHtml: (t: string) => string): string {
+  const label = archiveBackLinkLabel(editionId);
+  return `<nav class="mb-6 font-sans text-sm">
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${homeHref}">&larr; ${escapeHtml(label)}</a>
+      </nav>`;
+}
+
+async function buildBriefingsArchiveIndexPage(
+  edition: EditionDefinition,
+  siteRoot: string,
+  briefingsDir: string,
+  dates: string[],
+  escapeHtml: (t: string) => string,
+  siteBaseUrl?: string,
+  outboundRewrite?: OutboundRewriteContext,
+): Promise<void> {
+  const paths = briefingsArchivePaths(edition.siteSegment);
+  const brand = { name: edition.name, tagline: HOME_EDITION_TAGLINES[edition.id] };
+  const archiveGrid = await archiveMonthGridHtml(
+    dates,
+    paths,
+    briefingsDir,
+    DAYS_ARCHIVE_EMPTY,
+    escapeHtml,
+    DAYS_ARCHIVE_SECTION_HEADING,
+  );
+  const earliestDate = dates.length > 0 ? dates[dates.length - 1] : undefined;
+  const introText = daysArchiveIntroForEdition(edition.id, earliestDate);
+  const intro = `<p class="mb-6 max-w-[40rem] text-base leading-relaxed text-stone-600 dark:text-stone-400">${escapeHtml(introText)}</p>`;
+  const body = `${archiveIndexBackNav(paths.home, edition.id, escapeHtml)}
+      ${archiveIndexMainWrap(`${intro}${archiveGrid}`)}`;
+  await fs.writeFile(
+    path.join(siteRoot, "briefings", "index.html"),
+    pageShell(
+      DAYS_ARCHIVE_PAGE_TITLE[edition.id],
+      body,
       paths,
-      briefingsDir,
-      "No briefings yet. Run <code>npm run digest:skills</code> locally or wait for the daily workflow.",
+      brand,
+      daysArchiveMetaForEdition(edition.id),
       escapeHtml,
+      {
+        wideIndex: true,
+        homeIndexEdition: edition.id,
+        siteBaseUrl,
+        documentH1: DAYS_ARCHIVE_SECTION_HEADING,
+        documentH1Visible: true,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: edition.siteSegment
+                ? `${edition.siteSegment}/briefings/index.html`
+                : "briefings/index.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
+            }
+          : undefined,
+        outboundRewrite,
+      },
     ),
-    wrapUp ? weeklyMainBlock(wrapUp) : "",
-    wrapUp ? monthlyMainBlock(wrapUp) : "",
-  ].filter(Boolean);
-
-  const main = `<div class="space-y-8">${mainParts.join("\n")}</div>`;
-  const sidebar = siblingEditionPromoSidebar(paths, "oss");
-
-  return `${indexLayoutGrid(main, sidebar)}${homepageIndexTrackingScript("skills")}`;
+  );
 }
 
 function monthlyPagePaths(): SitePaths {
@@ -1533,7 +1860,17 @@ export async function buildMonthlySite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
+  siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
+  const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
+  const outboundMonthly: OutboundRewriteContext = {
+    siteBaseUrl,
+    destRegistry,
+    githubAllowlist,
+    channel: "pages",
+    surface: "monthly_page",
+  };
   const months = await listMonthlyReviewMonths(repoRoot);
   const outDir = path.join(siteDir, "monthly");
   await fs.mkdir(outDir, { recursive: true });
@@ -1552,25 +1889,93 @@ export async function buildMonthlySite(
     } catch {
       continue;
     }
-    const html = renderSafeMarkdown(markdown);
+    const html = rewriteOutboundLinksInHtml(renderSafeMarkdown(markdown), outboundMonthly);
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
-        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}#monthly-archive">All monthly rollups</a>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}monthly/index.html">All monthly rollups</a>
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+    const monthlyCopy = seoPage("monthly_rollup");
+    const monthlyDescription = monthlyCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(monthlyCopy.descriptionTemplate, { monthId })
+      : monthlyCopy.description;
     await fs.writeFile(
       path.join(outDir, `${monthId}.html`),
       pageShell(
-        `Monthly Rollup — ${monthId}`,
+        applyTemplate(
+          monthlyCopy.titleTemplate ?? `Monthly Rollup: {monthId} | Tastemakers`,
+          { monthId },
+        ),
         body,
         paths,
         brand,
-        "Monthly editorial synthesis across weekly Tastemakers reviews.",
+        monthlyDescription,
         escapeHtml,
+        {
+          siteBaseUrl,
+          seo: siteBaseUrl
+            ? {
+                siteBaseUrl,
+                canonicalPath: `monthly/${monthId}.html`,
+                ogType: "article",
+                ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+              }
+            : undefined,
+          outboundRewrite: outboundMonthly,
+        },
+      ),
+    );
+  }
+
+  if (months.length > 0) {
+    const useV2 = landingLayoutV2Enabled();
+    const indexBrand = useV2
+      ? { name: "AI Tastemakers", tagline: HOME_EDITION_TAGLINES.oss }
+      : brand;
+    const indexBody = useV2
+      ? `${archiveIndexBackNav(paths.home, "oss", escapeHtml)}
+      ${archiveIndexMainWrap(monthlyArchiveSection(months, (m) => `${m}.html`, { archiveIndex: true }))}`
+      : `
+      <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
+      </nav>
+      ${monthlyArchiveSection(months, (m) => `${m}.html`)}`;
+    await fs.writeFile(
+      path.join(outDir, "index.html"),
+      pageShell(
+        useV2 ? MONTHLY_INDEX_PAGE_TITLE : "Monthly rollups",
+        indexBody,
+        paths,
+        indexBrand,
+        useV2 ? MONTHLY_INDEX_META_DESCRIPTION : "Monthly editorial synthesis across weekly Tastemakers reviews.",
+        escapeHtml,
+        useV2
+          ? {
+              wideIndex: true,
+              homeIndexEdition: "oss",
+              siteBaseUrl,
+              documentH1: MONTHLY_INDEX_PAGE_TITLE,
+              documentH1Visible: true,
+              seo: siteBaseUrl
+                ? {
+                    siteBaseUrl,
+                    canonicalPath: "monthly/",
+                    ogType: "website",
+                    ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                  }
+                : undefined,
+              outboundRewrite: { ...outboundMonthly, surface: "monthly_index" },
+            }
+          : {
+              wideIndex: true,
+              outboundRewrite: { ...outboundMonthly, surface: "monthly_index" },
+            },
       ),
     );
   }
@@ -1593,14 +1998,24 @@ export async function buildWeeklySite(
   repoRoot: string,
   siteDir: string,
   escapeHtml: (t: string) => string,
+  siteBaseUrl = "https://leftyshields.github.io/ai-tastemakers",
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
+  const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
+  const outboundWeekly: OutboundRewriteContext = {
+    siteBaseUrl,
+    destRegistry,
+    githubAllowlist,
+    channel: "pages",
+    surface: "weekly_page",
+  };
   const weeks = await listWeeklyReviewWeeks(repoRoot);
   const outDir = path.join(siteDir, "weekly");
   await fs.mkdir(outDir, { recursive: true });
 
   const brand = {
     name: "Tastemakers Weekly",
-    tagline: "Strategy, then the stack, then the numbers — one week of AI open source.",
+    tagline: "Strategy, then the stack, then the numbers for one week of AI open source.",
   };
   const paths = weeklyPagePaths();
 
@@ -1612,25 +2027,122 @@ export async function buildWeeklySite(
     } catch {
       continue;
     }
-    const html = renderSafeMarkdown(markdown);
+    const html = rewriteOutboundLinksInHtml(renderSafeMarkdown(markdown), outboundWeekly);
     const body = `
       <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
         <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
         <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
-        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}#weekly-archive">All weekly reviews</a>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}weekly/index.html">All weekly reviews</a>
       </nav>
       <article class="brief-content prose prose-stone max-w-none dark:prose-invert prose-a:text-blue-800 dark:prose-a:text-blue-400">${html}</article>`;
+    const weeklyCopy = seoPage("weekly_review");
+    const site = weeklyCopy.siteName ?? "AI Tastemakers";
+    let rangeLabel = weekId;
+    let startLabel = weekId;
+    let endLabel = weekId;
+    let year = weekId.slice(0, 4);
+    try {
+      const weekJsonRaw = await fs.readFile(
+        path.join(repoRoot, "briefings", "weekly", weekId, "weekly_review.json"),
+        "utf8",
+      );
+      const weekJson = JSON.parse(weekJsonRaw) as { week_start?: string; week_end?: string };
+      if (weekJson.week_start && weekJson.week_end) {
+        rangeLabel = formatWeekReviewDateRange(weekJson.week_start, weekJson.week_end);
+        startLabel = formatSeoDateShort(weekJson.week_start);
+        endLabel = formatSeoDateShort(weekJson.week_end);
+        year = weekJson.week_end.slice(0, 4);
+      }
+    } catch {
+      const range = parseWeeklyReviewDateRange(markdown);
+      if (range) {
+        rangeLabel = formatWeekReviewDateRange(range.start, range.end);
+        startLabel = formatSeoDateShort(range.start);
+        endLabel = formatSeoDateShort(range.end);
+        year = String(range.year);
+      }
+    }
+    const weeklyVars: Record<string, string> = {
+      Site: site,
+      weekId,
+      startLabel,
+      endLabel,
+      year,
+    };
+    const weeklyTitle = weeklyCopy.titleTemplate
+      ? buildSeoTitleFromTemplate(weeklyCopy.titleTemplate, weeklyVars, ["startLabel", "endLabel"])
+      : `Weekly Review: ${rangeLabel}`;
+    const weeklyDescription = weeklyCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(weeklyCopy.descriptionTemplate, weeklyVars, [
+          "startLabel",
+          "endLabel",
+        ])
+      : weeklyCopy.description;
     await fs.writeFile(
       path.join(outDir, `${weekId}.html`),
+      pageShell(weeklyTitle, body, paths, brand, weeklyDescription, escapeHtml, {
+        siteBaseUrl,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: `weekly/${weekId}.html`,
+              ogType: "article",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+        outboundRewrite: outboundWeekly,
+      }),
+    );
+  }
+
+  if (weeks.length > 0) {
+    const useV2 = landingLayoutV2Enabled();
+    const weekLabels = await loadWeekRangeLabels(repoRoot, weeks);
+    const indexBrand = useV2
+      ? { name: "AI Tastemakers", tagline: HOME_EDITION_TAGLINES.oss }
+      : brand;
+    const indexBody = useV2
+      ? `${archiveIndexBackNav(paths.home, "oss", escapeHtml)}
+      ${archiveIndexMainWrap(weeklyArchiveSection(weeks, (w) => `${w}.html`, weekLabels, { archiveIndex: true }))}`
+      : `
+      <nav class="mb-6 flex flex-wrap items-center gap-x-4 gap-y-2 font-sans text-sm">
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
+        <span class="text-stone-300 dark:text-stone-600" aria-hidden="true">|</span>
+        <a class="text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.editionNav.skillsHref}">Skill Tastemakers</a>
+      </nav>
+      ${weeklyArchiveSection(weeks, (w) => `${w}.html`, weekLabels)}`;
+    await fs.writeFile(
+      path.join(outDir, "index.html"),
       pageShell(
-        `Weekly Review — ${weekId}`,
-        body,
+        useV2 ? WEEKLY_INDEX_PAGE_TITLE : "Weekly reviews",
+        indexBody,
         paths,
-        brand,
-        "One week of AI open source, written for executives first, then builders, then the numbers.",
+        indexBrand,
+        useV2 ? WEEKLY_INDEX_META_DESCRIPTION : "Sunday synthesis across AI Tastemakers and Skill Tastemakers.",
         escapeHtml,
+        useV2
+          ? {
+              wideIndex: true,
+              homeIndexEdition: "oss",
+              siteBaseUrl,
+              documentH1: WEEKLY_INDEX_PAGE_TITLE,
+              documentH1Visible: true,
+              seo: siteBaseUrl
+                ? {
+                    siteBaseUrl,
+                    canonicalPath: "weekly/",
+                    ogType: "website",
+                    ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                  }
+                : undefined,
+              outboundRewrite: { ...outboundWeekly, surface: "weekly_index" },
+            }
+          : {
+              wideIndex: true,
+              outboundRewrite: { ...outboundWeekly, surface: "weekly_index" },
+            },
       ),
     );
   }
@@ -1644,6 +2156,7 @@ export async function buildEditionSite(
   edition: EditionDefinition,
   escapeHtml: (t: string) => string,
   siteBaseUrl?: string,
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
   const briefingsDir = briefingsDirForEdition(repoRoot, edition);
   const badgeLookup = loadLabBadgeLookup(repoRoot);
@@ -1659,6 +2172,17 @@ export async function buildEditionSite(
   await fs.mkdir(briefOutDir, { recursive: true });
 
   const brand = { name: edition.name, tagline: edition.tagline };
+  const githubAllowlist = await collectDigestRepoAllowlist(repoRoot);
+  const pagesSiteBase =
+    siteBaseUrl?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+  const outboundPagesBase: OutboundRewriteContext = {
+    siteBaseUrl: pagesSiteBase,
+    destRegistry,
+    githubAllowlist,
+    channel: "pages",
+    surface: "daily_brief",
+    section: edition.id,
+  };
 
   for (const date of dates) {
     const mdPath = path.join(briefingsDir, date, "daily_brief.md");
@@ -1683,6 +2207,7 @@ export async function buildEditionSite(
         escapeHtml,
         badgeContext,
         labExperiments,
+        { ...outboundPagesBase, digestDate: date },
       );
     } catch {
       /* fall back to markdown-only body */
@@ -1694,18 +2219,40 @@ export async function buildEditionSite(
       ? `${edition.siteSegment}/briefings/${date}.html`
       : `briefings/${date}.html`;
 
-    let description: string | undefined = `${edition.name} daily brief for ${date} — curated AI repo picks with builder-focused summaries.`;
-    let pageTitle = `Daily Brief — ${date} · ${edition.name}`;
+    const briefCopy = seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss");
+    const siteName = edition.id === "skills" ? "Skill Tastemakers" : "AI Tastemakers";
+    const dateLabel = formatSeoDateLabel(date);
+    let topPick = "the top pick";
+    let description: string | undefined = briefCopy.descriptionTemplate
+      ? buildSeoDescriptionFromTemplate(briefCopy.descriptionTemplate, { dateLabel, topPick })
+      : undefined;
+    let pageTitle = briefCopy.titleTemplate
+      ? buildSeoTitleFromTemplate(briefCopy.titleTemplate, { Site: siteName, dateLabel })
+      : `Daily Brief: ${dateLabel}`;
     let seo: PageSeoOptions | undefined;
     if (siteBaseUrl) {
       try {
         const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
         const digest = JSON.parse(digestRaw) as {
           repos: Array<{ full_name: string; brief?: string | null }>;
+          generated_at?: string;
         };
-        description = briefSocialDescription(digest.repos);
+        if (digest.repos[0]?.full_name) {
+          topPick = topPickShortName(digest.repos[0].full_name);
+        }
+        if (briefCopy.descriptionTemplate) {
+          description = buildSeoDescriptionFromTemplate(briefCopy.descriptionTemplate, {
+            dateLabel,
+            topPick,
+          });
+        }
         const socialTitle = briefSocialTitle(date);
-        pageTitle = `Daily Brief — ${date} · ${edition.name}`;
+        if (briefCopy.titleTemplate) {
+          pageTitle = buildSeoTitleFromTemplate(briefCopy.titleTemplate, {
+            Site: siteName,
+            dateLabel,
+          });
+        }
         const ogImageRel = briefOgImagePath(edition.siteSegment, date);
         const ogImageAbs = `${siteBaseUrl.replace(/\/+$/, "")}/${ogImageRel}`;
         const ogOutPath = path.join(
@@ -1721,6 +2268,13 @@ export async function buildEditionSite(
           editionTagline: EDITION_TAGLINES[edition.id],
           repos: digest.repos.map((r) => r.full_name),
         });
+        const homePath = edition.siteSegment ? `${edition.siteSegment}/` : "";
+        const homeName = edition.id === "skills" ? "Skill Tastemakers" : "AI Tastemakers";
+        const repoFullNames = digest.repos.map((r) => r.full_name).filter(Boolean);
+        const digestListName =
+          edition.id === "skills"
+            ? `Claude skills and agent skills · ${dateLabel}`
+            : `Trending open source AI projects · ${dateLabel}`;
         seo = {
           siteBaseUrl,
           canonicalPath,
@@ -1728,14 +2282,21 @@ export async function buildEditionSite(
           ogTitle: socialTitle,
           ogImageUrl: ogImageAbs,
           ogImageAlt: `Top repo picks · ${date}`,
-          jsonLd: articleJsonLd(
-            siteBaseUrl,
-            canonicalPath,
-            pageTitle,
-            description,
-            `${date}T08:00:00-07:00`,
-            ogImageAbs,
-          ),
+          jsonLd: [
+            articleJsonLd(
+              siteBaseUrl,
+              canonicalPath,
+              pageTitle,
+              description ?? "",
+              `${date}T08:00:00-07:00`,
+              ogImageAbs,
+            ),
+            breadcrumbJsonLd(siteBaseUrl, [
+              { name: homeName, path: homePath },
+              { name: socialTitle, path: canonicalPath },
+            ]),
+            digestRepoItemListJsonLd(repoFullNames, digestListName),
+          ],
         };
       } catch {
         seo = {
@@ -1760,6 +2321,7 @@ export async function buildEditionSite(
       path.join(briefOutDir, `${date}.html`),
       pageShell(pageTitle, body, paths, brand, description, escapeHtml, {
         seo,
+        outboundRewrite: { ...outboundPagesBase, digestDate: date },
       }),
     );
   }
@@ -1774,38 +2336,125 @@ export async function buildEditionSite(
           indexPaths,
           dates,
           briefingsDir,
-          edition,
           escapeHtml,
           dates[0],
           wrapUp,
+          repoRoot,
+          badgeLookup,
         )
-      : await ossIndexBodyV2(indexPaths, dates, briefingsDir, escapeHtml, dates[0], wrapUp)
+      : await ossIndexBodyV2(
+          indexPaths,
+          dates,
+          briefingsDir,
+          escapeHtml,
+          dates[0],
+          wrapUp,
+          repoRoot,
+          badgeLookup,
+        )
     : edition.id === "skills"
       ? skillsIndexBody(indexPaths, dates, edition, dates[0], wrapUp)
       : ossIndexBody(indexPaths, dates, dates[0], wrapUp);
 
-  const indexDescription =
-    edition.id === "skills"
-      ? "Daily top AI agent skills on GitHub — Claude Code plugins and research skills ranked by momentum."
-      : "Daily curated briefings on trending AI-derivative open source on GitHub.";
-  const indexCanonical = edition.siteSegment ? `${edition.siteSegment}/index.html` : "index.html";
+  const homeCopy = seoPage(edition.id === "skills" ? "home_skills" : "home_oss");
+  const indexCanonical = edition.siteSegment ? `${edition.siteSegment}/` : "";
+  const recentBriefPaths = dates
+    .slice(0, 10)
+    .map((d) =>
+      edition.siteSegment ? `${edition.siteSegment}/briefings/${d}.html` : `briefings/${d}.html`,
+    );
   await fs.writeFile(
     path.join(siteRoot, "index.html"),
-    pageShell(edition.name, indexBody, indexPaths, brand, indexDescription, escapeHtml, {
+    pageShell(homeCopy.title ?? edition.name, indexBody, indexPaths, brand, homeCopy.description, escapeHtml, {
       wideIndex: useV2,
+      homeIndexEdition: useV2 ? edition.id : undefined,
+      documentH1: useV2 ? undefined : homeCopy.h1 ?? edition.name,
+      documentH1Visible: !useV2,
+      siteBaseUrl,
       seo: siteBaseUrl
         ? {
             siteBaseUrl,
             canonicalPath: indexCanonical,
             ogType: "website",
             ogImageUrl: defaultOgImageUrl(siteBaseUrl, edition.siteSegment),
-            ogImageAlt: `${edition.name} — daily curated AI repos`,
+            ogImageAlt: `${edition.name}. Daily curated AI repos`,
+            jsonLd: [
+              websiteJsonLd(
+                siteBaseUrl,
+                homeCopy.h1 ?? edition.name,
+                homeCopy.description ?? edition.tagline,
+              ),
+              itemListJsonLd(
+                siteBaseUrl,
+                `${homeCopy.h1 ?? edition.name} recent daily briefs`,
+                recentBriefPaths,
+              ),
+            ],
           }
         : undefined,
+      outboundRewrite: { ...outboundPagesBase, surface: "index" },
     }),
   );
 
+  if (useV2) {
+    await buildBriefingsArchiveIndexPage(
+      edition,
+      siteRoot,
+      briefingsDir,
+      dates,
+      escapeHtml,
+      siteBaseUrl,
+      {
+        ...outboundPagesBase,
+        surface: "briefings_archive_index",
+      },
+    );
+  }
+
   return dates.length;
+}
+
+export async function collectBriefFeedEntries(
+  repoRoot: string,
+  edition: EditionDefinition,
+  limit = 60,
+): Promise<BriefFeedEntry[]> {
+  const briefingsDir = briefingsDirForEdition(repoRoot, edition);
+  const dates = (await listBriefingDates(briefingsDir)).slice(0, limit);
+  const entries: BriefFeedEntry[] = [];
+  for (const date of dates) {
+    const canonicalPath = edition.siteSegment
+      ? `${edition.siteSegment}/briefings/${date}.html`
+      : `briefings/${date}.html`;
+    let summary = applyTemplate(
+      seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").descriptionFallback ?? "",
+      { date },
+    );
+    let updatedIso: string | undefined;
+    try {
+      const digestRaw = await fs.readFile(path.join(briefingsDir, date, "digest.json"), "utf8");
+      const digest = JSON.parse(digestRaw) as {
+        repos: Array<{ brief?: string | null }>;
+        generated_at?: string;
+      };
+      summary = briefSocialDescription(digest.repos);
+      if (digest.generated_at) updatedIso = digest.generated_at;
+    } catch {
+      /* markdown-only day */
+    }
+    entries.push({
+      date,
+      title: applyTemplate(
+        seoPage(edition.id === "skills" ? "brief_skills" : "brief_oss").titleTemplate ??
+          `Daily Brief: {dateLabel}`,
+        { date, dateLabel: formatSeoDateLabel(date) },
+      ),
+      summary,
+      canonicalPath,
+      updatedIso,
+    });
+  }
+  return entries;
 }
 
 function markdownH1(markdown: string, fallback: string): string {
@@ -1819,18 +2468,27 @@ export async function buildLabSite(
   escapeHtml: (t: string) => string,
   asOfIsoDate: string = buildIsoDatePt(),
   siteBaseUrl?: string,
+  destRegistry?: OutboundDestRegistry,
 ): Promise<number> {
   const labSiteDir = path.join(siteDir, "lab");
   await fs.mkdir(labSiteDir, { recursive: true });
   const paths = labSitePaths();
   const brand = {
     name: "Tastemakers Lab",
-    tagline:
-      "Public notes on how repos get picked, how pipeline changes get tested, and what readers actually engage with.",
+    tagline: LAB_HOME_HEADER_TAGLINE,
   };
 
   const labShell = { labLayout: true as const, labFallbackSection: "about" as LabLinkSection };
   const allowlist = await collectDigestRepoAllowlist(repoRoot);
+  const labSiteBase =
+    siteBaseUrl?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+  const labOutbound: OutboundRewriteContext = {
+    siteBaseUrl: labSiteBase,
+    destRegistry,
+    githubAllowlist: allowlist,
+    channel: "pages",
+    surface: "lab",
+  };
   const linkCtx = defaultLabLinkContext(0, allowlist, asOfIsoDate);
   const labExperiments = loadExperimentsFile(repoRoot).experiments;
   const writeupPostIds = listLabWriteupPostIds(repoRoot);
@@ -1841,10 +2499,9 @@ export async function buildLabSite(
   const labIndexMd = path.join(repoRoot, "briefings", "lab", "index.md");
   let introBlock = "";
   try {
-    const markdown = await fs.readFile(labIndexMd, "utf8");
-    const html = applyLabIntroVonRestorff(prepareLabProseHtmlFromMarkdown(markdown));
+    await fs.readFile(labIndexMd, "utf8");
     introBlock = renderLabHomeIntroBlock(
-      html,
+      "",
       renderLabLoopStripHtml("lab-home", escapeHtml, { linkCtx }),
       asOfIsoDate,
       escapeHtml,
@@ -1868,31 +2525,80 @@ export async function buildLabSite(
     labShell,
     "methodology",
     siteBaseUrl,
+    labOutbound,
   );
 
-  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell);
-
-  const labIndexDescription =
-    "How AI Tastemakers measures site engagement, runs digest pipeline experiments, and publishes results openly.";
+  await writeLabAboutRedirectPage(labSiteDir, paths, brand, escapeHtml, labShell, siteBaseUrl, labOutbound);
+  const labIndexCopy = seoPage("lab_index");
+  const labIndexSeo: PageSeoOptions | undefined = siteBaseUrl
+    ? {
+        siteBaseUrl,
+        canonicalPath: "lab/",
+        ogType: "website",
+        ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+        jsonLd: collectionPageJsonLd(
+          siteBaseUrl,
+          "lab/",
+          labIndexCopy.h1 ?? "Tastemakers Lab",
+          labIndexCopy.description ?? labIndexCopy.title ?? "Lab",
+        ),
+      }
+    : undefined;
 
   await fs.writeFile(
     path.join(labSiteDir, "index.html"),
-    pageShell("Lab · Tastemakers", indexBody, paths, brand, labIndexDescription, escapeHtml, {
-      ...labShell,
-      labNavActive: "home",
-      labFallbackSection: "hero",
-    }),
+    pageShell(
+      labIndexCopy.title ?? "Lab · Tastemakers",
+      indexBody,
+      paths,
+      brand,
+      labIndexCopy.description,
+      escapeHtml,
+      {
+        ...labShell,
+        labNavActive: "home",
+        labFallbackSection: "hero",
+        seo: labIndexSeo,
+        siteBaseUrl,
+        documentH1: labIndexCopy.h1,
+        documentH1Visible: true,
+        documentH1Lead: labIndexCopy.lead,
+        labHomePage: true,
+        outboundRewrite: labOutbound,
+      },
+    ),
   );
 
   const toolsBody = `${labNavHtml("tools", escapeHtml)}${renderToolsPageHtml(repoRoot, linkCtx, escapeHtml)}${labPublishFooterHtml(escapeHtml)}`;
 
+  const labToolsCopy = seoPage("lab_tools");
   await fs.writeFile(
     path.join(labSiteDir, "tools.html"),
-    pageShell("Evaluated tools · Lab", toolsBody, paths, brand, undefined, escapeHtml, {
-      ...labShell,
-      labNavActive: "tools",
-      labFallbackSection: "tools",
-    }),
+    pageShell(
+      labToolsCopy.title ?? "Evaluated tools · Lab",
+      toolsBody,
+      paths,
+      brand,
+      labToolsCopy.description,
+      escapeHtml,
+      {
+        ...labShell,
+        labNavActive: "tools",
+        labFallbackSection: "tools",
+        siteBaseUrl,
+        documentH1: labToolsCopy.h1,
+        documentH1Visible: true,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/tools.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+      outboundRewrite: labOutbound,
+      },
+    ),
   );
 
   await writeExperimentsData(repoRoot, labSiteDir);
@@ -1926,16 +2632,32 @@ export async function buildLabSite(
     path.join(labSiteDir, "experiments.js"),
   );
 
+  const labExperimentsCopy = seoPage("lab_experiments");
   await fs.writeFile(
     path.join(labSiteDir, "experiments.html"),
     pageShell(
-      "Experiments · Lab",
+      labExperimentsCopy.title ?? "Experiments · Lab",
       experimentsBody,
       paths,
       brand,
-      "Public record of digest and homepage experiments: what we changed, whether we kept it, and what is live today.",
+      labExperimentsCopy.description,
       escapeHtml,
-      { ...labShell, labNavActive: "experiments" },
+      {
+        ...labShell,
+        labNavActive: "experiments",
+        siteBaseUrl,
+        documentH1: labExperimentsCopy.h1,
+        documentH1Visible: true,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/experiments.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+        outboundRewrite: labOutbound,
+      },
     ),
   );
 
@@ -1945,16 +2667,32 @@ export async function buildLabSite(
   const experiments = await loadAllExperiments(repoRoot);
   const tokenBody = `${labNavHtml("tokens", escapeHtml)}${renderTokenUsagePage(tokenData, experiments, escapeHtml)}`;
 
+  const labTokensCopy = seoPage("lab_tokens");
   await fs.writeFile(
     path.join(labSiteDir, "token-usage.html"),
     pageShell(
-      "Narration cost & quality · Lab",
+      labTokensCopy.title ?? "Narration cost & quality · Lab",
       tokenBody,
       paths,
       brand,
-      "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
+      labTokensCopy.description,
       escapeHtml,
-      { ...labShell, labNavActive: "tokens" },
+      {
+        ...labShell,
+        labNavActive: "tokens",
+        siteBaseUrl,
+        documentH1: labTokensCopy.h1,
+        documentH1Visible: true,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/token-usage.html",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+        outboundRewrite: labOutbound,
+      },
     ),
   );
 
@@ -1968,9 +2706,19 @@ export async function buildLabSite(
     escapeHtml,
     labShell,
     "experiments",
+    siteBaseUrl,
+    labOutbound,
   );
 
-  const shadowCount = await buildShadowPages(repoRoot, labSiteDir, brand, escapeHtml, labShell);
+  const shadowCount = await buildShadowPages(
+    repoRoot,
+    labSiteDir,
+    brand,
+    escapeHtml,
+    labShell,
+    siteBaseUrl,
+    labOutbound,
+  );
 
   await fs.mkdir(path.join(labSiteDir, "posts"), { recursive: true });
   const postsDir = path.join(repoRoot, "briefings", "lab", "posts");
@@ -1988,6 +2736,7 @@ export async function buildLabSite(
         const markdown = await fs.readFile(path.join(postsDir, file), "utf8");
         let html = prepareLabWriteupHtmlFromMarkdown(markdown);
         html = prepareLabPostArticleHtml(html, postLinkCtx);
+        html = rewriteOutboundLinksInHtml(html, labOutbound);
         html = stripLeadingH1FromArticleHtml(html);
         const slug = file.replace(/\.md$/, "");
         const title = markdownH1(markdown, slug);
@@ -2011,14 +2760,52 @@ export async function buildLabSite(
             })
           : `<header class="lab-post-header mb-6 font-sans"><h1 class="mb-0 text-2xl font-bold tracking-tight text-stone-900 dark:text-stone-100">${escapeHtml(title)}</h1></header>`;
         const postBody = `${labNavHtml("posts", escapeHtml, 1)}${headerBlock}<article class="${LAB_PROSE_ARTICLE_CLASS}">${html}</article>`;
+        const labPostCopy = seoPage("lab_post");
+        const postVars = { title, postTitle: title };
+        const leadLine =
+          markdown
+            .split(/\n/)
+            .map((line) => line.trim())
+            .find((line) => line && !line.startsWith("#")) ?? title;
+        const postDescription = labPostCopy.descriptionTemplate
+          ? buildSeoDescriptionFromTemplate(labPostCopy.descriptionTemplate, postVars, ["postTitle", "title"])
+          : metaDescriptionFromLead(leadLine);
+        const postTitle = labPostCopy.titleTemplate
+          ? buildSeoTitleFromTemplate(labPostCopy.titleTemplate, postVars, ["postTitle", "title"])
+          : `${title} · Lab`;
         await fs.writeFile(
           path.join(labSiteDir, "posts", `${slug}.html`),
-          pageShell(`${title} · Lab`, postBody, labSitePaths(1), brand, undefined, escapeHtml, {
+          pageShell(postTitle, postBody, labSitePaths(1), brand, postDescription, escapeHtml, {
             ...labShell,
             labNavActive: "posts",
             labNavDepth: 1,
             labFallbackSection: "posts",
+            outboundRewrite: labOutbound,
             labPostShell: true,
+            siteBaseUrl,
+            seo: siteBaseUrl
+              ? {
+                  siteBaseUrl,
+                  canonicalPath: `lab/posts/${slug}.html`,
+                  ogType: "article",
+                  ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                  jsonLd: [
+                    articleJsonLd(
+                      siteBaseUrl,
+                      `lab/posts/${slug}.html`,
+                      title,
+                      postDescription,
+                      `${asOfIsoDate}T12:00:00Z`,
+                      defaultOgImageUrl(siteBaseUrl),
+                    ),
+                    breadcrumbJsonLd(siteBaseUrl, [
+                      { name: "Tastemakers Lab", path: "lab/" },
+                      { name: "Posts", path: "lab/posts/" },
+                      { name: title, path: `lab/posts/${slug}.html` },
+                    ]),
+                  ],
+                }
+              : undefined,
           }),
         );
       }
@@ -2026,26 +2813,67 @@ export async function buildLabSite(
       const fixtureBody = `${labNavHtml("posts", escapeHtml, 1)}${fixtureHeader}<article class="${LAB_PROSE_ARTICLE_CLASS}"><p>Long repo name header fixture for verify screenshots.</p></article>`;
       await fs.writeFile(
         path.join(labSiteDir, "posts", "_fixture-e1-long-repo.html"),
-        pageShell("Long repo header fixture · Lab", fixtureBody, labSitePaths(1), brand, undefined, escapeHtml, {
-          ...labShell,
-          labNavActive: "posts",
-          labNavDepth: 1,
-          labFallbackSection: "posts",
-          labPostShell: true,
-        }),
+        pageShell(
+          "Long repo header fixture · Lab",
+          fixtureBody,
+          labSitePaths(1),
+          brand,
+          "Internal layout fixture for lab post header screenshots.",
+          escapeHtml,
+          {
+            ...labShell,
+            labNavActive: "posts",
+            labNavDepth: 1,
+            labFallbackSection: "posts",
+            labPostShell: true,
+            siteBaseUrl,
+            outboundRewrite: labOutbound,
+            seo: siteBaseUrl
+              ? {
+                  siteBaseUrl,
+                  canonicalPath: "lab/posts/_fixture-e1-long-repo.html",
+                  noindex: true,
+                  ogType: "website",
+                  ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+                }
+              : undefined,
+          },
+        ),
       );
       postsBody += `<ul class="font-sans text-sm leading-relaxed">${listings.join("")}</ul>`;
     }
   } catch {
     postsBody += `<p class="font-sans text-sm leading-relaxed text-stone-600 dark:text-stone-400">Write-ups appear here after we finish an experiment or try a tool from the digest.</p>`;
   }
+  const labPostsIndexCopy = seoPage("lab_posts_index");
   await fs.writeFile(
     path.join(labSiteDir, "posts", "index.html"),
-    pageShell("Posts · Lab", postsBody, labSitePaths(1), brand, undefined, escapeHtml, {
-      ...labShell,
-      labNavActive: "posts",
-      labNavDepth: 1,
-    }),
+    pageShell(
+      labPostsIndexCopy.title ?? "Posts · Lab",
+      postsBody,
+      labSitePaths(1),
+      brand,
+      labPostsIndexCopy.description,
+      escapeHtml,
+      {
+        ...labShell,
+        labNavActive: "posts",
+        labNavDepth: 1,
+        siteBaseUrl,
+        documentH1: labPostsIndexCopy.h1,
+        documentH1Visible: true,
+        siteBaseUrl,
+        seo: siteBaseUrl
+          ? {
+              siteBaseUrl,
+              canonicalPath: "lab/posts/",
+              ogType: "website",
+              ogImageUrl: defaultOgImageUrl(siteBaseUrl),
+            }
+          : undefined,
+      outboundRewrite: labOutbound,
+      },
+    ),
   );
 
   return 5 + shadowCount + 1;

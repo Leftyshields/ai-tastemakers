@@ -1,0 +1,89 @@
+{
+  "_notice": "Copywriter approved. Templates use {placeholders} filled at build time.",
+  "pages": {
+    "home_oss": {
+      "title": "Trending Open Source AI Projects | Daily AI GitHub Digest",
+      "description": "Free daily AI GitHub digest of trending open source AI projects. Ten fast-rising repos each morning with briefs for builders exploring agents and tools.",
+      "h1": "AI Tastemakers"
+    },
+    "home_skills": {
+      "title": "Claude Skills and Agent Skills | Daily GitHub Digest",
+      "description": "Daily digest of trending Claude skills and agent skills on GitHub. Each pick includes a short brief and one thing to try on Claude Code, Cursor, or Codex.",
+      "h1": "Skill Tastemakers"
+    },
+    "brief_oss": {
+      "titleTemplate": "{Site} Daily AI GitHub Digest · {dateLabel}",
+      "descriptionTemplate": "Daily AI GitHub digest for {dateLabel}: trending open source AI projects ranked by recent GitHub star growth, led by {topPick}. What each does and why now."
+    },
+    "brief_skills": {
+      "titleTemplate": "{Site} Claude Skills Digest · {dateLabel}",
+      "descriptionTemplate": "Daily Claude skills digest for {dateLabel}: trending agent skills on GitHub, led by {topPick}. What each skill does and why builders are trying it now."
+    },
+    "lab_index": {
+      "title": "Tastemakers Lab: Real AI Tool Tests, Including the Misses",
+      "description": "I test AI tools on real work briefs and publish every result, including the misses. See what actually earned its keep in the AI Tastemakers Lab.",
+      "h1": "Tastemakers Lab",
+      "lead": "AI Tastemakers is my site for finding out which AI tools actually earn their keep, and in the Lab I test them on my real work briefs and publish every result, including the ones where nothing helped. Every day the site reports on new tools, picks the ones that could improve how it runs, and puts them to work almost automatically, so each post shows what really happened."
+    },
+    "lab_methodology": {
+      "title": "Methodology | Tastemakers Lab",
+      "description": "How AI Tastemakers runs calendar experiments, measures reader engagement, and publishes results on the Lab.",
+      "h1": "Methodology"
+    },
+    "lab_post": {
+      "titleTemplate": "{postTitle} | Tastemakers Lab",
+      "descriptionTemplate": "Lab write-up: {postTitle}. Experiment notes from Tastemakers digest and site tests."
+    },
+    "lab_tools": {
+      "title": "Evaluated tools | Lab",
+      "description": "Tools from the daily digest inventory that Tastemakers Lab has evaluated or queued for experiments.",
+      "h1": "Evaluated tools"
+    },
+    "lab_experiments": {
+      "title": "Experiments | Lab",
+      "description": "Public record of digest and homepage experiments: what changed, whether it shipped, and what is live today.",
+      "h1": "Experiments"
+    },
+    "lab_tokens": {
+      "title": "Narration cost and quality | Lab",
+      "description": "Daily Claude narration cost and writing-quality checks for AI Tastemakers digest runs.",
+      "h1": "Narration cost and quality"
+    },
+    "lab_posts_index": {
+      "title": "Posts | Lab",
+      "description": "Experiment write-ups and tool trials published from Tastemakers Lab.",
+      "h1": "Lab posts"
+    },
+    "subscribe": {
+      "title": "Subscribe | Tastemakers",
+      "description": "Get the AI Tastemakers daily digest by email: top trending AI open source repos with Claude briefs.",
+      "h1": "Subscribe to AI Tastemakers"
+    },
+    "unsubscribe": {
+      "title": "Unsubscribe | Tastemakers",
+      "description": "Remove an email address from the AI Tastemakers daily digest mailing list.",
+      "h1": "Unsubscribe from AI Tastemakers"
+    },
+    "weekly_review": {
+      "siteName": "AI Tastemakers",
+      "titleTemplate": "{Site} Weekly Review: {startLabel} to {endLabel}, {year}",
+      "descriptionTemplate": "Weekly roundup of trending open source AI projects from {startLabel} to {endLabel}, {year}, and what builders can take from the week on AI Tastemakers."
+    },
+    "monthly_rollup": {
+      "titleTemplate": "Monthly Rollup: {monthId} | Tastemakers",
+      "descriptionTemplate": "Monthly rollup for {monthId}: trends across four weeks of AI Tastemakers and Skill Tastemakers reviews."
+    },
+    "feed_ai": {
+      "title": "AI Tastemakers: Trending Open Source AI Projects",
+      "description": "A free daily digest of the fastest-rising open source AI projects on GitHub, with a short brief on what each does and why it matters now."
+    },
+    "feed_skills": {
+      "title": "AI Tastemakers: Trending Claude Skills",
+      "description": "A free daily digest of trending Claude skills and agent skills on GitHub, with a short brief and one thing to try in Claude Code, Cursor, or Codex."
+    },
+    "llms_txt": {
+      "summary": "AI Tastemakers publishes a daily pick of the open source AI projects gaining the most GitHub stars over the past 7 days, each with a short brief on what it does and why it matters now. Its sister list, Skill Tastemakers, does the same for agent skills, the add-ons that teach tools like Claude Code, Cursor, and Codex new tricks. Weekly reviews and monthly rollups sum up the trends. The Tastemakers Lab tests changes to the site in the open and publishes every result, good or bad. Written for builders deciding what to try next.",
+      "full_intro": "This site is generated from the ai-tastemakers repository. Daily briefs rank repos by seven-day star growth and include Claude-written summaries. The Lab documents experiments on digest writing, layout, and discovery."
+    }
+  }
+}

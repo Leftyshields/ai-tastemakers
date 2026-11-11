@@ -8,19 +8,32 @@ import {
   buildLabSite,
   buildMonthlySite,
   buildWeeklySite,
+  collectBriefFeedEntries,
   editionSitePaths,
   pageShell,
   verifyPosthogInBuiltSite,
 } from "./edition-pages.js";
-import { writeRobotsTxt, writeSitemapFromSiteDir } from "./seo-helpers.js";
-import { writeDefaultOgPng } from "./generate-brief-og.js";
+import { EDITIONS } from "../src/tastemaker/editions.js";
+import { seoPage } from "./seo-copy.js";
+import {
+  writeBriefAtomFeed,
+  writeLlmsTxtFiles,
+  writeRobotsTxt,
+  writeSitemapFromSiteDir,
+} from "./seo-helpers.js";
+import { writeDefaultOgPng, writeSiteFavicons } from "./generate-brief-og.js";
 import { collectDigestRepoAllowlist } from "../src/tastemaker/analytics/digest-allowlist.js";
 import { renderGoRedirectPage } from "./digest-go-page.js";
+import { OutboundDestRegistry, writeOutboundDestManifest } from "../src/tastemaker/analytics/outbound-dest-manifest.js";
+import { registerEmailOutboundDestsForManifest } from "../src/tastemaker/analytics/register-email-outbound-dests.js";
 import { assertExperimentsValid } from "./lab/validate-experiments.js";
 import { buildIsoDatePt } from "./lab/lab-format.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
+if (process.env.SITE_LANDING_LAYOUT_V2 == null || process.env.SITE_LANDING_LAYOUT_V2 === "") {
+  process.env.SITE_LANDING_LAYOUT_V2 = "1";
+}
 const SITE_DIR = path.join(ROOT, "site");
 
 interface FirebaseWebConfig {
@@ -217,7 +230,11 @@ form.addEventListener("submit", async function (event) {
 </script>`;
 }
 
-async function buildSubscribePage(): Promise<void> {
+async function buildSubscribePage(
+  siteBaseUrl: string,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): Promise<void> {
   const paths = editionSitePaths("", 0);
   paths.editionNav.active = undefined;
   const brand = {
@@ -234,7 +251,7 @@ async function buildSubscribePage(): Promise<void> {
 
     <section class="mb-8">
       <p class="mb-3 font-sans text-xs font-semibold uppercase tracking-widest text-stone-500 dark:text-stone-400">Daily email</p>
-      <h2 class="mb-4 font-sans text-2xl font-bold tracking-tight">Subscribe to AI Tastemakers</h2>
+      <h1 class="mb-4 font-sans text-2xl font-bold tracking-tight">Subscribe to AI Tastemakers</h1>
       <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
         One email each morning with the top ten AI-derivative repos gaining momentum on GitHub&mdash;ranked by 7-day star growth, with a short Claude-written brief for each pick.
       </p>
@@ -278,20 +295,40 @@ async function buildSubscribePage(): Promise<void> {
 
     ${subscribeFormScript(firebase)}`;
 
+  const subscribeCopy = seoPage("subscribe");
   await fs.writeFile(
     path.join(SITE_DIR, "subscribe.html"),
     pageShell(
-      "Subscribe · Tastemakers",
+      subscribeCopy.title ?? "Subscribe · Tastemakers",
       body,
       paths,
       brand,
-      "Get the AI Tastemakers daily digest by email — top trending AI open source repos with Claude briefs.",
+      subscribeCopy.description,
       escapeHtml,
+      {
+        siteBaseUrl,
+        seo: {
+          siteBaseUrl,
+          canonicalPath: "subscribe.html",
+          ogType: "website",
+        },
+        outboundRewrite: {
+          siteBaseUrl,
+          destRegistry,
+          githubAllowlist,
+          channel: "pages",
+          surface: "subscribe",
+        },
+      },
     ),
   );
 }
 
-async function buildUnsubscribePage(): Promise<void> {
+async function buildUnsubscribePage(
+  siteBaseUrl: string,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): Promise<void> {
   const paths = editionSitePaths("", 0);
   paths.editionNav.active = undefined;
   const brand = {
@@ -307,7 +344,7 @@ async function buildUnsubscribePage(): Promise<void> {
     <a class="mb-6 inline-block font-sans text-sm text-stone-500 no-underline hover:text-blue-800 dark:text-stone-400 dark:hover:text-blue-400" href="${paths.home}">&larr; AI Tastemakers</a>
 
     <section class="mb-8">
-      <h2 class="mb-4 font-sans text-2xl font-bold tracking-tight">Unsubscribe from AI Tastemakers</h2>
+      <h1 class="mb-4 font-sans text-2xl font-bold tracking-tight">Unsubscribe from AI Tastemakers</h1>
       <p class="mb-0 text-base leading-relaxed text-stone-600 dark:text-stone-400">
         Enter the email address that receives the daily digest. We&rsquo;ll remove it from the mailing list immediately.
       </p>
@@ -343,15 +380,31 @@ async function buildUnsubscribePage(): Promise<void> {
 
     ${unsubscribeFormScript(firebase, loadTastemakersUnsubscribeApiUrl())}`;
 
+  const unsubscribeCopy = seoPage("unsubscribe");
   await fs.writeFile(
     path.join(SITE_DIR, "unsubscribe.html"),
     pageShell(
-      "Unsubscribe · Tastemakers",
+      unsubscribeCopy.title ?? "Unsubscribe · Tastemakers",
       body,
       paths,
       brand,
-      "Unsubscribe from the AI Tastemakers daily digest email.",
+      unsubscribeCopy.description,
       escapeHtml,
+      {
+        siteBaseUrl,
+        seo: {
+          siteBaseUrl,
+          canonicalPath: "unsubscribe.html",
+          ogType: "website",
+        },
+        outboundRewrite: {
+          siteBaseUrl,
+          destRegistry,
+          githubAllowlist,
+          channel: "pages",
+          surface: "unsubscribe",
+        },
+      },
     ),
   );
 }
@@ -367,23 +420,24 @@ async function main(): Promise<void> {
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(path.join(SITE_DIR, ".nojekyll"), "");
   await writeDefaultOgPng(path.join(SITE_DIR, "assets", "og-card.png"));
+  await writeSiteFavicons(SITE_DIR);
 
   const siteBaseUrl =
     process.env.DIGEST_SITE_URL?.trim() || "https://leftyshields.github.io/ai-tastemakers";
+  const allowlist = await collectDigestRepoAllowlist(ROOT);
+  const destRegistry = new OutboundDestRegistry();
 
   let total = 0;
   for (const edition of allEditions()) {
-    total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml, siteBaseUrl);
+    total += await buildEditionSite(ROOT, SITE_DIR, edition, escapeHtml, siteBaseUrl, destRegistry);
   }
-  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml);
+  const weeklyCount = await buildWeeklySite(ROOT, SITE_DIR, escapeHtml, siteBaseUrl, destRegistry);
   total += weeklyCount;
-  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml);
+  const monthlyCount = await buildMonthlySite(ROOT, SITE_DIR, escapeHtml, siteBaseUrl, destRegistry);
   total += monthlyCount;
 
-  await buildSubscribePage();
-  await buildUnsubscribePage();
-
-  const allowlist = await collectDigestRepoAllowlist(ROOT);
+  await buildSubscribePage(siteBaseUrl, allowlist, destRegistry);
+  await buildUnsubscribePage(siteBaseUrl, allowlist, destRegistry);
   const siteHomePath = (() => {
     try {
       const pathname = new URL(siteBaseUrl).pathname.replace(/\/+$/, "");
@@ -398,21 +452,87 @@ async function main(): Promise<void> {
     `${JSON.stringify(allowlist, null, 0)}\n`,
     "utf8",
   );
+  const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
+  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl, destRegistry);
+
+  const { writeLabChangesRssFeed } = await import("./lab/lab-changes-rss.js");
+  const labFeed = await writeLabChangesRssFeed(ROOT, SITE_DIR, siteBaseUrl, destRegistry);
+
+  await registerEmailOutboundDestsForManifest(destRegistry, ROOT, siteBaseUrl, allowlist);
+  await destRegistry.verifyHttpUpgrades();
+
+  const manifestPath = path.join(SITE_DIR, "assets", "outbound-link-dests.json");
+  await writeOutboundDestManifest(manifestPath, destRegistry);
+  const manifestHashes = destRegistry.toSortedHashes();
+
   await fs.mkdir(path.join(SITE_DIR, "go"), { recursive: true });
   await fs.writeFile(
     path.join(SITE_DIR, "go", "index.html"),
-    renderGoRedirectPage(allowlist, siteHomePath),
+    renderGoRedirectPage(allowlist, siteHomePath, siteBaseUrl, manifestHashes),
     "utf8",
   );
-  const buildIsoDate = process.env.DIGEST_AS_OF_DATE?.trim() || buildIsoDatePt();
-  const labCount = await buildLabSite(ROOT, SITE_DIR, escapeHtml, buildIsoDate, siteBaseUrl);
+
+  const aiFeedEntries = await collectBriefFeedEntries(ROOT, EDITIONS.oss);
+  const skillsFeedEntries = await collectBriefFeedEntries(ROOT, EDITIONS.skills);
+  const feedAiCopy = seoPage("feed_ai");
+  const feedSkillsCopy = seoPage("feed_skills");
+  await writeBriefAtomFeed(
+    SITE_DIR,
+    siteBaseUrl,
+    "feeds/ai.xml",
+    feedAiCopy.title ?? "AI Tastemakers daily briefs",
+    feedAiCopy.description ?? "Atom feed of AI Tastemakers daily briefings.",
+    `${siteBaseUrl.replace(/\/+$/, "")}/feeds/ai.xml`,
+    aiFeedEntries,
+  );
+  await writeBriefAtomFeed(
+    SITE_DIR,
+    siteBaseUrl,
+    "feeds/skills.xml",
+    feedSkillsCopy.title ?? "Skill Tastemakers daily briefs",
+    feedSkillsCopy.description ?? "Atom feed of Skill Tastemakers daily briefings.",
+    `${siteBaseUrl.replace(/\/+$/, "")}/feeds/skills.xml`,
+    skillsFeedEntries,
+  );
+
+  const llmsCopy = seoPage("llms_txt");
+  const latestAi = aiFeedEntries[0];
+  await writeLlmsTxtFiles(SITE_DIR, siteBaseUrl, {
+    summary: llmsCopy.summary ?? "",
+    fullIntro: llmsCopy.full_intro ?? "",
+    latestBriefPath: latestAi?.canonicalPath,
+    archivePath: "",
+    labPath: "lab/",
+    methodologyPath: "lab/methodology.html",
+    recentBriefLinks: aiFeedEntries.slice(0, 14).map((e) => ({
+      date: e.date,
+      path: e.canonicalPath,
+      title: e.title,
+    })),
+  });
   const sitemapUrls = await writeSitemapFromSiteDir(SITE_DIR, siteBaseUrl);
   await writeRobotsTxt(SITE_DIR, siteBaseUrl);
+  const pagesBuildSha =
+    process.env.GITHUB_SHA?.trim() ||
+    process.env.PAGES_BUILD_SHA?.trim() ||
+    "local";
+  await fs.writeFile(
+    path.join(SITE_DIR, "build.json"),
+    `${JSON.stringify(
+      {
+        commit: pagesBuildSha,
+        built_at: new Date().toISOString(),
+      },
+      null,
+      2,
+    )}\n`,
+    "utf8",
+  );
   const posthogPages = await verifyPosthogInBuiltSite(SITE_DIR);
   const posthogNote =
     posthogPages > 0 ? `; PostHog on ${posthogPages} HTML page(s)` : "";
   console.log(
-    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/; sitemap ${sitemapUrls} URL(s)${posthogNote}`,
+    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/; lab RSS ${labFeed.itemCount} item(s); sitemap ${sitemapUrls} URL(s)${posthogNote}`,
   );
 }
 

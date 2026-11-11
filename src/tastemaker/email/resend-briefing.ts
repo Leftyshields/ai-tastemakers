@@ -2,8 +2,12 @@ import path from "node:path";
 import { promises as fs } from "node:fs";
 import type { AppConfig, WeeklyReview } from "../types.js";
 import { readDigestJson } from "../writers/json.js";
-import { resolveDigestRecipients } from "../subscribers/load.js";
-import { sendDigestEmail, sendWeeklyDigestEmail, shouldSendDigestEmail } from "./resend.js";
+import { refreshOutboundEmailDestManifest } from "../analytics/write-outbound-email-manifest.js";
+import {
+  assertDigestSendReady,
+  sendDigestEmail,
+  sendWeeklyDigestEmail,
+} from "./resend.js";
 import { coerceWeeklyEmail, coerceWeeklyNarrative } from "../narrate/weekly.js";
 import { isoWeekIdFromDateLabel, isSundayDateLabel } from "../weekly/week.js";
 
@@ -15,13 +19,8 @@ export async function resendDigestEmailForDate(
     throw new Error("Digest email is OSS edition only");
   }
 
-  if (!(await shouldSendDigestEmail(config))) {
-    throw new Error(
-      "Email not configured: set RESEND_API_KEY, DIGEST_EMAIL_FROM, and add subscribers",
-    );
-  }
-
-  const recipients = await resolveDigestRecipients(config);
+  const recipients = await assertDigestSendReady(config);
+  const manualRunId = process.env.GITHUB_RUN_ID?.trim() || undefined;
 
   if (isSundayDateLabel(dateLabel)) {
     const weekId = isoWeekIdFromDateLabel(dateLabel);
@@ -39,7 +38,7 @@ export async function resendDigestEmailForDate(
         narrative: coerceWeeklyNarrative(raw.narrative),
         email: coerceWeeklyEmail(raw.email),
       };
-      const sent = await sendWeeklyDigestEmail(config, review, recipients);
+      const sent = await sendWeeklyDigestEmail(config, review, recipients, { manualRunId });
       return { id: sent.id, recipientCount: recipients.length };
     } catch {
       // Weekly file missing — fall through to the daily top 10.
@@ -48,6 +47,9 @@ export async function resendDigestEmailForDate(
 
   const digestPath = path.join(config.briefingsDir, dateLabel, "digest.json");
   const digest = await readDigestJson(digestPath);
-  const sent = await sendDigestEmail(config, digest, dateLabel, recipients);
+  await refreshOutboundEmailDestManifest(config.rootDir, config.digestSiteUrl, {
+    pendingDigest: { digest, dateLabel, editionId: "oss" },
+  });
+  const sent = await sendDigestEmail(config, digest, dateLabel, recipients, { manualRunId });
   return { id: sent.id, recipientCount: recipients.length };
 }

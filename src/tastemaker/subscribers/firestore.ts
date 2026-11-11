@@ -1,7 +1,40 @@
-import { cert, getApps, initializeApp, type App } from "firebase-admin/app";
-import { getFirestore, type Firestore } from "firebase-admin/firestore";
+import { createRequire } from "node:module";
+import type { App } from "firebase-admin/app";
+import type { Firestore } from "firebase-admin/firestore";
 import type { AppConfig } from "../types.js";
 import { normalizeEmail } from "./load.js";
+
+const require = createRequire(import.meta.url);
+
+type FirebaseAppModule = typeof import("firebase-admin/app");
+type FirebaseFirestoreModule = typeof import("firebase-admin/firestore");
+
+let firebaseAppModule: FirebaseAppModule | undefined;
+let firebaseFirestoreModule: FirebaseFirestoreModule | undefined;
+
+function loadFirebaseAppModule(): FirebaseAppModule {
+  if (!firebaseAppModule) {
+    firebaseAppModule = require("firebase-admin/app") as FirebaseAppModule;
+  }
+  return firebaseAppModule;
+}
+
+function loadFirebaseFirestoreModule(): FirebaseFirestoreModule {
+  if (!firebaseFirestoreModule) {
+    try {
+      firebaseFirestoreModule = require("firebase-admin/firestore") as FirebaseFirestoreModule;
+    } catch (err) {
+      const message =
+        err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `firebase-admin Firestore is unavailable (${message}). ` +
+          "Install optional peer @google-cloud/firestore (npm installs it with firebase-admin by default).",
+        { cause: err },
+      );
+    }
+  }
+  return firebaseFirestoreModule;
+}
 
 export const TASTEMAKERS_SUBSCRIBERS_COLLECTION = "tastemakers_subscribers";
 
@@ -23,6 +56,7 @@ function parsePrivateKey(raw: string): string {
 }
 
 function resolveCredential(config: AppConfig) {
+  const { cert } = loadFirebaseAppModule();
   if (config.firebaseServiceAccount) {
     return cert(config.firebaseServiceAccount as Parameters<typeof cert>[0]);
   }
@@ -45,6 +79,8 @@ export function getAdminFirestore(config: AppConfig): Firestore | null {
   if (!isFirebaseAdminConfigured(config)) return null;
   if (cachedDb) return cachedDb;
 
+  const { getApps, initializeApp } = loadFirebaseAppModule();
+  const { getFirestore } = loadFirebaseFirestoreModule();
   cachedApp =
     getApps().find((app) => app.name === "tastemakers") ??
     initializeApp(
@@ -87,6 +123,10 @@ export async function readFirestoreSubscriberRecords(
     }
     return records.filter((entry) => entry.email);
   } catch (err) {
+    if (isFirebaseAdminConfigured(config)) {
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(`Firestore subscriber read failed: ${detail}`, { cause: err });
+    }
     console.warn("Firestore subscriber read failed; using file/env recipients only:", err);
     return [];
   }

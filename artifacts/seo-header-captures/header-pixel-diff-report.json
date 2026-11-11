@@ -1,0 +1,68 @@
+{
+  "diffReport": [
+    {
+      "file": "before-ai-home-390-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-ai-home-390-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-ai-home-desktop-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-ai-home-desktop-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-skills-home-390-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-skills-home-390-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-skills-home-desktop-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-skills-home-desktop-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-lab-post-390-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-lab-post-390-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-lab-post-desktop-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-lab-post-desktop-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-daily-brief-390-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-daily-brief-390-dark.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-daily-brief-desktop-light.png",
+      "mismatchedPixels": 0
+    },
+    {
+      "file": "before-daily-brief-desktop-dark.png",
+      "mismatchedPixels": 0
+    }
+  ]
+}

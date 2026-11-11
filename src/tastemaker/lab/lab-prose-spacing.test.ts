@@ -6,11 +6,13 @@ import { renderSafeMarkdown } from "../../../scripts/safe-markdown.js";
 import {
   buildIsoDatePt,
   findLabPostBacktickViolations,
+  findLabPostUnrenderedMarkdownLinkViolations,
   findLabPostUnrenderedTableViolations,
   findLabProseBacktickViolations,
   findLabProseInlineSpacingViolations,
   listLabWriteupPostIds,
   normalizeLabWriteupMarkdown,
+  prepareLabWriteupHtmlFromMarkdown,
   prepareLabProseHtmlFromMarkdown,
   repairGfmTableDelimiterRows,
   sanitizeLabVisibleHtml,
@@ -159,6 +161,24 @@ describe("Lab UX26 UX28 UX29", () => {
     expect(out).toContain("Aug 17, 2026");
     expect(out).not.toMatch(/~\s*\d/);
     expect(out).not.toMatch(/\d{4}-\d{2}-\d{2}/);
+  });
+
+  it("UX46 leaves ISO paths in markdown link destinations intact", () => {
+    const md =
+      "- **After:** [Aug 17, 2026](../../skills/briefings/2026-08-17.html), the first brief under the new rules.";
+    const out = normalizeLabWriteupMarkdown(md);
+    expect(out).toContain("../../skills/briefings/2026-08-17.html");
+    expect(out).not.toContain("Aug 17, 2026.html");
+    const html = prepareLabWriteupHtmlFromMarkdown(md);
+    expect(html).toContain('href="../../skills/briefings/2026-08-17.html"');
+    expect(findLabPostUnrenderedMarkdownLinkViolations(`<article class="${"lab-prose-capped"}">${html}</article>`, "test")).toEqual([]);
+  });
+
+  it("UX43 flags raw markdown links in rendered lab post HTML", () => {
+    const bad = `<article class="lab-prose-capped"><p>[Aug 17, 2026](../../skills/briefings/Aug 17, 2026.html)</p></article>`;
+    expect(findLabPostUnrenderedMarkdownLinkViolations(bad, "site/lab/posts/x.html").length).toBeGreaterThan(0);
+    const ok = `<article class="lab-prose-capped"><p><a href="../../skills/briefings/2026-08-17.html">Aug 17, 2026</a></p></article>`;
+    expect(findLabPostUnrenderedMarkdownLinkViolations(ok, "site/lab/posts/x.html")).toEqual([]);
   });
 
   it("UX37 buildIsoDatePt uses America/Los_Angeles calendar date", () => {

@@ -267,7 +267,7 @@ export function renderDigestLearnedSectionHtml(
   }
 
   const sourcesId = "learned-sources";
-  parts.push(`<div class="mt-3 text-xs text-stone-600 dark:text-stone-400">
+  parts.push(`<div class="mt-3 text-sm text-stone-600 dark:text-stone-400">
       ${renderLabMoreButton(sourcesId, escapeHtml, "More")}
       <div class="lab-expand-row lab-learned-source-panel" data-for="${sourcesId}" data-open="false">
         <p class="mt-2 font-mono text-xs">lab/experiments.json</p>

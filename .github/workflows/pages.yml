@@ -24,6 +24,8 @@ on:
       - "scripts/index-layout-helpers.ts"
       - "firebase/**"
       - "site/assets/**"
+      - "site/google65a429d15bd1a67c.html"
+      - "scripts/site-verification-pages.ts"
       - ".github/workflows/pages.yml"
   workflow_dispatch:
 
@@ -47,9 +49,9 @@ jobs:
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
-          node-version: "20"
+          node-version: "22"
           cache: npm
 
       - run: npm ci
@@ -74,7 +76,7 @@ jobs:
 
       - uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
-      - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3.0.1
+      - uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: site
 
@@ -97,7 +99,7 @@ jobs:
           sleep 60
 
       - id: deployment
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         continue-on-error: true
         with:
           timeout: 900000
@@ -109,7 +111,7 @@ jobs:
       - name: Retry Pages deployment (attempt 2)
         if: steps.deployment.outcome == 'failure'
         id: deployment_retry
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         continue-on-error: true
         with:
           timeout: 900000
@@ -121,14 +123,54 @@ jobs:
       - name: Retry Pages deployment (attempt 3)
         if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure'
         id: deployment_retry_2
-        uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4.0.5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
         continue-on-error: true
         with:
           timeout: 900000
 
       - name: Fail if Pages deployment did not succeed
+        id: deploy_outcome
         if: steps.deployment.outcome == 'failure' && steps.deployment_retry.outcome == 'failure' && steps.deployment_retry_2.outcome == 'failure'
         run: |
           echo "GitHub Pages deployment failed after three attempts."
           echo "If a deployment is still stuck, cancel it under Settings → Pages → Deployments, then re-run."
           exit 1
+
+    outputs:
+      deploy_pages_ok: ${{ steps.deployment.outcome == 'success' || steps.deployment_retry.outcome == 'success' || steps.deployment_retry_2.outcome == 'success' }}
+
+  verify:
+    needs: deploy
+    if: always() && needs.deploy.result != 'cancelled'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      pages: read
+    env:
+      VERIFY_PAGES_MAX_WAIT_MS: "600000"
+      DIGEST_SITE_URL: https://leftyshields.github.io/ai-tastemakers
+    # Three-stage contract:
+    # - deploy_done (gate): deploy-pages succeeded AND live /build.json commit equals GITHUB_SHA (retry for CDN up to VERIFY_PAGES_MAX_WAIT_MS).
+    # - fresh_fetch (advisory): fetch live /build.json vs gate commit; log ETag/Age/X-Cache as notice/warning only (CDN may lag max-age=600).
+    # - assertions: optional content checks; may observe cached live HTML (none in this workflow).
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: "22"
+          cache: npm
+
+      - run: npm ci
+
+      - name: Verify Pages deploy (deploy_done gate + fresh_fetch advisory)
+        env:
+          EXPECTED_PAGES_SHA: ${{ github.sha }}
+        run: |
+          set -e
+          extra=""
+          if [ "${{ needs.deploy.outputs.deploy_pages_ok }}" != "true" ]; then
+            extra="--deploy-pages-failed"
+          fi
+          ./node_modules/.bin/tsx scripts/pages-deploy-verify.ts --stages deploy_done,fresh_fetch ${extra}
