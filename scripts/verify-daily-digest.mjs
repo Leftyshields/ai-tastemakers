@@ -44,7 +44,7 @@ function requiredFile(relPath) {
 
 import { execFileSync, spawnSync } from 'node:child_process';
 
-const TSX = path.join(repoRoot, 'node_modules', '.bin', 'tsx');
+const TSX_CLI = path.join(repoRoot, 'node_modules', 'tsx', 'dist', 'cli.mjs');
 
 function expectedPagesSha() {
   if (process.env.EXPECTED_PAGES_SHA?.trim()) {
@@ -59,14 +59,22 @@ function expectedPagesSha() {
 
 /** deploy_done gate + fresh_fetch advisory + assertions (HEAD briefing; may hit CDN cache). */
 function runPagesDeployVerify(date) {
+  if (!fs.existsSync(TSX_CLI)) {
+    return {
+      ok: false,
+      error:
+        `Pages verify needs tsx (${TSX_CLI} missing). Run npm ci before verify-daily-digest Pages checks.`,
+    };
+  }
   const args = [
+    TSX_CLI,
     'scripts/pages-deploy-verify.ts',
     '--stages',
     'deploy_done,fresh_fetch,assertions',
     '--date',
     date,
   ];
-  const r = spawnSync(TSX, args, {
+  const r = spawnSync(process.execPath, args, {
     cwd: repoRoot,
     env: {
       ...process.env,
@@ -79,8 +87,17 @@ function runPagesDeployVerify(date) {
   if (r.status === 0) {
     return { ok: true };
   }
-  const detail = (r.stderr || r.stdout || 'pages deploy verify failed').trim().split('\n').pop();
-  return { ok: false, error: detail || 'Pages deploy verification failed' };
+  if (r.error) {
+    return {
+      ok: false,
+      error: `Pages verify subprocess failed (${r.error.code ?? 'error'}): ${r.error.message}`,
+    };
+  }
+  const detail = (r.stderr || r.stdout || '').trim().split('\n').filter(Boolean).pop();
+  return {
+    ok: false,
+    error: detail || 'Pages deploy verification failed (no output from scripts/pages-deploy-verify.ts)',
+  };
 }
 
 function writeGithubOutputs(today, errors, briefingsOk, pagesOk) {
