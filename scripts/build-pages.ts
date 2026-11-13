@@ -1,6 +1,6 @@
 import fs from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+import { fileURLToPath, pathToFileURL } from "node:url";
 import { config as loadDotenv } from "dotenv";
 import {
   allEditions,
@@ -12,6 +12,7 @@ import {
   editionSitePaths,
   pageShell,
   verifyPosthogInBuiltSite,
+  type SitePaths,
 } from "./edition-pages.js";
 import { EDITIONS } from "../src/tastemaker/editions.js";
 import { seoPage } from "./seo-copy.js";
@@ -31,6 +32,91 @@ import { buildIsoDatePt } from "./lab/lab-format.js";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 loadDotenv({ path: path.join(ROOT, ".env") });
+
+export const NOT_FOUND_HEADING = "This page was not found.";
+export const NOT_FOUND_BODY = "The link may be old, or the page may have moved.";
+export const NOT_FOUND_HOME_CTA = "Go to the AI Tastemakers home page";
+export const NOT_FOUND_PAGE_TITLE = "Page not found · Tastemakers";
+/** GitHub Pages default body copy when no custom 404.html is deployed. */
+export const GITHUB_STOCK_NOT_FOUND_SNIPPET = "File not found";
+
+export function siteHomePathFromBaseUrl(siteBaseUrl: string): string {
+  try {
+    const pathname = new URL(siteBaseUrl).pathname.replace(/\/+$/, "");
+    return pathname ? `${pathname}/` : "/";
+  } catch {
+    return "/";
+  }
+}
+
+/** Root-absolute publish paths so 404.html works from any missing URL depth on GitHub Pages. */
+export function notFoundSitePaths(siteHomePath: string): SitePaths {
+  const base = siteHomePath.endsWith("/") ? siteHomePath : `${siteHomePath}/`;
+  return {
+    css: `${base}assets/style.css`,
+    home: base,
+    subscribe: `${base}subscribe.html`,
+    lab: `${base}lab/`,
+    brief: (date) => `${base}briefings/${date}.html`,
+    crossEdition: { href: `${base}skills/`, label: "Skill Tastemakers" },
+    editionNav: {
+      ossHref: base,
+      skillsHref: `${base}skills/`,
+      active: undefined,
+    },
+  };
+}
+
+export function renderBuiltNotFoundHtml(
+  siteBaseUrl: string,
+  siteHomePath: string,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): string {
+  const paths = notFoundSitePaths(siteHomePath);
+  const brand = {
+    name: "Tastemakers",
+    tagline: "Daily GitHub digests for AI open source and agent skills",
+  };
+  const homeHref = paths.home;
+  const body = `
+    <section>
+      <h1 class="mb-4 font-sans text-2xl font-bold tracking-tight">${NOT_FOUND_HEADING}</h1>
+      <p class="mb-6 text-base leading-relaxed text-stone-600 dark:text-stone-400">${NOT_FOUND_BODY}</p>
+      <a href="${homeHref}" class="inline-flex min-h-11 items-center rounded-lg bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">${NOT_FOUND_HOME_CTA}</a>
+    </section>`;
+
+  return pageShell(NOT_FOUND_PAGE_TITLE, body, paths, brand, NOT_FOUND_BODY, escapeHtml, {
+    siteBaseUrl,
+    notFoundPage: true,
+    seo: {
+      siteBaseUrl,
+      canonicalPath: "404.html",
+      ogType: "website",
+      noindex: true,
+    },
+    outboundRewrite: {
+      siteBaseUrl,
+      destRegistry,
+      githubAllowlist,
+      channel: "pages",
+      surface: "not_found",
+    },
+  });
+}
+
+async function buildNotFoundPage(
+  siteBaseUrl: string,
+  siteHomePath: string,
+  githubAllowlist: Record<string, string>,
+  destRegistry?: OutboundDestRegistry,
+): Promise<void> {
+  await fs.writeFile(
+    path.join(SITE_DIR, "404.html"),
+    renderBuiltNotFoundHtml(siteBaseUrl, siteHomePath, githubAllowlist, destRegistry),
+    "utf8",
+  );
+}
 if (process.env.SITE_LANDING_LAYOUT_V2 == null || process.env.SITE_LANDING_LAYOUT_V2 === "") {
   process.env.SITE_LANDING_LAYOUT_V2 = "1";
 }
@@ -438,14 +524,8 @@ async function main(): Promise<void> {
 
   await buildSubscribePage(siteBaseUrl, allowlist, destRegistry);
   await buildUnsubscribePage(siteBaseUrl, allowlist, destRegistry);
-  const siteHomePath = (() => {
-    try {
-      const pathname = new URL(siteBaseUrl).pathname.replace(/\/+$/, "");
-      return pathname ? `${pathname}/` : "/";
-    } catch {
-      return "/";
-    }
-  })();
+  const siteHomePath = siteHomePathFromBaseUrl(siteBaseUrl);
+  await buildNotFoundPage(siteBaseUrl, siteHomePath, allowlist, destRegistry);
   await fs.mkdir(path.join(SITE_DIR, "assets"), { recursive: true });
   await fs.writeFile(
     path.join(SITE_DIR, "assets", "digest-repo-allowlist.json"),
@@ -532,11 +612,17 @@ async function main(): Promise<void> {
   const posthogNote =
     posthogPages > 0 ? `; PostHog on ${posthogPages} HTML page(s)` : "";
   console.log(
-    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe → site/; lab RSS ${labFeed.itemCount} item(s); sitemap ${sitemapUrls} URL(s)${posthogNote}`,
+    `Built ${total} page(s) (briefings + weekly + monthly) + ${labCount} lab page(s) across editions + subscribe + unsubscribe + 404 → site/; lab RSS ${labFeed.itemCount} item(s); sitemap ${sitemapUrls} URL(s)${posthogNote}`,
   );
 }
 
-main().catch((err) => {
-  console.error(err);
-  process.exit(1);
-});
+const isBuildPagesCli =
+  process.argv[1] != null &&
+  import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+
+if (isBuildPagesCli) {
+  main().catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+}

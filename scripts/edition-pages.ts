@@ -941,6 +941,8 @@ export function pageShell(
     labPostShell?: boolean;
     metaRefresh?: string;
     outboundRewrite?: OutboundRewriteContext;
+    /** GitHub Pages 404: skip link and a main landmark (not used on other pages). */
+    notFoundPage?: boolean;
   },
 ): string {
   const safeTitle = escapeHtml(title);
@@ -1005,9 +1007,15 @@ export function pageShell(
   const headerClass = labHomePage
     ? "lab-home-header mb-4 border-b border-stone-200 pb-4 dark:border-stone-700"
     : "mb-8 border-b border-stone-200 pb-6 dark:border-stone-700";
+  const pageBodyInner = `${documentH1}${documentH1Lead}${labBody}`;
   const mainHtml = labLayout
-    ? `<main class="lab-main">${documentH1}${documentH1Lead}${labBody}</main>`
-    : `${documentH1}${documentH1Lead}${labBody}`;
+    ? `<main class="lab-main">${pageBodyInner}</main>`
+    : options?.notFoundPage
+      ? `<main id="main-content">${pageBodyInner}</main>`
+      : pageBodyInner;
+  const skipToMainLink = options?.notFoundPage
+    ? `<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:border focus:border-stone-300 focus:bg-white focus:px-4 focus:py-2 focus:font-sans focus:text-sm focus:font-semibold focus:text-blue-800 focus:no-underline dark:focus:border-stone-600 dark:focus:bg-stone-900 dark:focus:text-blue-400">Skip to main content</a>`
+    : "";
   const footerMt = labLayout ? "mt-10" : "mt-16";
   let footerLinks = footerLinkRowHtml(paths, escapeHtml, {
     homeIndex: Boolean(homeIndexEdition),
@@ -1035,6 +1043,7 @@ export function pageShell(
   ${posthogScriptHtml()}
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
+  ${skipToMainLink}
   <div class="${shellClass}">
     <header class="${headerClass}">
       ${
