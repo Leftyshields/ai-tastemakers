@@ -943,9 +943,15 @@ export function pageShell(
     outboundRewrite?: OutboundRewriteContext;
     /** GitHub Pages 404: skip link and a main landmark (not used on other pages). */
     notFoundPage?: boolean;
+    /** Project-site path prefix for `<base href>` on 404 only (e.g. `/ai-tastemakers/`). */
+    notFoundBaseHref?: string;
   },
 ): string {
   const safeTitle = escapeHtml(title);
+  const notFoundBase =
+    options?.notFoundPage && options.notFoundBaseHref?.trim()
+      ? `<base href="${escapeHtml(options.notFoundBaseHref.trim())}">`
+      : "";
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
   const siteBase = options?.siteBaseUrl ?? options?.seo?.siteBaseUrl;
   const labLayout = options?.labLayout === true;
@@ -1031,6 +1037,7 @@ export function pageShell(
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  ${notFoundBase}
   ${colorSchemeHeadScript}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   ${faviconLinks}

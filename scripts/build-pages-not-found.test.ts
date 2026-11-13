@@ -12,16 +12,19 @@ import {
   siteHomePathFromBaseUrl,
 } from "./build-pages.js";
 import { pageShell } from "./edition-pages.js";
+import { siteSeoGateExemptRel } from "./site-seo-exempt-pages.js";
 
 const SITE_BASE = "https://leftyshields.github.io/ai-tastemakers";
 
 describe("GitHub Pages not-found document", () => {
-  it("uses root-absolute paths for publish home and assets", () => {
+  it("uses site-root relative paths with a base href for deep missing URLs", () => {
     const homePath = siteHomePathFromBaseUrl(SITE_BASE);
     expect(homePath).toBe("/ai-tastemakers/");
-    const paths = notFoundSitePaths(homePath);
-    expect(paths.home).toBe("/ai-tastemakers/");
-    expect(paths.css).toBe("/ai-tastemakers/assets/style.css");
+    const paths = notFoundSitePaths();
+    expect(paths.home).toBe("./");
+    expect(paths.css).toBe("assets/style.css");
+    const html = renderBuiltNotFoundHtml(SITE_BASE, homePath, {});
+    expect(html).toContain('<base href="/ai-tastemakers/">');
   });
 
   it("renders a branded page with home link and site shell, not GitHub stock 404", () => {
@@ -30,7 +33,7 @@ describe("GitHub Pages not-found document", () => {
     expect(html).toContain(NOT_FOUND_HEADING);
     expect(html).toContain(NOT_FOUND_BODY);
     expect(html).toContain(NOT_FOUND_HOME_CTA);
-    expect(html).toContain('href="/ai-tastemakers/"');
+    expect(html).toContain('href="./"');
     expect(html).toContain("Tastemakers");
     expect(html).toContain('rel="stylesheet"');
     expect(html).toContain("prefers-color-scheme: dark");
@@ -46,7 +49,7 @@ describe("GitHub Pages not-found document", () => {
   });
 
   it("does not add skip link or main wrapper to ordinary pageShell pages", () => {
-    const paths = notFoundSitePaths("/ai-tastemakers/");
+    const paths = notFoundSitePaths();
     const esc = (t: string) =>
       t.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const plain = pageShell(
@@ -81,6 +84,11 @@ describe("published site output", () => {
     expect(fs.existsSync(outPath)).toBe(true);
     const written = fs.readFileSync(outPath, "utf8");
     expect(written).toContain(NOT_FOUND_HOME_CTA);
-    expect(written).toContain('href="/ai-tastemakers/"');
+    expect(written).toContain('<base href="/ai-tastemakers/">');
+    expect(written).toContain('href="./"');
+  });
+
+  it("treats 404.html as an SEO utility page (noindex)", () => {
+    expect(siteSeoGateExemptRel("404.html")).toBe(true);
   });
 });
