@@ -917,6 +917,25 @@ export function footerLinkRowHtml(
 /** Sync in head before CSS so Tailwind dark: tokens apply on first paint (UX22). */
 export const colorSchemeHeadScript = `<script>(function(){try{var m=window.matchMedia("(prefers-color-scheme: dark)");if(m.matches)document.documentElement.classList.add("dark");}catch(e){}})();</script>`;
 
+/** 404 only: <base> breaks fragment-only skip href; focus main in-page instead. */
+export const notFoundSkipToMainScript = `<script>
+(function () {
+  var skip = document.getElementById("skip-to-main");
+  var main = document.getElementById("main-content");
+  if (!skip || !main) return;
+  function focusMain(event) {
+    if (event.type === "keydown") {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.key === " ") event.preventDefault();
+    }
+    event.preventDefault();
+    main.focus({ preventScroll: false });
+  }
+  skip.addEventListener("click", focusMain);
+  skip.addEventListener("keydown", focusMain);
+})();
+</script>`;
+
 export function pageShell(
   title: string,
   body: string,
@@ -1017,10 +1036,10 @@ export function pageShell(
   const mainHtml = labLayout
     ? `<main class="lab-main">${pageBodyInner}</main>`
     : options?.notFoundPage
-      ? `<main id="main-content">${pageBodyInner}</main>`
+      ? `<main id="main-content" tabindex="-1">${pageBodyInner}</main>`
       : pageBodyInner;
   const skipToMainLink = options?.notFoundPage
-    ? `<a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:border focus:border-stone-300 focus:bg-white focus:px-4 focus:py-2 focus:font-sans focus:text-sm focus:font-semibold focus:text-blue-800 focus:no-underline dark:focus:border-stone-600 dark:focus:bg-stone-900 dark:focus:text-blue-400">Skip to main content</a>`
+    ? `<a id="skip-to-main" href="#main-content" class="not-found-skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:border focus:border-stone-300 focus:bg-white focus:px-4 focus:py-2 focus:font-sans focus:text-sm focus:font-semibold focus:text-blue-800 focus:no-underline dark:focus:border-stone-600 dark:focus:bg-stone-900 dark:focus:text-blue-400">Skip to main content</a>`
     : "";
   const footerMt = labLayout ? "mt-10" : "mt-16";
   let footerLinks = footerLinkRowHtml(paths, escapeHtml, {
@@ -1071,6 +1090,7 @@ export function pageShell(
     </footer>
   </div>
   ${labLayout ? `${labLinkClickScript()}${labNavScrollScript()}` : ""}
+  ${options?.notFoundPage ? notFoundSkipToMainScript : ""}
 </body>
 </html>`;
 }

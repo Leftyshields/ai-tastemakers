@@ -71,7 +71,7 @@ export function renderBuiltNotFoundHtml(
     <section>
       <h1 class="mb-4 font-sans text-2xl font-bold tracking-tight">${NOT_FOUND_HEADING}</h1>
       <p class="mb-6 text-base leading-relaxed text-stone-600 dark:text-stone-400">${NOT_FOUND_BODY}</p>
-      <a href="${paths.home}" class="inline-flex min-h-11 items-center rounded-lg bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">${NOT_FOUND_HOME_CTA}</a>
+      <a href="${paths.home}" class="not-found-home-cta inline-flex min-h-11 items-center rounded-lg bg-blue-800 px-6 py-3 font-sans text-sm font-semibold text-white no-underline transition hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-500">${NOT_FOUND_HOME_CTA}</a>
     </section>`;
 
   return pageShell(NOT_FOUND_PAGE_TITLE, body, paths, brand, NOT_FOUND_BODY, escapeHtml, {
