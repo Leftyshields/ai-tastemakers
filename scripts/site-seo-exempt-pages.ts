@@ -4,6 +4,7 @@ import { isSiteGateExemptHtmlFile } from "./site-verification-pages.js";
 /** HTML pages excluded from indexability and uniqueness SEO gates (utility / internal). */
 export function siteSeoGateExemptRel(rel: string): boolean {
   const norm = rel.split(path.sep).join("/");
+  if (norm === "404.html") return true;
   if (norm === "go/index.html") return true;
   if (norm === "lab/about.html") return true;
   if (norm.startsWith("lab/shadow/")) return true;

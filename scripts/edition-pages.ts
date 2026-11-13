@@ -917,6 +917,25 @@ export function footerLinkRowHtml(
 /** Sync in head before CSS so Tailwind dark: tokens apply on first paint (UX22). */
 export const colorSchemeHeadScript = `<script>(function(){try{var m=window.matchMedia("(prefers-color-scheme: dark)");if(m.matches)document.documentElement.classList.add("dark");}catch(e){}})();</script>`;
 
+/** 404 only: <base> breaks fragment-only skip href; focus main in-page instead. */
+export const notFoundSkipToMainScript = `<script>
+(function () {
+  var skip = document.getElementById("skip-to-main");
+  var main = document.getElementById("main-content");
+  if (!skip || !main) return;
+  function focusMain(event) {
+    if (event.type === "keydown") {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      if (event.key === " ") event.preventDefault();
+    }
+    event.preventDefault();
+    main.focus({ preventScroll: false });
+  }
+  skip.addEventListener("click", focusMain);
+  skip.addEventListener("keydown", focusMain);
+})();
+</script>`;
+
 export function pageShell(
   title: string,
   body: string,
@@ -941,9 +960,17 @@ export function pageShell(
     labPostShell?: boolean;
     metaRefresh?: string;
     outboundRewrite?: OutboundRewriteContext;
+    /** GitHub Pages 404: skip link and a main landmark (not used on other pages). */
+    notFoundPage?: boolean;
+    /** Project-site path prefix for `<base href>` on 404 only (e.g. `/ai-tastemakers/`). */
+    notFoundBaseHref?: string;
   },
 ): string {
   const safeTitle = escapeHtml(title);
+  const notFoundBase =
+    options?.notFoundPage && options.notFoundBaseHref?.trim()
+      ? `<base href="${escapeHtml(options.notFoundBaseHref.trim())}">`
+      : "";
   const headMeta = buildSeoHeadHtml(title, description, escapeHtml, options?.seo);
   const siteBase = options?.siteBaseUrl ?? options?.seo?.siteBaseUrl;
   const labLayout = options?.labLayout === true;
@@ -1005,9 +1032,15 @@ export function pageShell(
   const headerClass = labHomePage
     ? "lab-home-header mb-4 border-b border-stone-200 pb-4 dark:border-stone-700"
     : "mb-8 border-b border-stone-200 pb-6 dark:border-stone-700";
+  const pageBodyInner = `${documentH1}${documentH1Lead}${labBody}`;
   const mainHtml = labLayout
-    ? `<main class="lab-main">${documentH1}${documentH1Lead}${labBody}</main>`
-    : `${documentH1}${documentH1Lead}${labBody}`;
+    ? `<main class="lab-main">${pageBodyInner}</main>`
+    : options?.notFoundPage
+      ? `<main id="main-content" tabindex="-1">${pageBodyInner}</main>`
+      : pageBodyInner;
+  const skipToMainLink = options?.notFoundPage
+    ? `<a id="skip-to-main" href="#main-content" class="not-found-skip-link sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:border focus:border-stone-300 focus:bg-white focus:px-4 focus:py-2 focus:font-sans focus:text-sm focus:font-semibold focus:text-blue-800 focus:no-underline dark:focus:border-stone-600 dark:focus:bg-stone-900 dark:focus:text-blue-400">Skip to main content</a>`
+    : "";
   const footerMt = labLayout ? "mt-10" : "mt-16";
   let footerLinks = footerLinkRowHtml(paths, escapeHtml, {
     homeIndex: Boolean(homeIndexEdition),
@@ -1023,6 +1056,7 @@ export function pageShell(
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  ${notFoundBase}
   ${colorSchemeHeadScript}
   <meta name="viewport" content="width=device-width, initial-scale=1">
   ${faviconLinks}
@@ -1035,6 +1069,7 @@ export function pageShell(
   ${posthogScriptHtml()}
 </head>
 <body class="min-h-screen bg-stone-100 text-stone-900 dark:bg-stone-950 dark:text-stone-200 bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(30,64,175,0.08),transparent)] dark:bg-[radial-gradient(ellipse_80%_50%_at_50%_-20%,rgba(37,99,235,0.12),transparent)]">
+  ${skipToMainLink}
   <div class="${shellClass}">
     <header class="${headerClass}">
       ${
@@ -1055,6 +1090,7 @@ export function pageShell(
     </footer>
   </div>
   ${labLayout ? `${labLinkClickScript()}${labNavScrollScript()}` : ""}
+  ${options?.notFoundPage ? notFoundSkipToMainScript : ""}
 </body>
 </html>`;
 }

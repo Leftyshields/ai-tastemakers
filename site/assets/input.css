@@ -59,6 +59,15 @@
     @apply border-blue-800 text-blue-800 hover:border-blue-700 hover:bg-blue-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 dark:border-blue-400 dark:text-blue-300 dark:hover:border-blue-300 dark:hover:bg-blue-950/50 dark:focus-visible:outline-blue-400;
   }
 
+  a.not-found-home-cta:focus-visible {
+    outline: 2px solid #1e40af;
+    outline-offset: 2px;
+  }
+
+  .dark a.not-found-home-cta:focus-visible {
+    outline-color: #60a5fa;
+  }
+
   .lab-tested-badge__icon {
     @apply shrink-0;
   }
