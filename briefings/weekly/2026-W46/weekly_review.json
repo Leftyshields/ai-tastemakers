@@ -1,0 +1,177 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W46",
+  "week_start": "2026-11-09",
+  "week_end": "2026-11-15",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 47,
+      "skills": 52
+    },
+    "total_stars_gained": {
+      "oss": 133738,
+      "skills": 152289
+    },
+    "top_topics": {
+      "oss": [
+        "mcp",
+        "claude-code",
+        "llm",
+        "dsh-plugin",
+        "ai-agents"
+      ],
+      "skills": [
+        "claude-code",
+        "ai",
+        "codex",
+        "agent-skills",
+        "ai-agents"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "ccch1mneyyy/dsh-Go",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "milind-soni/OpenMausBot",
+          "days_appeared": 4
+        },
+        {
+          "full_name": "vercel-labs/agent-desktop",
+          "days_appeared": 3
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "mattpocock/skills",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "milind-soni/OpenMausBot",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "days_appeared": 3
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "ChenLiu-1996/figures4papers",
+      "ChromeDevTools/chrome-devtools-mcp",
+      "Imbad0202/academic-research-skills",
+      "Jakeschincariol/day-trader-skill",
+      "NVIDIA/SkillSpector",
+      "OpenMontageInc/OpenMontage",
+      "Ryze-AI-Adgent/open-seo-mcp-skills",
+      "career-ops-hq/career-ops",
+      "chuspeeism/dashi-ppt-skill",
+      "elder-plinius/CL4R1T4S",
+      "f/prompts.chat",
+      "farion1231/cc-switch",
+      "homeassistant-ai/ha-mcp",
+      "kajisho5/ffmpeg-skill",
+      "milind-soni/OpenMausBot",
+      "morluto/rea",
+      "obsidianmd/obsidian-skills",
+      "pingdotgg/t3code"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 147550,
+          "days_appeared": 7,
+          "excerpt": "REA is a Model Context Protocol (MCP) server that lets AI agents reverse engineer binaries, mobile apps, and runtime behavior without source code, down to the native binary level."
+        },
+        {
+          "full_name": "ccch1mneyyy/dsh-Go",
+          "total_stars_gained": 67705,
+          "days_appeared": 7,
+          "excerpt": "DSH Go is an Android client (Flutter/Dart, Android 8+) that runs DeepSeek Harness, an AI agent framework, locally on-device or remotely controls a desktop DSH instance, with animated desktop-pet companions that signal agent state across typing, completion, waiting, and idle."
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "total_stars_gained": 65535,
+          "days_appeared": 7,
+          "excerpt": "A zero-dependency plugin for dsh, the DeepSeek Harness agent framework, that exposes frontier models including DeepSeek V4.1 Flash and Kimi K3 through the OpenCode Zen and Kilo AI public gateways with no login, API key, or build step."
+        },
+        {
+          "full_name": "milind-soni/OpenMausBot",
+          "total_stars_gained": 35077,
+          "days_appeared": 4,
+          "excerpt": "OpenMausBot is an Electron desktop app for Mac, Windows, and Ubuntu that runs Claude or Codex agents as chat contacts, each with its own model, personality, and sandboxed cloud computer for reviewing and approving actions."
+        },
+        {
+          "full_name": "vercel-labs/agent-desktop",
+          "total_stars_gained": 27010,
+          "days_appeared": 3,
+          "excerpt": "agent-desktop reads the OS accessibility tree of desktop apps on macOS, Windows, and Linux and returns JSON snapshots with stable element refs that an AI agent can click or type on, with no screenshots or pixel matching required."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 147540,
+          "days_appeared": 7,
+          "excerpt": "REA is a TypeScript MCP server (Model Context Protocol, the standard for wiring tools into AI agents) that lets agents reverse-engineer binaries, mobile apps, and runtime behavior down to the native binary level, no source code required."
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "total_stars_gained": 56445,
+          "days_appeared": 7,
+          "excerpt": "A collection of small, composable agent skills for Claude Code, Codex, Copilot, and other coding agents, designed to give engineers fine-grained control over planning, triaging, and spec workflows without handing the process over to the agent."
+        },
+        {
+          "full_name": "milind-soni/OpenMausBot",
+          "total_stars_gained": 42167,
+          "days_appeared": 5,
+          "excerpt": "OpenMausBot is an Electron desktop app for Mac, Windows, and Ubuntu that gives each AI agent its own sidebar contact, personality, model selection, and sandboxed cloud computer, letting you chat with Claude or Codex instances as if they were teammates."
+        },
+        {
+          "full_name": "debpalash/VoiceStudio",
+          "total_stars_gained": 20521,
+          "days_appeared": 3,
+          "excerpt": "VoiceStudio is a fully local, open-source Python app covering voice cloning, voice design, video dubbing, dictation, transcription, and audiobook creation across 646 languages, with no cloud dependency."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 6501,
+          "days_appeared": 1,
+          "excerpt": "Orca is a desktop, mobile, and remote app that runs multiple coding agents (Claude Code, Codex, and others) in parallel across isolated git worktrees, with chat and terminal interfaces in one window."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "Reverse-engineering AI, free frontier models without accounts, and desktop agent interfaces were the defining themes of W46. The standout project, REA, lets AI agents analyze compiled software at the binary level with no source code, a capability that matters deeply for security, legacy modernization, and competitive intelligence. Meanwhile, two projects in the DeepSeek Harness ecosystem attracted sustained attention by letting teams run capable AI models at zero cost and with no login requirements, lowering the barrier for teams that cannot or will not route work through major cloud vendors. OpenMausBot, which puts coding agents into a chat-style desktop interface with sandboxed cloud computers per agent, appeared in both the open-source and skills rankings all week, suggesting real builder appetite for human-in-the-loop agent workflows. The quarter's watch item: access to frontier models is decoupling from accounts and API keys faster than most procurement teams expect, and that changes your vendor-lock-in calculus.",
+    "generalist": "The most technically striking project this week was REA, a Model Context Protocol server that gives AI agents the ability to reverse-engineer binaries and mobile apps at the native level, no source code required. MCP continues to anchor the open-source AI tooling conversation, appearing as a top topic across both the open-source and skills rankings. The week also saw continued momentum for the DeepSeek Harness (dsh) ecosystem: dsh-Go runs the agent framework locally on Android with animated desktop-pet companions that signal agent state, and the dsh-our-free-model plugin surfaces models like DeepSeek V4.1 Flash and Kimi K3 through public gateways with no authentication at all.\n\nOn the skills and agent-control side, Matt Pocock's skills repo held the top-seven-day streak in the skills edition with a library of small, composable instructions for Claude Code, Codex, and Copilot that keep engineers in charge of planning and spec workflows. vercel-labs/agent-desktop is a quieter but technically important entry: it reads the OS accessibility tree on macOS, Windows, and Linux and returns stable JSON references that any agent can act on, skipping screenshots entirely. Orca, from Stably AI, rounds out the picture by running multiple coding agents in parallel across isolated git worktrees in a single window, pointing toward a future where multi-agent parallelism is a standard part of the developer desktop.",
+    "statistician": "REA dominates raw totals in both editions, so the aggregate star figures for the week are heavily skewed by a single project rather than broad momentum. The seven-day streaks for repos like morluto/rea, mattpocock/skills, and the dsh projects are a more reliable signal of sustained interest than one-day spikes. Cross-edition overlap of 18 repos is notably high this week, meaning the same projects are resonating with both general open-source audiences and agent-skill builders, which is rarer than it might look."
+  },
+  "email": {
+    "verdict": "One repo held the top spot on both lists for most of the week, and it does something most AI tooling has never touched: it lets an agent take apart software it has no source code for.",
+    "body": "[REA](https://github.com/morluto/rea) sat at number one on AI Tastemakers (the daily list of open-source AI tools) five of seven days, hit number one on Skill Tastemakers (the daily list of agent skills and plugins) on Thursday, and pulled more attention in a single week than most repos see in a year. What REA does is specific: it is a TypeScript server that wires into AI agents using the Model Context Protocol, a standard for giving agents access to external tools, and lets those agents reverse-engineer compiled binaries, mobile apps, and runtime behavior down to the native level, with no source code required. That is a category that barely existed in public tooling before this week.\n\nTwo repos running all week underneath REA filled in a related picture. [DSH Go](https://github.com/ccch1mneyyy/dsh-Go) runs an AI agent framework locally on Android. [dsh-our-free-model](https://github.com/Ebony-Vinyl/dsh-our-free-model) adds frontier models to that same framework with zero setup and no API key. Both held AI Tastemakers for seven straight days.\n\n[OpenMausBot](https://github.com/milind-soni/OpenMausBot) arrived mid-week on both lists. It is a desktop app that gives each coding agent its own sandboxed cloud computer, so you can review and approve what it does before anything lands.\n\nThe pattern is engineers building better control surfaces around agents: what they can see, what they can touch, and when you stay in the loop. That question is consolidating fast."
+  },
+  "generated_at": "2026-11-15T20:21:51.245Z"
+}
