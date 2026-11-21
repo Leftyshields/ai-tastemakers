@@ -1,0 +1,104 @@
+# AI Tastemakers — Daily Brief — 2026-11-21
+
+_Ranking: delta_7d · 10 repos · generated 2026-11-21T20:51:35.291Z_
+
+
+## 1. affaan-m/ECC
+
+https://github.com/affaan-m/ECC · ★ 308292 (+5386 this week) · ai-agents, anthropic, claude, claude-code, developer-tools, llm, mcp, productivity
+
+**What it does:** ECC is an agent harness system that adds skills, memory, security, and instinct layers on top of coding agents like Claude Code, Codex, Cursor, and Opencode.
+
+**Why now:** The repo crossed 5,000 new stars this week as agentic coding tools move from experiment to daily driver for more development teams.
+
+**Build with it:** Install `ecc-universal` from npm, wire it into an existing Claude Code workflow, and get persistent memory plus AgentShield security without touching your core prompting setup.
+
+## 2. Leonxlnx/taste-skill
+
+https://github.com/Leonxlnx/taste-skill · ★ 119703 (+4156 this week) · agent-skills, ai-agents, anti-slop, claude-code, codex, cursor, design-system, frontend, landing-page, ui-design, web-design
+
+**What it does:** Taste Skill is an agent skill (v2.5.1) that tells coding agents like Claude Code, Cursor, and Codex to build company websites at Figma.com and x.ai quality, enforcing a real design system, licensed photography, brand icons, and a browser-based checker that gates the final output.
+
+**Why now:** The repo gained over 4,000 stars this week, a signal that builders are actively looking for tools that stop AI coding agents from producing low-quality frontend work.
+
+**Build with it:** Drop the skill file into your Cursor or Claude Code project, write a single-page brief, and let the browser checker and finish gate enforce the design rules automatically.
+
+## 3. yetone/magpie
+
+https://github.com/yetone/magpie · ★ 39769 (+3250 this week) · claude-code, codex, deepseek, gemini-cli, llm, macos
+
+**What it does:** Magpie is a local gateway and menu-bar app that lets you point any AI coding agent (Claude Code, Codex, Gemini CLI) at any model provider by editing one config value, with automatic failover across accounts when a quota runs out.
+
+**Why now:** The repo gained 3,250 stars this week as multi-agent workflows become a daily driver for more developers, and the tool now ships with cross-platform support across macOS, Windows, Linux, Docker, and Termux.
+
+**Build with it:** Use the routing group config to wire Claude Code against a Kimi API key with a DeepSeek fallback, so your agent keeps running uninterrupted when one quota hits its limit.
+
+## 4. Appllama/appllama-skills <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/Appllama/appllama-skills · ★ 5609 (+3216 this week) · agent-skills, ai-agents, claude, claude-code, claude-code-skill, claude-skills, codex, codex-skill, cursor, design-system, expo, mcp, mobile-app-development, mobile-design, mobile-ui, model-context-protocol, react-native, skills, ui-design
+
+**What it does:** Appllama-skills is a pair of agent skills for Claude Code, Cursor, Codex, and others that teach AI agents to study real screens from top-grossing mobile apps via the Appllama MCP, then build native-quality Expo/React Native screens verified in a full-motion simulator loop.
+
+**Why now:** The repo gained over 3,000 stars this week, pointing to real builder demand for agent-native mobile workflows that go beyond generic code generation.
+
+**Build with it:** Run `npx skills@latest add appllama/appllama-skills -a claude-code -y` from your Expo project root to wire both skills into Claude Code and have it pull live app patterns from the Appllama MCP before generating any screen.
+
+## 5. morluto/rea
+
+https://github.com/morluto/rea · ★ 472648 (+13121 this week) · agent-skills, ai, android, claude-code, cli, cpp, dsh-plugin, html, java, javascript, linux, mcp, nodejs, python, rea, react, rust, security, touhou, typescript
+
+**What it does:** REA is an MCP server (a tool integration layer for AI agents) that connects agents to disassemblers and runtime analysis tools for inspecting native binaries, JavaScript and Electron apps, .NET assemblies, and websites without needing source code.
+
+**Why now:** The repo is gaining over 13,000 stars this week, making it worth evaluating now before competing forks fragment the ecosystem.
+
+**Build with it:** Run `npx rea-agents setup` to wire REA into your existing MCP-compatible agent, then prompt it to reverse engineer a closed-source feature you want to replicate in your own app.
+
+## 6. NousResearch/hermes-agent
+
+https://github.com/NousResearch/hermes-agent · ★ 265178 (+1815 this week) · ai, ai-agent, ai-agents, anthropic, chatgpt, claude, claude-code, codex, hermes, hermes-agent, llm, nous-research, openai
+
+**What it does:** Hermes Agent is a self-improving Python AI agent that creates and refines skills from experience, searches past conversations, and runs across local, Docker, SSH, Modal, and Vercel Sandbox backends with any OpenAI-compatible model endpoint.
+
+**Why now:** The repo pulled over 1,800 stars this week as builder interest in persistent, self-modifying agent architectures moves from research curiosity to practical tooling.
+
+**Build with it:** Point it at your own model endpoint via `hermes model`, then wire the built-in cron scheduler to run a nightly task delivered to Telegram, validating the cross-platform automation loop with near-zero idle cost on Modal.
+
+## 7. elementalsouls/Claude-BugHunter
+
+https://github.com/elementalsouls/Claude-BugHunter · ★ 15804 (+9978 this week) · ai-security, anthropic, application-security, bug-bounty, bugbounty, bugcrowd, claude, claude-code, claude-skills, ethical-hacking, hackerone, offensive-security, pentesting, red-team, security-tools, web-security
+
+**What it does:** claude-bughunter is a Claude Code skill bundle that loads 83 skills and 15 slash commands covering 681 disclosed HackerOne report patterns across 24 vulnerability classes, plus enterprise identity and infrastructure attack chains for authorized bug hunting and red-team work.
+
+**Why now:** The repo gained nearly 10,000 stars this week as Claude Code's plugin and skills system becomes a real surface for security tooling, not just code generation.
+
+**Build with it:** Install via `/plugin marketplace add elementalsouls/Claude-BugHunter` inside Claude Code, then describe a target in plain English to auto-load the relevant `hunt-*` skill and get detection patterns, payloads, and chain templates without manual invocation.
+
+## 8. pingdotgg/t3code
+
+https://github.com/pingdotgg/t3code · ★ 69351 (+8913 this week) · agent-orchestration, agents, ai, chatgpt, claude, claude-code, code, vibe-coding
+
+**What it does:** T3 Code is an open-source control plane that runs Claude Code, Codex, Cursor, and other ACP-compatible coding agents on your local machine and exposes them through a single interface across desktop, web, iOS, and Android.
+
+**Why now:** The repo gained over 8,900 stars this week, right as teams are actively deciding how to run and supervise multi-agent coding workflows.
+
+**Build with it:** Install the `t3` CLI via the one-liner, point it at an existing Claude Code or Codex login, and use the phone app's approval flow to gate agent shell commands during unattended runs.
+
+## 9. BaaRai/ARTEX <span class="new-repo-badge" style="display:inline-block;margin-left:0.5rem;padding:0.125rem 0.5rem;border-radius:9999px;border:1px solid #a7f3d0;background:#ecfdf5;color:#047857;font-family:system-ui,-apple-system,sans-serif;font-size:10px;font-weight:700;letter-spacing:0.06em;line-height:1.2;text-transform:uppercase;vertical-align:middle;white-space:nowrap;">New</span>
+
+https://github.com/BaaRai/ARTEX · ★ 14942 (+1330 this week) · ai, ai-agents, autonomous-agents, bug-bounty, docker, golang, linux, llm, mcp, nextjs, penetration-testing, pentest, postgresql, rea, react, red-team, security, security-automation, sqlite, typescript
+
+**What it does:** ARTEX is a self-hosted, LLM-driven penetration testing platform where a planner breaks goals into intents, workers execute them with real tools, and every finding is anchored to captured HTTP traffic across two linked graphs covering asset state and test progress.
+
+**Why now:** The repo gained 1,330 stars this week as builders look for autonomous offensive security tooling they can run against their own infrastructure.
+
+**Build with it:** Point ARTEX at a staging target, configure an Ollama endpoint under System, LLM, and use the argv-prefix scope rules to gate which commands run autonomously before reviewing findings tied to their raw request/response evidence.
+
+## 10. Ebony-Vinyl/dsh-our-free-model
+
+https://github.com/Ebony-Vinyl/dsh-our-free-model · ★ 83057 (+8798 this week) · ai-agents, deepseek, deepseek-harness, developer-tools, dsh, dsh-plugin, free-model, llm, model-provider, openai-compatible
+
+**What it does:** A zero-dependency dsh plugin that exposes frontier LLMs including DeepSeek V4.1 Flash and Kimi K3 through the OpenCode Zen and Kilo AI public gateways, with no login, API key, or usage cap required.
+
+**Why now:** The repo hit the top of GitHub Trending for JavaScript this week (2026-10-05 to 2026-10-11), surfacing it to a large builder audience at a moment when free, uncapped LLM access is a common prototype bottleneck.
+
+**Build with it:** Point any OpenAI-compatible local tool at the plugin's forwarding port using its base URL and key to get free model calls without touching an upstream account.
