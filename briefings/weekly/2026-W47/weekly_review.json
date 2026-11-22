@@ -1,0 +1,179 @@
+{
+  "schema_version": 1,
+  "week_id": "2026-W47",
+  "week_start": "2026-11-16",
+  "week_end": "2026-11-22",
+  "days_covered": {
+    "oss": 7,
+    "skills": 7
+  },
+  "stats": {
+    "unique_repos": {
+      "oss": 47,
+      "skills": 53
+    },
+    "total_stars_gained": {
+      "oss": 142733,
+      "skills": 163338
+    },
+    "top_topics": {
+      "oss": [
+        "claude-code",
+        "llm",
+        "ai-agents",
+        "mcp",
+        "dsh-plugin"
+      ],
+      "skills": [
+        "claude-code",
+        "agent-skills",
+        "codex",
+        "claude",
+        "mcp"
+      ]
+    },
+    "repeat_repos": {
+      "oss": [
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "ccch1mneyyy/dsh-Go",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "pingdotgg/t3code",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "elementalsouls/Claude-BugHunter",
+          "days_appeared": 4
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "days_appeared": 7
+        },
+        {
+          "full_name": "elementalsouls/Claude-BugHunter",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "pingdotgg/t3code",
+          "days_appeared": 5
+        },
+        {
+          "full_name": "stablyai/orca",
+          "days_appeared": 4
+        }
+      ]
+    },
+    "cross_edition_overlap": [
+      "Appllama/appllama-skills",
+      "Tencent/LoopForge",
+      "affaan-m/ECC",
+      "bojieli/ai-agent-book",
+      "citrolabs/ego-lite",
+      "elementalsouls/Claude-BugHunter",
+      "emilkowalski/skills",
+      "erkamyaman/rust-anything",
+      "ethanplusai/sellbird",
+      "gamedev-skills/awesome-gamedev-agent-skills",
+      "irinabuht12-oss/google-ads-meta-ads-mcp",
+      "irinabuht12-oss/marketing-skills",
+      "lemomo-ai/lemo-opuscar",
+      "morluto/rea",
+      "mvanhorn/last30days-skill",
+      "nexu-io/openmotion",
+      "pingdotgg/t3code",
+      "thedotmack/claude-mem",
+      "tt-a1i/archify",
+      "yetone/magpie"
+    ],
+    "ranking_modes": [
+      "delta_7d"
+    ],
+    "standouts": {
+      "oss": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 107205,
+          "days_appeared": 7,
+          "excerpt": "REA is a TypeScript MCP server that lets AI agents reverse engineer binaries, mobile apps, and running processes without source code, down to native instruction level."
+        },
+        {
+          "full_name": "Ebony-Vinyl/dsh-our-free-model",
+          "total_stars_gained": 66842,
+          "days_appeared": 7,
+          "excerpt": "A zero-dependency plugin for dsh (DeepSeek Harness, an AI agent shell) that gives you free, uncapped access to frontier models including DeepSeek V4.1 Flash and Kimi K3 with no login, API key, or configuration required."
+        },
+        {
+          "full_name": "pingdotgg/t3code",
+          "total_stars_gained": 42171,
+          "days_appeared": 5,
+          "excerpt": "T3 Code is an open-source, MIT-licensed desktop and mobile control plane that runs Claude Code, Codex, Cursor, and other ACP-compatible coding agents locally while exposing a single unified thread interface across desktop, web, iOS, and Android."
+        },
+        {
+          "full_name": "ccch1mneyyy/dsh-Go",
+          "total_stars_gained": 38295,
+          "days_appeared": 5,
+          "excerpt": "DSH Go is a Flutter-based Android app (iOS in progress) that runs DeepSeek Harness, an AI coding agent runtime, on a phone, letting you control the agent locally or remotely from your device."
+        },
+        {
+          "full_name": "elementalsouls/Claude-BugHunter",
+          "total_stars_gained": 31542,
+          "days_appeared": 4,
+          "excerpt": "claude-bughunter is a Claude Code skill bundle that loads 83 skills and 15 slash commands covering 681 disclosed HackerOne report patterns across 24 vulnerability classes, plus enterprise identity and infrastructure attack chains for authorized bug-hunting and red-team work."
+        }
+      ],
+      "skills": [
+        {
+          "full_name": "morluto/rea",
+          "total_stars_gained": 107193,
+          "days_appeared": 7,
+          "excerpt": "REA is a TypeScript MCP server (a protocol for connecting tools to AI agents) that lets AI agents reverse engineer closed binaries, mobile apps, and runtime behavior down to the native instruction level, without source code."
+        },
+        {
+          "full_name": "pingdotgg/t3code",
+          "total_stars_gained": 42163,
+          "days_appeared": 5,
+          "excerpt": "T3 Code is an open-source, MIT-licensed control plane that runs Claude Code, Codex, Cursor, and other ACP-compatible coding agents on your machine and surfaces them through a single interface across desktop, web, iOS, and Android."
+        },
+        {
+          "full_name": "elementalsouls/Claude-BugHunter",
+          "total_stars_gained": 38346,
+          "days_appeared": 5,
+          "excerpt": "Claude-BugHunter is a Claude Code skill bundle that loads 83 skills and 15 slash commands covering 681 disclosed HackerOne report patterns across 24 vulnerability classes, plus enterprise identity and infrastructure attack chains for authorized red-team and bug-bounty work."
+        },
+        {
+          "full_name": "stablyai/orca",
+          "total_stars_gained": 27161,
+          "days_appeared": 4,
+          "excerpt": "Orca is a desktop, mobile, and remote app that runs multiple coding agents including Claude Code and Codex in parallel git worktrees, with chat, terminal, diffs, and a browser in one interface."
+        },
+        {
+          "full_name": "mattpocock/skills",
+          "total_stars_gained": 7554,
+          "days_appeared": 1,
+          "excerpt": "A collection of small, composable agent skills for Claude Code, Codex, Copilot, and other coding agents that give engineers structured workflows for triage, spec, and setup without handing over full process control."
+        }
+      ]
+    }
+  },
+  "narrative": {
+    "executive": "This was a week when developer tooling for AI coding agents reached a new level of ambition. REA, a tool that lets AI agents reverse-engineer closed software without source code, dominated attention across both open-source and agent-skills tracking. T3 Code, an open-source desktop and mobile control plane that unifies Claude Code, Codex, Cursor, and other coding agents under one interface, held strong for five days straight. Claude-BugHunter, a skill bundle that equips agents to systematically search for security vulnerabilities using patterns from nearly 700 real bug-bounty reports, appeared in both editions as well, signaling that security teams are starting to bring structured agent workflows into authorized red-team work. The watch-item for the quarter is the emerging category of \"agent control planes,\" software that orchestrates multiple AI coding agents in parallel across devices, because whichever tool wins that layer will have significant leverage over developer productivity workflows.",
+    "generalist": "The story of W47 is consolidation around agent orchestration and tool-use. REA topped both editions by giving AI agents the ability to inspect compiled binaries and running processes at the instruction level via an MCP server, filling a real gap for security and reverse-engineering workflows that have historically required human expertise. Meanwhile, two separate projects, T3 Code and Orca, are competing in the same space: running multiple coding agents locally, side by side, with unified interfaces across desktop, mobile, and web. T3 Code takes a broader ACP-compatible approach across Claude Code, Codex, and Cursor; Orca focuses on parallel git worktrees with an integrated browser and diff viewer.\n\nThe dsh (DeepSeek Harness) ecosystem also had a noticeable week, with both a zero-dependency free-model plugin and a Flutter-based Android client landing in the top five OSS standouts. That points to a growing community building peripheral tooling around a specific agent shell runtime, similar to how the VS Code extension ecosystem developed. Claude-BugHunter, with its structured library of 83 skills mapped to real vulnerability classes, illustrates a broader shift: skill bundles are starting to look less like prompt collections and more like tradecraft libraries with real structure behind them.",
+    "statistician": "The ranking method this week is seven-day star delta only, so projects that launched earlier in the week and built momentum have a natural advantage over anything that surfaced late Friday. REA's star counts in the OSS and skills editions differ by just 12 stars (107,205 vs. 107,193), which is a good calibration check showing consistent cross-edition signal rather than duplication artifacts. Any repo appearing all seven days should be read as a genuine sustained trend, not a single viral spike."
+  },
+  "email": {
+    "verdict": "The week belonged to one idea: AI agents that work on software you cannot read, run on devices you carry, and get controlled from a single place you actually trust.",
+    "body": "The number that stopped the scroll: [REA](https://github.com/morluto/rea), a TypeScript server that lets an AI agent take apart software it has no source code for, pulled over 107,000 attention points and held the top of AI Tastemakers for the full seven days. That is not a typical open-source arc. It also held Skill Tastemakers all week, which means people wanted to both study it and use it. The draw is obvious once you see it: most real-world code arrives without source, and REA closes that gap at the agent level.\n\nThe second thread was control. [T3 Code](https://github.com/pingdotgg/t3code), a desktop and mobile control plane for running Claude Code, Codex, Cursor, and similar coding agents locally through a single unified interface, held both lists for five days. [DSH Go](https://github.com/ccch1mneyyy/dsh-Go), a Flutter app that runs a coding agent runtime from your phone, ran alongside it. [Orca](https://github.com/stablyai/orca), a desktop and mobile app that runs multiple coding agents in parallel git worktrees with chat, terminal, and diffs in one view, did the same on Skill Tastemakers. Three separate projects, same week, same problem: where do you actually sit while the agent works?\n\n[Claude-BugHunter](https://github.com/elementalsouls/Claude-BugHunter), a skill bundle for Claude Code that packs 681 disclosed bug-bounty report patterns into 83 skills and 15 slash commands, held both lists for most of the week and added a pointed edge to the story. Attention this week concentrated on agents doing hard, specific technical work, not demos. That is a decent signal about where the field is consolidating."
+  },
+  "generated_at": "2026-11-22T21:04:00.832Z"
+}

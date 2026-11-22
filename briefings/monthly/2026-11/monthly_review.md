@@ -1,0 +1,23 @@
+# Tastemakers Monthly — 2026-11
+
+_2026-11-01 – 2026-11-30 · generated 2026-11-22T21:03:36.820Z_
+
+Three reads of the same month, in order: **strategy**, then **the stack**, then **the counts**.
+
+## For executives
+
+November 2026 was defined by three converging forces: AI agents gaining the ability to work on systems they cannot read (compiled binaries, obfuscated apps, closed desktop software), frontier model access decoupling from accounts and API keys, and a growing discipline around keeping humans meaningfully in the loop. The REA project, an MCP server for reverse-engineering binaries and mobile apps without source code, held the top position in both open-source and skills rankings across all three weeks, a level of sustained dominance that signals a genuine capability gap being filled, with real implications for security, compliance, and legacy modernization teams. Free-model routing tools requiring no login and no usage cap drew consistent interest throughout the month, moving faster than most procurement and vendor-lock-in frameworks are prepared for. Meanwhile, composable "agent skills", small, reusable instructions that keep engineers in charge of specific workflow steps rather than handing off entire processes, emerged as a category, not just a trend. Teams planning 2027 AI tooling should budget for the governance questions that follow when agents can inspect closed systems and access frontier models outside sanctioned channels.
+
+## For AI generalists
+
+November's month-level story is about agents gaining new perceptual and connective surfaces. The MCP (Model Context Protocol) standard continued to anchor the open-source AI tooling conversation, but what changed in November is the *depth* of what agents can now reach through it: REA brought reverse-engineering of native binaries, Electron apps.NET assemblies, and obfuscated websites into the standard tool-calling interface, while Chrome DevTools and Home Assistant each shipped their own MCP connectors, extending agent reach into the browser and the smart home. Vercel Labs' agent-desktop took a different angle, serializing the OS accessibility tree as stable JSON references so agents can operate native desktop apps without screenshot fragility. Taken together, the month sketched an emerging agent-perception stack: web scraping (Scrapling), desktop UI (agent-desktop), codebase knowledge graphs (Graphify), and closed binaries (REA), four distinct surfaces now addressable through the same tool-calling primitives.
+
+The output and control side of the ecosystem matured in parallel. Design-quality tooling, Hallmark and Impeccable, established a philosophy of *opinionated constraints* rather than generative prompts, using static rule sets to push back against AI UI defaults. The mattpocock/skills library and the broader "agent skills" tag crystallized a pattern: engineers want composable, named primitives that keep them in charge of planning and spec workflows rather than full delegation. The DeepSeek Harness (dsh) ecosystem also had a strong month, with a free-model plugin routing to frontier models through public gateways and an Android client running agents locally with desktop-pet state indicators, both pointing toward an infrastructure layer where capable AI is simply ambient and unauthenticated.
+
+## The numbers
+
+November's combined star totals, roughly 504K on the open-source side and 581K on the skills side, drawn from three weekly rollups spanning W44 through W46, are dominated by REA, which appeared in the top position of both editions every single day of the month; strip that one project and the underlying breadth looks more modest. Star counts are cumulative per repo across each week's trending window, so multi-day streaks inflate totals relative to single-day spikes, making the seven-day repeat appearances (REA, dsh-our-free-model, mattpocock/skills) the most reliable durability signals in the data. The skills edition outpaced OSS in stars each week, partly because projects like CleanYourTV and VoiceStudio carry broad consumer audiences that inflate aggregate counts beyond the core builder signal.
+
+- **AI Tastemakers:** +503,911 stars gained (summed across weekly rollups) · top topics: c, l, a, u, d
+- **Skill Tastemakers:** +581,491 stars gained (summed across weekly rollups) · top topics: c, l, a, u, d
+- **Weekly sources:** 2026-W44, 2026-W45, 2026-W46
