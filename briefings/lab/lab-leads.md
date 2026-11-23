@@ -13,7 +13,7 @@ EXP-20260802-ponytail-narration-skills.md
 lead: Kept Aug 29, 2026. Two simple writing rules made Skills briefs about 18% shorter, kept them passing every quality check, and made them better at explaining why each project matters now.
 
 EXP-20260913-caveman-compress-skills.md
-lead: Queued, not started, and planned for Oct 25 to Nov 21, 2026. Trimming the background notes the writer reads should cut cost without losing a single fact.
+lead: Not kept, Nov 21, 2026. Trimming the background notes ran on every Skills run but cut them by only 3.7%, so cost, brief length and quality stayed flat. The notes were too small a part of the prompt to matter.
 
 EXP-20260913-humanizer-polish-skills.md
 lead: Kept Oct 24, 2026. A final polish step now strips machine-sounding phrasing from both daily lists, and briefs passed all 13 quality checks while why now rose from 3.7 to 5.0 and specificity from 4.5 to 5.0.
