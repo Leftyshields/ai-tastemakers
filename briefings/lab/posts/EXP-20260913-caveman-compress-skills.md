@@ -1,10 +1,10 @@
 ---
-lead: "Queued, not started, and planned for Oct 25 to Nov 21, 2026. Trimming the background notes the writer reads should cut cost without losing a single fact."
+lead: "Not kept, Nov 21, 2026. Trimming the background notes ran on every Skills run but cut them by only 3.7%, so cost, brief length and quality stayed flat. The notes were too small a part of the prompt to matter."
 ---
 
 # Shorter background notes
 
-_**Queued, not started.** This experiment will trim the background notes the Skills writer reads before writing each brief. It is planned for Oct 25 to Nov 21, 2026._
+_**Not kept, Nov 21, 2026.** This experiment trimmed the background notes the Skills writer reads before each brief. From Nov 8 to Nov 21, 2026, the trimming ran every day but cut the notes by only 3.7%, and cost, brief length and quality didn't move. The trimming worked. It was aimed at the wrong part of the prompt._
 
 ## The idea
 
@@ -36,7 +36,18 @@ Reader clicks will be tracked but won't decide the result. Recent tests show why
 
 ## What happened
 
-Nothing yet. The test has not started. Results will be added here when it closes.
+The trimming ran on every Skills run from Nov 8 to Nov 21. It just had very little to cut. The comparison is 14 runs before the change (Oct 25 to Nov 7) against 14 runs with it.
+
+- **Cheaper to run: no.** The background notes shrank by 3.7%, about 120 characters per run. What Claude reads per Skills list, counted in tokens (the chunks of text AI models bill by), went from 24,412 to 24,279, down 0.5%. The OSS list had no trimming and fell 2.0% over the same weeks, so the Skills drop is normal drift, not the change. Cost stayed flat: $1.716 for the 14 runs before, $1.721 for the 14 after, about 12 cents a run.
+- **Briefs don't bloat: held.** Briefs ran about the same length, 980 words per list before and 996 after.
+- **Quality holds: held.** The day's top brief passed its quality checks 14 times out of 14 in both periods.
+- **Still timely: held.** The why now score, which rates from 1 to 5 how well a brief explains why a project matters right now, sat at 4.64 in both periods. Specificity, which rates how concrete the details are, stayed at 5.0.
+
+Why so little changed: the background notes are only about 3,000 characters of a prompt that runs about 70,000. Most of the prompt is project READMEs, the front page text of each project, capped at 4,000 characters per project. If cost becomes the goal, the READMEs are the bigger target.
+
+The trimming didn't help the briefs, so the step is off. That result is about this digest, not Caveman. The digest borrowed Caveman's habit and never installed the tool.
+
+A test that changes nothing still gets published here. That's the rule.
 
 ## References
 
